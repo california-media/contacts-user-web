@@ -1629,7 +1629,8 @@ bg-light {
   }
 }
 .header .mobile-user-menu a {
-  color: #E41F07;
+  /* color: #E41F07; */
+  color: #000;
   padding: 0;
 }
 .header .mobile-user-menu a::after {

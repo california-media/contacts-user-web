@@ -10,7 +10,7 @@ import { IoQrCode } from "react-icons/io5";
 import GroupsOffcanvas from "../../../core/common/offCanvas/groups/GroupsOffcanvas";
 import { all_routes } from "../../router/all_routes";
 import { Link } from "react-router-dom";
-import {Camera} from "react-camera-pro";
+import { Camera } from "react-camera-pro";
 
 const Dashboard = () => {
   const camera = useRef(null);
@@ -293,11 +293,18 @@ const Dashboard = () => {
                 </div>
               </div>
             </div> */}
-              <div>
-      <Camera ref={camera} />
-      <button onClick={() => setImage(camera.current.takePhoto())}>Take photo</button>
-      <img src={image} alt='Taken photo'/>
-    </div>
+            <div style={{  position: "fixed",
+  width: "100%",
+  height: "100%",
+  zIndex: 1}}>
+              <div style={{ width: "100%", height: 400 }}>
+                <Camera ref={camera} />
+              </div>
+              <button onClick={() => setImage(camera.current.takePhoto())}>
+                Take photo
+              </button>
+              <img src={image} alt="Taken photo" />
+            </div>
           </div>
         </div>
       </div>
