@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import { Image } from "react-bootstrap";
 import { FaPhoneAlt, FaRegEye, FaTag } from "react-icons/fa";
@@ -10,8 +10,11 @@ import { IoQrCode } from "react-icons/io5";
 import GroupsOffcanvas from "../../../core/common/offCanvas/groups/GroupsOffcanvas";
 import { all_routes } from "../../router/all_routes";
 import { Link } from "react-router-dom";
+import {Camera} from "react-camera-pro";
 
 const Dashboard = () => {
+  const camera = useRef(null);
+  const [image, setImage] = useState(null);
   const [sline] = useState({
     chart: {
       height: 350,
@@ -62,8 +65,8 @@ const Dashboard = () => {
     <>
       <div className="page-wrapper" style={{ backgroundColor: "#fff" }}>
         <div className="content">
-          <div className="container">
-            <div className="row">
+          <div className="container-fluid">
+            {/* <div className="row">
               <div className="col-md-4">
                 <div className="dashboardProfileContainer">
                   <ImageWithBasePath
@@ -289,7 +292,12 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
+              <div>
+      <Camera ref={camera} />
+      <button onClick={() => setImage(camera.current.takePhoto())}>Take photo</button>
+      <img src={image} alt='Taken photo'/>
+    </div>
           </div>
         </div>
       </div>
