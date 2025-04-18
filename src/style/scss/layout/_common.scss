@@ -20,6 +20,20 @@
 .none{
     display: none !important;
 }
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    margin: 0 !important; 
+}
+.react-tel-input .form-control {
+
+    padding: 6.5px 14px 6.5px 60px !important;
+    border-color: #E8E8E8 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+}
 .text-red{color: $danger !important;
 }
 .text-green{

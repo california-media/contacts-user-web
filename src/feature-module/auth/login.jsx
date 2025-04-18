@@ -3,12 +3,16 @@ import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../router/all_routes";
 import Calling from "../crm/calling";
+import axios from "axios";
+import api from "../../core/axios/axiosInstance";
 
 const Login = () => {
   const navigate = useNavigate();
   const route = all_routes;
   const [isPasswordVisible, setPasswordVisible] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" });
   const [showCallingComponent, setShowCallingComponent] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,73 +22,63 @@ const Login = () => {
   useEffect(() => {
     localStorage.setItem("menuOpened", "Dashboard");
   }, []);
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   console.log("clicked");
+
+  //   try {
+
+  //     console.log(email, password, "email and password data");
+
+  //     const response = await fetch(
+  //       "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/login",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ email, password }),
+  //       }
+  //     );
+  //     console.log(response, "response");
+  //     if (!response.ok) {
+  //       console.log("Network response was not ok");
+  //       return;
+
+  //     }
+
+  //     else {
+  //       const result = await response.json();
+  //       console.log(result, "resulttt");
+  //       navigate(route.dashboard);
+  //     }
+  //   } catch (error) {
+  //     console.error("API call error:", error);
+  //   }
+  // };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("clicked");
-    navigate(route.dashboard);
-    // const rawData = JSON.stringify({
-    //   emailaddress: email,
-    //   password: password,
-    // });
+    setMessage({text:"",type:""})
+    setIsLoading(true)
+
     try {
-      // console.log(rawData, "rawdata");
       console.log(email, password, "email and password data");
 
-      const response = await fetch("https://ssdev.ae/test/api/login_api.php", {
-        method: "POST",
-        // headers: {
-        //   "Content-Type": "application/json",
-        // },
-        body: {
-          emailaddress: email,
-          password: password,
-        },
-      });
-      console.log("response", response);
+      const response = await api.post("user/login", { email, password });
 
-      if (!response.ok) throw new Error("Network response was not ok");
-      const result = await response.json();
-      console.log(result, "result");
-
-      // const access_token = result.data.access_token;
-      // localStorage.setItem("access_token", access_token);
+      if (response.data.status === "success") {
+        localStorage.setItem("token",response.data.data.token)
+        setMessage({text:response.data.message, type:"success"});
+        navigate(route.dashboard);
+        setIsLoading(false)
+      }
     } catch (error) {
-      console.error("API call error:", error);
+      setMessage({text:error.response.data.message, type:"error"});
+      setIsLoading(false)
     }
   };
 
-  //   useEffect(() => {
-  //     if (isLoggedIn) {
-
-  //       console.log("code run before login");
-
-  // // {/* <Calling/> */}
-
-  //       // setShowCallingComponent(true)
-  //       console.log("code run after login");
-
-  //       navigate(route.dealsDashboard);
-  //     }
-  //   }, [isLoggedIn, navigate, route.dealsDashboard]);
-
-  // const handleLogin = () => {
-  //   console.log("Login button clicked");
-
-  //   setIsLoggedIn(true);
-  // };
-
-  // const handleLogin = async () => {
-  //   console.log("Login button clicked");
-
-  //   setIsLoggedIn(true);
-
-  //   // Call the API after setting isLoggedIn to true
-  //   // await callApiAfterLogin();
-  //   navigate(route.leads);
-  // };
-  {
-    console.log(email, "email");
-  }
   return (
     <div className="account-content">
       <div className="container-fluid">
@@ -137,6 +131,17 @@ const Login = () => {
                         ></span>
                       </div>
                     </div>
+                    {message.text && (
+                      <p
+                        className={`fw-medium ${
+                          message.type === "success"
+                            ? "text-success"
+                            : "text-danger"
+                        }`}
+                      >
+                        {message.text}
+                      </p>
+                    )}
                     <div className="d-flex align-items-center justify-content-between mb-3">
                       <div className="form-check form-check-md d-flex align-items-center">
                         <input
@@ -168,7 +173,15 @@ const Login = () => {
                         onClick={handleLogin}
                         className="btn btn-primary w-100"
                       >
-                        Sign In
+                        {isLoading ? (
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                        ) : (
+                          "Sign In"
+                        )}
                       </button>
                     </div>
                     <div className="mb-3">

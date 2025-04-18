@@ -1513,6 +1513,7 @@ bg-light {
   top: 0;
   right: 0;
 }
+
 @media (max-width: 991.98px) {
   .header .top-nav-search.active form {
     display: block;
@@ -1522,6 +1523,7 @@ bg-light {
   .header .top-nav-search.active form .form-control {
     background-color: #FFF;
   }
+ 
   .header .top-nav-search.active form .btn {
     background-color: transparent;
     border-color: transparent;

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import { Image } from "react-bootstrap";
 import { FaPhoneAlt, FaRegEye, FaTag } from "react-icons/fa";
@@ -11,10 +11,20 @@ import GroupsOffcanvas from "../../../core/common/offCanvas/groups/GroupsOffcanv
 import { all_routes } from "../../router/all_routes";
 import { Link } from "react-router-dom";
 import { Camera } from "react-camera-pro";
+import Tesseract from "tesseract.js";
+import api from "../../../core/axios/axiosInstance";
+import { useDispatch, useSelector } from "react-redux";
+import { setGetUser } from "../../../core/data/redux/slices/getUserSlice";
 
 const Dashboard = () => {
-  const camera = useRef(null);
-  const [image, setImage] = useState(null);
+  const [file, setFile] = useState();
+  const [progress, setProgress] = useState(0);
+  const [language, setLanguage] = useState("eng");
+  const [result, setResult] = useState("");
+const dispatch = useDispatch()
+
+const userProfile = useSelector((state)=>state.getUser)
+
   const [sline] = useState({
     chart: {
       height: 350,
@@ -61,13 +71,66 @@ const Dashboard = () => {
     },
   });
   const route = all_routes;
+  const onFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+  useEffect(() => {
+    const fetchProfile = async () => {
+     try {
+      const response = await api.get("/getUser");
+      console.log(response.data, "response from get profile");
+      dispatch(setGetUser(response.data.data))
+     } catch (error) {
+      console.log(error.response.data,"errorrr");
+     }
+    };
+    fetchProfile();
+  }, []);
+  const processImage = () => {
+    setResult("");
+    setProgress(0);
+    Tesseract.recognize(file, language, {
+      logger: (m) => {
+        if (m.status === "recognizing text") {
+          setProgress(m.progress);
+        }
+      },
+    }).then(({ data: { text } }) => {
+      setResult(text);
+    });
+  };
   return (
     <>
       <div className="page-wrapper" style={{ backgroundColor: "#fff" }}>
         <div className="content">
           <div className="container-fluid">
-            {/* <div className="row">
+            <div className="row">
               <div className="col-md-4">
+                <div className="App">
+                  {/* <input type="file" onChange={onFileChange} /> */}
+                  {/* <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+        <option value="eng">English</option>
+        <option value="tel">Telugu</option>
+        <option value="hin">Hindi</option>
+        <option value="kan">Kannada</option>
+      </select> */}
+                  {/* <div style={{ marginTop: 25 }}>
+                    <input
+                      type="button"
+                      value="Submit"
+                      onClick={processImage}
+                    />
+                  </div> */}
+                  {/* <div>
+                    <progress value={progress} max={1} />
+                  </div> */}
+                  {result !== "" && (
+                    <div style={{ marginTop: 20, fontSize: 24, color: "teal" }}>
+                      Result: {result}
+                    </div>
+                  )}
+                </div>
+
                 <div className="dashboardProfileContainer">
                   <ImageWithBasePath
                     src="assets/img/profileBanner.jpeg"
@@ -85,14 +148,14 @@ const Dashboard = () => {
                     <div
                       style={{ padding: 20, color: "#fff", paddingBottom: 120 }}
                     >
-                      <p className="text-center fs-4">Waqar Ahmad Ansari</p>
+                      <p className="text-center fs-4 text-capitalize">{userProfile.firstname}  {userProfile.lastname} </p>
                       <div className="profileCardTextContainer">
                         <FaPhoneAlt />
-                        <p className="profileCardText">1234567890</p>
+                        <p className="profileCardText">{userProfile.phonenumber.number?userProfile.phonenumber.number:"No phone Number"}</p>
                       </div>
                       <div className="profileCardTextContainer">
                         <IoMdMail />
-                        <p className="profileCardText">example@test.com</p>
+                        <p className="profileCardText">{userProfile.email}</p>
                       </div>
 
                       <div className="profileCardQrCodeContainer">
@@ -152,7 +215,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              3
+                              {userProfile.contactCount}
                             </p>
                           </div>
                           <div
@@ -204,7 +267,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              5
+                              {userProfile.tagCount}
                             </p>
                           </div>
                           <div
@@ -292,19 +355,23 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-            </div> */}
-            <div style={{  position: "fixed",
-  width: "100%",
-  height: "100%",
-  zIndex: 1}}>
-              <div style={{ width: "100%", height: 400 }}>
-                <Camera ref={camera} />
-              </div>
-              <button onClick={() => setImage(camera.current.takePhoto())}>
-                Take photo
-              </button>
-              <img src={image} alt="Taken photo" />
             </div>
+            {/* <div
+                style={{
+                  position: "fixed",
+                  width: "100%",
+                  height: "100%",
+                  zIndex: 1,
+                }}
+              >
+                <div style={{ width: "100%", height: 400 }}>
+                  <Camera ref={camera} />
+                </div>
+                <button onClick={() => setImage(camera.current.takePhoto())}>
+                  Take photo
+                </button>
+                <img src={image} alt="Taken photo" />
+              </div> */}
           </div>
         </div>
       </div>
