@@ -44,6 +44,7 @@ import EditCell from "../../../core/common/editCell/EditCell";
 import { Pagination } from "antd";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
+import api from "../../../core/axios/axiosInstance";
 
 const Contacts = () => {
   const route = all_routes;
@@ -61,6 +62,7 @@ const Contacts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLeadStatus, setSelectedLeadStatus] = useState([]);
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
+  const [allContacts, setAllContacts] = useState([]);
   const [stars, setStars] = useState({});
   const [newContents, setNewContents] = useState([0]);
   const [statusLead, setStatusLead] = useState({});
@@ -497,6 +499,26 @@ const Contacts = () => {
     employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
   );
 
+  useEffect(()=>{
+const getContacts =async()=>{
+  const filters ={
+    "page": 1,
+    "limit": 10,
+    "search": "",
+    "tag": []
+  }
+try {
+  const response = await api.post("/getContact", filters)
+  setAllContacts(response.data.data)
+  console.log(response.data.data,"response from get all contacts");
+  
+} catch (error) {
+  console.log(error.response.data,"error response from get all contacts");
+}
+}
+getContacts()
+  },[])
+
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
       .filter((key) => key !== "" && key !== "Action")
@@ -541,14 +563,16 @@ const Contacts = () => {
     },
     {
       title: "Name",
-      dataIndex: "lead_name",
-      key: "lead_name",
+      dataIndex: "firstname",
+      key: "firstname",
       width: 200,
       onCell: () => ({
         className: "hoverable-cell", // Adding a class for the cell
       }),
 
       render: (text, record) => {
+        console.log(text,"text from name field");
+        
         return (
           <div className="cell-content justify-content-between">
             {/* Lead name */}
@@ -628,7 +652,7 @@ const Contacts = () => {
         );
       },
 
-      sorter: (a, b) => a.lead_name.localeCompare(b.lead_name),
+      sorter: (a, b) => a.firstname.localeCompare(b.firstname),
     },
     {
       title: "Company",
@@ -706,9 +730,9 @@ const Contacts = () => {
     },
     {
       title: "Email",
-      dataIndex: "email",
+      dataIndex: "emailaddresses",
       width: 300,
-      key: "email",
+      key: "emailaddresses",
       onCell: (record) => ({
         onMouseEnter: () => {
           const editIcon = document.querySelector(`.edit-icon-${record.key}`);
@@ -725,20 +749,20 @@ const Contacts = () => {
             fieldName="Email"
             fieldValue={text}
             recordKey={record.key}
-            columnKey="email"
+            columnKey="emailaddresses"
             routeLink="#"
             textColor="#2c5cc5"
             isActive={
               activeCell?.rowKey === record.key &&
-              activeCell?.columnKey === "email"
+              activeCell?.columnKey === "emailaddresses"
             }
-            onSave={(key, value) => handleSaveField(key, "email", value)}
-            onEditClick={() => handleEditClick(record.key, "email")}
+            onSave={(key, value) => handleSaveField(key, "emailaddresses", value)}
+            onEditClick={() => handleEditClick(record.key, "emailaddresses")}
             onClose={handleClose}
           />
         </>
       ),
-      sorter: (a, b) => a.email.localeCompare(b.email),
+      sorter: (a, b) => a.emailaddresses.localeCompare(b.emailaddresses),
     },
     {
       title: "Groups",
@@ -812,47 +836,6 @@ const Contacts = () => {
       ),
       // sorter: (a, b) => a.status.localeCompare(b.status),
     },
-
-    // {
-    //   title: "Created Date",
-    //   dataIndex: "created_date",
-    //   key: "created_date",
-    //   sorter: (a, b) =>
-    //     new Date(a.created_date).getTime() - new Date(b.created_date).getTime(),
-    // },
-    // {
-    //   title: "Owner",
-    //   dataIndex: "owner",
-    //   key: "owner",
-    //   onCell: (record) => ({
-    //     onMouseEnter: () => {
-    //       const editIcon = document.querySelector(`.edit-icon-${record.key}`);
-    //       if (editIcon) editIcon.style.visibility = "visible";
-    //     },
-    //     onMouseLeave: () => {
-    //       const editIcon = document.querySelector(`.edit-icon-${record.key}`);
-    //       if (editIcon) editIcon.style.visibility = "hidden";
-    //     },
-    //   }),
-    //   render: (text, record) => (
-    //     <>
-    //       <EditCell
-    //         fieldName="Owner"
-    //         fieldValue={text}
-    //         recordKey={record.key}
-    //         columnKey="owner"
-    //         isActive={
-    //           activeCell?.rowKey === record.key &&
-    //           activeCell?.columnKey === "owner"
-    //         }
-    //         onSave={(key, value) => handleSaveField(key, "owner", value)}
-    //         onEditClick={() => handleEditClick(record.key, "owner")}
-    //         onClose={handleClose}
-    //       />
-    //     </>
-    //   ),
-    //   sorter: (a, b) => a.customer_company.length - b.customer_company.length,
-    // },
   ];
 
   const handleLeadStatus = (rowKey, value) => {
@@ -912,8 +895,8 @@ const Contacts = () => {
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
-  const filteredData = leadsData.filter((lead) => {
-    const leadDate = new Date(lead.created_date).toDateString();
+  const filteredData = allContacts.filter((lead) => {
+    // const leadDate = new Date(lead.created_date).toDateString();
 
     const isAnySearchColumnVisible =
       columnVisibility["Name"] ||
@@ -924,7 +907,7 @@ const Contacts = () => {
     const matchesSearchQuery =
       !isAnySearchColumnVisible ||
       (columnVisibility["Name"] &&
-        lead.lead_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        lead.firstname.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (columnVisibility["Company"] &&
         lead.customer_company
           .toLowerCase()
@@ -932,7 +915,7 @@ const Contacts = () => {
       (columnVisibility["Phone"] &&
         lead.phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (columnVisibility["Email"] &&
-        lead.email.toLowerCase().includes(searchQuery.toLowerCase()));
+        lead.emailaddresses.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Check if lead matches selected statuses
     const matchesStatus =
