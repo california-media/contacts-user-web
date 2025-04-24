@@ -80,6 +80,7 @@ import { utils, writeFile } from "xlsx";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
 import { estimationListData } from "../../../core/data/json/estimationList";
 import { HiEllipsisVertical } from "react-icons/hi2";
+import api from "../../../core/axios/axiosInstance";
 const route = all_routes;
 const allNotes = [
   {
@@ -241,6 +242,7 @@ export const initialSettings = {
 const ContactsDetails = () => {
   const data = leadsData;
   const location = useLocation();
+  const { record } = location.state || {};
 
   const [addcomment, setAddComment] = useState(false);
   const [activeEditorIndex, setActiveEditorIndex] = useState(null);
@@ -255,6 +257,7 @@ const ContactsDetails = () => {
   const [haveShippingAddress, setHaveShippingAddress] = useState(false);
   const [showQuotationViewForm, setShowQuotationViewForm] = useState(false);
   const [quotationQuantity, setQuotationQuantity] = useState(false);
+  const [allTags, setAllTags] = useState([]);
   const [selectedDropdownQuotation, setSelectedDropdownQuotation] =
     useState(false);
   const [showQuotationForm, setShowQuotationForm] = useState(false);
@@ -270,6 +273,22 @@ const ContactsDetails = () => {
       setEditingIndex(index);
     }
   };
+  useEffect(() => {
+    const fetchAllTags = async () => {
+      try {
+        const response = await api.get("/getTag");
+        console.log(response.data.data, "response.data from tag");
+        const allTagsFetched = response.data.data.map((tag) => ({
+          value: tag.tag,
+          label: tag.tag,
+        }));
+        setAllTags(allTagsFetched);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+    fetchAllTags();
+  }, []);
   const togglecomment = () => {
     setAddComment((prevState) => !prevState);
   };
@@ -543,7 +562,9 @@ const ContactsDetails = () => {
   const handleQuotationProductChange = (selectedProduct) => {
     setSelectedQuotationProduct(selectedProduct);
   };
-
+const handleCreateTag =()=>{
+  
+}
   const handleTaskSubmit = () => {
     // if (selectedTask) {
     //   // Update existing task
@@ -1117,7 +1138,7 @@ const ContactsDetails = () => {
                             Contacts
                           </Link>
                         </li>
-                        <li>{leadInfo.lead_name}</li>
+                        <li>{leadInfo.firstname}</li>
                       </ul>
                     </div>
                   </div>
@@ -1197,53 +1218,74 @@ const ContactsDetails = () => {
                       <div className="profilePic"></div>
                     </div>
                     <ul>
-                      <li className="row mb-3">
+                      <div className="row mb-3 d-flex flex-column align-items-center">
                         <span className="col-12 fw-semibold text-black">
                           Name
                         </span>
-                        <span className="col-12">{leadInfo.lead_name}</span>
-                      </li>
-                      <li className="row mb-3">
-                        <span className="col-12 fw-semibold text-black">
-                          Phone
-                        </span>
-                        <div className="d-flex justify-content-between align-items-center">
-                          <span>{leadInfo.phone}</span>
-                          <div className="d-flex align-items-center">
-                            <a
-                              //  href={`tel:${text}`}
-                              onClick={() => {}}
-                              className="action-icon me-3"
-                              title="Call"
-                            >
-                              <i className="ti ti-phone" />
-                            </a>
+                        <span className="col-12">{leadInfo.firstname}</span>
+                      </div>
+                      {leadInfo?.phonenumbers?.length > 0 && (
+                        <li className="row mb-3">
+                          <span className="col-12 fw-semibold text-black">
+                            Phone
+                          </span>
+                          {leadInfo?.phonenumbers?.map((number, index) => {
+                            return (
+                              <div
+                                className="d-flex justify-content-between align-items-center"
+                                key={index}
+                              >
+                                <span>
+                                  {number.countryCode}
+                                  {number.number}
+                                </span>
+                                <div className="d-flex align-items-center">
+                                  <a
+                                    //  href={`tel:${text}`}
+                                    onClick={() => {}}
+                                    className="action-icon me-3"
+                                    title="Call"
+                                  >
+                                    <i className="ti ti-phone" />
+                                  </a>
 
-                            <a
-                              // href={`https://wa.me/${text}`}
-                              className="action-icon"
-                              title="WhatsApp"
-                            >
-                              <i className="ti ti-message-circle-share" />
-                            </a>
-                          </div>
-                        </div>
-                      </li>
-                      <li className="row mb-3">
-                        <span className="col-12 fw-semibold text-black">
-                          Email
-                        </span>
-                        <div className="d-flex align-items-center justify-content-between">
-                          <span>{leadInfo.email}</span>
-                            <a
-                              // href={`mailto:${text}`}
-                              className="action-icon"
-                              title="Email"
-                            >
-                              <MdMail />
-                            </a>
-                        </div>
-                      </li>
+                                  <a
+                                    // href={`https://wa.me/${text}`}
+                                    className="action-icon"
+                                    title="WhatsApp"
+                                  >
+                                    <i className="ti ti-message-circle-share" />
+                                  </a>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </li>
+                      )}
+                      {leadInfo?.emailaddresses?.length > 0 && (
+                        <li className="row mb-3">
+                          <span className="col-12 fw-semibold text-black">
+                            Email
+                          </span>
+                          {leadInfo?.emailaddresses?.map((email, index) => {
+                            return (
+                              <div
+                                className="d-flex align-items-center justify-content-between"
+                                key={index}
+                              >
+                                <span>{email}</span>
+                                <a
+                                  // href={`mailto:${text}`}
+                                  className="action-icon"
+                                  title="Email"
+                                >
+                                  <MdMail />
+                                </a>
+                              </div>
+                            );
+                          })}
+                        </li>
+                      )}
 
                       <li className="row mb-3">
                         <span className="col-12 fw-semibold text-black">
@@ -1268,10 +1310,10 @@ const ContactsDetails = () => {
                       <label className="col-form-label">Tags </label>
                       <CreatableSelect
                         classNamePrefix="react-select"
-                        options={all_tags}
+                        options={allTags}
                         // isLoading={isLoading}
                         // onChange={(newValue) => setValue(newValue)}
-                        // onCreateOption={handleCreate}
+                        onCreateOption={handleCreateTag}
                         className="js-example-placeholder-multiple select2 js-states"
                         isMulti={true}
                         placeholder="Add Tags"

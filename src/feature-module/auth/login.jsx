@@ -69,6 +69,8 @@ const Login = () => {
 
       if (response.data.status === "success") {
         localStorage.setItem("token",response.data.data.token)
+        console.log(response.data.data,"data");
+        
         setMessage({text:response.data.message, type:"success"});
         navigate(route.dashboard);
         setIsLoading(false)

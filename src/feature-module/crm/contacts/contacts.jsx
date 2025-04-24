@@ -99,13 +99,11 @@ const Contacts = () => {
   const handleClose = () => {
     setActiveCell(null);
   };
-
   const resetFilters = () => {
     setSelectedLeadStatus([]);
     setSelectedLeadEmployee([]);
     setSearchEmployeeInFilter("");
   };
-
   const handleDownload = () => {
     const data = [
       [
@@ -499,25 +497,28 @@ const Contacts = () => {
     employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
   );
 
-  useEffect(()=>{
-const getContacts =async()=>{
-  const filters ={
-    "page": 1,
-    "limit": 10,
-    "search": "",
-    "tag": []
-  }
-try {
-  const response = await api.post("/getContact", filters)
-  setAllContacts(response.data.data)
-  console.log(response.data.data,"response from get all contacts");
-  
-} catch (error) {
-  console.log(error.response.data,"error response from get all contacts");
-}
-}
-getContacts()
-  },[])
+  useEffect(() => {
+    const getContacts = async () => {
+      const userId = localStorage.getItem("userId");
+      const filters = {
+        id: userId,
+        page: 1,
+        limit: 10,
+        search: "",
+        tag: [],
+      };
+      try {
+        const response = await api.post("/getContact", filters);
+        setAllContacts(response.data.data);
+      } catch (error) {
+        console.log(
+          error.response.data,
+          "error response from get all contacts"
+        );
+      }
+    };
+    getContacts();
+  }, []);
 
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
@@ -571,8 +572,6 @@ getContacts()
       }),
 
       render: (text, record) => {
-        console.log(text,"text from name field");
-        
         return (
           <div className="cell-content justify-content-between">
             {/* Lead name */}
@@ -712,7 +711,7 @@ getContacts()
           <EditCell
             fieldName="Phone"
             fieldValue={text}
-            recordKey={record.key}
+            recordKey={record.contact_id}
             columnKey="phone"
             routeLink="#"
             textColor="#2c5cc5"
@@ -721,7 +720,7 @@ getContacts()
               activeCell?.columnKey === "phone"
             }
             onSave={(key, value) => handleSaveField(key, "phone", value)}
-            onEditClick={() => handleEditClick(record.key, "phone")}
+            onEditClick={() => handleEditClick(record.contact_id, "phone")}
             onClose={handleClose}
           />
         </>
@@ -745,6 +744,7 @@ getContacts()
       }),
       render: (text, record) => (
         <>
+
           <EditCell
             fieldName="Email"
             fieldValue={text}
@@ -753,11 +753,13 @@ getContacts()
             routeLink="#"
             textColor="#2c5cc5"
             isActive={
-              activeCell?.rowKey === record.key &&
+              activeCell?.rowKey === record.contact_id &&
               activeCell?.columnKey === "emailaddresses"
             }
-            onSave={(key, value) => handleSaveField(key, "emailaddresses", value)}
-            onEditClick={() => handleEditClick(record.key, "emailaddresses")}
+            onSave={(key, value) =>
+              handleSaveField(key, "emailaddresses", value)
+            }
+            onEditClick={() => handleEditClick(record.contact_id, "emailaddresses")}
             onClose={handleClose}
           />
         </>

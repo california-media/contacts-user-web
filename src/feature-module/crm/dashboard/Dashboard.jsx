@@ -79,6 +79,7 @@ const userProfile = useSelector((state)=>state.getUser)
      try {
       const response = await api.get("/getUser");
       console.log(response.data, "response from get profile");
+      localStorage.setItem("userId",response.data.data.id)
       dispatch(setGetUser(response.data.data))
      } catch (error) {
       console.log(error.response.data,"errorrr");
