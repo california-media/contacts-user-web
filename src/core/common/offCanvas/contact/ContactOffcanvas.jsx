@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import {
@@ -11,17 +11,45 @@ import {
 import { SelectWithImage2 } from "../../selectWithImage2";
 import { TagsInput } from "react-tag-input-component";
 
-const LeadOffcanvas = ({ selectedLead }) => {
+const LeadOffcanvas = ({ selectedContact }) => {
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
   const [owner, setOwner] = useState(["Collab"]);
   const [openModal2, setOpenModal2] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
+console.log(selectedContact,"selectedContact");
 
   const handleShow = () => setShow(true);
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
+  const handleContact =()=>{
+    
+  }
+  const handleChange= (e)=>{
+    const { name, value } = e.target;
+    setFormData((prevData)=>({
+      ...prevData,
+      [name]: value
+    }))
 
+  }
+
+  useEffect(() => {
+    if (selectedContact) {
+      setFormData({
+        firstName: selectedContact.firstname || "",
+        lastName: selectedContact.lastname || "",
+        email: selectedContact.emailaddresses || "",
+        phone: selectedContact.phone || "",
+      });
+    }
+  }, [selectedContact]);
   return (
     <div
       className="offcanvas offcanvas-end offcanvas-large"
@@ -30,7 +58,7 @@ const LeadOffcanvas = ({ selectedLead }) => {
     >
       <div className="offcanvas-header border-bottom">
         <h5 className="fw-semibold">
-          {selectedLead ? "Update Contact" : "Add New Contact"}
+          {selectedContact ? "Update Contact" : "Add New Contact"}
         </h5>
         <button
           type="button"
@@ -42,7 +70,7 @@ const LeadOffcanvas = ({ selectedLead }) => {
         </button>
       </div>
       <div className="offcanvas-body">
-        <form>
+        <form onSubmit={handleContact}>
           <div className="row">
             <div className="col-md-12 d-flex justify-content-center">
               <div className="profilePic">
@@ -56,8 +84,9 @@ const LeadOffcanvas = ({ selectedLead }) => {
                 </label>
                 <input
                   type="text"
-                  value={selectedLead ? selectedLead.lead_name : ""}
-                  onChange={() => {}}
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
                   className="form-control"
                 />
               </div>
@@ -67,8 +96,9 @@ const LeadOffcanvas = ({ selectedLead }) => {
                 <label className="col-form-label">Last Name</label>
                 <input
                   type="text"
-                  value={selectedLead ? selectedLead.lead_name : ""}
-                  onChange={() => {}}
+                  value={formData.lastName}
+                  name="lastName"
+                  onChange={handleChange}
                   className="form-control"
                 />
               </div>
@@ -78,8 +108,9 @@ const LeadOffcanvas = ({ selectedLead }) => {
                 <label className="col-form-label">Email</label>
                 <input
                   type="text"
-                  value={selectedLead ? selectedLead.lead_name : ""}
-                  onChange={() => {}}
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="form-control"
                 />
               </div>
@@ -120,7 +151,7 @@ const LeadOffcanvas = ({ selectedLead }) => {
                         <input
                           type="text"
                           className="form-control"
-                          defaultValue={selectedLead ? selectedLead.phone : ""}
+                          defaultValue={selectedContact ? selectedContact.phone : ""}
                         />
                       </div>
                     </div>

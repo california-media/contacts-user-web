@@ -62,6 +62,7 @@ const Contacts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLeadStatus, setSelectedLeadStatus] = useState([]);
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
+  const [isLoading,setIsLoading] = useState(false)
   const [allContacts, setAllContacts] = useState([]);
   const [stars, setStars] = useState({});
   const [newContents, setNewContents] = useState([0]);
@@ -70,7 +71,7 @@ const Contacts = () => {
   const [searchEmployeeInFilter, setSearchEmployeeInFilter] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
-  const [selectedLead, setSelectedLead] = useState(null);
+  const [selectedContact, setSelectedContact] = useState(null);
 
   const [activeRecordKey, setActiveRecordKey] = useState(null);
   const [activeCell, setActiveCell] = useState(null);
@@ -499,6 +500,7 @@ const Contacts = () => {
 
   useEffect(() => {
     const getContacts = async () => {
+      setIsLoading(true)
       const userId = localStorage.getItem("userId");
       const filters = {
         id: userId,
@@ -510,11 +512,13 @@ const Contacts = () => {
       try {
         const response = await api.post("/getContact", filters);
         setAllContacts(response.data.data);
+        setIsLoading(false)
       } catch (error) {
         console.log(
           error.response.data,
           "error response from get all contacts"
         );
+        setIsLoading(false)
       }
     };
     getContacts();
@@ -546,7 +550,7 @@ const Contacts = () => {
   };
 
   const handleLeadEditClick = (record) => {
-    setSelectedLead(record);
+    setSelectedContact(record);
   };
   const columns = [
     {
@@ -1324,7 +1328,7 @@ const Contacts = () => {
                                 data-bs-toggle="offcanvas"
                                 data-bs-target="#contact_offcanvas"
                                 onClick={() => {
-                                  setSelectedLead(null);
+                                  setSelectedContact(null);
                                 }}
                               >
                                 <i className="ti ti-square-rounded-plus me-2" />
@@ -1374,6 +1378,7 @@ const Contacts = () => {
                         dataSource={filteredData}
                         columns={visibleColumns}
                         rowKey={(record) => record.key}
+                        loading={isLoading}
                       />
                     </div>
                     <div className="row align-items-center">
@@ -1393,7 +1398,7 @@ const Contacts = () => {
         </div>
         {/* /Page Wrapper */}
         {/* Add Edit Lead */}
-        <ContactOffcanvas selectedLead={selectedLead} />
+        <ContactOffcanvas selectedContact={selectedContact} />
         {/* /Add Edit Lead */}
 
         {/* Delete Lead */}

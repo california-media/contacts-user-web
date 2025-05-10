@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Table } from "antd";
+import { Spin, Table } from "antd";
 import { DatatableProps } from "../../data/interface"; // Ensure correct path
 import { RiArrowLeftWideLine, RiArrowRightWideLine } from "react-icons/ri";
 
-const Datatable= ({ columns, dataSource }) => {
+const Datatable= ({ columns, dataSource, loading }) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationConfig, setPaginationConfig] = useState({
     current: 1,
@@ -42,9 +42,11 @@ const Datatable= ({ columns, dataSource }) => {
 
   return (
     <>
+     
       <Table
         className="table datanew dataTable no-footer"
         rowSelection={rowSelection}
+        loading={loading}
         columns={columns}
         dataSource={dataSource}
         bordered
@@ -53,6 +55,7 @@ const Datatable= ({ columns, dataSource }) => {
             scrollToFirstRowOnChange: true }}
         pagination={paginationConfig}
       />
+     
     </>
   );
 };

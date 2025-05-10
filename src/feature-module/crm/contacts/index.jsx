@@ -256,7 +256,9 @@ const ContactsDetails = () => {
   const [hoveredMeetingIndex, setHoveredMeetingIndex] = useState(null);
   const [haveShippingAddress, setHaveShippingAddress] = useState(false);
   const [showQuotationViewForm, setShowQuotationViewForm] = useState(false);
+  const [previousTags, setPreviousTags] = useState([]);
   const [quotationQuantity, setQuotationQuantity] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [selectedDropdownQuotation, setSelectedDropdownQuotation] =
     useState(false);
@@ -277,7 +279,6 @@ const ContactsDetails = () => {
     const fetchAllTags = async () => {
       try {
         const response = await api.get("/getTag");
-        console.log(response.data.data, "response.data from tag");
         const allTagsFetched = response.data.data.map((tag) => ({
           value: tag.tag,
           label: tag.tag,
@@ -562,9 +563,19 @@ const ContactsDetails = () => {
   const handleQuotationProductChange = (selectedProduct) => {
     setSelectedQuotationProduct(selectedProduct);
   };
-const handleCreateTag =()=>{
-  
-}
+  const handleCreateTag = async (inputValue) => {
+    try {
+      const response = await api.post("/addTag", { tag: inputValue });
+
+      const newTag = response.data;
+
+      setAllTags((prev) => [...prev, { label: inputValue, value: inputValue }]);
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      alert("Failed to create tag");
+    }
+  };
+
   const handleTaskSubmit = () => {
     // if (selectedTask) {
     //   // Update existing task
@@ -698,9 +709,7 @@ const handleCreateTag =()=>{
     const leadData = location.state?.record || location.state?.lead || {};
     setLeadInfo(leadData); // Set leadInfo from location.state
   }, [location.state]);
-
-  console.log(leadInfo, "leadinfo");
-  console.log(location.state, "location.state");
+console.log(leadInfo,"lead info");
 
   const tagsBg = [
     "badge-soft-success",
@@ -713,7 +722,7 @@ const handleCreateTag =()=>{
     // Handle the uploaded files here
     setUploadedFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   }, []);
-
+  useEffect(() => {});
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     // accept: {
@@ -799,6 +808,37 @@ const handleCreateTag =()=>{
   }, [addedQuotationEntries, setAddedQuotationEntries]);
 
   const ViewQuotationTableRef = useRef(null);
+  const handleUserTags = (tags) => {
+    console.log(tags, "handleUserTags called");
+    const newTagValues = tags.map((tag) => {
+      return tag.value;
+    });
+    setSelectedTags(newTagValues)
+    
+    const previousTagValues = previousTags.map((tag) => {
+      return tag.value;
+    });
+    const newSelectedTag = tags.filter(
+      (tag) => !previousTagValues.includes(tag.value)
+    );
+
+    console.log(newTagValues, "newTagValues");
+    console.log(previousTagValues, "previousTagValues");
+    if (newSelectedTag.length > 0) {
+      const userId = localStorage.getItem("userId");
+      console.log(newSelectedTag[0].value, "newly selected tag");
+      const addTag = async () => {
+        const response = await api.post("/assignedContactTag", {
+          tagName: newSelectedTag[0].value,
+          contactId:userId,
+        });
+        console.log(response.data, "response from add tag api");
+      };
+      addTag();
+    }
+    // console.log(newSelectedTag, "newSelectedTag");
+    setPreviousTags(tags);
+  };
 
   useEffect(() => {
     const drake = dragula([ViewQuotationTableRef.current]);
@@ -1312,7 +1352,8 @@ const handleCreateTag =()=>{
                         classNamePrefix="react-select"
                         options={allTags}
                         // isLoading={isLoading}
-                        // onChange={(newValue) => setValue(newValue)}
+                        value={selectedTags}
+                        onChange={(newValue) => handleUserTags(newValue)}
                         onCreateOption={handleCreateTag}
                         className="js-example-placeholder-multiple select2 js-states"
                         isMulti={true}

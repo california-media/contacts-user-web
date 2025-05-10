@@ -13,23 +13,65 @@ import { TagsInput } from "react-tag-input-component";
 import { MdCancel } from "react-icons/md";
 import DeleteGroupModal from "../../modals/DeleteGroupModal";
 import { Modal } from "react-bootstrap";
+import api from "../../../axios/axiosInstance";
 
 const GroupsOffcanvas = () => {
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
+  const [tagValue, setTagValue] = useState("");
+  const [deleteTag, setDeleteTag] = useState({});
   const [owner, setOwner] = useState(["Collab"]);
   const [openGroupDeleteModal, setOpenGroupDeleteModal] = useState(false);
+  const [allTags, setAllTags] = useState([]);
 
   const handleShow = () => setShow(true);
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
   useEffect(() => {
-    console.log("groups off canvas on");
-    return () => {
-      console.log("groups off canvas off");
+    const fetchTags = async () => {
+      try {
+        const response = await api.get("getTag");
+        console.log(response.data.data, "response.data");
+        setAllTags(response.data.data);
+      } catch (error) {
+        console.log(error);
+      }
     };
-  });
+    fetchTags();
+  }, []);
+  const handleAddTag = async(e) => {
+    e.preventDefault();
+    try {
+
+      console.log("ran till here 1");
+      
+      const response =await api.post("addTag", { tag: tagValue });
+      
+      if(response.data.status==="success"){
+        setAllTags([...allTags, { tag: tagValue, tag_id: response.data.data.tag_id }]);
+        setTagValue("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleDeleteTag = async () => {
+    setOpenGroupDeleteModal(false);
+    try {
+      console.log(deleteTag, "deleteTag.tag_id");
+
+      const response = await api.delete("deleteTag", {
+        data: { tag_id: deleteTag.tag_id },
+      });
+      if (response.data.status === "success") {
+        setAllTags(allTags.filter((tag) => tag.tag_id !== deleteTag.tag_id));
+      }
+      console.log(response.data, "response.data from delete tag");
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div
       className="offcanvas offcanvas-end offcanvas-large"
@@ -48,32 +90,49 @@ const GroupsOffcanvas = () => {
         </button>
       </div>
       <div className="offcanvas-body">
-        <form>
+        <form onSubmit={handleAddTag}>
           <div className="row">
             <label className="col-form-label ms-3">Groups</label>
             <div className="col-md-9">
               <div className="mb-3">
                 <input
                   type="text"
-                  value={"abc"}
-                  onChange={() => {}}
+                  value={tagValue}
+                  onChange={(e) => {
+                    setTagValue(e.target.value);
+                  }}
                   className="form-control"
                 />
               </div>
             </div>
             <div className="col-md-3">
               <button
-                type="button"
+                type="submit"
                 className="btn btn-primary"
-                onClick={() => {}}
+                // onClick={() => {}}
               >
                 Add
               </button>
             </div>
           </div>
         </form>
+        {allTags.map((tag, index) => {
+          return (
+            <span className="groupContainer mb-2" key={index}>
+              {tag.tag}
+              <MdCancel
+                className="groupDeleteIconStyle"
+                onClick={() => {
+                  console.log(tag, "tag to be deleted");
 
-        {
+                  setDeleteTag(tag);
+                  setOpenGroupDeleteModal(true);
+                }}
+              />
+            </span>
+          );
+        })}
+        {/* {
           <>
             <span className="groupContainer">
               website
@@ -91,7 +150,7 @@ const GroupsOffcanvas = () => {
               <MdCancel className="groupDeleteIconStyle" onClick={() => {}} />
             </span>
           </>
-        }
+        } */}
         <Modal
           show={openGroupDeleteModal}
           onHide={() => setOpenGroupDeleteModal(false)}
@@ -113,12 +172,17 @@ const GroupsOffcanvas = () => {
               <h3>Are you sure, you want to delete the group</h3>
               <p>This group will be removed from all your contacts</p>
               <div className="col-lg-12 text-center modal-btn">
-                <Link to="#" className="btn btn-light" data-bs-dismiss="modal" onClick={() => setOpenGroupDeleteModal(false)}>
+                <Link
+                  to="#"
+                  className="btn btn-light"
+                  data-bs-dismiss="modal"
+                  onClick={() => setOpenGroupDeleteModal(false)}
+                >
                   Cancel
                 </Link>
                 <Link
                   to="#"
-                  onClick={() => setOpenGroupDeleteModal(false)}
+                  onClick={handleDeleteTag}
                   className="btn btn-primary"
                 >
                   Delete
