@@ -576,6 +576,8 @@ const Contacts = () => {
       }),
 
       render: (text, record) => {
+        console.log(record,text,"record and text");
+        
         return (
           <div className="cell-content justify-content-between">
             {/* Lead name */}
@@ -594,7 +596,7 @@ const Contacts = () => {
               <div className="action-icons d-flex justify-content-center">
                 <a
                   //  href={`tel:${text}`}
-                  onClick={() => handlePhoneClick(record.phone)}
+                  onClick={() => handlePhoneClick(record.phonenumbers[0].countryCode + record.phonenumbers[0].number)}
                   className="action-icon me-3"
                   title="Call"
                 >
@@ -602,16 +604,19 @@ const Contacts = () => {
                 </a>
 
                 <a
-                  href={`https://wa.me/${text}`}
+                  href={`https://wa.me/${record.phonenumbers[0].countryCode + record.phonenumbers[0].number}`}
                   className="action-icon"
                   title="WhatsApp"
+                  target="_blank"
                 >
                   <i className="ti ti-message-circle-share me-3" />
                 </a>
                 <a
-                  href={`mailto:${text}`}
+                  href={`mailto:${record.emailaddresses[0]}`}
                   className="action-icon"
                   title="Email"
+                  target="_blank"
+
                 >
                   <MdMail />
                 </a>
@@ -909,11 +914,12 @@ const Contacts = () => {
       columnVisibility["Company"] ||
       columnVisibility["Phone"] ||
       columnVisibility["Email"];
+console.log(lead.firstname,"lead.firstname");
 
     const matchesSearchQuery =
       !isAnySearchColumnVisible ||
       (columnVisibility["Name"] &&
-        lead.firstname.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        lead.firstname?.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (columnVisibility["Company"] &&
         lead.customer_company
           .toLowerCase()

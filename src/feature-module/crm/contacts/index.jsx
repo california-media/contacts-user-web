@@ -563,13 +563,43 @@ const ContactsDetails = () => {
   const handleQuotationProductChange = (selectedProduct) => {
     setSelectedQuotationProduct(selectedProduct);
   };
+  // const handleCreateTag = async (inputValue) => {
+  //   try {
+  //     const response = await api.post("/addTag", { tag: inputValue });
+
+  //     const newTag = response.data;
+
+  //     setAllTags((prev) => [...prev, { label: inputValue, value: inputValue }]);
+  //   } catch (error) {
+  //     console.error("Error creating tag:", error);
+  //     alert("Failed to create tag");
+  //   }
+  // };
+
   const handleCreateTag = async (inputValue) => {
     try {
+      // 1️⃣ **Create the tag in the backend**
       const response = await api.post("/addTag", { tag: inputValue });
-
-      const newTag = response.data;
-
-      setAllTags((prev) => [...prev, { label: inputValue, value: inputValue }]);
+  
+      // 2️⃣ **Extract the new tag object from the response**
+      const newTag = {
+        label: inputValue,
+        value: inputValue,
+      };
+  
+      // 3️⃣ **Update All Tags** (So it shows up in the list)
+      setAllTags((prev) => [...prev, newTag]);
+  
+      // 4️⃣ **Update Selected Tags** (So it's also selected in the UI)
+      setSelectedTags((prev) => [...prev, newTag]);
+  
+      // 5️⃣ **Assign the new tag to the contact immediately**
+      await api.post("/assignedContactTag/assign-tag", {
+        tagNames: [inputValue],
+        contactId: leadInfo.contact_id,
+      });
+  
+      console.log("Tag created and assigned successfully:", inputValue);
     } catch (error) {
       console.error("Error creating tag:", error);
       alert("Failed to create tag");
@@ -709,7 +739,7 @@ const ContactsDetails = () => {
     const leadData = location.state?.record || location.state?.lead || {};
     setLeadInfo(leadData); // Set leadInfo from location.state
   }, [location.state]);
-console.log(leadInfo,"lead info");
+  console.log(leadInfo, "lead info");
 
   const tagsBg = [
     "badge-soft-success",
@@ -808,35 +838,120 @@ console.log(leadInfo,"lead info");
   }, [addedQuotationEntries, setAddedQuotationEntries]);
 
   const ViewQuotationTableRef = useRef(null);
+  // const handleUserTags = (tags) => {
+  //   const newTagValues = tags.map((tag) => {
+  //     return tag.value;
+  //   });
+  //   setSelectedTags(newTagValues);
+
+  //   const previousTagValues = previousTags.map((tag) => {
+  //     return tag.value;
+  //   });
+  //   const newSelectedTag = tags.filter(
+  //     (tag) => !previousTagValues.includes(tag.value)
+  //   );
+
+  //   if (newSelectedTag.length > 0) {
+  //     const userId = localStorage.getItem("userId");
+
+  //     const addTag = async () => {
+  //       const response = await api.post("/assignedContactTag", {
+  //         tagName: newSelectedTag[0].value,
+  //         contactId: leadInfo.contact_id,
+  //       });
+  //     };
+  //     addTag();
+  //   }
+  //   setPreviousTags(tags);
+  // };
   const handleUserTags = (tags) => {
-    console.log(tags, "handleUserTags called");
-    const newTagValues = tags.map((tag) => {
-      return tag.value;
-    });
-    setSelectedTags(newTagValues)
-    
-    const previousTagValues = previousTags.map((tag) => {
-      return tag.value;
-    });
-    const newSelectedTag = tags.filter(
+    setSelectedTags(tags);
+
+    // Extract tag values from the current and previous state
+    const newTagValues = tags.map((tag) => tag.value);
+    const previousTagValues = previousTags.map((tag) => tag.value);
+
+    // 🔹 **Find Newly Added Tag**
+    const newSelectedTag = tags.find(
       (tag) => !previousTagValues.includes(tag.value)
     );
 
-    console.log(newTagValues, "newTagValues");
-    console.log(previousTagValues, "previousTagValues");
-    if (newSelectedTag.length > 0) {
-      const userId = localStorage.getItem("userId");
-      console.log(newSelectedTag[0].value, "newly selected tag");
+    // 🔹 **Find Removed Tag**
+    const removedTag = previousTags.find(
+      (tag) => !newTagValues.includes(tag.value)
+    );
+
+    if (newSelectedTag) {
+      console.log("Adding Tag:", newSelectedTag.value);
+
       const addTag = async () => {
-        const response = await api.post("/assignedContactTag", {
-          tagName: newSelectedTag[0].value,
-          contactId:userId,
-        });
-        console.log(response.data, "response from add tag api");
+        try {
+          // 🔹 **Check if it's a custom-created tag**
+          if (newSelectedTag.__isNew__) {
+            console.log("Creating new tag:", newSelectedTag.value);
+            // 1️⃣ **Create the tag first**
+            const createResponse = await api.post("/addTag", {
+              tagName: newSelectedTag.value,
+            });
+
+            console.log(
+              createResponse.data,
+              "Custom Tag Created:",
+              newSelectedTag.value
+            );
+
+            // 2️⃣ **Assign the new tag to the contact**
+            await api.post("/assignedContactTag/assign-tag", {
+              tagNames: [newSelectedTag.value],
+              contactId: leadInfo.contact_id,
+            });
+            
+
+            console.log("Custom Tag Assigned:", newSelectedTag.value);
+          } else {
+            // If it's an existing tag, just assign it
+            const response = await api.post("/assignedContactTag/assign-tag", {
+              tagNames: [newSelectedTag.value],
+              contactId: leadInfo.contact_id,
+            });
+            console.log(response.data, "Tag Added:", newSelectedTag.value);
+          }
+        } catch (error) {
+          console.error(
+            "Failed to add/assign tag:",
+            newSelectedTag.value,
+            error
+          );
+        }
       };
       addTag();
     }
-    // console.log(newSelectedTag, "newSelectedTag");
+
+    if (removedTag) {
+      console.log("Removing Tag:", removedTag.value);
+
+      const removeTag = async () => {
+        try {
+          console.log(
+            "removed",
+            removedTag.value,
+            "tag from",
+            leadInfo.contact_id
+          );
+
+          const response = await api.post("/assignedContactTag/unassign-tag", {
+            tagNames: [removedTag.value],
+            contactId: leadInfo.contact_id,
+          });
+          console.log(response.data, "Tag Removed:", removedTag.value);
+        } catch (error) {
+          console.error("Failed to remove tag:", removedTag.value, error);
+        }
+      };
+      removeTag();
+    }
+
+    // Update the previous tags state
     setPreviousTags(tags);
   };
 
@@ -1158,7 +1273,17 @@ console.log(leadInfo,"lead info");
   const handleMeetingTypeChange = (selectedOption) => {
     setSelectedMeetingType(selectedOption ? selectedOption.value : null);
   };
-
+  useEffect(() => {
+    if (leadInfo?.tags) {
+      // Format the existing tags for CreatableSelect
+      const formattedTags = leadInfo.tags.map((tag) => ({
+        value: tag,
+        label: tag,
+      }));
+      setSelectedTags(formattedTags);
+      setPreviousTags(formattedTags);
+    }
+  }, [leadInfo]);
   return (
     <>
       {/* Page Wrapper */}
@@ -1240,7 +1365,7 @@ console.log(leadInfo,"lead info");
                 {/* /Leads User */}
               </div>
               {/* Leads Sidebar */}
-              <ContactOffcanvas />
+              <ContactOffcanvas selectedContact={leadInfo} />
               <div className="col-xl-3 theiaStickySidebar">
                 <div className="card">
                   <div className="card-body p-3">
@@ -1250,6 +1375,7 @@ console.log(leadInfo,"lead info");
                         to="#"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#contact_offcanvas"
+
                       >
                         <CiEdit size={20} />
                       </Link>
