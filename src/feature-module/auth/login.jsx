@@ -61,16 +61,11 @@ const Login = () => {
     e.preventDefault();
     setMessage({text:"",type:""})
     setIsLoading(true)
-
     try {
-      console.log(email, password, "email and password data");
-
       const response = await api.post("user/login", { email, password });
 
       if (response.data.status === "success") {
-        localStorage.setItem("token",response.data.data.token)
-        console.log(response.data.data,"data");
-        
+        localStorage.setItem("token",response.data.data.token)        
         setMessage({text:response.data.message, type:"success"});
         navigate(route.dashboard);
         setIsLoading(false)

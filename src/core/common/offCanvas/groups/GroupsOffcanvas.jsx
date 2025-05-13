@@ -14,62 +14,70 @@ import { MdCancel } from "react-icons/md";
 import DeleteGroupModal from "../../modals/DeleteGroupModal";
 import { Modal } from "react-bootstrap";
 import api from "../../../axios/axiosInstance";
+import { useDispatch, useSelector } from "react-redux";
+import { addTag, deleteTag } from "../../../data/redux/slices/TagSlice";
 
 const GroupsOffcanvas = () => {
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
   const [tagValue, setTagValue] = useState("");
-  const [deleteTag, setDeleteTag] = useState({});
+  const [tagToBeDeleted, setTagToBeDeleted] = useState({});
   const [owner, setOwner] = useState(["Collab"]);
   const [openGroupDeleteModal, setOpenGroupDeleteModal] = useState(false);
   const [allTags, setAllTags] = useState([]);
+
+
+const dispatch = useDispatch()
 
   const handleShow = () => setShow(true);
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
+  // useEffect(() => {
+  //   const fetchTags = async () => {
+  //     try {
+  //       const response = await api.get("getTag");
+  //       console.log(response.data.data, "response.data");
+  //       setAllTags(response.data.data);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+  //   fetchTags();
+  // }, []);
+  const { tags, loading, error } = useSelector((state) => state.tags);
   useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const response = await api.get("getTag");
-        console.log(response.data.data, "response.data");
-        setAllTags(response.data.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchTags();
-  }, []);
-  const handleAddTag = async(e) => {
+    setAllTags(tags);
+  }, [tags]);
+  
+  const handleAddTag = async (e) => {
     e.preventDefault();
-    try {
+    
+    dispatch(addTag({ tag: tagValue }));
+    setTagValue("");
+    // try {
+    //   console.log("ran till here 1");
 
-      console.log("ran till here 1");
-      
-      const response =await api.post("addTag", { tag: tagValue });
-      
-      if(response.data.status==="success"){
-        setAllTags([...allTags, { tag: tagValue, tag_id: response.data.data.tag_id }]);
-        setTagValue("");
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    //   const response = await api.post("addTag", { tag: tagValue });
+
+    //   if (response.data.status === "success") {
+    //     setAllTags([
+    //       ...allTags,
+    //       { tag: tagValue, tag_id: response.data.data.tag_id },
+    //     ]);
+    //     setTagValue("");
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
   const handleDeleteTag = async () => {
-    setOpenGroupDeleteModal(false);
     try {
-      console.log(deleteTag, "deleteTag.tag_id");
-
-      const response = await api.delete("deleteTag", {
-        data: { tag_id: deleteTag.tag_id },
-      });
-      if (response.data.status === "success") {
-        setAllTags(allTags.filter((tag) => tag.tag_id !== deleteTag.tag_id));
-      }
-      console.log(response.data, "response.data from delete tag");
+      await dispatch(deleteTag(tagToBeDeleted.tag_id)).unwrap();
+      // Only runs if the delete was successful
+      setOpenGroupDeleteModal(false);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to delete the tag:", error);
     }
   };
   return (
@@ -123,9 +131,7 @@ const GroupsOffcanvas = () => {
               <MdCancel
                 className="groupDeleteIconStyle"
                 onClick={() => {
-                  console.log(tag, "tag to be deleted");
-
-                  setDeleteTag(tag);
+                  setTagToBeDeleted(tag);
                   setOpenGroupDeleteModal(true);
                 }}
               />

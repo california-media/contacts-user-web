@@ -1,15 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Spin, Table } from "antd";
 import { DatatableProps } from "../../data/interface"; // Ensure correct path
 import { RiArrowLeftWideLine, RiArrowRightWideLine } from "react-icons/ri";
+import { useSelector } from "react-redux";
 
-const Datatable= ({ columns, dataSource, loading }) => {
+const Datatable= ({ columns, dataSource, loading,totalCount,onPageChange }) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  
   const [paginationConfig, setPaginationConfig] = useState({
     current: 1,
     pageSize: 10,
     showQuickJumper: true,
-    total: dataSource.length,
+    total: totalCount,
     showTotal: (total, range) => `Showing ${range[0]}–${range[1]} of ${total} results`,
     showSizeChanger: true,
     pageSizeOptions: ['10', '20', '30'],
@@ -40,6 +43,31 @@ const Datatable= ({ columns, dataSource, loading }) => {
     onChange: onSelectChange,
   };
 
+
+
+
+  useEffect(() => {
+    setPaginationConfig((prev) => ({
+      ...prev,
+      total: totalCount,
+    }));
+  }, [totalCount]);
+
+  // ➡️ Handle page change
+  const handleTableChange = (pagination) => {
+    setPaginationConfig((prev) => ({
+      ...prev,
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+    }));
+
+    // 👇 Call parent handler to fetch new page data
+    onPageChange(pagination.current, pagination.pageSize);
+  };
+
+
+
+
   return (
     <>
      
@@ -54,6 +82,7 @@ const Datatable= ({ columns, dataSource, loading }) => {
           //  x: 'max-content', y: 300,
             scrollToFirstRowOnChange: true }}
         pagination={paginationConfig}
+        onChange={handleTableChange}
       />
      
     </>

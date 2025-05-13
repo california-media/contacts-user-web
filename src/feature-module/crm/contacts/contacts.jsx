@@ -45,6 +45,9 @@ import { Pagination } from "antd";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
 import api from "../../../core/axios/axiosInstance";
+import { fetchContacts } from "../../../core/data/redux/slices/ContactSlice";
+import { useSelector } from "react-redux";
+import { setSelectedContact, setSelectedContactSlice } from "../../../core/data/redux/slices/SelectedContactSlice";
 
 const Contacts = () => {
   const route = all_routes;
@@ -62,7 +65,7 @@ const Contacts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLeadStatus, setSelectedLeadStatus] = useState([]);
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
-  const [isLoading,setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [allContacts, setAllContacts] = useState([]);
   const [stars, setStars] = useState({});
   const [newContents, setNewContents] = useState([0]);
@@ -71,13 +74,24 @@ const Contacts = () => {
   const [searchEmployeeInFilter, setSearchEmployeeInFilter] = useState("");
   const [selectedOption, setSelectedOption] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
-  const [selectedContact, setSelectedContact] = useState(null);
+  // const [selectedContact, setSelectedContact] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState();
 
   const [activeRecordKey, setActiveRecordKey] = useState(null);
   const [activeCell, setActiveCell] = useState(null);
 
   const [importModal, setImportModal] = useState(false);
   const dispatch = useAppDispatch();
+
+  const { contacts, loading, error, totalPages, totalContacts } = useSelector(
+    (state) => state.contacts
+  );
+
+  const handlePageChange = (newPage, newPageSize) => {
+    setPage(newPage);
+    setLimit(newPageSize);
+  };
 
   const [selectedDateRange, setSelectedDateRange] = useState({
     startDate: new Date().toDateString(),
@@ -498,31 +512,45 @@ const Contacts = () => {
     employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
   );
 
+  // useEffect(() => {
+  //   const getContacts = async () => {
+  //     setIsLoading(true)
+  //     const userId = localStorage.getItem("userId");
+  //     const filters = {
+  //       id: userId,
+  //       page: 1,
+  //       limit: 10,
+  //       search: "",
+  //       tag: [],
+  //     };
+  //     try {
+  //       const response = await api.post("/getContact", filters);
+  //       setAllContacts(response.data.data);
+  //       setIsLoading(false)
+  //     } catch (error) {
+  //       console.log(
+  //         error.response.data,
+  //         "error response from get all contacts"
+  //       );
+  //       setIsLoading(false)
+  //     }
+  //   };
+  //   getContacts();
+  // }, []);
   useEffect(() => {
-    const getContacts = async () => {
-      setIsLoading(true)
-      const userId = localStorage.getItem("userId");
-      const filters = {
-        id: userId,
-        page: 1,
-        limit: 10,
-        search: "",
-        tag: [],
-      };
-      try {
-        const response = await api.post("/getContact", filters);
-        setAllContacts(response.data.data);
-        setIsLoading(false)
-      } catch (error) {
-        console.log(
-          error.response.data,
-          "error response from get all contacts"
-        );
-        setIsLoading(false)
-      }
+    setAllContacts(contacts);
+  }, [contacts]);
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    const filters = {
+      id: userId,
+      page,
+      limit,
+      search: "",
+      tag: [],
     };
-    getContacts();
-  }, []);
+    dispatch(fetchContacts({ filters }));
+  }, [page, limit, dispatch]);
 
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
@@ -548,8 +576,13 @@ const Contacts = () => {
   const handlePhoneClick = (phone) => {
     dispatch(setPhone(phone));
   };
+  const selectedContact = useSelector((state) => state.selectedContact);
 
+  
   const handleLeadEditClick = (record) => {
+    dispatch(setSelectedContact(record));
+    console.log(record, "selected contact");
+
     setSelectedContact(record);
   };
   const columns = [
@@ -576,8 +609,6 @@ const Contacts = () => {
       }),
 
       render: (text, record) => {
-        console.log(record,text,"record and text");
-        
         return (
           <div className="cell-content justify-content-between">
             {/* Lead name */}
@@ -596,7 +627,12 @@ const Contacts = () => {
               <div className="action-icons d-flex justify-content-center">
                 <a
                   //  href={`tel:${text}`}
-                  onClick={() => handlePhoneClick(record.phonenumbers[0].countryCode + record.phonenumbers[0].number)}
+                  onClick={() =>
+                    handlePhoneClick(
+                      record.phonenumbers[0].countryCode +
+                        record.phonenumbers[0].number
+                    )
+                  }
                   className="action-icon me-3"
                   title="Call"
                 >
@@ -604,7 +640,10 @@ const Contacts = () => {
                 </a>
 
                 <a
-                  href={`https://wa.me/${record.phonenumbers[0].countryCode + record.phonenumbers[0].number}`}
+                  href={`https://wa.me/${
+                    record.phonenumbers[0].countryCode +
+                    record.phonenumbers[0].number
+                  }`}
                   className="action-icon"
                   title="WhatsApp"
                   target="_blank"
@@ -616,7 +655,6 @@ const Contacts = () => {
                   className="action-icon"
                   title="Email"
                   target="_blank"
-
                 >
                   <MdMail />
                 </a>
@@ -753,7 +791,6 @@ const Contacts = () => {
       }),
       render: (text, record) => (
         <>
-
           <EditCell
             fieldName="Email"
             fieldValue={text}
@@ -768,7 +805,9 @@ const Contacts = () => {
             onSave={(key, value) =>
               handleSaveField(key, "emailaddresses", value)
             }
-            onEditClick={() => handleEditClick(record.contact_id, "emailaddresses")}
+            onEditClick={() =>
+              handleEditClick(record.contact_id, "emailaddresses")
+            }
             onClose={handleClose}
           />
         </>
@@ -914,12 +953,11 @@ const Contacts = () => {
       columnVisibility["Company"] ||
       columnVisibility["Phone"] ||
       columnVisibility["Email"];
-console.log(lead.firstname,"lead.firstname");
 
     const matchesSearchQuery =
       !isAnySearchColumnVisible ||
       (columnVisibility["Name"] &&
-        lead.firstname?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        lead?.firstname?.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (columnVisibility["Company"] &&
         lead.customer_company
           .toLowerCase()
@@ -964,6 +1002,7 @@ console.log(lead.firstname,"lead.firstname");
         : [...prevStatus, leadEmployee]
     );
   };
+
   const exportPDF = () => {
     const doc = new jsPDF();
 
@@ -1054,7 +1093,7 @@ console.log(lead.firstname,"lead.firstname");
                               <h4 className="page-title mb-0 ms-5">
                                 Contacts
                                 <span className="count-title">
-                                  {filteredData.length}
+                                  {totalContacts}
                                 </span>
                               </h4>
                             </div>
@@ -1385,6 +1424,8 @@ console.log(lead.firstname,"lead.firstname");
                         columns={visibleColumns}
                         rowKey={(record) => record.key}
                         loading={isLoading}
+                        totalCount={totalContacts}
+                        onPageChange={handlePageChange}
                       />
                     </div>
                     <div className="row align-items-center">

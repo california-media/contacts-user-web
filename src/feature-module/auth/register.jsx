@@ -28,8 +28,6 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      console.log(email, password, "email and password data");
-
       const response = await api.post("user/signup", { email, password });
 
       if (response.data.status === "success") {

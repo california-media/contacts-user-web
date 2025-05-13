@@ -284,6 +284,8 @@ const ContactsDetails = () => {
           label: tag.tag,
         }));
         setAllTags(allTagsFetched);
+        console.log(response.data,"response form getTag");
+        
       } catch (error) {
         console.error("Error fetching tags:", error);
       }

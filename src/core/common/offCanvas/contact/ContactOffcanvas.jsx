@@ -55,10 +55,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
         (prevTag) => !selectedTags.some((tag) => tag.value === prevTag.value)
       )
       .map((tag) => tag.value);
-    console.log(tagsForApi, "tags for api");
-    console.log(removedTags, "removed tags");
-
-    console.log(tagsForApi, "tags to be sent to api");
 
     try {
       //parallel api calling
@@ -85,9 +81,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
           : Promise.resolve(null),
       ]);
       setIsLoading(false)
-      console.log("Response from addEditContact:", contactResponse.data);
-      console.log("Response from addTags:", tagResponse.data);
-      console.log("Response from addTags:", addTagResponse.data);
     } catch (error) {
       console.error("Error:", error);
       setIsLoading(false)
@@ -109,7 +102,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
           value: tag.tag,
           label: tag.tag,
         }));
-        console.log(response.data, "response from get tag api");
 
         setAllTags(allTagsFetched);
       } catch (error) {
@@ -119,16 +111,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
     fetchAllTags();
   }, []);
   const handleCreateTag = async (inputValue) => {
-    // try {
-    //   const response = await api.post("/addTag", { tag: inputValue });
-
-    //   const newTag = response.data;
-
-    //   setAllTags((prev) => [...prev, { label: inputValue, value: inputValue }]);
-    // } catch (error) {
-    //   console.error("Error creating tag:", error);
-    //   alert("Failed to create tag");
-    // }
     setNewTags([...newTags, inputValue]);
     setSelectedTags([
       ...selectedTags,
@@ -170,8 +152,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
     const offcanvasElement = document.getElementById("contact_offcanvas");
 
     const handleOffcanvasHide = () => {
-      console.log("Offcanvas hidden, clearing contact data...");
-
       // Clear form data
       setFormData({
         firstName: "",

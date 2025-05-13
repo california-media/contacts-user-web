@@ -15,6 +15,7 @@ import Tesseract from "tesseract.js";
 import api from "../../../core/axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { setGetUser } from "../../../core/data/redux/slices/getUserSlice";
+import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -24,6 +25,8 @@ const Dashboard = () => {
 const dispatch = useDispatch()
 
 const userProfile = useSelector((state)=>state.getUser)
+const { tags, loading, error } = useSelector((state) => state.tags);
+
 
   const [sline] = useState({
     chart: {
@@ -78,7 +81,6 @@ const userProfile = useSelector((state)=>state.getUser)
     const fetchProfile = async () => {
      try {
       const response = await api.get("/getUser");
-      console.log(response.data, "response from get profile");
       localStorage.setItem("userId",response.data.data.id)
       dispatch(setGetUser(response.data.data))
      } catch (error) {
@@ -86,7 +88,13 @@ const userProfile = useSelector((state)=>state.getUser)
      }
     };
     fetchProfile();
+
   }, []);
+
+
+  useEffect(() => {
+    dispatch(fetchTags());
+  }, [dispatch]);
   const processImage = () => {
     setResult("");
     setProgress(0);
@@ -268,7 +276,7 @@ const userProfile = useSelector((state)=>state.getUser)
                                 color: "#000",
                               }}
                             >
-                              {userProfile.tagCount}
+                              {tags.length}
                             </p>
                           </div>
                           <div
