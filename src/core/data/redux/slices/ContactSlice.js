@@ -9,8 +9,14 @@ export const fetchContacts = createAsyncThunk(
     const limit = filters.limit;
     try {
       const response = await api.post("/getContact", { id, page, limit });
-        console.log("response.data.pagination.totalContacts",response.data.pagination.totalContacts)
-      return { data: response.data.data, totalContacts:response.data.pagination.totalContacts };
+      console.log(
+        "response.data.pagination.totalContacts",
+        response.data.pagination.totalContacts
+      );
+      return {
+        data: response.data.data,
+        totalContacts: response.data.pagination.totalContacts,
+      };
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -19,25 +25,35 @@ export const fetchContacts = createAsyncThunk(
 
 export const saveContact = createAsyncThunk(
   "contacts/saveContact",
-  async (contactData, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
+    formData.forEach((value, key) => {
+  console.log(key + ": " + value);
+});
     try {
-      const { id, ...data } = contactData;
-      const response = await api.post("addEditContact", {
-        id: id ?? 0, // If id is 0 or undefined, it creates a new contact
-        ...data,
-      });
-      return response.data;
+      const response = await api.post(
+        "addEditContact",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log(response.data.data, "response from add edit contact");
+
+      return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
   }
 );
-
 export const deleteContact = createAsyncThunk(
   "contacts/deleteContact",
   async (contactId, { rejectWithValue }) => {
     try {
-      await api.delete("/deleteContact");
+   const response = await api.delete("/deleteContact",{data:{contact_id:contactId}});
+      console.log(response.data,"response from delete contact");
+      
       return contactId;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -52,7 +68,7 @@ const contactSlice = createSlice({
     page: 1,
     limit: 20,
     totalPages: 0,
-    totalContacts:0,
+    totalContacts: 0,
     loading: false,
     error: null,
   },
@@ -78,7 +94,7 @@ const contactSlice = createSlice({
 
     builder.addCase(saveContact.fulfilled, (state, action) => {
       const index = state.contacts.findIndex(
-        (contact) => contact.id === action.payload.id
+        (contact) => contact.contact_id === action.payload.contact_id
       );
 
       if (index !== -1) {
@@ -89,7 +105,7 @@ const contactSlice = createSlice({
     });
 
     builder.addCase(deleteContact.fulfilled, (state, action) => {
-      state.contacts = state.contacts.filter((c) => c.id !== action.payload);
+      state.contacts = state.contacts.filter((c) => c.contact_id !== action.payload);
     });
   },
 });

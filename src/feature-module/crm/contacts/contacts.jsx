@@ -45,9 +45,17 @@ import { Pagination } from "antd";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
 import api from "../../../core/axios/axiosInstance";
-import { fetchContacts } from "../../../core/data/redux/slices/ContactSlice";
+import {
+  deleteContact,
+  fetchContacts,
+  saveContact,
+} from "../../../core/data/redux/slices/ContactSlice";
 import { useSelector } from "react-redux";
-import { setSelectedContact, setSelectedContactSlice } from "../../../core/data/redux/slices/SelectedContactSlice";
+import {
+  resetSelectedContact,
+  setSelectedContact,
+  setSelectedContactSlice,
+} from "../../../core/data/redux/slices/SelectedContactSlice";
 
 const Contacts = () => {
   const route = all_routes;
@@ -77,6 +85,8 @@ const Contacts = () => {
   // const [selectedContact, setSelectedContact] = useState(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState();
+  const selectedContact = useSelector((state) => state.selectedContact);
+  console.log(selectedContact, "selected contactttt");
 
   const [activeRecordKey, setActiveRecordKey] = useState(null);
   const [activeCell, setActiveCell] = useState(null);
@@ -107,10 +117,16 @@ const Contacts = () => {
     setSelectedOption2(option); // Update the selected option
   };
 
-  const handleEditClick = (rowKey, columnKey) => {
+  const handleEditClick = (rowKey, columnKey, record) => {
+    // dispatch(setSelectedContact(record))
+    console.log(rowKey, columnKey, "row and column key");
+
     setActiveCell({ rowKey, columnKey });
   };
 
+  const handleDeleteContact = () => {
+    dispatch(deleteContact(selectedContact.contact_id));
+  };
   const handleClose = () => {
     setActiveCell(null);
   };
@@ -455,11 +471,21 @@ const Contacts = () => {
   // };
 
   const handleSaveField = (key, field, value) => {
-    // Update the record data here. For example:
-    // const updatedData = tableData.map((item) =>
-    //   item.key === key ? { ...item, [field]: value } : item
-    // );
-    // setTableData(updatedData);
+    // Update the selectedContact with the new value
+    const updatedContact = { ...selectedContact, [field]: value };
+    console.log(updatedContact, "updated contacttttt");
+
+    // Create a FormData object
+    const formDataObj = new FormData();
+
+    // Add the updated contact fields to the FormData object
+    formDataObj.append("contact_id", updatedContact.contact_id);
+    formDataObj.append("firstname", updatedContact.firstname);
+    formDataObj.append("lastname", updatedContact.lastname);
+    formDataObj.append("emailaddresses", updatedContact.emailaddresses);
+
+    // Dispatch saveContact with the updated form data
+    dispatch(saveContact(formDataObj));
   };
 
   const handleDateRangeChange = (startDate, endDate) => {
@@ -495,11 +521,22 @@ const Contacts = () => {
     setAddCompany(!addcompany);
   };
 
-  const handleStarToggle = (index) => {
-    setStars((prevStars) => ({
-      ...prevStars,
-      [index]: !prevStars[index],
-    }));
+  // const handleStarToggle = (index) => {
+  //   setStars((prevStars) => ({
+  //     ...prevStars,
+  //     [index]: !prevStars[index],
+  //   }));
+  // };
+  const handleStarToggle = (index, record) => {
+    const formDataObj = new FormData();
+    const isFavToggled = !record.isFavourite;
+    console.log(isFavToggled, "isFavToggled");
+
+    // Add the updated contact fields to the FormData object
+    formDataObj.append("contact_id", record.contact_id);
+    formDataObj.append("isFavourite", isFavToggled);
+
+    dispatch(saveContact(formDataObj));
   };
   const handleToggleColumnVisibility = (columnTitle) => {
     setColumnVisibility((prevVisibility) => ({
@@ -512,31 +549,6 @@ const Contacts = () => {
     employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
   );
 
-  // useEffect(() => {
-  //   const getContacts = async () => {
-  //     setIsLoading(true)
-  //     const userId = localStorage.getItem("userId");
-  //     const filters = {
-  //       id: userId,
-  //       page: 1,
-  //       limit: 10,
-  //       search: "",
-  //       tag: [],
-  //     };
-  //     try {
-  //       const response = await api.post("/getContact", filters);
-  //       setAllContacts(response.data.data);
-  //       setIsLoading(false)
-  //     } catch (error) {
-  //       console.log(
-  //         error.response.data,
-  //         "error response from get all contacts"
-  //       );
-  //       setIsLoading(false)
-  //     }
-  //   };
-  //   getContacts();
-  // }, []);
   useEffect(() => {
     setAllContacts(contacts);
   }, [contacts]);
@@ -576,26 +588,29 @@ const Contacts = () => {
   const handlePhoneClick = (phone) => {
     dispatch(setPhone(phone));
   };
-  const selectedContact = useSelector((state) => state.selectedContact);
 
-  
   const handleLeadEditClick = (record) => {
     dispatch(setSelectedContact(record));
-    console.log(record, "selected contact");
 
-    setSelectedContact(record);
+    // setSelectedContact(record);
   };
   const columns = [
     {
       title: "",
-      dataIndex: "",
+      dataIndex: "isFavourite",
       width: 40,
-      render: (text, record, index) => (
+      render: (_, record, index) => (
         <div
-          className={`set-star rating-select ${stars[index] ? "filled" : ""}`}
-          onClick={() => handleStarToggle(index)}
+          className="set-star rating-select"
+          onClick={() => handleStarToggle(index, record)}
+          style={{ cursor: "pointer" }}
         >
-          <i className="fa fa-star"></i>
+          <i
+            className={`fa ${
+              record.isFavourite ? "fa-solid fa-star" : "fa-regular fa-star"
+            }`}
+            style={{ color: record.isFavourite ? "gold" : "gray" }}
+          ></i>
         </div>
       ),
     },
@@ -640,10 +655,13 @@ const Contacts = () => {
                 </a>
 
                 <a
-                  href={`https://wa.me/${
-                    record.phonenumbers[0].countryCode +
-                    record.phonenumbers[0].number
-                  }`}
+                  href={
+                    record.phonenumbers?.length > 0
+                      ? `https://wa.me/${
+                          record.phonenumbers[0]?.countryCode ?? ""
+                        }${record.phonenumbers[0]?.number ?? ""}`
+                      : "#"
+                  }
                   className="action-icon"
                   title="WhatsApp"
                   target="_blank"
@@ -651,7 +669,11 @@ const Contacts = () => {
                   <i className="ti ti-message-circle-share me-3" />
                 </a>
                 <a
-                  href={`mailto:${record.emailaddresses[0]}`}
+                  href={
+                    record.emailaddresses?.length > 0
+                      ? `mailto:${record.emailaddresses[0]}`
+                      : "#"
+                  }
                   className="action-icon"
                   title="Email"
                   target="_blank"
@@ -700,44 +722,47 @@ const Contacts = () => {
 
       sorter: (a, b) => a.firstname.localeCompare(b.firstname),
     },
-    {
-      title: "Company",
-      dataIndex: "customer_company",
-      width: 200,
-      onCell: (record) => ({
-        onMouseEnter: () => {
-          const editIcon = document.querySelector(`.edit-icon-${record.key}`);
-          if (editIcon) editIcon.style.visibility = "visible";
-        },
-        onMouseLeave: () => {
-          const editIcon = document.querySelector(`.edit-icon-${record.key}`);
-          if (editIcon) editIcon.style.visibility = "hidden";
-        },
-      }),
-      render: (text, record) => {
-        return (
-          <>
-            <EditCell
-              fieldName="Company Name"
-              fieldValue={text}
-              textColor="#2c5cc5"
-              routeLink={route.leads}
-              recordKey={record.key}
-              columnKey="customer_company"
-              isActive={record.key === activeRecordKey}
-              onEditClick={() => {
-                setActiveRecordKey(record.key);
-              }}
-              onClose={() => setActiveRecordKey(null)}
-              onSave={(key, value) =>
-                handleSaveField(key, "customer_company", value)
-              }
-            />
-          </>
-        );
-      },
-      sorter: (a, b) => a.customer_company.localeCompare(b.customer_company),
-    },
+    // {
+    //   title: "Company",
+    //   dataIndex: "customer_company",
+    //   width: 200,
+    //   onCell: (record) => ({
+    //     onMouseEnter: () => {
+    //       const editIcon = document.querySelector(`.edit-icon-${record.key}`);
+    //       if (editIcon) editIcon.style.visibility = "visible";
+    //     },
+    //     onMouseLeave: () => {
+    //       const editIcon = document.querySelector(`.edit-icon-${record.key}`);
+    //       if (editIcon) editIcon.style.visibility = "hidden";
+    //     },
+    //   }),
+    //   render: (text, record) => {
+    //     console.log(record,"Reddddd");
+
+    //     return (
+    //       <>
+    //         <EditCell
+    //           fieldName="Company Name"
+    //           fieldValue={text}
+    //           textColor="#2c5cc5"
+    //           routeLink="#"
+    //           recordKey={record.key}
+    //           columnKey="customer_company"
+    //           isActive={record.key === activeRecordKey}
+    //           onEditClick={() => {
+    //             // setActiveRecordKey(record.key);
+    //             handleEditClick(record.key, "customer_company",record)
+    //           }}
+    //           onClose={() => setActiveRecordKey(null)}
+    //           onSave={(key, value) =>
+    //             handleSaveField(key, "customer_company", value)
+    //           }
+    //         />
+    //       </>
+    //     );
+    //   },
+    //   sorter: (a, b) => a.customer_company.localeCompare(b.customer_company),
+    // },
     {
       title: "Phone",
       dataIndex: "phone",
@@ -753,25 +778,29 @@ const Contacts = () => {
           if (editIcon) editIcon.style.visibility = "hidden";
         },
       }),
-      render: (text, record) => (
-        <>
-          <EditCell
-            fieldName="Phone"
-            fieldValue={text}
-            recordKey={record.contact_id}
-            columnKey="phone"
-            routeLink="#"
-            textColor="#2c5cc5"
-            isActive={
-              activeCell?.rowKey === record.key &&
-              activeCell?.columnKey === "phone"
-            }
-            onSave={(key, value) => handleSaveField(key, "phone", value)}
-            onEditClick={() => handleEditClick(record.contact_id, "phone")}
-            onClose={handleClose}
-          />
-        </>
-      ),
+      render: (text, record) => {
+        console.log(text, "texttttt");
+
+        return (
+          <>
+            <EditCell
+              fieldName="Phone"
+              fieldValue={text}
+              recordKey={record.contact_id}
+              columnKey="phone"
+              routeLink="#"
+              textColor="#2c5cc5"
+              isActive={
+                activeCell?.rowKey === record.key &&
+                activeCell?.columnKey === "phone"
+              }
+              onSave={(key, value) => handleSaveField(key, "phone", value)}
+              onEditClick={() => handleEditClick(record.contact_id, "phone")}
+              onClose={handleClose}
+            />
+          </>
+        );
+      },
       sorter: (a, b) => a.phone.localeCompare(b.phone),
     },
     {
@@ -789,101 +818,60 @@ const Contacts = () => {
           if (editIcon) editIcon.style.visibility = "hidden";
         },
       }),
-      render: (text, record) => (
-        <>
-          <EditCell
-            fieldName="Email"
-            fieldValue={text}
-            recordKey={record.key}
-            columnKey="emailaddresses"
-            routeLink="#"
-            textColor="#2c5cc5"
-            isActive={
-              activeCell?.rowKey === record.contact_id &&
-              activeCell?.columnKey === "emailaddresses"
-            }
-            onSave={(key, value) =>
-              handleSaveField(key, "emailaddresses", value)
-            }
-            onEditClick={() =>
-              handleEditClick(record.contact_id, "emailaddresses")
-            }
-            onClose={handleClose}
-          />
-        </>
-      ),
+      render: (text, record) => {
+        return (
+          <>
+            <EditCell
+              fieldName="Email"
+              fieldValue={text}
+              recordKey={record.key}
+              columnKey="emailaddresses"
+              routeLink="#"
+              textColor="#2c5cc5"
+              isActive={
+                activeCell?.rowKey === record.contact_id &&
+                activeCell?.columnKey === "emailaddresses"
+              }
+              onSave={(key, value) => {
+                console.log(value, "valueeee");
+
+                handleSaveField(key, "emailaddresses", value);
+              }}
+              onEditClick={() =>
+                handleEditClick(record.contact_id, "emailaddresses", record)
+              }
+              onClose={handleClose}
+            />
+          </>
+        );
+      },
       sorter: (a, b) => a.emailaddresses.localeCompare(b.emailaddresses),
     },
     {
       title: "Groups",
-      dataIndex: "groups",
-      render: (text, record) => (
-        <div>
-          <div className="d-inline-block">
-            <div
-              className="py-1 px-2 d-inline-block me-2"
-              style={{ background: "#ababab", borderRadius: 5 }}
-              // style={{
-              //   boxShadow: "none",
-              //   fontSize: "12px",
-              //   padding: "4px 8px 4px 4px",
-              //   color:
-              //     statusLead[record.key] === "Resolved"
-              //       ? "#00795b"
-              //       : statusLead[record.key] === "Open"
-              //         ? "#264966"
-              //         : statusLead[record.key] === "Pending"
-              //           ? "#d58c08"
-              //           : statusLead[record.key] === "Closed"
-              //             ? "#ff1616c7"
-              //             : "#000000c7",
-              //   backgroundColor:
-              //     statusLead[record.key] === "Resolved"
-              //       ? "#e0f5f1"
-              //       : statusLead[record.key] === "Open"
-              //         ? "#dff0ff"
-              //         : statusLead[record.key] === "Pending"
-              //           ? "#ffd9947a"
-              //           : statusLead[record.key] === "Closed"
-              //             ? "#c169692b"
-              //             : "#62626273",
-              // }}
-              // data-bs-toggle="dropdown"
-              // aria-expanded="false"
-            >
-              {/* <MdDoubleArrow /> */}
-              <span style={{ color: "#fff" }}>
-                {statusLead[record.key] || "Select Status"}
-              </span>
-            </div>
-            <div
-              className="py-1 px-2 d-inline-block"
-              style={{ background: "#ababab", borderRadius: 5 }}
-            >
-              <span style={{ color: "#fff" }}>
-                {statusLead[record.key] || "Select Status"}
-              </span>
-            </div>
-            {/* <Link
-              className="py-1 border-0"
-              style={{background:"#ababab"}}>
-              {statusLead[record.key] || "Select Status"}
-              </Link> */}
-            {/* <div className="dropdown-menu dropdown-menu-right">
-              {leadStatus.map((leadstatus, index) => (
-                <Link
-                  className="dropdown-item"
-                  to="#"
-                  key={index}
-                  onClick={() => handleLeadStatus(record.key, leadstatus.value)}
-                >
-                  {leadstatus.label}
-                </Link>
-              ))}
-            </div> */}
+      dataIndex: "tags",
+      render: (text, record) => {
+        console.log(text, record, "recordddffdd");
+
+        return (
+          <div>
+            {text.length>0 && <div className="d-inline-block">
+              <div
+                className="py-1 px-2 d-inline-block me-2"
+                style={{ background: "#ababab", borderRadius: 5 }}
+              >
+                {text.map((tag, index) => {
+                  console.log(tag, "tagsssssdd");
+
+                  return <div key={index}>{tag}</div>;
+                })}
+
+              </div>
+
+            </div>}
           </div>
-        </div>
-      ),
+        );
+      },
       // sorter: (a, b) => a.status.localeCompare(b.status),
     },
   ];
@@ -954,18 +942,18 @@ const Contacts = () => {
       columnVisibility["Phone"] ||
       columnVisibility["Email"];
 
-    const matchesSearchQuery =
-      !isAnySearchColumnVisible ||
-      (columnVisibility["Name"] &&
-        lead?.firstname?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (columnVisibility["Company"] &&
-        lead.customer_company
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())) ||
-      (columnVisibility["Phone"] &&
-        lead.phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (columnVisibility["Email"] &&
-        lead.emailaddresses.toLowerCase().includes(searchQuery.toLowerCase()));
+    // const matchesSearchQuery =
+    //   !isAnySearchColumnVisible ||
+    //   (columnVisibility["Name"] &&
+    //     lead?.firstname?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    //   (columnVisibility["Company"] &&
+    //     lead.customer_company
+    //       .toLowerCase()
+    //       .includes(searchQuery.toLowerCase())) ||
+    //   (columnVisibility["Phone"] &&
+    //     lead.phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    //   (columnVisibility["Email"] &&
+    //     lead.emailaddresses.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Check if lead matches selected statuses
     const matchesStatus =
@@ -983,8 +971,9 @@ const Contacts = () => {
 
     // (leadDate >= selectedDateRange.startDate && leadDate <= selectedDateRange.endDate);
 
-    return matchesSearchQuery && matchesStatus && matchesEmployee;
+    return matchesStatus && matchesEmployee;
     // && matchesDateRange;
+    // matchesSearchQuery &&
   });
 
   const filterLeadStatus = (leadStatus) => {
@@ -1373,7 +1362,8 @@ const Contacts = () => {
                                 data-bs-toggle="offcanvas"
                                 data-bs-target="#contact_offcanvas"
                                 onClick={() => {
-                                  setSelectedContact(null);
+                                  // setSelectedContact(null);
+                                  dispatch(resetSelectedContact());
                                 }}
                               >
                                 <i className="ti ti-square-rounded-plus me-2" />
@@ -1449,7 +1439,7 @@ const Contacts = () => {
         {/* /Add Edit Lead */}
 
         {/* Delete Lead */}
-        {<DeleteModal text={deleteModalText} />}
+        {<DeleteModal text={deleteModalText} onDelete={handleDeleteContact} />}
         {/* /Delete Lead */}
         {/* Create Lead */}
         <Modal show={openModal2} onHide={() => setOpenModal2(false)}>
