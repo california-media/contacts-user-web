@@ -14,9 +14,10 @@ export const fetchTags = createAsyncThunk("tags/fetchTags", async (_, { rejectWi
 });
 
 
-export const addTag = createAsyncThunk("tags/addTag", async (tagData, { rejectWithValue }) => {
-  try {    
-    const response = await api.post("/addTag", tagData);
+export const addTag = createAsyncThunk("tags/addTag", async (tag, { rejectWithValue }) => {
+  try {
+    
+    const response = await api.post("/addTag", tag);
     
     return response.data.data;
   } catch (error) {
@@ -27,7 +28,6 @@ export const addTag = createAsyncThunk("tags/addTag", async (tagData, { rejectWi
 export const deleteTag = createAsyncThunk("tags/deleteTag", async (tagId, { rejectWithValue }) => {
   try {    
    const response = await api.delete("/deleteTag",{data:{tag_id:tagId}});
-   console.log(response.data.data.tag_id);
    
    return response.data.data.tag_id;
   } catch (error) {
@@ -62,10 +62,14 @@ const tagSlice = createSlice({
     builder.addCase(addTag.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(addTag.fulfilled, (state, action) => {
-      state.loading = false;
-      state.tags.push(action.payload);
-    });
+    // builder.addCase(addTag.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.tags.push(action.payload);
+    // });
+  builder.addCase(addTag.fulfilled, (state, action) => {
+  state.loading = false;
+  state.tags = [...state.tags, ...action.payload];
+});
     builder.addCase(addTag.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload;

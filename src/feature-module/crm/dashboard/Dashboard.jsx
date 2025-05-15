@@ -16,6 +16,7 @@ import api from "../../../core/axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { setGetUser } from "../../../core/data/redux/slices/getUserSlice";
 import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
+import { QRCode } from "antd";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -23,7 +24,7 @@ const Dashboard = () => {
   const [language, setLanguage] = useState("eng");
   const [result, setResult] = useState("");
 const dispatch = useDispatch()
-
+  const qrCodeRef = useRef();
 const userProfile = useSelector((state)=>state.getUser)
 const { tags, loading, error } = useSelector((state) => state.tags);
 
@@ -91,7 +92,18 @@ const { tags, loading, error } = useSelector((state) => state.tags);
 
   }, []);
 
-
+const qrCodeValue = JSON.stringify({
+    firstname:'rtertefirstname',
+    lastname:'ertertlastname',
+    email:'erter@fgfd.ff',
+    phone:'33333333333',
+  });
+// const qrCodeValue = JSON.stringify({
+//     firstname: user?.firstname || '',
+//     lastname: user?.lastname || '',
+//     email: user?.emailaddress || '',
+//     phone: user?.mobilenumber || '',
+//   });
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
@@ -168,11 +180,14 @@ const { tags, loading, error } = useSelector((state) => state.tags);
                       </div>
 
                       <div className="profileCardQrCodeContainer">
-                        <ImageWithBasePath
+                        {/* <ImageWithBasePath
                           src="assets/img/myQr.png"
                           alt="Profile Banner"
                           className="profileCardQrCode"
-                        />
+                        /> */}
+                        <div ref={qrCodeRef}>
+                <QRCode  value={qrCodeValue} size={150}  className="profileCardQrCode" bgColor="#ffffff"/>
+              </div>
                       </div>
                     </div>
                   </div>

@@ -15,6 +15,7 @@ import api from "../../../axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { saveContact } from "../../../data/redux/slices/ContactSlice";
 import PhoneInput from "react-phone-input-2";
+import { addTag } from "../../../data/redux/slices/TagSlice";
 
 const LeadOffcanvas = ({ selectedContact }) => {
   const [show, setShow] = useState(false);
@@ -25,6 +26,8 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const [openModal2, setOpenModal2] = useState(false);
   const [selectedTags, setSelectedTags] = useState([]);
   const [previousTags, setPreviousTags] = useState([]);
+  const [removedTags, setRemovedTags] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [newTags, setNewTags] = useState([]);
   const [allTags, setAllTags] = useState([]);
@@ -32,74 +35,50 @@ const LeadOffcanvas = ({ selectedContact }) => {
     contact_id: "",
     firstName: "",
     lastName: "",
-    email: "",
-    phone: "",
+    email: [],
+    phone: [],
+    tags: [],
   });
   const { tags, loading, error } = useSelector((state) => state.tags);
 
   const dispatch = useDispatch();
   const offcanvasRef = useRef(null);
 
+  const fileInputRef = useRef(null);
 
-  const handleOnPhoneChange = (value, countryData) => {
-    const pureNumber = value.replace(`+${countryData.dialCode}`, "").trim();
-
-    setPhone(pureNumber);
-    setCountry(countryData);
+  const handleOnPhoneChange = (value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      phone: value,
+    }));
   };
-console.log(phone,country,"ghghgghghh");
 
   const handleShow = () => setShow(true);
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
+
   const handleContact = async () => {
     setIsLoading(true);
-    // 1️⃣ Create a FormData instance
-    const formDataObj = new FormData();
 
-    // 2️⃣ Append data to it (key-value pairs)
+    const formDataObj = new FormData();
 
     formDataObj.append("contact_id", formData.contact_id);
     formDataObj.append("firstname", formData.firstName);
     formDataObj.append("lastname", formData.lastName);
     formDataObj.append("emailaddresses", formData.email);
-
-    // formData.append("phone", "123456789");
-
-    const tagsForApi = selectedTags.map((tag) => tag.value);
-
-    const removedTags = previousTags
-      .filter(
-        (prevTag) => !selectedTags.some((tag) => tag.value === prevTag.value)
-      )
-      .map((tag) => tag.value);
+    formDataObj.append(
+      "tags",
+      JSON.stringify(selectedTags.map((tag) => tag.value))
+    );
+    formDataObj.append("phonenumbers", formData.phone);
 
     try {
+
+      if(newTags.length>0){
+        dispatch(addTag({ tag: newTags }));
+      }
       dispatch(saveContact(formDataObj));
-      //parallel api calling
-      // const [contactResponse, tagResponse, addTagResponse] = await Promise.all([
-      //   api.post("/addEditContact", formDataObj, {
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   }),
-      //   api.post("/assignedContactTag/assign-tag", {
-      //     tagNames: tagsForApi,
-      //     contactId: formData.contact_id,
-      //   }),
-      //   newTags.length > 0
-      //     ? api.post("/addTag", {
-      //         tag: newTags,
-      //       })
-      //     : Promise.resolve(null),
-      //   removedTags.length > 0
-      //     ? api.post("/addTag", {
-      //         tagNames: removedTags,
-      //         contactId: formData.contact_id,
-      //       })
-      //     : Promise.resolve(null),
-      // ]);
 
       setIsLoading(false);
     } catch (error) {
@@ -107,6 +86,7 @@ console.log(phone,country,"ghghgghghh");
       setIsLoading(false);
     }
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -128,9 +108,9 @@ console.log(phone,country,"ghghgghghh");
       { value: inputValue, label: inputValue },
     ]);
   };
+
   useEffect(() => {
     if (selectedContact?.tags) {
-      // Format the existing tags for CreatableSelect
       const formattedTags = selectedContact.tags.map((tag) => ({
         value: tag,
         label: tag,
@@ -144,6 +124,11 @@ console.log(phone,country,"ghghgghghh");
     setSelectedTags(tags);
 
     const tagsForApi = tags.map((tag) => tag.value);
+
+    const removedTagsFilter = previousTags
+      .filter((prevTag) => !tags.some((tag) => tag.value === prevTag.value))
+      .map((tag) => tag.value);
+    setRemovedTags(removedTagsFilter);
   };
 
   useEffect(() => {
@@ -153,17 +138,17 @@ console.log(phone,country,"ghghgghghh");
         firstName: selectedContact.firstname || "",
         lastName: selectedContact.lastname || "",
         email: selectedContact.emailaddresses || "",
-        phone: selectedContact.phone || "",
+        phone: selectedContact.phonenumbers?.[0] || "",
+        tags: selectedContact.tags || [],
       });
     }
   }, [selectedContact]);
 
+
   useEffect(() => {
-    // Attach event listener to offcanvas hide
     const offcanvasElement = document.getElementById("contact_offcanvas");
 
     const handleOffcanvasHide = () => {
-      // Clear form data
       setFormData({
         firstName: "",
         lastName: "",
@@ -171,18 +156,15 @@ console.log(phone,country,"ghghgghghh");
         phone: "",
       });
 
-      // Clear tags
       setSelectedTags([]);
       setPreviousTags([]);
     };
 
-    // Listen for the Bootstrap event
     offcanvasElement.addEventListener(
       "hidden.bs.offcanvas",
       handleOffcanvasHide
     );
 
-    // Clean up the event listener on unmount
     return () => {
       offcanvasElement.removeEventListener(
         "hidden.bs.offcanvas",
@@ -190,7 +172,18 @@ console.log(phone,country,"ghghgghghh");
       );
     };
   }, []);
-  console.log(phone, "phoneeeee");
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      setSelectedImage(file);
+    }
+  };
 
   return (
     <div
@@ -218,7 +211,31 @@ console.log(phone,country,"ghghgghghh");
         <form onSubmit={handleContact}>
           <div className="row">
             <div className="col-md-12 d-flex justify-content-center">
-              <div className="profilePic"></div>
+              <div className="profilePic">
+                {/* <img
+                  src="https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
+                  className="profilePic cursor-pointer"
+                  id="profileImage"
+                  onClick={handleImageClick}
+                /> */}
+                <img
+                  src={
+                    selectedImage
+                      ? URL.createObjectURL(selectedImage)
+                      : "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
+                  }
+                  className="profilePic cursor-pointer"
+                  id="profileImage"
+                  onClick={handleImageClick}
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </div>
             </div>
             <div className="col-md-6">
               <div className="mb-3">
@@ -259,6 +276,7 @@ console.log(phone,country,"ghghgghghh");
               </div>
             </div>
 
+
             {newContents.map((index) => (
               <div className="col-md-12" key={index}>
                 <div className="add-product-new">
@@ -268,14 +286,9 @@ console.log(phone,country,"ghghgghghh");
                         <label className="col-form-label">
                           Phone <span className="text-danger">*</span>
                         </label>
-                        {/* <Select
-                          className="select"
-                          options={optionschoose}
-                          classNamePrefix="react-select"
-                        /> */}
                         <PhoneInput
                           country={"us"} // Default country
-                          value={phone}
+                          value={formData.phonenumbers}
                           onChange={handleOnPhoneChange}
                           enableSearch
                           inputProps={{
@@ -286,17 +299,6 @@ console.log(phone,country,"ghghgghghh");
                         />
                       </div>
                     </div>
-                    {/* <div className="col-md-8">
-                      <div className=" mb-3">
-                        <input
-                          type="text"
-                          className="form-control"
-                          defaultValue={
-                            selectedContact ? selectedContact.phone : ""
-                          }
-                        />
-                      </div>
-                    </div> */}
                   </div>
                 </div>
               </div>

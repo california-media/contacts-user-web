@@ -56,6 +56,7 @@ import {
   setSelectedContact,
   setSelectedContactSlice,
 } from "../../../core/data/redux/slices/SelectedContactSlice";
+import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
 
 const Contacts = () => {
   const route = all_routes;
@@ -71,7 +72,7 @@ const Contacts = () => {
   const [show2, setShow2] = useState(false);
   const [show3, setShow3] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLeadStatus, setSelectedLeadStatus] = useState([]);
+  const [selectedContactGroup, setSelectedContactGroup] = useState([]);
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [allContacts, setAllContacts] = useState([]);
@@ -86,8 +87,7 @@ const Contacts = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState();
   const selectedContact = useSelector((state) => state.selectedContact);
-  console.log(selectedContact, "selected contactttt");
-
+  const { tags } = useSelector((state) => state.tags);
   const [activeRecordKey, setActiveRecordKey] = useState(null);
   const [activeCell, setActiveCell] = useState(null);
 
@@ -118,8 +118,7 @@ const Contacts = () => {
   };
 
   const handleEditClick = (rowKey, columnKey, record) => {
-    // dispatch(setSelectedContact(record))
-    console.log(rowKey, columnKey, "row and column key");
+    dispatch(setSelectedContact(record));
 
     setActiveCell({ rowKey, columnKey });
   };
@@ -131,9 +130,9 @@ const Contacts = () => {
     setActiveCell(null);
   };
   const resetFilters = () => {
-    setSelectedLeadStatus([]);
-    setSelectedLeadEmployee([]);
-    setSearchEmployeeInFilter("");
+    setSelectedContactGroup([]);
+    // setSelectedLeadEmployee([]);
+    // setSearchEmployeeInFilter("");
   };
   const handleDownload = () => {
     const data = [
@@ -473,7 +472,6 @@ const Contacts = () => {
   const handleSaveField = (key, field, value) => {
     // Update the selectedContact with the new value
     const updatedContact = { ...selectedContact, [field]: value };
-    console.log(updatedContact, "updated contacttttt");
 
     // Create a FormData object
     const formDataObj = new FormData();
@@ -494,6 +492,9 @@ const Contacts = () => {
       endDate: new Date(endDate),
     });
   };
+  useEffect(() => {
+    dispatch(fetchTags());
+  }, [dispatch]);
 
   // Initial column visibility state
   const [columnVisibility, setColumnVisibility] = useState({
@@ -530,7 +531,6 @@ const Contacts = () => {
   const handleStarToggle = (index, record) => {
     const formDataObj = new FormData();
     const isFavToggled = !record.isFavourite;
-    console.log(isFavToggled, "isFavToggled");
 
     // Add the updated contact fields to the FormData object
     formDataObj.append("contact_id", record.contact_id);
@@ -558,11 +558,12 @@ const Contacts = () => {
       id: userId,
       page,
       limit,
-      search: "",
-      tag: [],
+      search: searchQuery,
+      tag: selectedContactGroup,
     };
+
     dispatch(fetchContacts({ filters }));
-  }, [page, limit, dispatch]);
+  }, [page, limit, dispatch, searchQuery, selectedContactGroup]);
 
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
@@ -633,6 +634,7 @@ const Contacts = () => {
               state={{ record }}
               className="lead-name title-name fw-bold "
               style={{ color: "#2c5cc5" }}
+              onClick={()=>dispatch(setSelectedContact(record))}
             >
               {text}
             </Link>
@@ -666,7 +668,7 @@ const Contacts = () => {
                   title="WhatsApp"
                   target="_blank"
                 >
-                  <i className="ti ti-message-circle-share me-3" />
+                  <i className="fa-brands fa-whatsapp me-3"></i>
                 </a>
                 <a
                   href={
@@ -779,7 +781,6 @@ const Contacts = () => {
         },
       }),
       render: (text, record) => {
-        console.log(text, "texttttt");
 
         return (
           <>
@@ -833,8 +834,6 @@ const Contacts = () => {
                 activeCell?.columnKey === "emailaddresses"
               }
               onSave={(key, value) => {
-                console.log(value, "valueeee");
-
                 handleSaveField(key, "emailaddresses", value);
               }}
               onEditClick={() =>
@@ -851,24 +850,24 @@ const Contacts = () => {
       title: "Groups",
       dataIndex: "tags",
       render: (text, record) => {
-        console.log(text, record, "recordddffdd");
-
         return (
           <div>
-            {text.length>0 && <div className="d-inline-block">
-              <div
-                className="py-1 px-2 d-inline-block me-2"
-                style={{ background: "#ababab", borderRadius: 5 }}
-              >
+            {text.length > 0 && (
+              <div className="d-inline-block">
                 {text.map((tag, index) => {
-                  console.log(tag, "tagsssssdd");
 
-                  return <div key={index}>{tag}</div>;
+                  return (
+                    <div
+                      className="py-1 px-2 d-inline-block me-2"
+                      key={index}
+                      style={{ background: "#ababab", borderRadius: 5 }}
+                    >
+                      <div>{tag}</div>
+                    </div>
+                  );
                 })}
-
               </div>
-
-            </div>}
+            )}
           </div>
         );
       },
@@ -956,9 +955,9 @@ const Contacts = () => {
     //     lead.emailaddresses.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Check if lead matches selected statuses
-    const matchesStatus =
-      selectedLeadStatus.length === 0 || // If no status is selected, show all
-      selectedLeadStatus.includes(lead.status.toLowerCase());
+    // const matchesStatus =
+    // selectedLeadStatus.length === 0 || // If no status is selected, show all
+    // selectedLeadStatus.includes(lead.status.toLowerCase());
     // Check if lead matches selected employee
     const matchesEmployee =
       selectedLeadEmployee.length === 0 || // If no status is selected, show all
@@ -971,17 +970,17 @@ const Contacts = () => {
 
     // (leadDate >= selectedDateRange.startDate && leadDate <= selectedDateRange.endDate);
 
-    return matchesStatus && matchesEmployee;
+    return matchesEmployee;
     // && matchesDateRange;
     // matchesSearchQuery &&
   });
 
-  const filterLeadStatus = (leadStatus) => {
-    setSelectedLeadStatus(
+  const filterContactGroup = (tag) => {
+    setSelectedContactGroup(
       (prevStatus) =>
-        prevStatus.includes(leadStatus)
-          ? prevStatus.filter((status) => status !== leadStatus) // Remove status if unchecked
-          : [...prevStatus, leadStatus] // Add status if checked
+        prevStatus.includes(tag)
+          ? prevStatus.filter((status) => status !== tag) // Remove status if unchecked
+          : [...prevStatus, tag] // Add status if checked
     );
   };
   const filterLeadEmployee = (leadEmployee) => {
@@ -1009,7 +1008,7 @@ const Contacts = () => {
     );
 
     const pageWidth = doc.internal.pageSize.getWidth();
-    const titleText = "Leads Report";
+    const titleText = "Contacts";
     const titleWidth = doc.getTextWidth(titleText);
     const titleX = (pageWidth - titleWidth) / 2;
 
@@ -1027,7 +1026,7 @@ const Contacts = () => {
     });
 
     // Save the PDF
-    doc.save("Calls_report.pdf");
+    doc.save("Contacts.pdf");
   };
 
   const exportExcel = () => {
@@ -1053,7 +1052,7 @@ const Contacts = () => {
     utils.book_append_sheet(wb, ws, "Calls");
 
     // Save the Excel file
-    writeFile(wb, "Calls_report.xlsx");
+    writeFile(wb, "Contacts.xlsx");
   };
 
   // Filter columns based on checkbox state
@@ -1133,7 +1132,7 @@ const Contacts = () => {
                                           aria-expanded="false"
                                           aria-controls="Status"
                                         >
-                                          Groups
+                                          Groups ({tags.length})
                                         </Link>
                                       </div>
                                       <div
@@ -1143,13 +1142,12 @@ const Contacts = () => {
                                       >
                                         <div className="filter-content-list">
                                           <ul>
-                                            {leadStatus.map(
-                                              (leadStatus, index) => {
-                                                return (
-                                                  <li key={index}>
-                                                    <div className="filter-checks">
-                                                      <label className="checkboxs">
-                                                        <input
+                                            {tags.map((tag, index) => {
+                                              return (
+                                                <li key={index}>
+                                                  <div className="filter-checks">
+                                                    <label className="checkboxs">
+                                                      {/* <input
                                                           type="checkbox"
                                                           checked={selectedLeadStatus.includes(
                                                             leadStatus.value.toLowerCase()
@@ -1159,15 +1157,25 @@ const Contacts = () => {
                                                               leadStatus.value.toLowerCase()
                                                             )
                                                           } // Call filterLeadStatus on change
-                                                        />
-                                                        <span className="checkmarks" />
-                                                        {leadStatus.value}
-                                                      </label>
-                                                    </div>
-                                                  </li>
-                                                );
-                                              }
-                                            )}
+                                                        /> */}
+                                                      <input
+                                                        type="checkbox"
+                                                        checked={selectedContactGroup.includes(
+                                                          tag.tag.toLowerCase()
+                                                        )} // Check if status is selected
+                                                        onChange={() =>
+                                                          filterContactGroup(
+                                                            tag.tag.toLowerCase()
+                                                          )
+                                                        } // Call filterLeadStatus on change
+                                                      />
+                                                      <span className="checkmarks" />
+                                                      {tag.tag}
+                                                    </label>
+                                                  </div>
+                                                </li>
+                                              );
+                                            })}
                                           </ul>
                                         </div>
                                       </div>
@@ -1323,7 +1331,7 @@ const Contacts = () => {
                                 </Link>
                                 <div className="dropdown-menu  dropdown-menu-end">
                                   <ul className="mb-0">
-                                    <li>
+                                    {/* <li>
                                       <button
                                         type="button"
                                         className="dropdown-item"
@@ -1332,7 +1340,7 @@ const Contacts = () => {
                                         <i className="ti ti-file-type-pdf text-danger me-1" />
                                         Import
                                       </button>
-                                    </li>
+                                    </li> */}
                                     <li>
                                       <Link
                                         to="#"

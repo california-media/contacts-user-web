@@ -49,11 +49,12 @@ const dispatch = useDispatch()
   useEffect(() => {
     setAllTags(tags);
   }, [tags]);
+  console.log(tags,"tags from the redux");
   
   const handleAddTag = async (e) => {
     e.preventDefault();
     
-    dispatch(addTag({ tag: tagValue }));
+    dispatch(addTag({tag:[tagValue]}));
     setTagValue("");
     // try {
     //   console.log("ran till here 1");

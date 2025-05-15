@@ -17,6 +17,10 @@ const selectedContactSlice = createSlice({
   reducers: {
     setSelectedContact: (state, action) => {
       // Merge the incoming contact data with the current state
+      console.log(state,"current state of the setselected contact");
+      console.log(action.payload,"action.payload state");
+      console.log({ ...state, ...action.payload },"now both are combined");
+      
       return { ...state, ...action.payload };
     },
     resetSelectedContact: () => ({

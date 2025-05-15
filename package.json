@@ -35,6 +35,7 @@
     "jspdf-autotable": "^3.8.3",
     "primeicons": "^6.0.1",
     "primereact": "^10.5.1",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-awesome-stars-rating": "^0.16.2",

@@ -81,6 +81,7 @@ import DeleteModal from "../../../core/common/modals/DeleteModal";
 import { estimationListData } from "../../../core/data/json/estimationList";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import api from "../../../core/axios/axiosInstance";
+import { useSelector } from "react-redux";
 const route = all_routes;
 const allNotes = [
   {
@@ -240,9 +241,20 @@ export const initialSettings = {
 };
 
 const ContactsDetails = () => {
+
   const data = leadsData;
+
+  const [leadInfo, setLeadInfo] = useState({});
+  
+  const selectedContact = useSelector((state)=>state.selectedContact)
+  
   const location = useLocation();
   const { record } = location.state || {};
+  
+  useEffect(() => {
+    setLeadInfo(selectedContact);
+  }, [selectedContact, leadInfo]);
+
 
   const [addcomment, setAddComment] = useState(false);
   const [activeEditorIndex, setActiveEditorIndex] = useState(null);
@@ -284,7 +296,6 @@ const ContactsDetails = () => {
           label: tag.tag,
         }));
         setAllTags(allTagsFetched);
-        console.log(response.data,"response form getTag");
         
       } catch (error) {
         console.error("Error fetching tags:", error);
@@ -367,7 +378,6 @@ const ContactsDetails = () => {
   const [contactedToday, setContactedToday] = useState(false);
   const [quotationQuantities, setQuotationQuantities] = useState([]);
   const [addedQuotationEntries, setAddedQuotationEntries] = useState([]);
-  const [leadInfo, setLeadInfo] = useState({});
 
   const [columnVisibility, setColumnVisibility] = useState({
     "": true,
@@ -565,48 +575,54 @@ const ContactsDetails = () => {
   const handleQuotationProductChange = (selectedProduct) => {
     setSelectedQuotationProduct(selectedProduct);
   };
-  // const handleCreateTag = async (inputValue) => {
-  //   try {
-  //     const response = await api.post("/addTag", { tag: inputValue });
-
-  //     const newTag = response.data;
-
-  //     setAllTags((prev) => [...prev, { label: inputValue, value: inputValue }]);
-  //   } catch (error) {
-  //     console.error("Error creating tag:", error);
-  //     alert("Failed to create tag");
-  //   }
-  // };
-
   const handleCreateTag = async (inputValue) => {
     try {
-      // 1️⃣ **Create the tag in the backend**
       const response = await api.post("/addTag", { tag: inputValue });
-  
-      // 2️⃣ **Extract the new tag object from the response**
-      const newTag = {
-        label: inputValue,
-        value: inputValue,
-      };
-  
-      // 3️⃣ **Update All Tags** (So it shows up in the list)
-      setAllTags((prev) => [...prev, newTag]);
-  
-      // 4️⃣ **Update Selected Tags** (So it's also selected in the UI)
-      setSelectedTags((prev) => [...prev, newTag]);
-  
-      // 5️⃣ **Assign the new tag to the contact immediately**
-      await api.post("/assignedContactTag/assign-tag", {
-        tagNames: [inputValue],
-        contactId: leadInfo.contact_id,
-      });
-  
-      console.log("Tag created and assigned successfully:", inputValue);
+
+      const newTag = response.data;
+
+      setAllTags((prev) => [...prev, { label: inputValue, value: inputValue }]);
     } catch (error) {
       console.error("Error creating tag:", error);
       alert("Failed to create tag");
     }
   };
+  //   const handleCreateTag = async (inputValue) => {
+  //   setNewTags([...newTags, inputValue]);
+  //   setSelectedTags([
+  //     ...selectedTags,
+  //     { value: inputValue, label: inputValue },
+  //   ]);
+  // };
+
+  // const handleCreateTag = async (inputValue) => {
+  //   try {
+  //     // 1️⃣ **Create the tag in the backend**
+  //     const response = await api.post("/addTag", { tag: inputValue });
+  
+  //     // 2️⃣ **Extract the new tag object from the response**
+  //     const newTag = {
+  //       label: inputValue,
+  //       value: inputValue,
+  //     };
+  
+  //     // 3️⃣ **Update All Tags** (So it shows up in the list)
+  //     setAllTags((prev) => [...prev, newTag]);
+  
+  //     // 4️⃣ **Update Selected Tags** (So it's also selected in the UI)
+  //     setSelectedTags((prev) => [...prev, newTag]);
+  
+  //     // 5️⃣ **Assign the new tag to the contact immediately**
+  //     await api.post("/assignedContactTag/assign-tag", {
+  //       tagNames: [inputValue],
+  //       contactId: leadInfo.contact_id,
+  //     });
+
+  //   } catch (error) {
+  //     console.error("Error creating tag:", error);
+  //     alert("Failed to create tag");
+  //   }
+  // };
 
   const handleTaskSubmit = () => {
     // if (selectedTask) {
@@ -737,11 +753,7 @@ const ContactsDetails = () => {
   // Store leadInfo in a state variable
 
   // Initialize leadInfo when the component mounts or when location.state changes
-  useEffect(() => {
-    const leadData = location.state?.record || location.state?.lead || {};
-    setLeadInfo(leadData); // Set leadInfo from location.state
-  }, [location.state]);
-  console.log(leadInfo, "lead info");
+
 
   const tagsBg = [
     "badge-soft-success",
@@ -840,122 +852,132 @@ const ContactsDetails = () => {
   }, [addedQuotationEntries, setAddedQuotationEntries]);
 
   const ViewQuotationTableRef = useRef(null);
-  // const handleUserTags = (tags) => {
-  //   const newTagValues = tags.map((tag) => {
-  //     return tag.value;
-  //   });
-  //   setSelectedTags(newTagValues);
-
-  //   const previousTagValues = previousTags.map((tag) => {
-  //     return tag.value;
-  //   });
-  //   const newSelectedTag = tags.filter(
-  //     (tag) => !previousTagValues.includes(tag.value)
-  //   );
-
-  //   if (newSelectedTag.length > 0) {
-  //     const userId = localStorage.getItem("userId");
-
-  //     const addTag = async () => {
-  //       const response = await api.post("/assignedContactTag", {
-  //         tagName: newSelectedTag[0].value,
-  //         contactId: leadInfo.contact_id,
-  //       });
-  //     };
-  //     addTag();
-  //   }
-  //   setPreviousTags(tags);
-  // };
   const handleUserTags = (tags) => {
-    setSelectedTags(tags);
+    const newTagValues = tags.map((tag) => {
+      return tag.value;
+    });
+    setSelectedTags(newTagValues);
 
-    // Extract tag values from the current and previous state
-    const newTagValues = tags.map((tag) => tag.value);
-    const previousTagValues = previousTags.map((tag) => tag.value);
-
-    // 🔹 **Find Newly Added Tag**
-    const newSelectedTag = tags.find(
+    const previousTagValues = previousTags.map((tag) => {
+      return tag.value;
+    });
+    const newSelectedTag = tags.filter(
       (tag) => !previousTagValues.includes(tag.value)
     );
 
-    // 🔹 **Find Removed Tag**
-    const removedTag = previousTags.find(
-      (tag) => !newTagValues.includes(tag.value)
-    );
-
-    if (newSelectedTag) {
-      console.log("Adding Tag:", newSelectedTag.value);
+    if (newSelectedTag.length > 0) {
+      const userId = localStorage.getItem("userId");
 
       const addTag = async () => {
-        try {
-          // 🔹 **Check if it's a custom-created tag**
-          if (newSelectedTag.__isNew__) {
-            console.log("Creating new tag:", newSelectedTag.value);
-            // 1️⃣ **Create the tag first**
-            const createResponse = await api.post("/addTag", {
-              tagName: newSelectedTag.value,
-            });
-
-            console.log(
-              createResponse.data,
-              "Custom Tag Created:",
-              newSelectedTag.value
-            );
-
-            // 2️⃣ **Assign the new tag to the contact**
-            await api.post("/assignedContactTag/assign-tag", {
-              tagNames: [newSelectedTag.value],
-              contactId: leadInfo.contact_id,
-            });
-            
-
-            console.log("Custom Tag Assigned:", newSelectedTag.value);
-          } else {
-            // If it's an existing tag, just assign it
-            const response = await api.post("/assignedContactTag/assign-tag", {
-              tagNames: [newSelectedTag.value],
-              contactId: leadInfo.contact_id,
-            });
-            console.log(response.data, "Tag Added:", newSelectedTag.value);
-          }
-        } catch (error) {
-          console.error(
-            "Failed to add/assign tag:",
-            newSelectedTag.value,
-            error
-          );
-        }
+        const response = await api.post("/assignedContactTag", {
+          tagName: newSelectedTag[0].value,
+          contactId: leadInfo.contact_id,
+        });
       };
       addTag();
     }
-
-    if (removedTag) {
-      console.log("Removing Tag:", removedTag.value);
-
-      const removeTag = async () => {
-        try {
-          console.log(
-            "removed",
-            removedTag.value,
-            "tag from",
-            leadInfo.contact_id
-          );
-
-          const response = await api.post("/assignedContactTag/unassign-tag", {
-            tagNames: [removedTag.value],
-            contactId: leadInfo.contact_id,
-          });
-          console.log(response.data, "Tag Removed:", removedTag.value);
-        } catch (error) {
-          console.error("Failed to remove tag:", removedTag.value, error);
-        }
-      };
-      removeTag();
-    }
-
-    // Update the previous tags state
     setPreviousTags(tags);
   };
+//  const handleUserTags = async () => {
+//     setIsLoading(true);
+
+//     const formDataObj = new FormData();
+
+//     formDataObj.append("contact_id", selectedContact.contact_id);
+
+//     formDataObj.append(
+//       "tags",
+//       JSON.stringify(selectedTags.map((tag) => tag.value))
+//     );
+
+//     try {
+
+//       if(newTags.length>0){
+//         dispatch(addTag({ tag: newTags }));
+//       }
+//       dispatch(saveContact(formDataObj));
+
+//       setIsLoading(false);
+//     } catch (error) {
+//       console.error("Error:", error);
+//       setIsLoading(false);
+//     }
+//   };
+
+  // const handleUserTags = (tags) => {
+  //   setSelectedTags(tags);
+
+  //   // Extract tag values from the current and previous state
+  //   const newTagValues = tags.map((tag) => tag.value);
+  //   const previousTagValues = previousTags.map((tag) => tag.value);
+
+  //   // 🔹 **Find Newly Added Tag**
+  //   const newSelectedTag = tags.find(
+  //     (tag) => !previousTagValues.includes(tag.value)
+  //   );
+
+  //   // 🔹 **Find Removed Tag**
+  //   const removedTag = previousTags.find(
+  //     (tag) => !newTagValues.includes(tag.value)
+  //   );
+
+  //   if (newSelectedTag) {
+
+
+  //     const addTag = async () => {
+  //       try {
+  //         // 🔹 **Check if it's a custom-created tag**
+  //         if (newSelectedTag.__isNew__) {
+
+  //           // 1️⃣ **Create the tag first**
+  //           const createResponse = await api.post("/addTag", {
+  //             tagName: newSelectedTag.value,
+  //           });
+
+
+  //           // 2️⃣ **Assign the new tag to the contact**
+  //           await api.post("/assignedContactTag/assign-tag", {
+  //             tagNames: [newSelectedTag.value],
+  //             contactId: leadInfo.contact_id,
+  //           });
+            
+
+  //         } else {
+  //           // If it's an existing tag, just assign it
+  //           const response = await api.post("/assignedContactTag/assign-tag", {
+  //             tagNames: [newSelectedTag.value],
+  //             contactId: leadInfo.contact_id,
+  //           });
+  //         }
+  //       } catch (error) {
+  //         console.error(
+  //           "Failed to add/assign tag:",
+  //           newSelectedTag.value,
+  //           error
+  //         );
+  //       }
+  //     };
+  //     addTag();
+  //   }
+
+  //   if (removedTag) {
+
+  //     const removeTag = async () => {
+  //       try {
+  //         const response = await api.post("/assignedContactTag/unassign-tag", {
+  //           tagNames: [removedTag.value],
+  //           contactId: leadInfo.contact_id,
+  //         });
+  //       } catch (error) {
+  //         console.error("Failed to remove tag:", removedTag.value, error);
+  //       }
+  //     };
+  //     removeTag();
+  //   }
+
+  //   // Update the previous tags state
+  //   setPreviousTags(tags);
+  // };
 
   useEffect(() => {
     const drake = dragula([ViewQuotationTableRef.current]);
@@ -1367,7 +1389,7 @@ const ContactsDetails = () => {
                 {/* /Leads User */}
               </div>
               {/* Leads Sidebar */}
-              <ContactOffcanvas selectedContact={leadInfo} />
+              <ContactOffcanvas selectedContact={selectedContact} />
               <div className="col-xl-3 theiaStickySidebar">
                 <div className="card">
                   <div className="card-body p-3">
@@ -1422,7 +1444,7 @@ const ContactsDetails = () => {
                                     className="action-icon"
                                     title="WhatsApp"
                                   >
-                                    <i className="ti ti-message-circle-share" />
+                                    <i className="fa-brands fa-whatsapp"></i>
                                   </a>
                                 </div>
                               </div>
