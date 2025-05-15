@@ -37,6 +37,8 @@ export const saveContact = createAsyncThunk(
           },
         }
       );
+      console.log(response.data.data,"response from add edit contact");
+      
 dispatch(setSelectedContact(response.data.data));
       return response.data.data;
     } catch (error) {
@@ -89,7 +91,6 @@ const contactSlice = createSlice({
     });
 
     builder.addCase(saveContact.fulfilled, (state, action) => {
-      console.log(action.payload,"payload after updatation");
       
       const index = state.contacts.findIndex(
         (contact) => contact.contact_id === action.payload.contact_id

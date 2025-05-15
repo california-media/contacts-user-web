@@ -49,7 +49,6 @@ const dispatch = useDispatch()
   useEffect(() => {
     setAllTags(tags);
   }, [tags]);
-  console.log(tags,"tags from the redux");
   
   const handleAddTag = async (e) => {
     e.preventDefault();

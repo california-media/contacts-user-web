@@ -18,6 +18,7 @@ export const addTag = createAsyncThunk("tags/addTag", async (tag, { rejectWithVa
   try {
     
     const response = await api.post("/addTag", tag);
+    console.log(response.data.data,"response from add tag");
     
     return response.data.data;
   } catch (error) {
