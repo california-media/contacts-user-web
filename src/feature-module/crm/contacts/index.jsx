@@ -290,6 +290,8 @@ const ContactsDetails = () => {
       setEditingIndex(index);
     }
   };
+  console.log(selectedContact.tasks,"selected contact tasks");
+  
 
   // useEffect(() => {
   //   const fetchAllTags = async () => {
@@ -405,10 +407,12 @@ const ContactsDetails = () => {
   const [selectedTask, setSelectedTask] = useState(null);
 
   const [taskFormData, setTaskFormData] = useState({
+    task_id:"",
     taskDescription: "",
+    taskTitle: "",
     taskType: null,
-    dueDate: new Date(),
-    dueTime: dayjs("00:00:00", "HH:mm:ss"),
+    dueDate: dayjs(),
+    dueTime: dayjs("00:00", "HH:mm"),
   });
   const [meetingFormData, setMeetingFormData] = useState({
     meetingDescription: "",
@@ -500,7 +504,8 @@ const ContactsDetails = () => {
   const handleTaskInputChange = (name, value) => {
     setTaskFormData({
       ...taskFormData,
-      [name]: name === "taskType" ? value.label : value,
+      // [name]: name === "taskType" ? value.label : value,
+      [name] :value
     });
   };
   const handleMeetingInputChange = (name, value) => {
@@ -513,23 +518,28 @@ const ContactsDetails = () => {
   useEffect(() => {
     if (selectedTask) {
       setTaskFormData({
+        task_id:selectedTask.task_id,
         taskDescription: selectedTask.description,
-        taskType:
-          taskType.find((option) => option.value === selectedTask.taskType)
-            .value || null,
+        taskTitle: selectedTask.title,
+        // taskType:
+        //   taskType.find((option) => option.value === selectedTask.taskType)
+        //     .value || null,
         dueDate: dayjs(selectedTask.dueDate),
-        dueTime: dayjs(selectedTask.dueTime, "HH:mm:ss"),
+        dueTime: dayjs(selectedTask.dueTime, "HH:mm"),
       });
     } else {
       // Reset form for new task
       setTaskFormData({
+        task_id: "",
         taskDescription: "",
+        taskTitle: "",
         taskType: null,
         dueDate: dayjs(),
         dueTime: dayjs("00:00:00", "HH:mm:ss"),
       });
     }
   }, [selectedTask]);
+
   useEffect(() => {
     if (selectedMeeting) {
       setMeetingFormData({
@@ -605,18 +615,16 @@ const ContactsDetails = () => {
       // setIsLoading(false);
     }
   };
+console.log(taskFormData,"task form data");
 
   const handleTaskSubmit = () => {
-    // if (selectedTask) {
-    //   // Update existing task
-    //   saveTask({
-    //     ...taskFormData,
-    //     id: selectedTask.id, // Preserve the task ID for updating
-    //   });
-    // } else {
-    //   // Create new task
-    //   saveTask(formData);
-    // }
+ console.log(taskFormData,"taskkkkkform datatata");
+ 
+const formDataObj = new FormData();
+formDataObj.append("contact_id", selectedContact.contact_id);
+formDataObj.append({tasks:taskFormData})
+
+dispatch(saveContact(formDataObj))
   };
   const handleHaveShippingAddress = (event) => {
     setHaveShippingAddress(event.target.checked);
@@ -687,9 +695,11 @@ const ContactsDetails = () => {
   const sortIncompleteTask = (incompleteTask) => {
     const sortedIncompleteTask = [...incompleteTask];
     const parseDate = (dateString) => {
-      const [day, month, year, time, meridiem] = dateString.split(/[\s,]+/);
-      const formattedDate = `${day} ${month} ${year} ${time} ${meridiem}`;
-      return new Date(formattedDate).getTime();
+      // const [day, month, year, time, meridiem] = dateString.split(/[\s,]+/);
+      // const formattedDate = `${day} ${month} ${year} ${time} ${meridiem}`;
+      // return new Date(formattedDate).getTime();
+      if (!dateString) return 0;
+  return dayjs(dateString).isValid() ? dayjs(dateString).valueOf() : 0;
     };
     if (sortOrderIncompleteTask === "Ascending") {
       sortedIncompleteTask.sort(
@@ -705,9 +715,11 @@ const ContactsDetails = () => {
   const sortCompletedTask = (completedTask) => {
     const sortedCompletedTask = [...completedTask];
     const parseDate = (dateString) => {
-      const [day, month, year, time, meridiem] = dateString.split(/[\s,]+/);
-      const formattedDate = `${day} ${month} ${year} ${time} ${meridiem}`;
-      return new Date(formattedDate).getTime();
+      // const [day, month, year, time, meridiem] = dateString.split(/[\s,]+/);
+      // const formattedDate = `${day} ${month} ${year} ${time} ${meridiem}`;
+      // return new Date(formattedDate).getTime();
+      if (!dateString) return 0;
+  return dayjs(dateString).isValid() ? dayjs(dateString).valueOf() : 0;
     };
     if (sortOrderCompletedTask === "Ascending") {
       sortedCompletedTask.sort(
@@ -728,8 +740,8 @@ const ContactsDetails = () => {
   };
 
   const sortedNotes = sortNotes(allNotes);
-  const sortedIncompleteTask = sortIncompleteTask(allTasks);
-  const sortedCompletedTask = sortCompletedTask(allTasks);
+  const sortedIncompleteTask = sortIncompleteTask(selectedContact.tasks);
+  const sortedCompletedTask = sortCompletedTask(selectedContact.tasks);
 
   // const leadInfo = location.state?.record || location.state?.lead || {};
   // Store leadInfo in a state variable
@@ -2118,10 +2130,11 @@ const ContactsDetails = () => {
                           </Link>
                         </div>
                       </div>
+                    
                       <div className="card-body">
                         <div className="notes-activity">
                           {sortedIncompleteTask
-                            .filter((task) => task.isCompleted === "false")
+                            .filter((task) => task.complete === false)
                             .map((task, taskIndex) => {
                               return (
                                 <div className="card mb-3" key={taskIndex}>
@@ -2156,6 +2169,8 @@ const ContactsDetails = () => {
                                             data-bs-target="#add_tasks"
                                             onClick={() => {
                                               handleTaskEditClick(task);
+                                              console.log(task,"selected task");
+                                              
                                             }}
                                           >
                                             <i className="ti ti-edit text-blue" />
@@ -2175,19 +2190,20 @@ const ContactsDetails = () => {
                                       )}
                                     </div>
                                     <div className="col-md-11 mb-3">
-                                      {task.taskType == "Follow Up" ? (
+                                      {/* {task.taskType == "Follow Up" ? ( */}
+                                      {1<2 ? (
                                         <p
                                           className={`badge badge-soft-warning fw-medium me-2`}
                                         >
-                                          <FaCalendarAlt className="me-2" />
-                                          {task.taskType}
+                                          {/* <FaCalendarAlt className="me-2" /> */}
+                                          {task.title}
                                         </p>
                                       ) : (
                                         <p
                                           className={`badge badge-soft-info fw-medium me-2`}
                                         >
-                                          <FaRegBell className="me-2" />
-                                          {task.taskType}
+                                          {/* <FaRegBell className="me-2" /> */}
+                                          {task.title}
                                         </p>
                                       )}
                                       <p>{task.description}</p>
@@ -2196,15 +2212,15 @@ const ContactsDetails = () => {
                                       <p className="mb-0">
                                         ✎{" "}
                                         <span className="fw-medium text-black ms-2">
-                                          Modified by Jessica on{" "}
+                                         Last Modified on{" "}
                                         </span>{" "}
-                                        <span>{task.dateCreated} </span>
+                                        {/* <span>{task.dateCreated} </span> */}
                                       </p>
                                       <p>
                                         <span className="fw-medium text-black">
                                           Due date :
                                         </span>{" "}
-                                        <span>{task.dateCreated} </span>
+                                        {/* <span>{task.dateCreated} </span> */}
                                       </p>
                                     </div>
                                   </div>
@@ -2233,7 +2249,7 @@ const ContactsDetails = () => {
                       <div className="card-body">
                         <div className="notes-activity">
                           {sortedCompletedTask
-                            .filter((task) => task.isCompleted === "true")
+                            .filter((task) => task.complete === true)
                             .map((task, taskCompletedIndex) => {
                               return (
                                 <div
@@ -3684,8 +3700,8 @@ const ContactsDetails = () => {
                   </label>
                   <input
                     className="form-control"
-                    name="meetingTitle"
-                    value={meetingFormData.meetingTitle}
+                    name="taskTitle"
+                    value={taskFormData.taskTitle}
                     onChange={(e) => {
                       handleTaskInputChange(e.target.name, e.target.value);
                     }}
@@ -3731,11 +3747,15 @@ const ContactsDetails = () => {
                     </span>
                     <DatePicker
                       className="form-control datetimepicker deals-details"
-                      selected={taskFormData.dueDate}
+                      value={taskFormData.dueDate}
+                      name="taskDueDate"
                       onChange={(date) =>
-                        handleTaskInputChange("dueDate", date)
+                        
+                        {console.log(date,"changed date...");
+                        
+                          handleTaskInputChange("dueDate", date)}
                       }
-                      dateFormat="dd-mm-yyyy"
+                      format="DD-MM-YYYY"
                     />
                   </div>
                 </div>
@@ -3747,9 +3767,11 @@ const ContactsDetails = () => {
                   <TimePicker
                     placeholder="Select Time"
                     className="form-control datetimepicker-time"
+                    name="taskDueTime"
                     onChange={(time) => handleTaskInputChange("dueTime", time)}
                     value={taskFormData.dueTime}
                     defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
+                    format="hh:mm A"
                   />
                 </div>
 
@@ -3766,7 +3788,7 @@ const ContactsDetails = () => {
                     data-bs-dismiss="modal"
                     type="button"
                     onClick={() => {
-                      handleTaskSubmit(taskFormData);
+                      handleTaskSubmit();
                     }}
                   >
                     Save changes

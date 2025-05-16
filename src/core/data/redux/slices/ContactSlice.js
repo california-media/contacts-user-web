@@ -32,6 +32,8 @@ export const fetchContacts = createAsyncThunk(
 export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
+    console.log(Object.fromEntries(formData));
+    
     try {
       const response = await api.post("addEditContact", formData, {
         headers: {

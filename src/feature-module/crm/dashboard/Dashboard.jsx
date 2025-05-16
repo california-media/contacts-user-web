@@ -98,12 +98,6 @@ const qrCodeValue = JSON.stringify({
     email:'erter@fgfd.ff',
     phone:'33333333333',
   });
-// const qrCodeValue = JSON.stringify({
-//     firstname: user?.firstname || '',
-//     lastname: user?.lastname || '',
-//     email: user?.emailaddress || '',
-//     phone: user?.mobilenumber || '',
-//   });
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
