@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
@@ -22,6 +22,8 @@ const EditCell = ({
   record,
 }) => {
   const [newValue, setNewValue] = useState(fieldValue);
+    const popupRef = useRef(null);
+
   const route = all_routes;
   const all_companies = [
     ...new Set(
@@ -36,6 +38,7 @@ const EditCell = ({
   };
 
   const handleCancel = () => {
+    console.log("Closing the field...");
     onClose();
     setNewValue(fieldValue);
   };
@@ -44,6 +47,30 @@ const EditCell = ({
     onClose();
   };
 
+ useEffect(() => {
+    if (isActive) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isActive]);
+  const handleClickOutside = (event) => {
+    // Check if click is outside of popup
+    console.log("clicked outside");
+    console.log(popupRef.current,"popupRef.current");
+    console.log(event.target,"event.target");
+    
+    if (popupRef.current && !popupRef.current.contains(event.target)) {
+      handleCancel(); // <-- Call handleCancel if outside
+    }
+  };
+  useEffect(() => {
+  console.log("Popup Ref: ", popupRef.current); // <-- Should not be null
+}, [isActive]);
   return (
     <div
       className="editable-cell"
@@ -107,6 +134,7 @@ const EditCell = ({
           {columnKey == "owner" ? (
             <div
               className="popup"
+              ref={popupRef}
               style={{
                 position: "absolute",
                 top: 0,

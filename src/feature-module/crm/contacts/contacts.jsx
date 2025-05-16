@@ -472,15 +472,15 @@ const Contacts = () => {
   const handleSaveField = (key, field, value) => {
     // Update the selectedContact with the new value
     const updatedContact = { ...selectedContact, [field]: value };
+console.log(updatedContact,"updated contact");
 
     // Create a FormData object
     const formDataObj = new FormData();
 
     // Add the updated contact fields to the FormData object
     formDataObj.append("contact_id", updatedContact.contact_id);
-    formDataObj.append("firstname", updatedContact.firstname);
-    formDataObj.append("lastname", updatedContact.lastname);
     formDataObj.append("emailaddresses", updatedContact.emailaddresses);
+    formDataObj.append("phonenumbers", updatedContact.phonenumbers);
 
     // Dispatch saveContact with the updated form data
     dispatch(saveContact(formDataObj));
@@ -595,6 +595,7 @@ const Contacts = () => {
 
     // setSelectedContact(record);
   };
+  
   const columns = [
     {
       title: "",
@@ -625,6 +626,8 @@ const Contacts = () => {
       }),
 
       render: (text, record) => {
+        console.log(record,"recordddd");
+        
         return (
           <div className="cell-content justify-content-between">
             {/* Lead name */}
@@ -646,8 +649,7 @@ const Contacts = () => {
                   //  href={`tel:${text}`}
                   onClick={() =>
                     handlePhoneClick(
-                      record.phonenumbers[0].countryCode +
-                        record.phonenumbers[0].number
+                      record.phonenumbers[0]
                     )
                   }
                   className="action-icon me-3"
@@ -660,8 +662,7 @@ const Contacts = () => {
                   href={
                     record.phonenumbers?.length > 0
                       ? `https://wa.me/${
-                          record.phonenumbers[0]?.countryCode ?? ""
-                        }${record.phonenumbers[0]?.number ?? ""}`
+                          record.phonenumbers[0]}`
                       : "#"
                   }
                   className="action-icon"
@@ -767,9 +768,9 @@ const Contacts = () => {
     // },
     {
       title: "Phone",
-      dataIndex: "phone",
+      dataIndex: "phonenumbers",
       width: 200,
-      key: "phone",
+      key: "phonenumbers",
       onCell: (record) => ({
         onMouseEnter: () => {
           const editIcon = document.querySelector(`.edit-icon-${record.key}`);
@@ -788,15 +789,15 @@ const Contacts = () => {
               fieldName="Phone"
               fieldValue={text}
               recordKey={record.contact_id}
-              columnKey="phone"
+              columnKey="phonenumbers"
               routeLink="#"
               textColor="#2c5cc5"
               isActive={
-                activeCell?.rowKey === record.key &&
-                activeCell?.columnKey === "phone"
+                activeCell?.rowKey === record.contact_id &&
+                activeCell?.columnKey === "phonenumbers"
               }
-              onSave={(key, value) => handleSaveField(key, "phone", value)}
-              onEditClick={() => handleEditClick(record.contact_id, "phone")}
+              onSave={(key, value) => handleSaveField(key, "phonenumbers", value)}
+              onEditClick={() => handleEditClick(record.contact_id, "phonenumbers",record)}
               onClose={handleClose}
             />
           </>

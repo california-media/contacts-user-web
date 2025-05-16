@@ -11,7 +11,13 @@ export const fetchContacts = createAsyncThunk(
     const search = filters.search;
     const tag = filters.tag;
     try {
-      const response = await api.post("/getContact", { id, page, limit,search, tag });
+      const response = await api.post("/getContact", {
+        id,
+        page,
+        limit,
+        search,
+        tag,
+      });
 
       return {
         data: response.data.data,
@@ -25,21 +31,16 @@ export const fetchContacts = createAsyncThunk(
 
 export const saveContact = createAsyncThunk(
   "contacts/saveContact",
-  async (formData, { rejectWithValue,dispatch }) => {
-    
+  async (formData, { rejectWithValue, dispatch }) => {
     try {
-      const response = await api.post(
-        "addEditContact",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log(response.data.data,"response from add edit contact");
-      
-dispatch(setSelectedContact(response.data.data));
+      const response = await api.post("addEditContact", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data.data, "response from add edit contact");
+
+      dispatch(setSelectedContact(response.data.data));
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -50,8 +51,10 @@ export const deleteContact = createAsyncThunk(
   "contacts/deleteContact",
   async (contactId, { rejectWithValue }) => {
     try {
-   const response = await api.delete("/deleteContact",{data:{contact_id:contactId}});
-      
+      const response = await api.delete("/deleteContact", {
+        data: { contact_id: contactId },
+      });
+
       return contactId;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -91,7 +94,6 @@ const contactSlice = createSlice({
     });
 
     builder.addCase(saveContact.fulfilled, (state, action) => {
-      
       const index = state.contacts.findIndex(
         (contact) => contact.contact_id === action.payload.contact_id
       );
@@ -101,11 +103,12 @@ const contactSlice = createSlice({
       } else {
         state.contacts.push(action.payload);
       }
-      
     });
 
     builder.addCase(deleteContact.fulfilled, (state, action) => {
-      state.contacts = state.contacts.filter((c) => c.contact_id !== action.payload);
+      state.contacts = state.contacts.filter(
+        (c) => c.contact_id !== action.payload
+      );
     });
   },
 });

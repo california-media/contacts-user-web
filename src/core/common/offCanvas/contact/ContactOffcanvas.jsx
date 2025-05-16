@@ -27,16 +27,17 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [previousTags, setPreviousTags] = useState([]);
   const [removedTags, setRemovedTags] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
+  // const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [newTags, setNewTags] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [formData, setFormData] = useState({
     contact_id: "",
+    contactImageURL: "",
     firstName: "",
     lastName: "",
     email: [],
-    phone: [],
+    phone: "",
     tags: [],
   });
   const { tags, loading, error } = useSelector((state) => state.tags);
@@ -52,6 +53,8 @@ const LeadOffcanvas = ({ selectedContact }) => {
       phone: value,
     }));
   };
+  console.log(selectedContact, "selected contact");
+  console.log(formData.phone, "form dta phone numbers");
 
   const handleShow = () => setShow(true);
   const addNewContent = () => {
@@ -64,6 +67,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
     const formDataObj = new FormData();
 
     formDataObj.append("contact_id", formData.contact_id);
+    formDataObj.append("contactImage", formData.contactImageURL);
     formDataObj.append("firstname", formData.firstName);
     formDataObj.append("lastname", formData.lastName);
     formDataObj.append("emailaddresses", formData.email);
@@ -74,9 +78,8 @@ const LeadOffcanvas = ({ selectedContact }) => {
     formDataObj.append("phonenumbers", formData.phone);
 
     try {
-
-      if(newTags.length>0){
-        dispatch(addTag({ tag: newTags }));
+      if (newTags.length > 0) {
+        await dispatch(addTag({ tag: newTags })).unwrap();
       }
       dispatch(saveContact(formDataObj));
 
@@ -135,6 +138,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
     if (selectedContact) {
       setFormData({
         contact_id: selectedContact.contact_id || 0,
+        contactImageURL: selectedContact.contactImageURL || null,
         firstName: selectedContact.firstname || "",
         lastName: selectedContact.lastname || "",
         email: selectedContact.emailaddresses || "",
@@ -143,7 +147,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
       });
     }
   }, [selectedContact]);
-
 
   useEffect(() => {
     const offcanvasElement = document.getElementById("contact_offcanvas");
@@ -180,10 +183,18 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const handleImageChange = (event) => {
     const file = event.target.files[0];
 
+    // if (file) {
+    //   // setSelectedImage(file);
+    //   formData.contactImageURL(file)
+    // }
     if (file) {
-      setSelectedImage(file);
+      setFormData((prevData) => ({
+        ...prevData,
+        contactImageURL: file,
+      }));
     }
   };
+  console.log(formData.contactImageURL, "image url");
 
   return (
     <div
@@ -220,8 +231,10 @@ const LeadOffcanvas = ({ selectedContact }) => {
                 /> */}
                 <img
                   src={
-                    selectedImage
-                      ? URL.createObjectURL(selectedImage)
+                    formData.contactImageURL instanceof File
+                      ? URL.createObjectURL(formData.contactImageURL)
+                      : formData.contactImageURL
+                      ? formData.contactImageURL
                       : "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
                   }
                   className="profilePic cursor-pointer"
@@ -276,7 +289,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
               </div>
             </div>
 
-
             {newContents.map((index) => (
               <div className="col-md-12" key={index}>
                 <div className="add-product-new">
@@ -288,7 +300,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
                         </label>
                         <PhoneInput
                           country={"us"} // Default country
-                          value={formData.phonenumbers}
+                          value={formData.phone}
                           onChange={handleOnPhoneChange}
                           enableSearch
                           inputProps={{
