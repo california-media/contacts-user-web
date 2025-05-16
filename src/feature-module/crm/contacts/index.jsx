@@ -3788,7 +3788,9 @@ dispatch(saveContact(formDataObj))
                     data-bs-dismiss="modal"
                     type="button"
                     onClick={() => {
-                      handleTaskSubmit();
+                      // handleTaskSubmit();
+                      console.log("clicked");
+                      
                     }}
                   >
                     Save changes
