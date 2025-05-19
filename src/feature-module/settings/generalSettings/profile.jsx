@@ -7,10 +7,10 @@ import { useDispatch, useSelector } from "react-redux";
 import api from "../../../core/axios/axiosInstance";
 import "react-phone-input-2/lib/bootstrap.css";
 import PhoneInput from "react-phone-input-2";
-import { setGetUser } from "../../../core/data/redux/slices/getUserSlice";
+import { editProfile } from "../../../core/data/redux/slices/ProfileSlice";
 const route = all_routes;
 const Profile = () => {
-  const userProfile = useSelector((state) => state.getUser);
+  const userProfile = useSelector((state) => state.profile);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [profileFirstName, setProfileFirstName] = useState(
@@ -36,28 +36,29 @@ const Profile = () => {
     formData.append("email", profileEmail)
     formData.append("number", profilePhoneNumber);
     formData.append("countryCode", profileCountryCode);
-    try {
-      const response = await api.put("/editProfile", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setMessage({ text: response.data.message, type: "success" });
-      dispatch(setGetUser({
-        firstname:profileFirstName,
-        lastname:profileLastName,
-        email:profileEmail,
-        phonenumber: {
-          number:profilePhoneNumber,
-          countryCode:profileCountryCode
-          }
+    // try {
+    //   const response = await api.put("/editProfile", formData, {
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   });
+    //   setMessage({ text: response.data.message, type: "success" });
+    //   dispatch(setGetUser({
+    //     firstname:profileFirstName,
+    //     lastname:profileLastName,
+    //     email:profileEmail,
+    //     phonenumber: {
+    //       number:profilePhoneNumber,
+    //       countryCode:profileCountryCode
+    //       }
           
-      }));
-      setIsLoading(false);
-    } catch (error) {
-      setMessage({ text: error.response.data.message, type: "error" });
-      setIsLoading(false);
-    }
+    //   }));
+    //   setIsLoading(false);
+    // } catch (error) {
+    //   setMessage({ text: error.response.data.message, type: "error" });
+    //   setIsLoading(false);
+    // }
+    dispatch(editProfile(formData))
   };
   const handlePhoneInputChange = (value, data) => {
     const countryCode = data.dialCode;

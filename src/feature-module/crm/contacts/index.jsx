@@ -248,7 +248,8 @@ const ContactsDetails = () => {
   const [leadInfo, setLeadInfo] = useState({});
 
   const selectedContact = useSelector((state) => state.selectedContact);
-
+ const { tags } = useSelector((state) => state.tags);
+ 
   const location = useLocation();
   const { record } = location.state || {};
 
@@ -290,8 +291,6 @@ const ContactsDetails = () => {
       setEditingIndex(index);
     }
   };
-  console.log(selectedContact.tasks,"selected contact tasks");
-  
 
   // useEffect(() => {
   //   const fetchAllTags = async () => {
@@ -324,10 +323,15 @@ const ContactsDetails = () => {
     });
     setStars(starsState);
   };
+  useEffect(()=>{
+const tagsArrayOfObject = tags.map((tag)=>{
+  return {value:tag.tag,label:tag.tag}
+})
+setAllTags(tagsArrayOfObject)
+  },[])
   const [isEditor3, setIsEditor3] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [isEditor2, setIsEditor2] = useState(false);
-  const [tags, setTags] = useState(["Collab", "Rated"]);
   const [owner, setOwner] = useState(["Collab", "Rated"]);
   const [editorContent, setEditorContent] = useState("");
   const [isActiveEditor, setIsActiveEditor] = useState(true);
@@ -615,10 +619,8 @@ const ContactsDetails = () => {
       // setIsLoading(false);
     }
   };
-console.log(taskFormData,"task form data");
 
   const handleTaskSubmit = () => {
- console.log(taskFormData,"taskkkkkform datatata");
  
 const formDataObj = new FormData();
 formDataObj.append("contact_id", selectedContact.contact_id);
@@ -1034,6 +1036,7 @@ dispatch(saveContact(formDataObj))
   const filteredEmployees = companyEmployee.filter((employee) =>
     employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
   );
+console.log(tags,"allllltagss");
 
   const columns = [
     {
@@ -2169,7 +2172,6 @@ dispatch(saveContact(formDataObj))
                                             data-bs-target="#add_tasks"
                                             onClick={() => {
                                               handleTaskEditClick(task);
-                                              console.log(task,"selected task");
                                               
                                             }}
                                           >
@@ -3751,8 +3753,7 @@ dispatch(saveContact(formDataObj))
                       name="taskDueDate"
                       onChange={(date) =>
                         
-                        {console.log(date,"changed date...");
-                        
+                        {
                           handleTaskInputChange("dueDate", date)}
                       }
                       format="DD-MM-YYYY"

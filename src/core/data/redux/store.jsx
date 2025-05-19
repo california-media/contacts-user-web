@@ -1,7 +1,7 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import appCommonReducer from "./slices/appCommonSlice"; 
 import commonSlice from "./commonSlice";
-import getUserReducer from "./slices/getUserSlice";
+import profileReducer from "./slices/ProfileSlice";
 import tagReducer from "./slices/TagSlice"
 import contactReducer from "./slices/ContactSlice"
 import selectedContactReducer from "./slices/SelectedContactSlice"
@@ -11,12 +11,12 @@ import storageSession from 'redux-persist/lib/storage/session'
 const persistConfig = {
   key: "root",
   storage: storageSession,
-  whitelist: ["getUser"]
+  whitelist: ["profile"]
 };
 const combinedReducer = combineReducers({
   common: commonSlice,       
   appCommon: appCommonReducer,
-  getUser: getUserReducer,
+  profile: profileReducer,
   tags: tagReducer,
   contacts: contactReducer,
   selectedContact: selectedContactReducer

@@ -14,7 +14,7 @@ import { Camera } from "react-camera-pro";
 import Tesseract from "tesseract.js";
 import api from "../../../core/axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { setGetUser } from "../../../core/data/redux/slices/getUserSlice";
+import { fetchProfile } from "../../../core/data/redux/slices/ProfileSlice";
 import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
 import { QRCode } from "antd";
 
@@ -25,8 +25,9 @@ const Dashboard = () => {
   const [result, setResult] = useState("");
 const dispatch = useDispatch()
   const qrCodeRef = useRef();
-const userProfile = useSelector((state)=>state.getUser)
+const userProfile = useSelector((state)=>state.profile)
 const { tags, loading, error } = useSelector((state) => state.tags);
+console.log(userProfile,"user profile in dashboard");
 
 
   const [sline] = useState({
@@ -79,16 +80,18 @@ const { tags, loading, error } = useSelector((state) => state.tags);
     setFile(e.target.files[0]);
   };
   useEffect(() => {
-    const fetchProfile = async () => {
-     try {
-      const response = await api.get("/getUser");
-      localStorage.setItem("userId",response.data.data.id)
-      dispatch(setGetUser(response.data.data))
-     } catch (error) {
-      console.log(error.response.data,"errorrr");
-     }
-    };
-    fetchProfile();
+    // const fetchProfile = async () => {
+    //  try {
+    //   const response = await api.get("/getUser");
+    //   localStorage.setItem("userId",response.data.data.id)
+    //   dispatch(setGetUser(response.data.data))
+    //  } catch (error) {
+    //   console.log(error.response.data,"errorrr");
+    //  }
+    // };
+    // fetchProfile();
+    
+    dispatch(fetchProfile())
 
   }, []);
 
@@ -166,7 +169,7 @@ const qrCodeValue = JSON.stringify({
                       <p className="text-center fs-4 text-capitalize">{userProfile.firstname}  {userProfile.lastname} </p>
                       <div className="profileCardTextContainer">
                         <FaPhoneAlt />
-                        <p className="profileCardText">{userProfile.phonenumber.number?userProfile.phonenumber.number:"No phone Number"}</p>
+                        <p className="profileCardText">{userProfile.phonenumbers.length>0?userProfile.phonenumbers[0]:"No phone Number"}</p>
                       </div>
                       <div className="profileCardTextContainer">
                         <IoMdMail />
