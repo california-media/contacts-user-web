@@ -1,7 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-const DeleteModal = ({text, onCancel,onDelete }) => {    
+const DeleteModal = ({text, onCancel,onDelete }) => {
+  console.log(text, "text from delete modal")
+  console.log(onCancel, "onCancel from delete modal");
+  console.log(onDelete, "onDelete from delete modal");
+  
   return (
     <div className="modal fade" id={`delete_${text}`} role="dialog">
         <div className="modal-dialog modal-dialog-centered">

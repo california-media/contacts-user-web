@@ -472,7 +472,7 @@ const Contacts = () => {
   const handleSaveField = (key, field, value) => {
     // Update the selectedContact with the new value
     const updatedContact = { ...selectedContact, [field]: value };
-console.log(updatedContact,"updated contact");
+    console.log(updatedContact, "updated contact");
 
     // Create a FormData object
     const formDataObj = new FormData();
@@ -595,7 +595,7 @@ console.log(updatedContact,"updated contact");
 
     // setSelectedContact(record);
   };
-  
+
   const columns = [
     {
       title: "",
@@ -626,8 +626,8 @@ console.log(updatedContact,"updated contact");
       }),
 
       render: (text, record) => {
-        console.log(record,"recordddd");
-        
+        console.log(record, "recordddd");
+
         return (
           <div className="cell-content justify-content-between">
             {/* Lead name */}
@@ -637,7 +637,7 @@ console.log(updatedContact,"updated contact");
               state={{ record }}
               className="lead-name title-name fw-bold "
               style={{ color: "#2c5cc5" }}
-              onClick={()=>dispatch(setSelectedContact(record))}
+              onClick={() => dispatch(setSelectedContact(record))}
             >
               {text}
             </Link>
@@ -647,11 +647,7 @@ console.log(updatedContact,"updated contact");
               <div className="action-icons d-flex justify-content-center">
                 <a
                   //  href={`tel:${text}`}
-                  onClick={() =>
-                    handlePhoneClick(
-                      record.phonenumbers[0]
-                    )
-                  }
+                  onClick={() => handlePhoneClick(record.phonenumbers[0])}
                   className="action-icon me-3"
                   title="Call"
                 >
@@ -661,8 +657,7 @@ console.log(updatedContact,"updated contact");
                 <a
                   href={
                     record.phonenumbers?.length > 0
-                      ? `https://wa.me/${
-                          record.phonenumbers[0]}`
+                      ? `https://wa.me/${record.phonenumbers[0]}`
                       : "#"
                   }
                   className="action-icon"
@@ -782,7 +777,6 @@ console.log(updatedContact,"updated contact");
         },
       }),
       render: (text, record) => {
-
         return (
           <>
             <EditCell
@@ -796,8 +790,12 @@ console.log(updatedContact,"updated contact");
                 activeCell?.rowKey === record.contact_id &&
                 activeCell?.columnKey === "phonenumbers"
               }
-              onSave={(key, value) => handleSaveField(key, "phonenumbers", value)}
-              onEditClick={() => handleEditClick(record.contact_id, "phonenumbers",record)}
+              onSave={(key, value) =>
+                handleSaveField(key, "phonenumbers", value)
+              }
+              onEditClick={() =>
+                handleEditClick(record.contact_id, "phonenumbers", record)
+              }
               onClose={handleClose}
             />
           </>
@@ -856,7 +854,6 @@ console.log(updatedContact,"updated contact");
             {text.length > 0 && (
               <div className="d-inline-block">
                 {text.map((tag, index) => {
-
                   return (
                     <div
                       className="py-1 px-2 d-inline-block me-2"

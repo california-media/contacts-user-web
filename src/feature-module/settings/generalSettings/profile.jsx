@@ -244,15 +244,7 @@ const Profile = () => {
                           className="btn btn-primary"
                           style={{ width: 150 }}
                         >
-                          {isLoading ? (
-                            <span
-                              className="spinner-border spinner-border-sm me-2"
-                              role="status"
-                              aria-hidden="true"
-                            ></span>
-                          ) : (
-                            "Save Changes"
-                          )}
+                          Save Changes
                         </button>
                       </div>
                     </form>

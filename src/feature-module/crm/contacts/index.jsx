@@ -82,7 +82,10 @@ import { estimationListData } from "../../../core/data/json/estimationList";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import api from "../../../core/axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteTask, saveContact } from "../../../core/data/redux/slices/ContactSlice";
+import {
+  deleteTask,
+  saveContact,
+} from "../../../core/data/redux/slices/ContactSlice";
 import { addTag } from "../../../core/data/redux/slices/TagSlice";
 const route = all_routes;
 const allNotes = [
@@ -249,14 +252,14 @@ const ContactsDetails = () => {
 
   const selectedContact = useSelector((state) => state.selectedContact);
   const { tags } = useSelector((state) => state.tags);
-  console.log(tags, "tags from redux");
+console.log(selectedContact, "selected contact");
 
   const location = useLocation();
   const { record } = location.state || {};
 
   useEffect(() => {
     setLeadInfo(selectedContact);
-  }, [selectedContact, leadInfo]);
+  }, [selectedContact]);
 
   const [addcomment, setAddComment] = useState(false);
   const [activeEditorIndex, setActiveEditorIndex] = useState(null);
@@ -292,23 +295,7 @@ const ContactsDetails = () => {
       setEditingIndex(index);
     }
   };
-  console.log(selectedContact.tasks, "selected contact tasks");
 
-  // useEffect(() => {
-  //   const fetchAllTags = async () => {
-  //     try {
-  //       const response = await api.get("/getTag");
-  //       const allTagsFetched = response.data.data.map((tag) => ({
-  //         value: tag.tag,
-  //         label: tag.tag,
-  //       }));
-  //       setAllTags(allTagsFetched);
-  //     } catch (error) {
-  //       console.error("Error fetching tags:", error);
-  //     }
-  //   };
-  //   fetchAllTags();
-  // }, []);
   const togglecomment = () => {
     setAddComment((prevState) => !prevState);
   };
@@ -325,12 +312,12 @@ const ContactsDetails = () => {
     });
     setStars(starsState);
   };
-  useEffect(()=>{
-const tagsArrayOfObject = tags.map((tag)=>{
-  return {value:tag.tag,label:tag.tag}
-})
-setAllTags(tagsArrayOfObject)
-  },[])
+  useEffect(() => {
+    const tagsArrayOfObject = tags.map((tag) => {
+      return { value: tag.tag, label: tag.tag };
+    });
+    setAllTags(tagsArrayOfObject);
+  }, []);
   const [isEditor3, setIsEditor3] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [isEditor2, setIsEditor2] = useState(false);
@@ -451,17 +438,15 @@ setAllTags(tagsArrayOfObject)
   };
 
   const contentRef = useRef(null);
-const handleDeleteTask=()=>{
+  const handleDeleteTask = () => {
     setDeleteModalText("task");
     const deleteTaskData = {
+      contact_id: selectedContact.contact_id,
+      task_id: selectedTask.task_id,
+    };
 
-contactId: selectedContact.contact_id,
-task_id: selectedTask.task_id,
-    }
-    console.log(deleteTaskData, "delete task data in index");
-    
-      dispatch(deleteTask(deleteTaskData))                                   
-}
+    dispatch(deleteTask(deleteTaskData));
+  };
   const exportToPDF = () => {
     const input = contentRef.current;
 
@@ -613,36 +598,42 @@ task_id: selectedTask.task_id,
   };
 
   const handleCreateTag = async (inputValue) => {
-    setNewTags([...newTags, inputValue]);
+    const newTag = { value: inputValue, label: inputValue };
 
-    setSelectedTags([
-      ...selectedTags,
-      { value: inputValue, label: inputValue },
-    ]);
-    dispatch(addTag({ tag: [inputValue] }));
+    // Optimistically update selectedTags
+    const updatedTags = [...selectedTags, newTag];
 
-    const selectedTagsArray = selectedTags.map((tag) => tag.value);
-
-    const tagsForApi = [...selectedTagsArray, inputValue];
-    const formDataObj = new FormData();
-
-    formDataObj.append("tags", JSON.stringify(tagsForApi));
-    formDataObj.append("contact_id", selectedContact.contact_id);
-
+    setNewTags((prev) => [...prev, inputValue]);
+    setSelectedTags(updatedTags);
+    setAllTags((prev) => [...prev, newTag]);
     try {
-      dispatch(saveContact(formDataObj));
+      // First, create the tag
+      await dispatch(addTag({ tag: [inputValue] })).unwrap();
 
-      // setIsLoading(false);
+      // Then, assign the tag to the contact with updated tag list
+      const formDataObj = new FormData();
+      formDataObj.append(
+        "tags",
+        JSON.stringify(updatedTags.map((tag) => tag.value))
+      );
+      formDataObj.append("contact_id", selectedContact.contact_id);
+
+      dispatch(saveContact(formDataObj));
     } catch (error) {
       console.error("Error:", error);
-      // setIsLoading(false);
     }
   };
-  console.log(taskFormData, "task form data");
+  const handleToggleTaskCompletion = (task) => {
+    const formDataObj = new FormData();
+    formDataObj.append("contact_id", selectedContact.contact_id);
+    formDataObj.append("task_id", task.task_id);
+    // formDataObj.append("isCompleted", task.isCompleted ? false : true);
+    formDataObj.append("taskIsCompleted", (!task.taskIsCompleted).toString());
+    console.log(Object.fromEntries(formDataObj), "form data to be completed");
 
+    dispatch(saveContact(formDataObj));
+  };
   const handleTaskSubmit = () => {
-    console.log(taskFormData, "taskkkkkform datatata");
-
     const formDataObj = new FormData();
 
     formDataObj.append("contact_id", selectedContact.contact_id);
@@ -657,7 +648,6 @@ task_id: selectedTask.task_id,
     );
     formDataObj.append("taskDueTime", taskFormData.dueTime.format("HH:mm"));
 
-    console.log(Object.fromEntries(formDataObj), "form dataa from index");
     dispatch(saveContact(formDataObj));
   };
   const handleHaveShippingAddress = (event) => {
@@ -697,15 +687,6 @@ task_id: selectedTask.task_id,
     }));
   };
   const [openModal, setOpenModal] = useState(false);
-
-  const dealsopen = [
-    { value: "choose", label: "Choose" },
-    { value: "collins", label: "Collins" },
-    { value: "konopelski", label: "Konopelski" },
-    { value: "adams", label: "Adams" },
-    { value: "schumm", label: "Schumm" },
-    { value: "wisozk", label: "Wisozk" },
-  ];
 
   const sortNotes = (notes) => {
     const sortedNotes = [...notes];
@@ -1067,7 +1048,6 @@ task_id: selectedTask.task_id,
   const filteredEmployees = companyEmployee.filter((employee) =>
     employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
   );
-console.log(tags,"allllltagss");
 
   const columns = [
     {
@@ -1323,14 +1303,17 @@ console.log(tags,"allllltagss");
   useEffect(() => {
     if (leadInfo?.tags) {
       // Format the existing tags for CreatableSelect
+
       const formattedTags = leadInfo.tags.map((tag) => ({
         value: tag,
         label: tag,
       }));
+
       setSelectedTags(formattedTags);
       setPreviousTags(formattedTags);
     }
   }, [leadInfo]);
+
   return (
     <>
       {/* Page Wrapper */}
@@ -1422,6 +1405,7 @@ console.log(tags,"allllltagss");
                         to="#"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#contact_offcanvas"
+                        onClick={() => {}}
                       >
                         <CiEdit size={20} />
                       </Link>
@@ -2194,6 +2178,9 @@ console.log(tags,"allllltagss");
                                           <Link
                                             to="#"
                                             className="styleForDoneBtn me-3"
+                                            onClick={() => {
+                                              handleToggleTaskCompletion(task);
+                                            }}
                                           >
                                             <IoMdDoneAll />
                                           </Link>
@@ -2203,7 +2190,8 @@ console.log(tags,"allllltagss");
                                             data-bs-toggle="modal"
                                             data-bs-target="#add_tasks"
                                             onClick={() => {
-                                              handleTaskEditClick(task)}}
+                                              handleTaskEditClick(task);
+                                            }}
                                           >
                                             <i className="ti ti-edit text-blue" />
                                           </Link>
@@ -2212,7 +2200,9 @@ console.log(tags,"allllltagss");
                                             className="styleForDeleteBtn"
                                             data-bs-toggle="modal"
                                             data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={()=>setSelectedTask(task)}
+                                            onClick={() =>
+                                              setSelectedTask(task)
+                                            }
                                           >
                                             <i className="ti ti-trash text-danger" />
                                           </Link>
@@ -2221,14 +2211,14 @@ console.log(tags,"allllltagss");
                                     </div>
                                     <div className="col-md-11 mb-3">
                                       {/* {task.taskType == "Follow Up" ? ( */}
-                                    
-                                        <p
-                                          className={`badge badge-soft-warning fw-medium me-2`}
-                                        >
-                                          {/* <FaCalendarAlt className="me-2" /> */}
-                                          {task.taskTitle}
-                                        </p>
-                                    
+
+                                      <p
+                                        className={`badge badge-soft-warning fw-medium me-2`}
+                                      >
+                                        {/* <FaCalendarAlt className="me-2" /> */}
+                                        {task.taskTitle}
+                                      </p>
+
                                       <p>{task.taskDescription}</p>
                                     </div>
                                     <div className="d-flex justify-content-between align-items-center">
@@ -2238,26 +2228,34 @@ console.log(tags,"allllltagss");
                                           Last Modified on{" "}
                                         </span>{" "}
                                         {/* <span>{task.dateCreated} </span> */}
+                                        <span>{dayjs(task.updatedAt).format("DD MMM YYYY, hh:mm A")}</span>
                                       </p>
                                       <p>
                                         <span className="fw-medium text-black">
                                           Due date :
                                         </span>{" "}
-<span
-  style={{
-    color: dayjs(`${task.taskDueDate.split("T")[0]}T${task.taskDueTime}`).isBefore(dayjs())
-      ? "red"
-      : "inherit",
-  }}
->
-  {dayjs(task.taskDueDate).format("DD MMM YYYY")}
-  {", "}
-  {dayjs(task.taskDueTime, "HH:mm").format("hh:mm A")}
-</span>
-
+                                        <span
+                                          style={{
+                                            color: dayjs(
+                                              `${
+                                                task.taskDueDate.split("T")[0]
+                                              }T${task.taskDueTime}`
+                                            ).isBefore(dayjs())
+                                              ? "red"
+                                              : "inherit",
+                                          }}
+                                        >
+                                          {dayjs(task.taskDueDate).format(
+                                            "DD MMM YYYY"
+                                          )}
+                                          {", "}
+                                          {dayjs(
+                                            task.taskDueTime,
+                                            "HH:mm"
+                                          ).format("hh:mm A")}
+                                        </span>
                                       </p>
                                     </div>
-                                    {console.log(task.taskDueTime, "task time")}
                                   </div>
                                 </div>
                               );
@@ -2315,6 +2313,9 @@ console.log(tags,"allllltagss");
                                           <Link
                                             to="#"
                                             className="styleForNotDoneBtn me-3"
+                                            onClick={() => {
+                                              handleToggleTaskCompletion(task);
+                                            }}
                                           >
                                             <MdOutlineRemoveDone />
                                           </Link>
@@ -2334,7 +2335,9 @@ console.log(tags,"allllltagss");
                                             className="styleForDeleteBtn"
                                             data-bs-toggle="modal"
                                             data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={()=>setSelectedTask(task)}
+                                            onClick={() =>
+                                              setSelectedTask(task)
+                                            }
                                           >
                                             <i className="ti ti-trash text-danger" />
                                           </Link>
@@ -2393,7 +2396,7 @@ console.log(tags,"allllltagss");
                                           Due date :
                                         </span>{" "}
                                         <span>
-                                       {dayjs(task.taskDueDate).format(
+                                          {dayjs(task.taskDueDate).format(
                                             "DD MMM YYYY"
                                           )}
                                           {", "}
@@ -3787,8 +3790,6 @@ console.log(tags,"allllltagss");
                       value={taskFormData.dueDate}
                       name="taskDueDate"
                       onChange={(date) => {
-                        console.log(date, "changed date...");
-
                         handleTaskInputChange("dueDate", date);
                       }}
                       format="DD-MM-YYYY"
@@ -3825,7 +3826,6 @@ console.log(tags,"allllltagss");
                     type="button"
                     onClick={() => {
                       handleTaskSubmit();
-                      console.log("clicked");
                     }}
                   >
                     Save changes
@@ -5269,7 +5269,7 @@ console.log(tags,"allllltagss");
         </div>
       </Modal>
       {/* /Delete Stage */}
-      <DeleteModal text={deleteModalText} onDelete={handleDeleteTask}/>
+      <DeleteModal text={deleteModalText} onDelete={handleDeleteTask} />
     </>
   );
 };

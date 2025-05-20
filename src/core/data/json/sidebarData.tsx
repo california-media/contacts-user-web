@@ -102,15 +102,15 @@ export const SidebarData = [
       },
 
       {
-        label: "Groups",
+        label: "Templates",
         icon: "ti ti-tag",
         // subLink1: route.contactGrid,
         // subLink2: route.contactDetails,
         submenu: true,
         showSubRoute: false,
         submenuItems: [
-          { label: "Groups", link: "#", icon: <IoMdPricetag /> }
-          // { label: "Customer Details", link: route.contactDetails, icon:<IoMdPeople /> },
+          { label: "Templates", link: route.templates, icon: <IoMdPricetag /> }
+          // { label: "Customer Details", link: route.contacts, icon:<IoMdPeople /> },
           // { label: "Customer Grid", link: route.contactGrid, icon:<IoMdPeople /> },
         ],
       },

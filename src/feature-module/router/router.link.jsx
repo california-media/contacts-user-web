@@ -38,6 +38,7 @@ import Leads from "../crm/contacts/contacts";
 // import Companies from "../crm/companies/companies";
 import Login from "../auth/login";
 import Register from "../auth/register";
+import Templates from "../crm/templates/Templates";
 // import TwoStepVerification from "../auth/twoStepVerification";
 // import EmailVerification from "../auth/emailVerification";
 // import Success from "../auth/success";
@@ -445,12 +446,12 @@ export const publicRoutes = [
     route: Route,
     title:'Groups'
   },
-  // {
-  //   path: route.companies,
-  //   element: <Companies />,
-  //   route: Route,
-  //   title:'Companies'
-  // },
+  {
+    path: route.templates,
+    element: <Templates />,
+    route: Route,
+    title:'Templates'
+  },
   // {
   //   path: route.accordion,
   //   element: <Accordion />,

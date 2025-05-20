@@ -17,7 +17,7 @@ import { saveContact } from "../../../data/redux/slices/ContactSlice";
 import PhoneInput from "react-phone-input-2";
 import { addTag } from "../../../data/redux/slices/TagSlice";
 
-const LeadOffcanvas = ({ selectedContact }) => {
+const LeadOffcanvas = ({selectedContact}) => {
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
   const [phone, setPhone] = useState("");
@@ -53,8 +53,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
       phone: value,
     }));
   };
-  console.log(selectedContact, "selected contact");
-  console.log(formData.phone, "form dta phone numbers");
+
 
   const handleShow = () => setShow(true);
   const addNewContent = () => {
@@ -146,21 +145,21 @@ const LeadOffcanvas = ({ selectedContact }) => {
         tags: selectedContact.tags || [],
       });
     }
-  }, [selectedContact]);
+  }, [selectedContact,dispatch]);
 
   useEffect(() => {
     const offcanvasElement = document.getElementById("contact_offcanvas");
 
     const handleOffcanvasHide = () => {
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-      });
+      // setFormData({
+      //   firstName: "",
+      //   lastName: "",
+      //   email: "",
+      //   phone: "",
+      // });
 
-      setSelectedTags([]);
-      setPreviousTags([]);
+      // setSelectedTags([]);
+      // setPreviousTags([]);
     };
 
     offcanvasElement.addEventListener(
@@ -194,7 +193,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
       }));
     }
   };
-  console.log(formData.contactImageURL, "image url");
 
   return (
     <div

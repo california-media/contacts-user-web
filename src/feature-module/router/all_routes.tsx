@@ -38,6 +38,7 @@ export const all_routes = {
   contactsDetails: "/contacts-details",
   leads: "/leads",
   contacts: "/contacts",
+  templates: "/templates",
   // projectsGrid: "/crm/project-grid",
   // ProposalsList: "/crm/proposals-list",
   // ProposalsGrid: "/crm/proposals-grid",

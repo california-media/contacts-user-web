@@ -21,6 +21,7 @@ import { QRCode } from "antd";
 const Dashboard = () => {
   const [file, setFile] = useState();
   const [progress, setProgress] = useState(0);
+  const [qrCodeValue, setQrCodeValue] = useState("");
   const [language, setLanguage] = useState("eng");
   const [result, setResult] = useState("");
 const dispatch = useDispatch()
@@ -95,12 +96,15 @@ console.log(userProfile,"user profile in dashboard");
 
   }, []);
 
-const qrCodeValue = JSON.stringify({
-    firstname:'rtertefirstname',
-    lastname:'ertertlastname',
-    email:'erter@fgfd.ff',
-    phone:'33333333333',
+useEffect(()=>{
+const getQrCodeValue = JSON.stringify({
+    firstname:userProfile.firstname,
+    lastname:userProfile.lastname,
+    email:userProfile.email,
+    phone:userProfile.phonenumbers.length>0?userProfile.phonenumbers[0]:"",
   });
+ setQrCodeValue(getQrCodeValue);
+},[userProfile])
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);

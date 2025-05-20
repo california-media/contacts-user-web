@@ -74,8 +74,8 @@ export const deleteTask = createAsyncThunk(
       });
       console.log(response.data, "delete task response");
 
-      // return response.data.data.task_id;
-      return deleteTaskData.task_id;
+      return response.data.data.task_id;
+      // return deleteTaskData.task_id;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -124,6 +124,8 @@ const contactSlice = createSlice({
         state.contacts.push(action.payload);
       }
     });
+
+
 
     builder.addCase(deleteContact.fulfilled, (state, action) => {
       state.contacts = state.contacts.filter(
