@@ -33,7 +33,7 @@ export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
     console.log(Object.fromEntries(formData));
-    
+
     try {
       const response = await api.post("addEditContact", formData, {
         headers: {
@@ -58,6 +58,24 @@ export const deleteContact = createAsyncThunk(
       });
 
       return contactId;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+export const deleteTask = createAsyncThunk(
+  "tasks/deleteTask",
+  async (deleteTaskData, { rejectWithValue }) => {
+    try {
+      console.log(deleteTaskData, "delete task data");
+
+      const response = await api.delete("/deleteTask", {
+        data: deleteTaskData,
+      });
+      console.log(response.data, "delete task response");
+
+      // return response.data.data.task_id;
+      return deleteTaskData.task_id;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }

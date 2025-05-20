@@ -94,10 +94,6 @@ const profileSlice = createSlice({
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log({...state},"state...");
-        console.log(action.payload,"action.payload...");
-        
-        console.log({...state,...action.payload},"state and payload combined");
         
         // return { ...state, ...action.payload };
         Object.assign(state, action.payload);

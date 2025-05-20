@@ -82,7 +82,7 @@ import { estimationListData } from "../../../core/data/json/estimationList";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import api from "../../../core/axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
-import { saveContact } from "../../../core/data/redux/slices/ContactSlice";
+import { deleteTask, saveContact } from "../../../core/data/redux/slices/ContactSlice";
 import { addTag } from "../../../core/data/redux/slices/TagSlice";
 const route = all_routes;
 const allNotes = [
@@ -451,7 +451,17 @@ setAllTags(tagsArrayOfObject)
   };
 
   const contentRef = useRef(null);
+const handleDeleteTask=()=>{
+    setDeleteModalText("task");
+    const deleteTaskData = {
 
+contactId: selectedContact.contact_id,
+task_id: selectedTask.task_id,
+    }
+    console.log(deleteTaskData, "delete task data in index");
+    
+      dispatch(deleteTask(deleteTaskData))                                   
+}
   const exportToPDF = () => {
     const input = contentRef.current;
 
@@ -2193,12 +2203,7 @@ console.log(tags,"allllltagss");
                                             data-bs-toggle="modal"
                                             data-bs-target="#add_tasks"
                                             onClick={() => {
-                                              handleTaskEditClick(task);
-                                              console.log(
-                                                task,
-                                                "selected task"
-                                              );
-                                            }}
+                                              handleTaskEditClick(task)}}
                                           >
                                             <i className="ti ti-edit text-blue" />
                                           </Link>
@@ -2207,9 +2212,7 @@ console.log(tags,"allllltagss");
                                             className="styleForDeleteBtn"
                                             data-bs-toggle="modal"
                                             data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={() => {
-                                              setDeleteModalText("task");
-                                            }}
+                                            onClick={()=>setSelectedTask(task)}
                                           >
                                             <i className="ti ti-trash text-danger" />
                                           </Link>
@@ -2331,9 +2334,7 @@ console.log(tags,"allllltagss");
                                             className="styleForDeleteBtn"
                                             data-bs-toggle="modal"
                                             data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={() => {
-                                              setDeleteModalText("task");
-                                            }}
+                                            onClick={()=>setSelectedTask(task)}
                                           >
                                             <i className="ti ti-trash text-danger" />
                                           </Link>
@@ -2378,13 +2379,13 @@ console.log(tags,"allllltagss");
                                       <p className="mb-0">
                                         ✎{" "}
                                         <span className="fw-medium text-black ms-2">
-                                          Modified by Jessica on{" "}
+                                          Last Modified on{" "}
                                         </span>{" "}
                                         <span>
-                                          {task.taskDueDate}{" "}
+                                          {/* {task.taskDueDate}{" "}
                                           {task.taskDueTime && (
                                             <span>{task.taskDueTime}</span>
-                                          )}
+                                          )} */}
                                         </span>
                                       </p>
                                       <p>
@@ -5268,7 +5269,7 @@ console.log(tags,"allllltagss");
         </div>
       </Modal>
       {/* /Delete Stage */}
-      <DeleteModal text={deleteModalText} />
+      <DeleteModal text={deleteModalText} onDelete={handleDeleteTask}/>
     </>
   );
 };
