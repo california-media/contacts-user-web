@@ -11,7 +11,7 @@ import storageSession from 'redux-persist/lib/storage/session'
 const persistConfig = {
   key: "root",
   storage: storageSession,
-  whitelist: ["getUser"]
+  whitelist: ["getUser","tags","contacts","selectedContact"],
 };
 const combinedReducer = combineReducers({
   common: commonSlice,       
