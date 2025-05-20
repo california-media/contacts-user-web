@@ -76,9 +76,9 @@ const contactSlice = createSlice({
     error: null,
   },
   reducers: {
-    setPage: (state, action) => {
-      state.page = action.payload;
-    },
+    // setPage: (state, action) => {
+    //   state.page = action.payload;
+    // },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchContacts.pending, (state) => {
@@ -116,5 +116,5 @@ const contactSlice = createSlice({
 });
 
 // Export actions and reducer
-export const { setPage } = contactSlice.actions;
+// export const { setPage } = contactSlice.actions;
 export default contactSlice.reducer;

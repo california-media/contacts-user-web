@@ -325,6 +325,12 @@ const ContactsDetails = () => {
     });
     setStars(starsState);
   };
+  useEffect(()=>{
+const tagsArrayOfObject = tags.map((tag)=>{
+  return {value:tag.tag,label:tag.tag}
+})
+setAllTags(tagsArrayOfObject)
+  },[])
   const [isEditor3, setIsEditor3] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [isEditor2, setIsEditor2] = useState(false);
@@ -1051,6 +1057,7 @@ const ContactsDetails = () => {
   const filteredEmployees = companyEmployee.filter((employee) =>
     employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
   );
+console.log(tags,"allllltagss");
 
   const columns = [
     {
