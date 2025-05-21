@@ -19,11 +19,12 @@ const Profile = () => {
   const [profileLastName, setProfileLastName] = useState(userProfile.lastname);
   const [profileEmail, setProfileEmail] = useState(userProfile.email);
   const [profilePhoneNumber, setProfilePhoneNumber] = useState(
-    userProfile.phonenumber.number
+    userProfile?.phonenumber?.number
   );
   const [profileCountryCode, setProfileCountryCode] = useState(
-    userProfile.phonenumber.countryCode
+    userProfile?.phonenumber?.countryCode
   );
+console.log(userProfile,"USERPROFILE DATA");
 
   const dispatch = useDispatch();
 

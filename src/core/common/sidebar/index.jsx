@@ -292,145 +292,182 @@ const Sidebar = () => {
                       );
                     })} */}
 
-{mainLabel?.submenuItems?.map((title, i) => {
-  let link_array = [];
-  if ("submenuItems" in title) {
-    title.submenuItems?.forEach((link) => {
-      link_array.push(link?.link);
-      if (link?.submenu && "submenuItems" in link) {
-        link.submenuItems?.forEach((item) => {
-          link_array.push(item?.link);
-        });
-      }
-    });
-  }
-  title.links = link_array;
+                    {mainLabel?.submenuItems?.map((title, i) => {
+                      let link_array = [];
+                      if ("submenuItems" in title) {
+                        title.submenuItems?.forEach((link) => {
+                          link_array.push(link?.link);
+                          if (link?.submenu && "submenuItems" in link) {
+                            link.submenuItems?.forEach((item) => {
+                              link_array.push(item?.link);
+                            });
+                          }
+                        });
+                      }
+                      title.links = link_array;
 
-  // Check if it has only one submenu item
-  const hasSingleSubmenu = title.submenuItems?.length === 1;
-  const submenuLink = hasSingleSubmenu ? title.submenuItems[0]?.link : "#";
+                      // Check if it has only one submenu item
+                      const hasSingleSubmenu = title.submenuItems?.length === 1;
+                      const submenuLink = hasSingleSubmenu
+                        ? title.submenuItems[0]?.link
+                        : "#";
 
-  return (
-    <li
-  className={`submenu ${hasSingleSubmenu ? "single-submenu" : ""}`}
-  key={title.label}
-  onClick={(e) => {
-    if (hasSingleSubmenu) {
-      e.stopPropagation(); // Prevents dropdown from interfering
-      navigate(submenuLink); // <== React Router navigation
-    }
-  }}
-  style={{ cursor: hasSingleSubmenu ? "pointer" : "default" }}
->
-      <div
-        onMouseEnter={() => handleMouseEnter(title.label)}
-        onMouseLeave={handleMouseLeave}
-      >
-        <Link
-          to={title?.submenu ? "#" : title?.link}
-          onClick={() => toggleSidebar(title?.label)}
-          className={`${
-            subOpen === title?.label ? "subdrop" : ""
-          } ${
-            title?.links?.includes(Location.pathname) ? "active" : ""
-          } ${
-            title?.submenuItems
-              ?.map((link) => link?.link)
-              .includes(Location.pathname) || title?.link === Location.pathname
-              ? "active"
-              : ""
-          }`}
-        >
-          <i className={title.icon}></i>
-          <span>{title?.label}</span>
-          <span className={title?.submenu ? "menu-arrow" : ""} />
-        </Link>
+                      return (
+                        <li
+                          className={`submenu ${
+                            hasSingleSubmenu ? "single-submenu" : ""
+                          }`}
+                          key={title.label}
+                          onClick={(e) => {
+                            if (hasSingleSubmenu) {
+                              e.stopPropagation(); // Prevents dropdown from interfering
+                              navigate(submenuLink); // <== React Router navigation
+                            }
+                          }}
+                          style={{
+                            cursor: hasSingleSubmenu ? "pointer" : "default",
+                          }}
+                        >
+                          <div
+                            onMouseEnter={() => handleMouseEnter(title.label)}
+                            onMouseLeave={handleMouseLeave}
+                          >
+                            <Link
+                              to={title?.submenu ? "#" : title?.link}
+                              onClick={() => toggleSidebar(title?.label)}
+                              className={`${
+                                subOpen === title?.label ? "subdrop" : ""
+                              } ${
+                                title?.links?.includes(Location.pathname)
+                                  ? "active"
+                                  : ""
+                              } ${
+                                title?.submenuItems
+                                  ?.map((link) => link?.link)
+                                  .includes(Location.pathname) ||
+                                title?.link === Location.pathname
+                                  ? "active"
+                                  : ""
+                              }`}
+                            >
+                              <i className={title.icon}></i>
+                              <span>{title?.label}</span>
+                              <span
+                                className={title?.submenu ? "menu-arrow" : ""}
+                              />
+                            </Link>
 
-        {isHovered === title.label && (
-          <>
-            <div
-              style={{
-                background: "transparent",
-                position: "absolute",
-                width: "100px",
-                height: "100%",
-                top: 0,
-                left: 0,
-                zIndex: 1,
-              }}
-              onMouseEnter={() => handleMouseEnter(title.label)}
-              onMouseLeave={handleMouseLeave}
-            />
-            <div
-              className="showOnHover"
-              onMouseEnter={() => handleMouseEnter(title.label)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <div
-                style={{
-                  marginBottom: "10px",
-                  background: "#12344d",
-                  borderRadius: 6,
-                  minWidth: 240,
-                  position: "absolute",
-                  textAlign: "center",
-                  top: 0,
-                  left: 0,
-                  zIndex: 1,
-                }}
-              >
-                <div className="sideMenuHeadingContainer">
-                  <p className="sideMenuHeading">{title.label}</p>
-                </div>
-                <ul
-                  style={{
-                    marginBottom: 0,
-                    paddingLeft: 8,
-                    paddingRight: 8,
-                    paddingBottom: 12,
-                    display: "block",
-                  }}
-                >
-                  {title?.submenuItems?.map((item) => (
-                    <li
-                      className="submenu submenu-two subMenuLi"
-                      key={item.label}
-                    >
-                      <Link
-                        to={item?.link}
-                        className={`${
-                          item?.submenuItems
-                            ?.map((link) => link?.link)
-                            .includes(Location.pathname) ||
-                          item?.link === Location.pathname
-                            ? "active subdrop"
-                            : ""
-                        }`}
-                        onClick={() => {
-                          toggleSubsidebar(item?.label);
-                        }}
-                      >
-                        <div className="me-2">{item?.icon}</div>
-                        {item?.label}
-                        <span
-                          className={item?.submenu ? "menu-arrow" : ""}
-                        />
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </li>
-  );
-})}
-
-
-
-                    
+                            {isHovered === title.label && (
+                              <>
+                                <div
+                                  style={{
+                                    background: "transparent",
+                                    position: "absolute",
+                                    width: "100px",
+                                    height: "100%",
+                                    top: 0,
+                                    left: 0,
+                                    zIndex: 1,
+                                  }}
+                                  onMouseEnter={() =>
+                                    handleMouseEnter(title.label)
+                                  }
+                                  onMouseLeave={handleMouseLeave}
+                                />
+                                <div
+                                  className="showOnHover"
+                                  onMouseEnter={() =>
+                                    handleMouseEnter(title.label)
+                                  }
+                                  onMouseLeave={handleMouseLeave}
+                                >
+                                  <div
+                                    style={{
+                                      marginBottom: "10px",
+                                      background: "#12344d",
+                                      borderRadius: 6,
+                                      minWidth: 240,
+                                      position: "absolute",
+                                      textAlign: "center",
+                                      top: 0,
+                                      left: 0,
+                                      zIndex: 1,
+                                    }}
+                                  >
+                                    <div
+                                      className="sideMenuHeadingContainer"
+                                      style={{
+                                        marginBottom: `${
+                                          title.submenuItems?.length > 1
+                                        } ? "10px" : "none"`,
+                                      }}
+                                    >
+                                      <p
+                                        className="sideMenuHeading"
+                                        style={{
+                                          borderBottom: `${
+                                            title.submenuItems?.length > 1
+                                          } ? "1px solid #345c7c" : "none"`,
+                                        }}
+                                      >
+                                        {title.label}
+                                      </p>
+                                    </div>
+                                    {title.submenuItems?.length > 1 && (
+                                      <ul
+                                        style={{
+                                          marginBottom: 0,
+                                          paddingLeft: 8,
+                                          paddingRight: 8,
+                                          paddingBottom: 12,
+                                          display: "block",
+                                        }}
+                                      >
+                                        {title?.submenuItems?.map((item) => (
+                                          <li
+                                            className="submenu submenu-two subMenuLi"
+                                            key={item.label}
+                                          >
+                                            <Link
+                                              to={item?.link}
+                                              className={`${
+                                                item?.submenuItems
+                                                  ?.map((link) => link?.link)
+                                                  .includes(
+                                                    Location.pathname
+                                                  ) ||
+                                                item?.link === Location.pathname
+                                                  ? "active subdrop"
+                                                  : ""
+                                              }`}
+                                              onClick={() => {
+                                                toggleSubsidebar(item?.label);
+                                              }}
+                                            >
+                                              <div className="me-2">
+                                                {item?.icon}
+                                              </div>
+                                              {item?.label}
+                                              <span
+                                                className={
+                                                  item?.submenu
+                                                    ? "menu-arrow"
+                                                    : ""
+                                                }
+                                              />
+                                            </Link>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </li>
               ))}

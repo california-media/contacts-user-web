@@ -649,6 +649,14 @@ console.log(selectedContact, "selected contact");
     formDataObj.append("taskDueTime", taskFormData.dueTime.format("HH:mm"));
 
     dispatch(saveContact(formDataObj));
+    setTaskFormData({
+    task_id: "",
+    taskDescription: "",
+    taskTitle: "",
+    taskType: null,
+    dueDate: dayjs(),
+    dueTime: dayjs("00:00", "HH:mm"),
+  })
   };
   const handleHaveShippingAddress = (event) => {
     setHaveShippingAddress(event.target.checked);
@@ -2389,6 +2397,7 @@ console.log(selectedContact, "selected contact");
                                           {task.taskDueTime && (
                                             <span>{task.taskDueTime}</span>
                                           )} */}
+                                          <span>{dayjs(task.updatedAt).format("DD MMM YYYY, hh:mm A")}</span>
                                         </span>
                                       </p>
                                       <p>

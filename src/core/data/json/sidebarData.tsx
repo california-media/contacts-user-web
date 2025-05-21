@@ -91,7 +91,7 @@ export const SidebarData = [
       // },
       {
         label: "Contacts",
-        icon: "ti ti-layout-2",
+        icon: "fa-solid fa-address-book",
         submenu: true,
         showSubRoute: false,
         submenuItems: [

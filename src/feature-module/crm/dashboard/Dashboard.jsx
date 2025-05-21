@@ -24,12 +24,11 @@ const Dashboard = () => {
   const [qrCodeValue, setQrCodeValue] = useState("");
   const [language, setLanguage] = useState("eng");
   const [result, setResult] = useState("");
-const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const qrCodeRef = useRef();
-const userProfile = useSelector((state)=>state.profile)
-const { tags, loading, error } = useSelector((state) => state.tags);
-console.log(userProfile,"user profile in dashboard");
-
+  const userProfile = useSelector((state) => state.profile);
+  const { tags, loading, error } = useSelector((state) => state.tags);
+  console.log(userProfile, "user profile in dashboard");
 
   const [sline] = useState({
     chart: {
@@ -91,20 +90,20 @@ console.log(userProfile,"user profile in dashboard");
     //  }
     // };
     // fetchProfile();
-    
-    dispatch(fetchProfile())
 
+    dispatch(fetchProfile());
   }, []);
 
-useEffect(()=>{
-const getQrCodeValue = JSON.stringify({
-    firstname:userProfile.firstname,
-    lastname:userProfile.lastname,
-    email:userProfile.email,
-    phone:userProfile.phonenumbers.length>0?userProfile.phonenumbers[0]:"",
-  });
- setQrCodeValue(getQrCodeValue);
-},[userProfile])
+  useEffect(() => {
+    const getQrCodeValue = JSON.stringify({
+      firstname: userProfile.firstname,
+      lastname: userProfile.lastname,
+      email: userProfile.email,
+      phone:
+        userProfile.phonenumbers.length > 0 ? userProfile.phonenumbers[0] : "",
+    });
+    setQrCodeValue(getQrCodeValue);
+  }, [userProfile]);
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
@@ -127,25 +126,8 @@ const getQrCodeValue = JSON.stringify({
         <div className="content">
           <div className="container-fluid">
             <div className="row">
-              <div className="col-md-4">
+              <div className="col-md-2">
                 <div className="App">
-                  {/* <input type="file" onChange={onFileChange} /> */}
-                  {/* <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-        <option value="eng">English</option>
-        <option value="tel">Telugu</option>
-        <option value="hin">Hindi</option>
-        <option value="kan">Kannada</option>
-      </select> */}
-                  {/* <div style={{ marginTop: 25 }}>
-                    <input
-                      type="button"
-                      value="Submit"
-                      onClick={processImage}
-                    />
-                  </div> */}
-                  {/* <div>
-                    <progress value={progress} max={1} />
-                  </div> */}
                   {result !== "" && (
                     <div style={{ marginTop: 20, fontSize: 24, color: "teal" }}>
                       Result: {result}
@@ -170,10 +152,16 @@ const getQrCodeValue = JSON.stringify({
                     <div
                       style={{ padding: 20, color: "#fff", paddingBottom: 120 }}
                     >
-                      <p className="text-center fs-4 text-capitalize">{userProfile.firstname}  {userProfile.lastname} </p>
+                      <p className="text-center fs-4 text-capitalize">
+                        {userProfile.firstname} {userProfile.lastname}{" "}
+                      </p>
                       <div className="profileCardTextContainer">
                         <FaPhoneAlt />
-                        <p className="profileCardText">{userProfile.phonenumbers.length>0?userProfile.phonenumbers[0]:"No phone Number"}</p>
+                        <p className="profileCardText">
+                          {userProfile.phonenumbers.length > 0
+                            ? userProfile.phonenumbers[0]
+                            : "No phone Number"}
+                        </p>
                       </div>
                       <div className="profileCardTextContainer">
                         <IoMdMail />
@@ -187,8 +175,13 @@ const getQrCodeValue = JSON.stringify({
                           className="profileCardQrCode"
                         /> */}
                         <div ref={qrCodeRef}>
-                <QRCode  value={qrCodeValue} size={150}  className="profileCardQrCode" bgColor="#ffffff"/>
-              </div>
+                          <QRCode
+                            value={qrCodeValue}
+                            size={150}
+                            className="profileCardQrCode"
+                            bgColor="#ffffff"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -210,9 +203,9 @@ const getQrCodeValue = JSON.stringify({
                   </div>
                 </div>
               </div>
-              <div className="col-md-8 fitContentHeight">
+              <div className="col-md-10 fitContentHeight">
                 <div className="row">
-                  <div className="col-md-4 fitContentHeight">
+                  <div className="col-md-3 fitContentHeight">
                     <Link to={route.contacts}>
                       <div className="dashboardSmallCards">
                         <div
@@ -260,7 +253,7 @@ const getQrCodeValue = JSON.stringify({
                       </div>
                     </Link>
                   </div>
-                  <div className="col-md-4 fitContentHeight">
+                  <div className="col-md-3 fitContentHeight">
                     <Link
                       className="dropdown-item p-0 bgWhiteOnLinkHover"
                       data-bs-toggle="offcanvas"
@@ -312,7 +305,55 @@ const getQrCodeValue = JSON.stringify({
                       </div>
                     </Link>
                   </div>
-                  <div className="col-md-4 fitContentHeight">
+                  <div className="col-md-3 fitContentHeight">
+                    <Link to={route.myScans}>
+                      <div className="dashboardSmallCards">
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <div>
+                            <p
+                              style={{
+                                fontSize: 20,
+                                marginBottom: 10,
+                                color: "#000",
+                              }}
+                            >
+                              Scanned Cards
+                            </p>
+                            <p
+                              style={{
+                                fontSize: 26,
+                                fontWeight: 500,
+                                color: "#000",
+                              }}
+                            >
+                              50
+                            </p>
+                          </div>
+                          <div
+                            style={{
+                              width: 70,
+                              height: 70,
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              backgroundColor: "#d9f7e7",
+                              borderRadius: 22,
+                            }}
+                          >
+                            <IoQrCode color="#4ad991" size={30} />
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                  <div className="col-md-3 fitContentHeight">
                     <Link to={route.myScans}>
                       <div className="dashboardSmallCards">
                         <div

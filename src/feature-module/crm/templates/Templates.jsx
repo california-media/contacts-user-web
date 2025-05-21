@@ -6,80 +6,170 @@ import { MdMail } from "react-icons/md";
 import { SlPeople } from "react-icons/sl";
 import { Link } from "react-router-dom";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
+import Table from "../../../core/common/dataTable/index";
+import { HiEllipsisVertical } from "react-icons/hi2";
 
 const Templates = () => {
-  const whatsappTemplates = [
+  const [columnVisibility, setColumnVisibility] = useState({
+    "": true,
+    Title: true,
+    Message: true,
+  });
+  const columns = [
     {
-      template_id: "682c2114107a00a2e310d338",
-      templateTitle: "title4ww",
-      templateDescription: "description 4",
+      title: "",
+      dataIndex: "isFavourite",
+      width: 40,
+      render: (_, record, index) => (
+        <div
+          className="set-star rating-select"
+          // onClick={() => handleStarToggle(index, record)}
+          style={{ cursor: "pointer" }}
+        >
+          <i
+            className={`fa ${
+              record.isFavourite ? "fa-solid fa-star" : "fa-regular fa-star"
+            }`}
+            style={{ color: record.isFavourite ? "gold" : "gray" }}
+          ></i>
+        </div>
+      ),
+    },
+    {
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
+      width: 200,
+      // onCell: () => ({
+      //   className: "hoverable-cell", // Adding a class for the cell
+      // }),
+
+      render: (text, record) => {
+        console.log(record, "recordddd");
+
+        return (
+          <div className="cell-content justify-content-between">
+            <div className="d-inline-block" style={{ padding: 5 }}>
+              {text}
+            </div>
+
+            <div>
+              <Link
+                to="#"
+                className="action-icon "
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                onClick={() => {
+                  // handleLeadEditClick(record);
+                }}
+              >
+                <HiEllipsisVertical />
+              </Link>
+              <div className="dropdown-menu dropdown-menu-right">
+                <Link
+                  className="dropdown-item"
+                  to="#"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#contact_offcanvas"
+                >
+                  <i className="ti ti-edit text-blue" /> Edit
+                </Link>
+                <Link
+                  className="dropdown-item"
+                  to="#"
+                  data-bs-toggle="modal"
+                  // data-bs-target={`#delete_${deleteModalText}`}
+                  onClick={() => {
+                    // setDeleteModalText("lead");
+                  }}
+                >
+                  <i className="ti ti-trash text-danger"></i> Delete
+                </Link>
+              </div>
+            </div>
+          </div>
+        );
+      },
+
+      sorter: (a, b) => a.title.localeCompare(b.title),
+    },
+    {
+      title: "Message",
+      dataIndex: "message",
+      render: (text, record) => {
+        return <div className="d-inline-block">{text}</div>;
+      },
     },
   ];
-  const [whatsappTemplateFormData, setWhatsappTemplateFormData] = useState({
-    template_id: "",
-    templateDescription: "",
-    templateTitle: "",
+  const visibleColumns = columns.filter(
+    (column) => columnVisibility[column.title]
+  );
+
+  const allWhatsappTemplates = [
+    {
+      id: 1,
+      title: "Whatsapp Template 1",
+      message: "This is the message for Whatsapp Template 1",
+    },
+    {
+      id: 2,
+      title: "Whatsapp Template 2",
+      message: "This is the message for Whatsapp Template 2",
+    },
+    {
+      id: 3,
+      title: "Whatsapp Template 3",
+      message: "This is the message for Whatsapp Template 3",
+    },
+  ];
+
+  const filteredData = allWhatsappTemplates.filter((template) => {
+    // const leadDate = new Date(lead.created_date).toDateString();
+
+    const isAnySearchColumnVisible =
+      columnVisibility["Name"] ||
+      columnVisibility["Company"] ||
+      columnVisibility["Phone"] ||
+      columnVisibility["Email"];
+
+    // const matchesSearchQuery =
+    //   !isAnySearchColumnVisible ||
+    //   (columnVisibility["Name"] &&
+    //     lead?.firstname?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    //   (columnVisibility["Company"] &&
+    //     lead.customer_company
+    //       .toLowerCase()
+    //       .includes(searchQuery.toLowerCase())) ||
+    //   (columnVisibility["Phone"] &&
+    //     lead.phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    //   (columnVisibility["Email"] &&
+    //     lead.emailaddresses.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    // Check if lead matches selected statuses
+    // const matchesStatus =
+    // selectedLeadStatus.length === 0 || // If no status is selected, show all
+    // selectedLeadStatus.includes(lead.status.toLowerCase());
+    // Check if lead matches selected employee
+
+    // Check if lead date is within the selected date range
+    // const matchesDateRange =
+    //   selectedDateRange.startDate || selectedDateRange.endDate || // If no date range is selected, show all
+    //   console.log(selectedDateRange.endDate, "selectedDateRange.endDate");
+
+    // (leadDate >= selectedDateRange.startDate && leadDate <= selectedDateRange.endDate);
+
+    // return matchesEmployee;
+    // && matchesDateRange;
+    // matchesSearchQuery &&
+    return template;
   });
-  const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] =
-    useState(null);
-  const [hoveredWhatsappTemplateIndex, setHoveredWhatsappTemplateIndex] =
-    useState(null);
-  const [deleteModalText, setDeleteModalText] = useState("");
-  const handleWhatsappTemplateEditClick = (template) => {
-    setSelectedWhatsappTemplate(template);
-  };
-  const handleDeleteWhatsappTemplate = (template) => {
-    setDeleteModalText("template");
-  };
-  const handleWhatsappTemplateInputChange = (name, value) => {
-    setWhatsappTemplateFormData({
-      ...whatsappTemplateFormData,
-      [name]: value,
-    });
-  };
- const handleWhatsappTemplateSubmit = () => {
-    // const formDataObj = new FormData();
-
-    // // formDataObj.append("contact_id", selectedContact.contact_id);
-
-    // formDataObj.append("task_id", taskFormData.task_id); 
-    // formDataObj.append("taskDescription", taskFormData.taskDescription);
-    // formDataObj.append("taskTitle", taskFormData.taskTitle);
-
-    // formDataObj.append(
-    //   "taskDueDate",
-    //   taskFormData.dueDate.format("YYYY-MM-DD")
-    // );
-    // formDataObj.append("taskDueTime", taskFormData.dueTime.format("HH:mm"));
-
-    // dispatch(saveContact(formDataObj));
-  };
-
-
-
-  useEffect(() => {
-    if (selectedWhatsappTemplate) {
-      setWhatsappTemplateFormData({
-        template_id: selectedWhatsappTemplate.template_id,
-        templateDescription: selectedWhatsappTemplate.templateDescription,
-        templateTitle: selectedWhatsappTemplate.templateTitle,
-      });
-    } else {
-      // Reset form for new task
-      setWhatsappTemplateFormData({
-        template_id: "",
-        templateDescription: "",
-        templateTitle: "",
-      });
-    }
-  }, [selectedWhatsappTemplate]);
   return (
     <div className="page-wrapper">
       <div className="content">
         <div className="row">
           <div className="col-md-12">
             <div className="card mb-3">
-              <div className="card-body pb-0">
+              <div className="card-header">
                 <ul
                   className="nav nav-tabs nav-tabs-bottom mb-2"
                   role="tablist"
@@ -107,206 +197,120 @@ const Templates = () => {
                     </Link>
                   </li>
                 </ul>
+
+                
+              
+              
+              </div>
+              <div className="card-body pb-0">
+                
                 <div className="tab-content pt-0">
                   <div
                     className="tab-pane fade active show"
                     id="whatsappTemplates"
                     role="tabpanel"
                   >
-                    <div className="card">
-                      <div className="card-header d-flex align-items-center justify-content-end flex-wrap row-gap-3">
-                        {/* <h4 className="fw-semibold mb-0">Whatsapp Templates</h4> */}
-                        <div className="d-inline-flex align-items-center">
-                          <Link
-                            to="#"
-                            data-bs-toggle="modal"
-                            data-bs-target="#add_whatsapp_template"
-                            className="link-purple fw-medium"
-                            onClick={() => {
-                              setSelectedWhatsappTemplate(null);
-                            }}
-                          >
-                            <i className="ti ti-circle-plus me-1" />
-                            Add New
-                          </Link>
+
+                      <div className="row align-items-center mb-5">
+                  <div className="col-sm-12">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div className="page-header mb-0">
+                        <div className="row align-items-center">
+                          <h4 className="page-title mb-0 ms-5">
+                            Templates
+                            <span className="count-title">123</span>
+                            {/* <span className="count-title">{totalContacts}</span> */}
+                          </h4>
                         </div>
                       </div>
 
-                      <div className="card-body">
-                        <div className="notes-activity">
-                          {whatsappTemplates.map(
-                            (whatsappTemplate, whatsappTemplateIndex) => {
-                              return (
-                                <div
-                                  className="card mb-3"
-                                  key={whatsappTemplateIndex}
-                                >
-                                  <div
-                                    className="card-body"
-                                    onMouseEnter={() =>
-                                      setHoveredWhatsappTemplateIndex(
-                                        whatsappTemplateIndex
-                                      )
-                                    }
-                                    onMouseLeave={() =>
-                                      setHoveredWhatsappTemplateIndex(null)
-                                    }
-                                  >
-                                    <div className="d-flex align-items-center justify-content-between pb-2">
-                                      {hoveredWhatsappTemplateIndex ===
-                                        whatsappTemplateIndex && (
-                                        <div
-                                          style={{
-                                            position: "absolute",
-                                            top: 20,
-                                            right: 20,
-                                          }}
-                                        >
-                                          <Link
-                                            to="#"
-                                            className="styleForEditBtn me-3"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#add_whatsapp_template"
-                                            onClick={() => {
-                                              handleWhatsappTemplateEditClick(
-                                                whatsappTemplate
-                                              );
-                                            }}
-                                          >
-                                            <i className="ti ti-edit text-blue" />
-                                          </Link>
-                                          <Link
-                                            to="#"
-                                            className="styleForDeleteBtn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={() => {
-                                              setSelectedWhatsappTemplate(
-                                                whatsappTemplate
-                                              );
-                                              setDeleteModalText("template");
-                                            }}
-                                          >
-                                            <i className="ti ti-trash text-danger" />
-                                          </Link>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-md-11 mb-3">
-                                      <p
-                                        className={`badge badge-soft-warning fw-medium me-2`}
-                                      >
-                                        {whatsappTemplate.templateTitle}
-                                      </p>
+                      <div className="d-flex">
+                        <div className="icon-form mb-3  me-2 mb-sm-0">
+                          <span className="form-icon">
+                            <i className="ti ti-search" />
+                          </span>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Search Contacts"
+                            // onChange={(text) =>
+                            //   setSearchQuery(text.target.value)
+                            // }
+                          />
+                        </div>
 
-                                      <p>{whatsappTemplate.templateDescription}</p>
-                                    </div>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                      <p className="mb-0">
-                                        ✎{" "}
-                                        <span className="fw-medium text-black ms-2">
-                                          Last Modified on{" "}
-                                        </span>{" "}
-                                      </p>
-                                     
+                        <div className="dropdown me-2">
+                          <Link
+                            to="#"
+                            className="btn bg-soft-purple text-purple"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                          >
+                            <i className="ti ti-columns-3 me-2" />
+                            Manage Columns
+                          </Link>
+                          <div className="dropdown-menu  dropdown-menu-md-end dropdown-md p-3">
+                            <h4 className="mb-2 fw-semibold">Manage columns</h4>
+                            <div className="border-top pt-3">
+                              {columns.map((column, index) => {
+                                if (
+                                  column.title === "Action" ||
+                                  column.title === ""
+                                ) {
+                                  return;
+                                }
+                                return (
+                                  <div
+                                    className="d-flex align-items-center justify-content-between mb-3"
+                                    key={index}
+                                  >
+                                    <p className="mb-0 d-flex align-items-center">
+                                      <i className="ti ti-grip-vertical me-2" />
+                                      {column.title}
+                                    </p>
+                                    <div className="status-toggle">
+                                      <input
+                                        type="checkbox"
+                                        id={column.title}
+                                        className="check"
+                                        defaultChecked={true}
+                                        onClick={() =>
+                                          // handleToggleColumnVisibility(
+                                          //   column.title
+                                          // )
+                                          {}
+                                        }
+                                      />
+                                      <label
+                                        htmlFor={column.title}
+                                        className="checktoggle"
+                                      />
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            }
-                          )}
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <div className="col-sm-8">
+                    <div className="d-flex align-items-center flex-wrap row-gap-2 justify-content-sm-end"></div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <DeleteModal
-          text={deleteModalText}
-          onDelete={handleDeleteWhatsappTemplate}
-        />
-        <div
-          className="modal custom-modal fade modal-padding"
-          id="add_whatsapp_template"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {selectedWhatsappTemplate
-                    ? "Edit Template"
-                    : "Add new Template"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close position-static"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <form>
-                  <div className="mb-3">
-                    <label className="col-form-label">
-                      Title <span className="text-danger"> *</span>
-                    </label>
-                    <input
-                      className="form-control"
-                      name="templateTitle"
-                      value={whatsappTemplateFormData.templateTitle}
-                      onChange={(e) => {
-                        handleWhatsappTemplateInputChange(
-                          e.target.name,
-                          e.target.value
-                        );
-                      }}
-                      type="text"
-                    />
+                    <div className="table-responsive custom-table">
+                      <Table
+                        dataSource={filteredData}
+                        columns={visibleColumns}
+                        rowKey={(record) => record.key}
+                        // loading={isLoading}
+                        // totalCount={totalContacts}
+                        // onPageChange={handlePageChange}
+                      />
+                    </div>
                   </div>
-                  <div className="mb-3">
-                    <label className="col-form-label">
-                      Description <span className="text-danger"> *</span>
-                    </label>
-                    <textarea
-                      className="form-control"
-                      rows={4}
-                      name="whatsappTemplateDescription"
-                      value={whatsappTemplateFormData.templateDescription}
-                      onChange={(e) =>
-                        handleWhatsappTemplateInputChange(
-                          e.target.name,
-                          e.target.value
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="col-lg-12 text-end modal-btn">
-                    <Link
-                      to="#"
-                      className="btn btn-light"
-                      data-bs-dismiss="modal"
-                    >
-                      Cancel
-                    </Link>
-                    <button
-                      className="btn btn-primary"
-                      data-bs-dismiss="modal"
-                      type="button"
-                      onClick={() => {
-                        handleWhatsappTemplateSubmit();
-                      }}
-                    >
-                      Save changes
-                    </button>
-                  </div>
-                </form>
+                </div>
               </div>
             </div>
           </div>
