@@ -5,13 +5,14 @@ import profileReducer from "./slices/ProfileSlice";
 import tagReducer from "./slices/TagSlice"
 import contactReducer from "./slices/ContactSlice"
 import selectedContactReducer from "./slices/SelectedContactSlice"
+import selectedTemplateReducer from "./slices/SelectedTemplateSlice"
 import { persistStore, persistReducer } from 'redux-persist'
 import storageSession from 'redux-persist/lib/storage/session'
 
 const persistConfig = {
   key: "root",
   storage: storageSession,
-  whitelist: ["getUser","tags","contacts","selectedContact"],
+  whitelist: ["getUser","tags","contacts","selectedContact","setSelectedTemplate"],
 };
 const combinedReducer = combineReducers({
   common: commonSlice,       
@@ -19,6 +20,7 @@ const combinedReducer = combineReducers({
   profile: profileReducer,
   tags: tagReducer,
   contacts: contactReducer,
+  selectedTemplate:selectedTemplateReducer,
   selectedContact: selectedContactReducer
 });
 

@@ -60,7 +60,7 @@ export const fetchProfile = createAsyncThunk(
       const response =await api.get("/getUser");
       console.log( response.data,"response from fetch profile");
       localStorage.setItem("userId",response.data.data.id)
-      return response.data.data;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -94,14 +94,22 @@ const profileSlice = createSlice({
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.isLoading = false;
+        // console.log(action.payload.data, "action.payload.data");
         
         // return { ...state, ...action.payload };
-        Object.assign(state, action.payload);
+        Object.assign(state, action.payload.data);
       })
       .addCase(fetchProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error;
       })
+      .addCase(editProfile.fulfilled, (state, action) => {
+      console.log(action.payload, "action.payloaddddd from editProfile");
+      Object.assign(state, action.payload.data); // update state if needed
+    })
+    .addCase(editProfile.rejected, (state, action) => {
+      console.error("Edit profile failed", action.payload);
+    });
 
   },
 });

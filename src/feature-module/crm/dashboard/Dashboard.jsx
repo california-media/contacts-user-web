@@ -372,7 +372,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              Scanned Cards
+                              Templates
                             </p>
                             <p
                               style={{
@@ -381,7 +381,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              50
+                              12
                             </p>
                           </div>
                           <div

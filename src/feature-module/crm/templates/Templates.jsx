@@ -8,6 +8,10 @@ import { Link } from "react-router-dom";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
 import Table from "../../../core/common/dataTable/index";
 import { HiEllipsisVertical } from "react-icons/hi2";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProfile } from "../../../core/data/redux/slices/ProfileSlice";
+import WhatsappTemplateOffcanvas from "../../../core/common/offCanvas/templates/WhatsappTemplateOffcanvas";
+import { resetSelectedTemplate, setSelectedTemplate } from "../../../core/data/redux/slices/SelectedTemplateSlice";
 
 const Templates = () => {
   const [columnVisibility, setColumnVisibility] = useState({
@@ -15,6 +19,21 @@ const Templates = () => {
     Title: true,
     Message: true,
   });
+const dispatch = useDispatch();
+const userProfile = useSelector((state)=>state.profile)
+
+
+
+const handleWhatsappTemplateEditClick = (record) => {
+  const updatedRecord = {
+    ...record,
+templateType: "whatsapp",
+  }
+dispatch(setSelectedTemplate(updatedRecord))
+
+}
+
+
   const columns = [
     {
       title: "",
@@ -37,15 +56,14 @@ const Templates = () => {
     },
     {
       title: "Title",
-      dataIndex: "title",
-      key: "title",
+      dataIndex: "whatsappTemplateTitle",
+      key: "whatsappTemplateTitle",
       width: 200,
       // onCell: () => ({
       //   className: "hoverable-cell", // Adding a class for the cell
       // }),
 
       render: (text, record) => {
-        console.log(record, "recordddd");
 
         return (
           <div className="cell-content justify-content-between">
@@ -60,7 +78,7 @@ const Templates = () => {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
                 onClick={() => {
-                  // handleLeadEditClick(record);
+                  handleWhatsappTemplateEditClick(record);
                 }}
               >
                 <HiEllipsisVertical />
@@ -70,7 +88,7 @@ const Templates = () => {
                   className="dropdown-item"
                   to="#"
                   data-bs-toggle="offcanvas"
-                  data-bs-target="#contact_offcanvas"
+                  data-bs-target="#whatsapp_template_offcanvas"
                 >
                   <i className="ti ti-edit text-blue" /> Edit
                 </Link>
@@ -91,11 +109,12 @@ const Templates = () => {
         );
       },
 
-      sorter: (a, b) => a.title.localeCompare(b.title),
+      sorter: (a, b) => a.whatsappTemplateTitle.localeCompare(b.whatsappTemplateTitle),
     },
     {
       title: "Message",
-      dataIndex: "message",
+      dataIndex: "whatsappTemplateMessage",
+      key: "whatsappTemplateMessage",
       render: (text, record) => {
         return <div className="d-inline-block">{text}</div>;
       },
@@ -105,25 +124,8 @@ const Templates = () => {
     (column) => columnVisibility[column.title]
   );
 
-  const allWhatsappTemplates = [
-    {
-      id: 1,
-      title: "Whatsapp Template 1",
-      message: "This is the message for Whatsapp Template 1",
-    },
-    {
-      id: 2,
-      title: "Whatsapp Template 2",
-      message: "This is the message for Whatsapp Template 2",
-    },
-    {
-      id: 3,
-      title: "Whatsapp Template 3",
-      message: "This is the message for Whatsapp Template 3",
-    },
-  ];
 
-  const filteredData = allWhatsappTemplates.filter((template) => {
+  const filteredData = userProfile?.whatsappTemplates?.filter((template) => {
     // const leadDate = new Date(lead.created_date).toDateString();
 
     const isAnySearchColumnVisible =
@@ -197,108 +199,117 @@ const Templates = () => {
                     </Link>
                   </li>
                 </ul>
-
-                
-              
-              
               </div>
               <div className="card-body pb-0">
-                
                 <div className="tab-content pt-0">
                   <div
                     className="tab-pane fade active show"
                     id="whatsappTemplates"
                     role="tabpanel"
                   >
-
-                      <div className="row align-items-center mb-5">
-                  <div className="col-sm-12">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div className="page-header mb-0">
-                        <div className="row align-items-center">
-                          <h4 className="page-title mb-0 ms-5">
-                            Templates
-                            <span className="count-title">123</span>
-                            {/* <span className="count-title">{totalContacts}</span> */}
-                          </h4>
-                        </div>
-                      </div>
-
-                      <div className="d-flex">
-                        <div className="icon-form mb-3  me-2 mb-sm-0">
-                          <span className="form-icon">
-                            <i className="ti ti-search" />
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search Contacts"
-                            // onChange={(text) =>
-                            //   setSearchQuery(text.target.value)
-                            // }
-                          />
-                        </div>
-
-                        <div className="dropdown me-2">
-                          <Link
-                            to="#"
-                            className="btn bg-soft-purple text-purple"
-                            data-bs-toggle="dropdown"
-                            data-bs-auto-close="outside"
-                          >
-                            <i className="ti ti-columns-3 me-2" />
-                            Manage Columns
-                          </Link>
-                          <div className="dropdown-menu  dropdown-menu-md-end dropdown-md p-3">
-                            <h4 className="mb-2 fw-semibold">Manage columns</h4>
-                            <div className="border-top pt-3">
-                              {columns.map((column, index) => {
-                                if (
-                                  column.title === "Action" ||
-                                  column.title === ""
-                                ) {
-                                  return;
-                                }
-                                return (
-                                  <div
-                                    className="d-flex align-items-center justify-content-between mb-3"
-                                    key={index}
-                                  >
-                                    <p className="mb-0 d-flex align-items-center">
-                                      <i className="ti ti-grip-vertical me-2" />
-                                      {column.title}
-                                    </p>
-                                    <div className="status-toggle">
-                                      <input
-                                        type="checkbox"
-                                        id={column.title}
-                                        className="check"
-                                        defaultChecked={true}
-                                        onClick={() =>
-                                          // handleToggleColumnVisibility(
-                                          //   column.title
-                                          // )
-                                          {}
-                                        }
-                                      />
-                                      <label
-                                        htmlFor={column.title}
-                                        className="checktoggle"
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                    <div className="row align-items-center mb-5">
+                      <div className="col-sm-12">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div className="page-header mb-0">
+                            <div className="row align-items-center">
+                              <h4 className="page-title mb-0 ms-5">
+                                Templates
+                                <span className="count-title">123</span>
+                                {/* <span className="count-title">{totalContacts}</span> */}
+                              </h4>
                             </div>
+                          </div>
+
+                          <div className="d-flex">
+                            <div className="icon-form mb-3  me-2 mb-sm-0">
+                              <span className="form-icon">
+                                <i className="ti ti-search" />
+                              </span>
+                              <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search Template"
+                                // onChange={(text) =>
+                                //   setSearchQuery(text.target.value)
+                                // }
+                              />
+                            </div>
+
+                            <div className="dropdown me-2">
+                              <Link
+                                to="#"
+                                className="btn bg-soft-purple text-purple"
+                                data-bs-toggle="dropdown"
+                                data-bs-auto-close="outside"
+                              >
+                                <i className="ti ti-columns-3 me-2" />
+                                Manage Columns
+                              </Link>
+                              <div className="dropdown-menu  dropdown-menu-md-end dropdown-md p-3">
+                                <h4 className="mb-2 fw-semibold">
+                                  Manage columns
+                                </h4>
+                                <div className="border-top pt-3">
+                                  {columns.map((column, index) => {
+                                    if (
+                                      column.title === "Action" ||
+                                      column.title === ""
+                                    ) {
+                                      return;
+                                    }
+                                    return (
+                                      <div
+                                        className="d-flex align-items-center justify-content-between mb-3"
+                                        key={index}
+                                      >
+                                        <p className="mb-0 d-flex align-items-center">
+                                          <i className="ti ti-grip-vertical me-2" />
+                                          {column.title}
+                                        </p>
+                                        <div className="status-toggle">
+                                          <input
+                                            type="checkbox"
+                                            id={column.title}
+                                            className="check"
+                                            defaultChecked={true}
+                                            onClick={() =>
+                                              // handleToggleColumnVisibility(
+                                              //   column.title
+                                              // )
+                                              {}
+                                            }
+                                          />
+                                          <label
+                                            htmlFor={column.title}
+                                            className="checktoggle"
+                                          />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                             <Link
+                                                            to="#"
+                                                            className="btn btn-primary me-2"
+                                                            data-bs-toggle="offcanvas"
+                                                            data-bs-target="#whatsapp_template_offcanvas"
+                                                            onClick={() => {
+                                                              // setSelectedContact(null);
+                                                              dispatch(resetSelectedTemplate());
+                                                            }}
+                                                          >
+                                                            <i className="ti ti-square-rounded-plus me-2" />
+                                                            Add Template
+                                                          </Link>
                           </div>
                         </div>
                       </div>
+                      <div className="col-sm-8">
+                        <div className="d-flex align-items-center flex-wrap row-gap-2 justify-content-sm-end"></div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="col-sm-8">
-                    <div className="d-flex align-items-center flex-wrap row-gap-2 justify-content-sm-end"></div>
-                  </div>
-                </div>
                     <div className="table-responsive custom-table">
                       <Table
                         dataSource={filteredData}
@@ -315,6 +326,7 @@ const Templates = () => {
             </div>
           </div>
         </div>
+        <WhatsappTemplateOffcanvas/>
       </div>
     </div>
   );

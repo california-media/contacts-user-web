@@ -98,6 +98,7 @@ const Contacts = () => {
     (state) => state.contacts
   );
 
+  const userProfile = useSelector((state) => state.profile);
   const handlePageChange = (newPage, newPageSize) => {
     setPage(newPage);
     setLimit(newPageSize);
@@ -654,18 +655,24 @@ const Contacts = () => {
                   <i className="ti ti-phone" />
                 </a>
 
-                <a
-                  href={
-                    record.phonenumbers?.length > 0
-                      ? `https://wa.me/${record.phonenumbers[0]}`
-                      : "#"
-                  }
-                  className="action-icon"
+                <Link
+                  // href={
+                  //   record.phonenumbers?.length > 0
+                  //     ? `https://wa.me/${record.phonenumbers[0]}`
+                  //     : "#"
+                  // }
+                  to="#"
+                  data-bs-toggle="modal"
+                  data-bs-target="#show_whatsapp_templates"
+                  className="link-purple fw-medium action-icon"
+                  onClick={() => {
+                    dispatch(setSelectedContact(record));
+                  }}
                   title="WhatsApp"
-                  target="_blank"
+                  // target="_blank"
                 >
                   <i className="fa-brands fa-whatsapp me-3"></i>
-                </a>
+                </Link>
                 <a
                   href={
                     record.emailaddresses?.length > 0
@@ -1059,6 +1066,7 @@ const Contacts = () => {
   );
 
   const numberOfLeads = filteredData.length;
+console.log(selectedContact,"selectedContactselectedContact");
 
   return (
     <>
@@ -1718,6 +1726,61 @@ const Contacts = () => {
           <div className="modal-footer"></div>
         </Modal>
         {/* import leads */}
+        <div
+          className="modal custom-modal fade modal-padding"
+          id="show_whatsapp_templates"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Whatsapp Templates</h5>
+                <button
+                  type="button"
+                  className="btn-close position-static"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                {userProfile.whatsappTemplates.length > 0
+                  ? userProfile.whatsappTemplates.map((template, index) => {
+                    const phoneNumber =
+      selectedContact.phonenumbers?.length > 0 ? selectedContact.phonenumbers[0] : null;
+
+    const message = encodeURIComponent(template.whatsappTemplateMessage);
+    const whatsappLink = phoneNumber
+      ? `https://wa.me/${phoneNumber}?text=${message}`
+      : "#";
+                     return( <div
+                        key={index}
+                       onClick={() => {
+          if (phoneNumber) {
+            window.open(whatsappLink, "_blank");
+          } else {
+            alert("Phone number not available");
+          }
+        }}
+                        style={{
+                          backgroundColor: "#f5f5f5",
+                          padding: "10px",
+                          borderRadius: "10px",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        <p className="fw-semibold">
+                          {template.whatsappTemplateTitle}
+                        </p>
+                        <p>{template.whatsappTemplateMessage}</p>
+                      </div>)
+                    })
+                  : "No templates found"}
+              </div>
+            </div>
+          </div>
+        </div>
       </>
     </>
   );
