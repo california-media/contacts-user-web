@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { editProfile } from "../../../data/redux/slices/ProfileSlice";
 
-const WhatsappTemplateOffcanvas = () => {
+const EmailTemplateOffcanvas = () => {
   const [formData, setFormData] = useState({
-    whatsappTemplate_id: "",
-    whatsappTemplateTitle: "",
-    whatsappTemplateMessage: "",
+   emailTemplate_id: "",
+   emailTemplateTitle: "",
+   emailTemplateSubject: "",
+    emailTemplateBody: "",
   });
 
   const dispatch = useDispatch();
@@ -17,14 +18,15 @@ const WhatsappTemplateOffcanvas = () => {
       [name]: value,
     }));
   };
-  const handleAddWhatsappTemplate = async (e) => {
+  const handleAddEmailTemplate = async (e) => {
     e.preventDefault();
     dispatch(editProfile(formData));
-    if(selectedTemplate.whatsappTemplate_id == "") {
+    if(selectedTemplate.emailTemplate_id == "") {
       setFormData({
-      whatsappTemplate_id: "",
-      whatsappTemplateTitle: "",
-      whatsappTemplateMessage: "",
+     emailTemplate_id: "",
+   emailTemplateTitle: "",
+   emailTemplateSubject: "",
+    emailTemplateBody: "",
     });
     }
   };
@@ -33,14 +35,17 @@ const WhatsappTemplateOffcanvas = () => {
   useEffect(() => {
     if (selectedTemplate) {
       setFormData({
-        whatsappTemplate_id: selectedTemplate.whatsappTemplate_id
-          ? selectedTemplate.whatsappTemplate_id
+        emailTemplate_id: selectedTemplate.emailTemplate_id
+          ? selectedTemplate.emailTemplate_id
           : "",
-        whatsappTemplateTitle: selectedTemplate.whatsappTemplateTitle
-          ? selectedTemplate.whatsappTemplateTitle
+        emailTemplateTitle: selectedTemplate.emailTemplateTitle
+          ? selectedTemplate.emailTemplateTitle
           : "",
-        whatsappTemplateMessage: selectedTemplate.whatsappTemplateMessage
-          ? selectedTemplate.whatsappTemplateMessage
+        emailTemplateSubject: selectedTemplate.emailTemplateSubject
+          ? selectedTemplate.emailTemplateSubject
+          : "",
+        emailTemplateBody: selectedTemplate.emailTemplateBody
+          ? selectedTemplate.emailTemplateBody
           : "",
       });
     }
@@ -50,11 +55,11 @@ const WhatsappTemplateOffcanvas = () => {
     <div
       className="offcanvas offcanvas-end offcanvas-large"
       tabIndex={-1}
-      id="whatsapp_template_offcanvas"
+      id="email_template_offcanvas"
     >
       <div className="offcanvas-header border-bottom">
         <h5 className="fw-semibold">
-          {selectedTemplate.whatsappTemplate_id !== ""
+          {selectedTemplate.emailTemplate_id !== ""
             ? "Edit Template"
             : "Add Template"}
         </h5>
@@ -68,15 +73,15 @@ const WhatsappTemplateOffcanvas = () => {
         </button>
       </div>
       <div className="offcanvas-body">
-        <form onSubmit={handleAddWhatsappTemplate}>
+        <form onSubmit={handleAddEmailTemplate}>
           <div className="row">
             <div className="col-12">
               <div className="mb-3">
                 <label className="col-form-label ms-3">Title</label>
                 <input
                   type="text"
-                  value={formData.whatsappTemplateTitle}
-                  name="whatsappTemplateTitle"
+                  value={formData.emailTemplateTitle}
+                  name="emailTemplateTitle"
                   onChange={(e) =>
                     handleInputChange(e.target.name, e.target.value)
                   }
@@ -84,36 +89,34 @@ const WhatsappTemplateOffcanvas = () => {
                 />
               </div>
             </div>
-            {/* <div className="col-12">
+            <div className="col-12">
               <div className="mb-3">
-                <label className="col-form-label ms-3">Message</label>
+                <label className="col-form-label ms-3">Subject</label>
                 <input
                   type="text"
-                  value={formData.whatsappTemplateMessage}
-                  name="whatsappTemplateMessage"
+                  value={formData.emailTemplateSubject}
+                  name="emailTemplateSubject"
                   onChange={(e) =>
                     handleInputChange(e.target.name, e.target.value)
                   }
                   className="form-control"
                 />
               </div>
-            </div> */}
-            <div className="mb-3">
-                  <label className="col-form-label col-md-2">Message</label>
-                  <div className="col-md-12">
-                    <textarea
-                      rows={5}
-                      cols={5}
-                      className="form-control"
-                       name="whatsappTemplateMessage"
-                      placeholder="Enter text here"
-                        onChange={(e) =>
+            </div>
+            <div className="col-12">
+              <div className="mb-3">
+                <label className="col-form-label ms-3">Body</label>
+                <input
+                  type="text"
+                  value={formData.emailTemplateBody}
+                  name="emailTemplateBody"
+                  onChange={(e) =>
                     handleInputChange(e.target.name, e.target.value)
                   }
-                      value={formData.whatsappTemplateMessage}
-                    />
-                  </div>
-                </div>
+                  className="form-control"
+                />
+              </div>
+            </div>
           </div>
           <div className="d-flex align-items-center justify-content-end">
             <button
@@ -124,7 +127,7 @@ const WhatsappTemplateOffcanvas = () => {
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              {selectedTemplate?.whatsappTemplate_id == ""
+              {selectedTemplate?.emailTemplate_id == ""
                 ? "Create"
                 : "Update"}
             </button>
@@ -135,4 +138,4 @@ const WhatsappTemplateOffcanvas = () => {
   );
 };
 
-export default WhatsappTemplateOffcanvas;
+export default EmailTemplateOffcanvas;

@@ -24,7 +24,6 @@ const Profile = () => {
   const [profileCountryCode, setProfileCountryCode] = useState(
     userProfile?.phonenumber?.countryCode
   );
-console.log(userProfile,"USERPROFILE DATA");
 
   const dispatch = useDispatch();
 

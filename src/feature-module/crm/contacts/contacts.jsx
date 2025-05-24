@@ -70,9 +70,12 @@ const Contacts = () => {
   const [openModal3, setOpenModal3] = useState(false);
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
+  const [whatsppTemplateTitles, setWhatsppTemplateTitles] = useState([]);
   const [show3, setShow3] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedContactGroup, setSelectedContactGroup] = useState([]);
+  const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
+    useState("");
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [allContacts, setAllContacts] = useState([]);
@@ -99,6 +102,9 @@ const Contacts = () => {
   );
 
   const userProfile = useSelector((state) => state.profile);
+
+  console.log(userProfile, "userProfile in contacts from redux");
+
   const handlePageChange = (newPage, newPageSize) => {
     setPage(newPage);
     setLimit(newPageSize);
@@ -130,6 +136,21 @@ const Contacts = () => {
   const handleClose = () => {
     setActiveCell(null);
   };
+
+  useEffect(() => {
+    const titles =
+      userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.map(
+        (template) => {
+          return {
+            label: template.whatsappTemplateTitle,
+            value: template.whatsappTemplate_id,
+          };
+        }
+      );
+    setWhatsppTemplateTitles(titles);
+  }, [userProfile]);
+  useEffect(() => {}, []);
+
   const resetFilters = () => {
     setSelectedContactGroup([]);
     // setSelectedLeadEmployee([]);
@@ -473,7 +494,6 @@ const Contacts = () => {
   const handleSaveField = (key, field, value) => {
     // Update the selectedContact with the new value
     const updatedContact = { ...selectedContact, [field]: value };
-    console.log(updatedContact, "updated contact");
 
     // Create a FormData object
     const formDataObj = new FormData();
@@ -627,8 +647,6 @@ const Contacts = () => {
       }),
 
       render: (text, record) => {
-        console.log(record, "recordddd");
-
         return (
           <div className="cell-content justify-content-between">
             {/* Lead name */}
@@ -673,18 +691,18 @@ const Contacts = () => {
                 >
                   <i className="fa-brands fa-whatsapp me-3"></i>
                 </Link>
-                <a
-                  href={
-                    record.emailaddresses?.length > 0
-                      ? `mailto:${record.emailaddresses[0]}`
-                      : "#"
-                  }
-                  className="action-icon"
+                <Link
+                  to="#"
+                  data-bs-toggle="modal"
+                  data-bs-target="#show_email_templates"
+                  className="link-purple fw-medium action-icon"
+                  onClick={() => {
+                    dispatch(setSelectedContact(record));
+                  }}
                   title="Email"
-                  target="_blank"
                 >
                   <MdMail />
-                </a>
+                </Link>
               </div>
             </div>
             <div>
@@ -1066,7 +1084,6 @@ const Contacts = () => {
   );
 
   const numberOfLeads = filteredData.length;
-console.log(selectedContact,"selectedContactselectedContact");
 
   return (
     <>
@@ -1730,8 +1747,9 @@ console.log(selectedContact,"selectedContactselectedContact");
           className="modal custom-modal fade modal-padding"
           id="show_whatsapp_templates"
           role="dialog"
+          style={{ minHeight: 500 }}
         >
-          <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Whatsapp Templates</h5>
@@ -1744,37 +1762,281 @@ console.log(selectedContact,"selectedContactselectedContact");
                   <span aria-hidden="true">×</span>
                 </button>
               </div>
-              <div className="modal-body">
-                {userProfile.whatsappTemplates.length > 0
-                  ? userProfile.whatsappTemplates.map((template, index) => {
-                    const phoneNumber =
-      selectedContact.phonenumbers?.length > 0 ? selectedContact.phonenumbers[0] : null;
 
-    const message = encodeURIComponent(template.whatsappTemplateMessage);
-    const whatsappLink = phoneNumber
-      ? `https://wa.me/${phoneNumber}?text=${message}`
-      : "#";
-                     return( <div
-                        key={index}
-                       onClick={() => {
-          if (phoneNumber) {
-            window.open(whatsappLink, "_blank");
-          } else {
-            alert("Phone number not available");
-          }
-        }}
-                        style={{
-                          backgroundColor: "#f5f5f5",
-                          padding: "10px",
-                          borderRadius: "10px",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        <p className="fw-semibold">
-                          {template.whatsappTemplateTitle}
-                        </p>
-                        <p>{template.whatsappTemplateMessage}</p>
-                      </div>)
+              <div className="d-flex align-items-center justify-content-end mb-3 mt-4 me-4">
+                <div className="icon-form me-2 mb-sm-0">
+                  <span className="form-icon">
+                    <i className="ti ti-search" />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search Template"
+                    onChange={() => {}}
+                  />
+                </div>
+
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    if (selectedContact?.phonenumbers?.length > 0) {
+                      const url = `https://wa.me/${selectedContact.phonenumbers[0]}`;
+                      window.open(url, "_blank");
+                    } else {
+                      alert("Phone number not available");
+                    }
+                  }}
+                >
+                  Go directly to WhatsApp
+                </button>
+              </div>
+              <div className="modal-body">
+                {/* {userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.length > 0
+                  ? userProfile.templates.whatsappTemplates.whatsappTemplatesData.map((template, index) => {
+                      const phoneNumber =
+                        selectedContact?.phonenumbers?.length > 0
+                          ? selectedContact.phonenumbers[0]
+                          : null;
+
+                      const message = encodeURIComponent(
+                        template.whatsappTemplateMessage
+                      );
+                      const whatsappLink = phoneNumber
+                        ? `https://wa.me/${phoneNumber}?text=${message}`
+                        : "#";
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            if (phoneNumber) {
+                              window.open(whatsappLink, "_blank");
+                            } else {
+                              alert("Phone number not available");
+                            }
+                          }}
+                          style={{
+                            backgroundColor: "#f5f5f5",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            marginBottom: "10px",
+                            cursor: "pointer",
+                            position: "relative",
+                          }}
+                        >
+                          <div
+                            className="set-star rating-select"
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                            }}
+                          >
+                            <i
+                              className={`fa ${
+                                template.whatsappTemplateIsFavourite
+                                  ? "fa-solid fa-star"
+                                  : ""
+                              }`}
+                              style={{
+                                color: template.whatsappTemplateIsFavourite
+                                  ? "gold"
+                                  : "",
+                              }}
+                            ></i>
+                          </div>
+                          <p
+                            className="fw-semibold"
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {template.whatsappTemplateTitle}
+                          </p>
+                          <p
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              marginBottom: "0",
+                            }}
+                          >
+                            {template.whatsappTemplateMessage}
+                          </p>
+                        </div>
+                      );
+                    })
+                  : "No templates found"} */}
+                <div className="mb-3">
+                  <Select
+                    classNamePrefix="react-select"
+                    options={whatsppTemplateTitles}
+                    //className="select2 form-control"
+                    // defaultValue={selectwithplaceholder[0]} // Set the default selected option
+                    onChange={(selectedOption) => {
+                      setEditWhatsappTemplateMessage(
+                        userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData.find(
+                          (template) =>
+                            template.whatsappTemplate_id ===
+                            selectedOption.value
+                        )?.whatsappTemplateMessage
+                      );
+                    }}
+                    placeholder="Select a state"
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="col-form-label col-md-2">Message</label>
+                  <div className="col-md-12">
+                    <textarea
+                      rows={5}
+                      cols={5}
+                      className="form-control"
+                      name="whatsappTemplateMessage"
+                      placeholder="Enter text here"
+                      onChange={(e) =>
+                        setEditWhatsappTemplateMessage(e.target.value)
+                      }
+                      value={editWhatsappTemplateMessage}
+                    />
+                  </div>
+                </div>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    if (selectedContact?.phonenumbers?.length > 0) {
+                      const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${editWhatsappTemplateMessage}`;
+                      window.open(url, "_blank");
+                    } else {
+                      alert("Phone number not available");
+                    }
+                  }}
+                >
+                 Send Message
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="modal custom-modal fade modal-padding"
+          id="show_email_templates"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Email Templates</h5>
+                <button
+                  type="button"
+                  className="btn-close position-static"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="d-flex align-items-center justify-content-end mb-3">
+                  <div className="icon-form me-2 mb-sm-0">
+                    <span className="form-icon">
+                      <i className="ti ti-search" />
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search Template"
+                      onChange={() => {}}
+                    />
+                  </div>
+
+                  <button
+                    className="btn btn-primary"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (selectedContact.emailaddresses?.length > 0) {
+                        const recipient = selectedContact.emailaddresses[0];
+
+                        const url = `mailto:${recipient}`;
+
+                        window.open(url);
+                      } else {
+                        alert("Email not available");
+                      }
+                    }}
+                  >
+                    Go directly to Email
+                  </button>
+                </div>
+
+                {userProfile.emailTemplates?.length > 0
+                  ? userProfile.emailTemplates.map((template, index) => {
+                      const emailaddress =
+                        selectedContact.emailaddresses?.length > 0
+                          ? selectedContact.emailaddresses[0]
+                          : null;
+
+                      const subject = encodeURIComponent(
+                        "Hello from Brand Toaster"
+                      );
+                      const body = encodeURIComponent(
+                        "Hi there,\n\nI'd like to connect with you."
+                      );
+                      const recipient = selectedContact.emailaddresses[0];
+
+                      const url = `mailto:${recipient}?subject=${subject}&body=${body}`;
+
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            if (emailaddress) {
+                              window.open(url);
+                            } else {
+                              alert("Phone number not available");
+                            }
+                          }}
+                          style={{
+                            backgroundColor: "#f5f5f5",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            marginBottom: "10px",
+                            cursor: "pointer",
+                            position: "relative",
+                          }}
+                        >
+                          <div
+                            className="set-star rating-select"
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                            }}
+                          >
+                            <i
+                              className={`fa ${
+                                template.emailTemplateIsFavourite
+                                  ? "fa-solid fa-star"
+                                  : ""
+                              }`}
+                              style={{
+                                color: template.emailTemplateIsFavourite
+                                  ? "gold"
+                                  : "",
+                              }}
+                            ></i>
+                          </div>
+                          {/* <p className="fw-bold">
+                            {template.emailTemplateTitle}
+                          </p> */}
+                          <p className="fw-semibold">
+                            {template.emailTemplateSubject}
+                          </p>
+                          <p>{template.emailTemplateBody}</p>
+                        </div>
+                      );
                     })
                   : "No templates found"}
               </div>

@@ -28,7 +28,7 @@ const Dashboard = () => {
   const qrCodeRef = useRef();
   const userProfile = useSelector((state) => state.profile);
   const { tags, loading, error } = useSelector((state) => state.tags);
-  console.log(userProfile, "user profile in dashboard");
+  console.log(userProfile, "user profile in dashboard from redux");
 
   const [sline] = useState({
     chart: {
