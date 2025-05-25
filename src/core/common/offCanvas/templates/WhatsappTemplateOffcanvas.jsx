@@ -20,12 +20,12 @@ const WhatsappTemplateOffcanvas = () => {
   const handleAddWhatsappTemplate = async (e) => {
     e.preventDefault();
     dispatch(editProfile(formData));
-    if(selectedTemplate.whatsappTemplate_id == "") {
+    if (selectedTemplate.whatsappTemplate_id == "") {
       setFormData({
-      whatsappTemplate_id: "",
-      whatsappTemplateTitle: "",
-      whatsappTemplateMessage: "",
-    });
+        whatsappTemplate_id: "",
+        whatsappTemplateTitle: "",
+        whatsappTemplateMessage: "",
+      });
     }
   };
   const selectedTemplate = useSelector((state) => state.selectedTemplate);
@@ -99,21 +99,21 @@ const WhatsappTemplateOffcanvas = () => {
               </div>
             </div> */}
             <div className="mb-3">
-                  <label className="col-form-label col-md-2">Message</label>
-                  <div className="col-md-12">
-                    <textarea
-                      rows={5}
-                      cols={5}
-                      className="form-control"
-                       name="whatsappTemplateMessage"
-                      placeholder="Enter text here"
-                        onChange={(e) =>
+              <label className="col-form-label col-md-2">Message</label>
+              <div className="col-md-12">
+                <textarea
+                  rows={5}
+                  cols={5}
+                  className="form-control"
+                  name="whatsappTemplateMessage"
+                  placeholder="Enter text here"
+                  onChange={(e) =>
                     handleInputChange(e.target.name, e.target.value)
                   }
-                      value={formData.whatsappTemplateMessage}
-                    />
-                  </div>
-                </div>
+                  value={formData.whatsappTemplateMessage}
+                />
+              </div>
+            </div>
           </div>
           <div className="d-flex align-items-center justify-content-end">
             <button

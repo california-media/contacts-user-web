@@ -71,6 +71,7 @@ const Datatable = ({ columns, dataSource, loading, totalCount, onPageChange }) =
       loading={loading}
       columns={columns}
       dataSource={dataSource}
+      tableLayout="fixed"
       bordered
       scroll={{
         scrollToFirstRowOnChange: true,

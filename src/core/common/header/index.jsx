@@ -11,6 +11,8 @@ import {
 import Calling from "../../../feature-module/crm/calling";
 import { useAppSelector } from "../../data/redux/hooks";
 import { setPhone } from "../../data/redux/slices/appCommonSlice";
+import { resetSelectedContact } from "../../data/redux/slices/SelectedContactSlice";
+import { resetSelectedTemplate } from "../../data/redux/slices/SelectedTemplateSlice";
 
 const Header = () => {
   const route = all_routes;
@@ -48,7 +50,13 @@ const Header = () => {
   const toggleExpandMenu2 = () => {
     dispatch(setExpandMenu(false));
   };
+const handleLogout =()=>{
+  localStorage.removeItem("userId");
+  localStorage.removeItem("token");
+  dispatch(resetSelectedContact())
+  dispatch(resetSelectedTemplate())
 
+}
   const [layoutBs, setLayoutBs] = useState(localStorage.getItem("dataTheme"));
   const isLockScreen = location.pathname === "/lock-screen";
 
@@ -481,7 +489,7 @@ const Header = () => {
                   <Link className="dropdown-item" to={route.profile}>
                     <i className="ti ti-user-pin" /> My Profile
                   </Link>
-                  <Link className="dropdown-item" to={route.login}>
+                  <Link className="dropdown-item" onClick={handleLogout} to={route.login}>
                     <i className="ti ti-lock" /> Logout
                   </Link>
                 </div>

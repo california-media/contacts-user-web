@@ -103,20 +103,22 @@ const EmailTemplateOffcanvas = () => {
                 />
               </div>
             </div>
-            <div className="col-12">
-              <div className="mb-3">
-                <label className="col-form-label ms-3">Body</label>
-                <input
-                  type="text"
-                  value={formData.emailTemplateBody}
-                  name="emailTemplateBody"
-                  onChange={(e) =>
+                  <div className="col-12">
+            <div className="mb-3">
+                  <label className="col-form-label ms-3">Body</label>
+                    <textarea
+                      rows={5}
+                      cols={5}
+                      className="form-control"
+                       name="emailTemplateBody"
+                      placeholder="Enter text here"
+                        onChange={(e) =>
                     handleInputChange(e.target.name, e.target.value)
                   }
-                  className="form-control"
-                />
-              </div>
-            </div>
+                      value={formData.emailTemplateBody}
+                    />
+                  </div>
+                </div>
           </div>
           <div className="d-flex align-items-center justify-content-end">
             <button

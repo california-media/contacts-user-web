@@ -71,11 +71,14 @@ const Contacts = () => {
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
   const [whatsppTemplateTitles, setWhatsppTemplateTitles] = useState([]);
+  const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
   const [show3, setShow3] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedContactGroup, setSelectedContactGroup] = useState([]);
   const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
     useState("");
+  const [editEmailTemplateBody, setEditEmailTemplateBody] = useState("");
+  const [editEmailTemplateSubject, setEditEmailTemplateSubject] = useState("");
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [allContacts, setAllContacts] = useState([]);
@@ -138,7 +141,7 @@ const Contacts = () => {
   };
 
   useEffect(() => {
-    const titles =
+    const whatsappTitles =
       userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.map(
         (template) => {
           return {
@@ -147,9 +150,19 @@ const Contacts = () => {
           };
         }
       );
-    setWhatsppTemplateTitles(titles);
+
+    const emailTitles =
+      userProfile?.templates?.emailTemplates?.emailTemplatesData?.map(
+        (template) => {
+          return {
+            label: template.emailTemplateTitle,
+            value: template.emailTemplate_id,
+          };
+        }
+      );
+    setEmailTemplateTitles(emailTitles);
+    setWhatsppTemplateTitles(whatsappTitles);
   }, [userProfile]);
-  useEffect(() => {}, []);
 
   const resetFilters = () => {
     setSelectedContactGroup([]);
@@ -1764,7 +1777,7 @@ const Contacts = () => {
               </div>
 
               <div className="d-flex align-items-center justify-content-end mb-3 mt-4 me-4">
-                <div className="icon-form me-2 mb-sm-0">
+                {/* <div className="icon-form me-2 mb-sm-0">
                   <span className="form-icon">
                     <i className="ti ti-search" />
                   </span>
@@ -1774,7 +1787,7 @@ const Contacts = () => {
                     placeholder="Search Template"
                     onChange={() => {}}
                   />
-                </div>
+                </div> */}
 
                 <button
                   className="btn btn-primary"
@@ -1791,89 +1804,10 @@ const Contacts = () => {
                 </button>
               </div>
               <div className="modal-body">
-                {/* {userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.length > 0
-                  ? userProfile.templates.whatsappTemplates.whatsappTemplatesData.map((template, index) => {
-                      const phoneNumber =
-                        selectedContact?.phonenumbers?.length > 0
-                          ? selectedContact.phonenumbers[0]
-                          : null;
-
-                      const message = encodeURIComponent(
-                        template.whatsappTemplateMessage
-                      );
-                      const whatsappLink = phoneNumber
-                        ? `https://wa.me/${phoneNumber}?text=${message}`
-                        : "#";
-                      return (
-                        <div
-                          key={index}
-                          onClick={() => {
-                            if (phoneNumber) {
-                              window.open(whatsappLink, "_blank");
-                            } else {
-                              alert("Phone number not available");
-                            }
-                          }}
-                          style={{
-                            backgroundColor: "#f5f5f5",
-                            padding: "10px",
-                            borderRadius: "10px",
-                            marginBottom: "10px",
-                            cursor: "pointer",
-                            position: "relative",
-                          }}
-                        >
-                          <div
-                            className="set-star rating-select"
-                            style={{
-                              position: "absolute",
-                              top: "10px",
-                              right: "10px",
-                            }}
-                          >
-                            <i
-                              className={`fa ${
-                                template.whatsappTemplateIsFavourite
-                                  ? "fa-solid fa-star"
-                                  : ""
-                              }`}
-                              style={{
-                                color: template.whatsappTemplateIsFavourite
-                                  ? "gold"
-                                  : "",
-                              }}
-                            ></i>
-                          </div>
-                          <p
-                            className="fw-semibold"
-                            style={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {template.whatsappTemplateTitle}
-                          </p>
-                          <p
-                            style={{
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              marginBottom: "0",
-                            }}
-                          >
-                            {template.whatsappTemplateMessage}
-                          </p>
-                        </div>
-                      );
-                    })
-                  : "No templates found"} */}
                 <div className="mb-3">
                   <Select
                     classNamePrefix="react-select"
                     options={whatsppTemplateTitles}
-                    //className="select2 form-control"
-                    // defaultValue={selectwithplaceholder[0]} // Set the default selected option
                     onChange={(selectedOption) => {
                       setEditWhatsappTemplateMessage(
                         userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData.find(
@@ -1883,7 +1817,7 @@ const Contacts = () => {
                         )?.whatsappTemplateMessage
                       );
                     }}
-                    placeholder="Select a state"
+                    placeholder="Select a template"
                   />
                 </div>
 
@@ -1914,7 +1848,7 @@ const Contacts = () => {
                     }
                   }}
                 >
-                 Send Message
+                  Send Message
                 </button>
               </div>
             </div>
@@ -1940,18 +1874,6 @@ const Contacts = () => {
               </div>
               <div className="modal-body">
                 <div className="d-flex align-items-center justify-content-end mb-3">
-                  <div className="icon-form me-2 mb-sm-0">
-                    <span className="form-icon">
-                      <i className="ti ti-search" />
-                    </span>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search Template"
-                      onChange={() => {}}
-                    />
-                  </div>
-
                   <button
                     className="btn btn-primary"
                     onClick={(e) => {
@@ -1971,7 +1893,7 @@ const Contacts = () => {
                   </button>
                 </div>
 
-                {userProfile.emailTemplates?.length > 0
+                {/* {userProfile.emailTemplates?.length > 0
                   ? userProfile.emailTemplates.map((template, index) => {
                       const emailaddress =
                         selectedContact.emailaddresses?.length > 0
@@ -2028,9 +1950,6 @@ const Contacts = () => {
                               }}
                             ></i>
                           </div>
-                          {/* <p className="fw-bold">
-                            {template.emailTemplateTitle}
-                          </p> */}
                           <p className="fw-semibold">
                             {template.emailTemplateSubject}
                           </p>
@@ -2038,7 +1957,71 @@ const Contacts = () => {
                         </div>
                       );
                     })
-                  : "No templates found"}
+                  : "No templates found"} */}
+                <div className="mb-3">
+                  <Select
+                    classNamePrefix="react-select"
+                    options={emailTemplateTitles}
+                    onChange={(selectedOption) => {
+                      setEditEmailTemplateBody(
+                        userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
+                          (template) =>
+                            template.emailTemplate_id === selectedOption.value
+                        )?.emailTemplateBody
+                      );
+                      setEditEmailTemplateSubject(
+                        userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
+                          (template) =>
+                            template.emailTemplate_id === selectedOption.value
+                        )?.emailTemplateSubject
+                      );
+                    }}
+                    placeholder="Select a template"
+                  />
+                </div>
+
+                <div className="col-12">
+                  <div className="mb-3">
+                    <label className="col-form-label ms-3">Subject</label>
+                    <input
+                      type="text"
+                      value={editEmailTemplateSubject}
+                      name="emailTemplateSubject"
+                      onChange={(e) =>
+                        setEditEmailTemplateSubject(e.target.value)
+                      }
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="col-form-label col-md-2">Body</label>
+                  <div className="col-md-12">
+                    <textarea
+                      rows={5}
+                      cols={5}
+                      className="form-control"
+                      name="emailTemplateMessage"
+                      placeholder="Enter text here"
+                      onChange={(e) => setEditEmailTemplateBody(e.target.value)}
+                      value={editEmailTemplateBody}
+                    />
+                  </div>
+                </div>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    if (selectedContact?.emailaddresses?.length > 0) {
+                      const url = `mailto:${selectedContact.emailaddresses[0]}?subject=${editEmailTemplateSubject}&body=${editEmailTemplateBody}`;
+                      window.open(url, "_blank");
+                    } else {
+                      alert("Email not available");
+                    }
+                  }}
+                >
+                  Send Mail
+                </button>
               </div>
             </div>
           </div>

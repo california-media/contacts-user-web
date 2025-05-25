@@ -34,7 +34,7 @@ const Templates = () => {
     useState(false);
   const dispatch = useDispatch();
   const userProfile = useSelector((state) => state.profile);
-console.log("userProfile in templates", userProfile);
+  console.log("userProfile in templates", userProfile);
 
   const handleWhatsappTemplateEditClick = (record) => {
     const updatedRecord = {
@@ -111,10 +111,10 @@ console.log("userProfile in templates", userProfile);
         return (
           <div className="cell-content justify-content-between">
             <Link
-            className=""
-                  to="#"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#whatsapp_template_offcanvas"
+              className="dropdown-item"
+              to="#"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#whatsapp_template_offcanvas"
               style={{
                 padding: 5,
                 maxWidth: 400,
@@ -123,7 +123,9 @@ console.log("userProfile in templates", userProfile);
                 textOverflow: "ellipsis",
                 padding: 5,
               }}
-              onClick={()=>{handleWhatsappTemplateEditClick(record);}}
+              onClick={() => {
+                handleWhatsappTemplateEditClick(record);
+              }}
             >
               {text}
             </Link>
@@ -177,7 +179,6 @@ console.log("userProfile in templates", userProfile);
             className=""
             style={{
               whiteSpace: "nowrap",
-              maxWidth: 800,
               overflow: "hidden",
               textOverflow: "ellipsis",
             }}
@@ -224,9 +225,12 @@ console.log("userProfile in templates", userProfile);
       render: (text, record) => {
         return (
           <div className="cell-content justify-content-between">
-            <div className="d-inline-block" style={{ padding: 5 }}>
+            <Link className="dropdown-item"
+                  to="#"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#email_template_offcanvas" style={{ padding: 5 }}>
               {text}
-            </div>
+            </Link>
 
             <div>
               <Link
@@ -270,8 +274,11 @@ console.log("userProfile in templates", userProfile);
       title: "Subject",
       dataIndex: "emailTemplateSubject",
       key: "emailTemplateSubject",
+      width: 200,
       render: (text, record) => {
-        return <div className="d-inline-block">{text}</div>;
+        return <div className="" style={{whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",}}>{text}</div>;
       },
     },
     {
@@ -279,23 +286,27 @@ console.log("userProfile in templates", userProfile);
       dataIndex: "emailTemplateBody",
       key: "emailTemplateBody",
       render: (text, record) => {
-        return <div className="d-inline-block">{text}</div>;
+        return <div className="" style={{whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",}}>{text}</div>;
       },
     },
   ];
 
-  const filteredWhatsappTemplateData = userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.filter(
-    (template) => {
-      return template;
-    }
-  );
+  const filteredWhatsappTemplateData =
+    userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.filter(
+      (template) => {
+        return template;
+      }
+    );
   console.log("filteredWhatsappTemplateData", filteredWhatsappTemplateData);
-  
-  const filteredEmailTemplateData = userProfile?.templates?.emailTemplates?.emailTemplatesData?.filter(
-    (template) => {
-      return template;
-    }
-  );
+
+  const filteredEmailTemplateData =
+    userProfile?.templates?.emailTemplates?.emailTemplatesData?.filter(
+      (template) => {
+        return template;
+      }
+    );
   return (
     <div className="page-wrapper">
       <div className="content">
@@ -406,12 +417,11 @@ console.log("userProfile in templates", userProfile);
                         <div className="d-flex align-items-center flex-wrap row-gap-2 justify-content-sm-end"></div>
                       </div>
                     </div>
-                    <div className="table-responsive custom-table">
+                    <div className="custom-table">
                       <Table
                         dataSource={filteredWhatsappTemplateData}
                         columns={whatsappTemplateColumns}
                         rowKey={(record) => record.key}
-                        style={{ tableLayout: "fixed", width: "100%" }}
                         // loading={isLoading}
                         // totalCount={totalContacts}
                         // onPageChange={handlePageChange}
@@ -491,7 +501,7 @@ console.log("userProfile in templates", userProfile);
                         <div className="d-flex align-items-center flex-wrap row-gap-2 justify-content-sm-end"></div>
                       </div>
                     </div>
-                    <div className="table-responsive custom-table">
+                    <div className="custom-table">
                       <Table
                         dataSource={filteredEmailTemplateData}
                         columns={emailTemplateColumns}

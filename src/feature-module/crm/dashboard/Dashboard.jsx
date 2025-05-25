@@ -126,7 +126,7 @@ const Dashboard = () => {
         <div className="content">
           <div className="container-fluid">
             <div className="row">
-              <div className="col-md-2">
+              <div className="col-md-3">
                 <div className="App">
                   {result !== "" && (
                     <div style={{ marginTop: 20, fontSize: 24, color: "teal" }}>
@@ -203,7 +203,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-md-10 fitContentHeight">
+              <div className="col-md-9 fitContentHeight">
                 <div className="row">
                   <div className="col-md-3 fitContentHeight">
                     <Link to={route.contacts}>
