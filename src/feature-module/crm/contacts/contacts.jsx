@@ -656,6 +656,7 @@ const Contacts = () => {
       dataIndex: "firstname",
       key: "firstname",
       width: 300,
+      fixed:"left",
       onCell: () => ({
         className: "hoverable-cell", // Adding a class for the cell
       }),
