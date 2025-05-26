@@ -117,6 +117,7 @@ const contactSlice = createSlice({
         state.contacts[index] = action.payload;
       } else {
         state.contacts.push(action.payload);
+        state.totalContacts += 1;
       }
     });
 
@@ -126,6 +127,7 @@ const contactSlice = createSlice({
       state.contacts = state.contacts.filter(
         (c) => c.contact_id !== action.payload
       );
+      state.totalContacts -= 1;
     });
   },
 });

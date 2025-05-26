@@ -30,6 +30,7 @@
     "dragula": "^3.7.3",
     "feather-icons-react": "^0.7.0",
     "framer-motion": "^11.5.4",
+    "gapi-script": "^1.2.0",
     "jquery": "^3.7.1",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.3",

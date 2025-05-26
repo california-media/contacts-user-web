@@ -149,13 +149,14 @@
 }
 
 [data-color="red"]{
-    $primary: #E41F07;
+    // $primary: #E41F07;
+    $primary: #2249aa;
     .btn-primary {
         background: $primary;
         border: 1px solid $primary;
         &:hover {
-            background: #c11a06;
-            border-color: #c11a06;
+            background: #2249aa;
+            border-color: #2249aa;
         }
     }
 }

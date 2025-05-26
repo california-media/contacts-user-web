@@ -20,7 +20,8 @@ const EmailTemplateOffcanvas = () => {
   };
   const handleAddEmailTemplate = async (e) => {
     e.preventDefault();
-    dispatch(editProfile(formData));
+   await dispatch(editProfile(formData)).unwrap();
+   document.getElementById("closeEmailTemplateOffcanvas")?.click();
     if(selectedTemplate.emailTemplate_id == "") {
       setFormData({
      emailTemplate_id: "",
@@ -68,6 +69,7 @@ const EmailTemplateOffcanvas = () => {
           className="btn-close custom-btn-close border p-1 me-0 d-flex align-items-center justify-content-center rounded-circle"
           data-bs-dismiss="offcanvas"
           aria-label="Close"
+          id="closeEmailTemplateOffcanvas"
         >
           <i className="ti ti-x" />
         </button>

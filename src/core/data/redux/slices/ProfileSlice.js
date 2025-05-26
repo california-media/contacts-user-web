@@ -17,9 +17,11 @@ const initialState = {
 
 export const fetchProfile = createAsyncThunk(
   "profile/fetchProfile",
-  async (_, { rejectWithValue }) => {
+  async (paginationData, { rejectWithValue }) => {
+    console.log("paginationData in fetchProfile", paginationData);
+    
     try {
-      const response = await api.post("/getUser");
+      const response = await api.post("/getUser",paginationData);
       localStorage.setItem("userId", response.data.data.id);
       return response.data;
     } catch (error) {
@@ -39,7 +41,7 @@ export const editProfile = createAsyncThunk(
       });
       console.log(response.data, "response from edit profile");
 
-      return response.data.data;
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -89,42 +91,44 @@ const profileSlice = createSlice({
           JSON.parse(JSON.stringify(state))
         );
         if (
-          action.payload?.templates?.whatsappTemplates
+          action.payload.data?.templates?.whatsappTemplates
             ?.whatsappTemplatesData?.[0]
         ) {
           const index =
             state.templates.whatsappTemplates.whatsappTemplatesData.findIndex(
               (template) =>
                 template.whatsappTemplate_id ===
-                action.payload.templates.whatsappTemplates
+                action.payload.data.templates.whatsappTemplates
                   .whatsappTemplatesData[0].whatsappTemplate_id
             );
           if (index !== -1) {
             state.templates.whatsappTemplates.whatsappTemplatesData[index] =
-              action.payload.templates.whatsappTemplates.whatsappTemplatesData[0];
+              action.payload.data.templates.whatsappTemplates.whatsappTemplatesData[0];
           } else {
             state.templates.whatsappTemplates.whatsappTemplatesData.unshift(
-              action.payload.templates.whatsappTemplates
+              action.payload.data.templates.whatsappTemplates
                 .whatsappTemplatesData[0]
             );
+            state.templates.whatsappTemplates.whatsappTemplatePagination.totalTemplates+=1;
           }
         } else if (
-          action.payload?.templates?.emailTemplates?.emailTemplatesData?.[0]
+          action.payload.data?.templates?.emailTemplates?.emailTemplatesData?.[0]
         ) {
           const index =
             state.templates.emailTemplates.emailTemplatesData.findIndex(
               (template) =>
                 template.emailTemplate_id ===
-                action.payload.templates.emailTemplates.emailTemplatesData[0]
+                action.payload.data.templates.emailTemplates.emailTemplatesData[0]
                   .emailTemplate_id
             );
           if (index !== -1) {
             state.templates.emailTemplates.emailTemplatesData[index] =
-              action.payload.templates.emailTemplates.emailTemplatesData[0];
+              action.payload.data.templates.emailTemplates.emailTemplatesData[0];
           } else {
             state.templates.emailTemplates.emailTemplatesData.unshift(
-              action.payload.templates.emailTemplates.emailTemplatesData[0]
+              action.payload.data.templates.emailTemplates.emailTemplatesData[0]
             );
+            state.templates.emailTemplates.emailTemplatePagination.totalTemplates+=1;
           }
         }
       })
@@ -143,6 +147,7 @@ const profileSlice = createSlice({
             state.templates.whatsappTemplates.whatsappTemplatesData.filter(
               (template) => template.whatsappTemplate_id !== template_id
             );
+          state.templates.whatsappTemplates.whatsappTemplatePagination.totalTemplates-=1;
         }
         if (templateType === "emailTemplate") {
           state.templates.emailTemplates.emailTemplatesData =
@@ -150,6 +155,7 @@ const profileSlice = createSlice({
               (template) => template.emailTemplate_id !== template_id
             );
         }
+        state.templates.emailTemplates.emailTemplatePagination.totalTemplates-=1;
       });
   },
 });

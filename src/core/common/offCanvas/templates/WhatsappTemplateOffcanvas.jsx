@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { editProfile } from "../../../data/redux/slices/ProfileSlice";
+import { Button, Toast } from "react-bootstrap";
 
 const WhatsappTemplateOffcanvas = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const WhatsappTemplateOffcanvas = () => {
   });
 
   const dispatch = useDispatch();
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const handleInputChange = (name, value) => {
     setFormData((prev) => ({
@@ -19,7 +21,14 @@ const WhatsappTemplateOffcanvas = () => {
   };
   const handleAddWhatsappTemplate = async (e) => {
     e.preventDefault();
-    dispatch(editProfile(formData));
+    const result = await dispatch(editProfile(formData)).unwrap();
+
+    if (result?.status == "success") {
+      setShowSuccessToast(true);
+    }
+
+    //  document.getElementById("closeWhatsappTemplateOffcanvas")?.click();
+
     if (selectedTemplate.whatsappTemplate_id == "") {
       setFormData({
         whatsappTemplate_id: "",
@@ -45,7 +54,12 @@ const WhatsappTemplateOffcanvas = () => {
       });
     }
   }, [selectedTemplate]);
-
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setShowSuccessToast(false);
+    }, 6000);
+    return () => clearTimeout(timeoutId);
+  }, [showSuccessToast]);
   return (
     <div
       className="offcanvas offcanvas-end offcanvas-large"
@@ -63,6 +77,7 @@ const WhatsappTemplateOffcanvas = () => {
           className="btn-close custom-btn-close border p-1 me-0 d-flex align-items-center justify-content-center rounded-circle"
           data-bs-dismiss="offcanvas"
           aria-label="Close"
+          id="closeWhatsappTemplateOffcanvas"
         >
           <i className="ti ti-x" />
         </button>
@@ -130,6 +145,25 @@ const WhatsappTemplateOffcanvas = () => {
             </button>
           </div>
         </form>
+      </div>
+      <div className="toast-container position-fixed top-0 end-0 p-3">
+        <Toast
+          show={showSuccessToast}
+          onClose={() => setShowSuccessToast(false)}
+          id="solidPrimaryToast"
+          className="colored-toast bg-primary text-fixed-white"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
+          <Toast.Header closeButton className="bg-primary text-fixed-white">
+            <strong className="me-auto">Toast</strong>
+          </Toast.Header>
+          <Toast.Body>
+            {/* Add your toast content here */}
+            Your toast message here.
+          </Toast.Body>
+        </Toast>
       </div>
     </div>
   );

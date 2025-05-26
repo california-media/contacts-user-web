@@ -206,6 +206,7 @@ button {
             &.focus,
             &:active,
             &.active {
+                // background-color: #{darken($value, 7%)};
                 background-color: #{darken($value, 7%)};
                 border:1px solid #{darken($value, 7%)};
                 color: $white;
@@ -725,8 +726,8 @@ $green-hover:  darken($green, 10%);
   -webkit-justify-content: center;
   -ms-flex-pack: center;
   &:hover, &:active{
-      background: #c11a06;
-      border-color: #c11a06;
+      background: #2249aa;
+      border-color: #2249aa;
       color: $white;
   }
   @include respond-below(custom991) {

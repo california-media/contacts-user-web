@@ -4887,8 +4887,10 @@ button:focus {
   color: #FFF;
 }
 .btn.btn-primary:hover, .btn.btn-primary:focus, .btn.btn-primary.focus, .btn.btn-primary:active, .btn.btn-primary.active {
-  background-color: #c11a06;
-  border: 1px solid #c11a06;
+  background-color: #2249aa;
+  border: 1px solid #2249aa;
+  /* background-color: #c11a06;
+  border: 1px solid #c11a06; */
   color: #FFF;
 }
 .btn.btn-secondary {

@@ -57,6 +57,7 @@ import {
   setSelectedContactSlice,
 } from "../../../core/data/redux/slices/SelectedContactSlice";
 import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
+import { IoMdPricetag } from "react-icons/io";
 
 const Contacts = () => {
   const route = all_routes;
@@ -654,7 +655,7 @@ const Contacts = () => {
       title: "Name",
       dataIndex: "firstname",
       key: "firstname",
-      width: 200,
+      width: 300,
       onCell: () => ({
         className: "hoverable-cell", // Adding a class for the cell
       }),
@@ -671,7 +672,7 @@ const Contacts = () => {
               style={{ color: "#2c5cc5" }}
               onClick={() => dispatch(setSelectedContact(record))}
             >
-              {text}
+              {text} {record.lastname}
             </Link>
 
             {/* Icons that will be shown on hover */}
@@ -896,9 +897,12 @@ const Contacts = () => {
                     <div
                       className="py-1 px-2 d-inline-block me-2"
                       key={index}
-                      style={{ background: "#ababab", borderRadius: 5 }}
+                      style={{ background: "#dff0ff", borderRadius: 5 }}
                     >
-                      <div>{tag}</div>
+                     <div className="d-flex align-items-center">
+                        <img src="/assets/img/icons/tagIcon.svg" className="me-1" style={{color:"#264966"}}/>
+                        <div style={{color:"#264966"}}>{tag}</div>
+                     </div>
                     </div>
                   );
                 })}

@@ -250,6 +250,11 @@ const Dashboard = () => {
                             <MdPeople color="#8280ff" size={35} />
                           </div>
                         </div>
+                          <div className="d-flex align-items-center mt-2">
+                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
+                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
+                              </p>
+                              </div>
                       </div>
                     </Link>
                   </div>
@@ -302,6 +307,11 @@ const Dashboard = () => {
                             <FaTag color="#fec53d" size={25} />
                           </div>
                         </div>
+                        <div className="d-flex align-items-center mt-2">
+                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
+                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
+                              </p>
+                              </div>
                       </div>
                     </Link>
                   </div>
@@ -350,6 +360,11 @@ const Dashboard = () => {
                             <IoQrCode color="#4ad991" size={30} />
                           </div>
                         </div>
+                        <div className="d-flex align-items-center mt-2">
+                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
+                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
+                              </p>
+                              </div>
                       </div>
                     </Link>
                   </div>
@@ -398,15 +413,227 @@ const Dashboard = () => {
                             <IoQrCode color="#4ad991" size={30} />
                           </div>
                         </div>
+                        <div className="d-flex align-items-center mt-2">
+                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
+                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
+                              </p>
+                              </div>
                       </div>
                     </Link>
                   </div>
                 </div>
                 <div className="row mt-5">
-                  <div className="col-md-12">
+                  <div className="col-md-6">
+                    <div className="row">
+                      <div className="col-md-6 fitContentHeight">
+                        <Link
+                          className="dropdown-item p-0 bgWhiteOnLinkHover"
+                          data-bs-toggle="offcanvas"
+                          data-bs-target="#groups_offcanvas"
+                        >
+                          <div className="dashboardSmallCards">
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: 20,
+                                    marginBottom: 10,
+                                    color: "#000",
+                                  }}
+                                >
+                                  Groups
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 26,
+                                    fontWeight: 500,
+                                    color: "#000",
+                                  }}
+                                >
+                                  {tags.length}
+                                </p>
+                              </div>
+                              <div
+                                style={{
+                                  width: 50,
+                                  height: 50,
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  backgroundColor: "#fef2d6",
+                                  borderRadius: 18,
+                                }}
+                              >
+                                <FaTag color="#fec53d" size={25} />
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                      <div className="col-md-6 fitContentHeight">
+                        <Link to={route.myScans}>
+                          <div className="dashboardSmallCards">
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: 20,
+                                    marginBottom: 10,
+                                    color: "#000",
+                                  }}
+                                >
+                                  Scanned Cards
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 26,
+                                    fontWeight: 500,
+                                    color: "#000",
+                                  }}
+                                >
+                                  50
+                                </p>
+                              </div>
+                              <div
+                                style={{
+                                  width: 70,
+                                  height: 70,
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  backgroundColor: "#d9f7e7",
+                                  borderRadius: 22,
+                                }}
+                              >
+                                <IoQrCode color="#4ad991" size={30} />
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="row mt-3">
+                      <div className="col-md-6 fitContentHeight">
+                        <Link
+                          className="dropdown-item p-0 bgWhiteOnLinkHover"
+                          data-bs-toggle="offcanvas"
+                          data-bs-target="#groups_offcanvas"
+                        >
+                          <div className="dashboardSmallCards">
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: 20,
+                                    marginBottom: 10,
+                                    color: "#000",
+                                  }}
+                                >
+                                  Groups
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 26,
+                                    fontWeight: 500,
+                                    color: "#000",
+                                  }}
+                                >
+                                  {tags.length}
+                                </p>
+                              </div>
+                              <div
+                                style={{
+                                  width: 50,
+                                  height: 50,
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  backgroundColor: "#fef2d6",
+                                  borderRadius: 18,
+                                }}
+                              >
+                                <FaTag color="#fec53d" size={25} />
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                      <div className="col-md-6 fitContentHeight">
+                        <Link to={route.myScans}>
+                          <div className="dashboardSmallCards">
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: 20,
+                                    marginBottom: 10,
+                                    color: "#000",
+                                  }}
+                                >
+                                  Scanned Cards
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: 26,
+                                    fontWeight: 500,
+                                    color: "#000",
+                                  }}
+                                >
+                                  50
+                                </p>
+                              </div>
+                              <div
+                                style={{
+                                  width: 70,
+                                  height: 70,
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  backgroundColor: "#d9f7e7",
+                                  borderRadius: 22,
+                                }}
+                              >
+                                <IoQrCode color="#4ad991" size={30} />
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
                     <div className="card">
                       <div className="card-header">
-                        <h5 className="card-title">Contacts</h5>
+                        <h5 className="card-title">Recently Visited</h5>
                       </div>
                       <div className="card-body">
                         <div id="s-line-area" />

@@ -1,3 +1,100 @@
+// import React, { useEffect, useState } from 'react';
+// import { gapi } from 'gapi-script';
+
+// const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+// const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+// const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly';
+
+// const Templates = () => {
+//    const [isAuthenticated, setIsAuthenticated] = useState(false);
+//   const [messages, setMessages] = useState([]);
+// console.log('CLIENT_ID:', CLIENT_ID);
+// console.log('API_KEY:', API_KEY);
+//   useEffect(() => {
+//     const initClient = () => {
+//       gapi.client.init({
+//         apiKey: API_KEY,
+//         clientId: CLIENT_ID,
+//         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
+//         scope: SCOPES,
+//       }).then(() => {
+//         gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+//         updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+//       });
+//     };
+
+//     gapi.load('client:auth2', initClient);
+//   }, []);
+
+//   const updateSigninStatus = (isSignedIn) => {
+//     setIsAuthenticated(isSignedIn);
+//     if (isSignedIn) {
+//       fetchMessages();
+//     }
+//   };
+
+//   const handleAuthClick = () => {
+//     gapi.auth2.getAuthInstance().signIn();
+//   };
+
+//   const handleSignoutClick = () => {
+//     gapi.auth2.getAuthInstance().signOut();
+//   };
+
+//   const fetchMessages = () => {
+//     gapi.client.gmail.users.messages.list({
+//       userId: 'me',
+//       maxResults: 10,
+//     }).then((response) => {
+//       const messages = response.result.messages;
+//       if (messages && messages.length > 0) {
+//         const messagePromises = messages.map((msg) =>
+//           gapi.client.gmail.users.messages.get({
+//             userId: 'me',
+//             id: msg.id,
+//           })
+//         );
+
+//         Promise.all(messagePromises).then((responses) => {
+//           const messageDetails = responses.map((res) => res.result);
+//           setMessages(messageDetails);
+//         });
+//       }
+//     });
+//   };
+//   return (
+//     <div className="page-wrapper">
+//       <div className="content">
+//         <div className="row">
+//           <div>
+//       {!isAuthenticated ? (
+//         <button onClick={handleAuthClick}>Sign in with Google</button>
+//       ) : (
+//         <>
+//           <button onClick={handleSignoutClick}>Sign out</button>
+//           <div>
+//             <h2>Mails:</h2>
+//             {messages.map((message, index) => (
+//               <div key={index}>
+//                 <p>Subject: {message.payload.headers.find(header => header.name === 'Subject')?.value}</p>
+//                 <p>From: {message.payload.headers.find(header => header.name === 'From')?.value}</p>
+//               </div>
+//             ))}
+//           </div>
+//         </>
+//       )}
+//     </div>
+//         </div>
+       
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Templates;
+
+
+
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import { FaTasks } from "react-icons/fa";
@@ -27,6 +124,14 @@ const Templates = () => {
     Title: true,
     Message: true,
   });
+  const [whatsappTemplatePage, setWhatsappTemplatePage] = useState(1);
+  const [whatsappTemplateLimit, setWhatsappTemplateLimit] = useState("10");
+  const [searchWhatsappTemplateQuery, setSearchWhatsappTemplateQuery] =
+    useState("");
+  const [emailTemplatePage, setEmailTemplatePage] = useState(1);
+  const [emailTemplateLimit, setEmailTemplateLimit] = useState("10");
+  const [searchEmailTemplateQuery, setSearchEmailTemplateQuery] =
+    useState("");
   const [showFavouriteWhatsappTemplates, setShowFavouriteWhatsappTemplates] =
     useState(false);
   const [deleteModalText, setDeleteModalText] = useState("");
@@ -35,7 +140,20 @@ const Templates = () => {
   const dispatch = useDispatch();
   const userProfile = useSelector((state) => state.profile);
   console.log("userProfile in templates", userProfile);
-
+  const handleWhatsappTemplatePageChange = (
+    newWhatsappPage,
+    newWhatsappPageSize
+  ) => {
+    setWhatsappTemplatePage(newWhatsappPage);
+    setWhatsappTemplateLimit(newWhatsappPageSize);
+  };
+  const handleEmailTemplatePageChange = (
+    newEmailPage,
+    newEmailPageSize
+  ) => {
+    setEmailTemplatePage(newEmailPage);
+    setEmailTemplateLimit(newEmailPageSize);
+  };
   const handleWhatsappTemplateEditClick = (record) => {
     const updatedRecord = {
       ...record,
@@ -43,6 +161,35 @@ const Templates = () => {
     };
     dispatch(setSelectedTemplate(updatedRecord));
   };
+
+  useEffect(() => {
+    const filters = {
+      whatsappTemplatePage,
+      whatsappTemplateLimit,
+      searchWhatsappTemplates: searchWhatsappTemplateQuery,
+    };
+    console.log("whatsapp filters in templates", filters);
+
+    dispatch(fetchProfile(filters));
+  }, [
+    whatsappTemplatePage,
+    whatsappTemplateLimit,
+    searchWhatsappTemplateQuery,
+  ]);
+  useEffect(() => {
+    const filters = {
+      emailTemplatePage,
+      emailTemplateLimit,
+      searchEmailTemplates: searchEmailTemplateQuery,
+    };
+    console.log("email filters in templates", filters);
+
+    dispatch(fetchProfile(filters));
+  }, [
+    emailTemplatePage,
+    emailTemplateLimit,
+    searchEmailTemplateQuery,
+  ]);
   const handleEmailTemplateEditClick = (record) => {
     const updatedRecord = {
       ...record,
@@ -225,10 +372,16 @@ const Templates = () => {
       render: (text, record) => {
         return (
           <div className="cell-content justify-content-between">
-            <Link className="dropdown-item"
-                  to="#"
-                  data-bs-toggle="offcanvas"
-                  data-bs-target="#email_template_offcanvas" style={{ padding: 5 }}>
+            <Link
+              className="dropdown-item"
+              to="#"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#email_template_offcanvas"
+              style={{ padding: 5 }}
+              onClick={() => {
+                handleEmailTemplateEditClick(record);
+              }}
+            >
               {text}
             </Link>
 
@@ -276,9 +429,18 @@ const Templates = () => {
       key: "emailTemplateSubject",
       width: 200,
       render: (text, record) => {
-        return <div className="" style={{whiteSpace: "nowrap",
+        return (
+          <div
+            className=""
+            style={{
+              whiteSpace: "nowrap",
               overflow: "hidden",
-              textOverflow: "ellipsis",}}>{text}</div>;
+              textOverflow: "ellipsis",
+            }}
+          >
+            {text}
+          </div>
+        );
       },
     },
     {
@@ -286,9 +448,18 @@ const Templates = () => {
       dataIndex: "emailTemplateBody",
       key: "emailTemplateBody",
       render: (text, record) => {
-        return <div className="" style={{whiteSpace: "nowrap",
+        return (
+          <div
+            className=""
+            style={{
+              whiteSpace: "nowrap",
               overflow: "hidden",
-              textOverflow: "ellipsis",}}>{text}</div>;
+              textOverflow: "ellipsis",
+            }}
+          >
+            {text}
+          </div>
+        );
       },
     },
   ];
@@ -324,6 +495,10 @@ const Templates = () => {
                       data-bs-toggle="tab"
                       data-bs-target="#whatsappTemplates"
                       className="nav-link active"
+                      onClick={() => {
+                        setSearchEmailTemplateQuery("");
+                        setSearchWhatsappTemplateQuery("");
+                      }}
                     >
                       <i className="fa-brands fa-whatsapp me-2"></i>
                       Whatsapp Templates
@@ -335,6 +510,10 @@ const Templates = () => {
                       data-bs-toggle="tab"
                       data-bs-target="#emailTemplates"
                       className="nav-link"
+                       onClick={() => {
+                        setSearchEmailTemplateQuery("");
+                        setSearchWhatsappTemplateQuery("");
+                      }}
                     >
                       <MdMail className="me-2" />
                       Email Templates
@@ -356,8 +535,13 @@ const Templates = () => {
                             <div className="row align-items-center">
                               <h4 className="page-title mb-0 ms-5">
                                 Templates
-                                <span className="count-title">123</span>
-                                {/* <span className="count-title">{totalContacts}</span> */}
+                                <span className="count-title">
+                                  {
+                                    userProfile.templates?.whatsappTemplates
+                                      ?.whatsappTemplatePagination
+                                      ?.totalTemplates
+                                  }
+                                </span>
                               </h4>
                             </div>
                           </div>
@@ -391,9 +575,13 @@ const Templates = () => {
                                 type="text"
                                 className="form-control"
                                 placeholder="Search Template"
-                                // onChange={(text) =>
-                                //   setSearchQuery(text.target.value)
-                                // }
+                                value={
+                                  searchWhatsappTemplateQuery}
+                                onChange={(text) =>
+                                  setSearchWhatsappTemplateQuery(
+                                    text.target.value
+                                  )
+                                }
                               />
                             </div>
 
@@ -423,8 +611,11 @@ const Templates = () => {
                         columns={whatsappTemplateColumns}
                         rowKey={(record) => record.key}
                         // loading={isLoading}
-                        // totalCount={totalContacts}
-                        // onPageChange={handlePageChange}
+                        totalCount={
+                          userProfile.templates?.whatsappTemplates
+                            ?.whatsappTemplatePagination?.totalTemplates
+                        }
+                        onPageChange={handleWhatsappTemplatePageChange}
                       />
                     </div>
                   </div>
@@ -440,12 +631,15 @@ const Templates = () => {
                             <div className="row align-items-center">
                               <h4 className="page-title mb-0 ms-5">
                                 Templates
-                                <span className="count-title">12</span>
-                                {/* <span className="count-title">{totalContacts}</span> */}
+                                <span className="count-title">
+                                  {
+                                    userProfile.templates?.emailTemplates
+                                      ?.emailTemplatePagination?.totalTemplates
+                                  }
+                                </span>
                               </h4>
                             </div>
                           </div>
-
                           <div className="d-flex">
                             <Link
                               to="#"
@@ -475,9 +669,12 @@ const Templates = () => {
                                 type="text"
                                 className="form-control"
                                 placeholder="Search Template"
-                                // onChange={(text) =>
-                                //   setSearchQuery(text.target.value)
-                                // }
+                                value={searchEmailTemplateQuery}
+                               onChange={(text) =>
+                                  setSearchEmailTemplateQuery(
+                                    text.target.value
+                                  )
+                                }
                               />
                             </div>
 
@@ -507,8 +704,11 @@ const Templates = () => {
                         columns={emailTemplateColumns}
                         rowKey={(record) => record.key}
                         // loading={isLoading}
-                        // totalCount={totalContacts}
-                        // onPageChange={handlePageChange}
+                        totalCount={
+                          userProfile.templates?.emailTemplates
+                            ?.emailTemplatePagination?.totalTemplates
+                        }
+                        onPageChange={handleEmailTemplatePageChange}
                       />
                     </div>
                   </div>

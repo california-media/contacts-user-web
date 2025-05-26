@@ -83,6 +83,8 @@ const EditCell = ({
         padding: "5px",
       }}
     >
+      {console.log(fieldValue,"fieldValuefieldValuefieldValue")
+      }
       {routeLink ? (
         <Link to={routeLink} state={{ record }} className="d-flex flex-column">
           {textColor ? (
@@ -123,6 +125,10 @@ const EditCell = ({
           title="Edit"
           style={{
             cursor: "pointer",
+                background: "linear-gradient(180deg, #fff, #f5f7f9)",
+    border: "1px solid #cfd7df",
+    padding: "2px 6px",
+    borderRadius: "4px",
           }}
         >
           ✎

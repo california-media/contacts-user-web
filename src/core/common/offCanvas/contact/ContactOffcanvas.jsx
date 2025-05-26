@@ -80,8 +80,8 @@ const LeadOffcanvas = ({selectedContact}) => {
       if (newTags.length > 0) {
         await dispatch(addTag({ tag: newTags })).unwrap();
       }
-      dispatch(saveContact(formDataObj));
-
+     await dispatch(saveContact(formDataObj)).unwrap();
+document.getElementById("closeContactOffcanvas")?.click();
       setIsLoading(false);
     } catch (error) {
       console.error("Error:", error);
@@ -212,6 +212,7 @@ const LeadOffcanvas = ({selectedContact}) => {
           className="btn-close custom-btn-close border p-1 me-0 d-flex align-items-center justify-content-center rounded-circle"
           data-bs-dismiss="offcanvas"
           aria-label="Close"
+          id="closeContactOffcanvas"
         >
           <i className="ti ti-x" />
         </button>
@@ -346,8 +347,8 @@ const LeadOffcanvas = ({selectedContact}) => {
               onClick={handleContact}
             >
               {isLoading ? (
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="sr-only">Loading...</span>
+                <div className="spinner-border spinner-border-sm" role="status">
+                  <span className="sr-only">Loading...</span>
                 </div>
               ) : selectedContact.contact_id == null ? (
                 "Create"
