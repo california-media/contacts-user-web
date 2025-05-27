@@ -1,6 +1,6 @@
 import SubMenu from "antd/es/menu/SubMenu";
 import { all_routes } from "../../../feature-module/router/all_routes";
-import { IoMdPeople, IoMdPricetag } from "react-icons/io";
+import { IoMdMail, IoMdPeople, IoMdPricetag } from "react-icons/io";
 import { FaWhatsapp } from "react-icons/fa";
 import { Link } from "react-router-dom";
 const route = all_routes;
@@ -110,6 +110,19 @@ export const SidebarData = [
         showSubRoute: false,
         submenuItems: [
           { label: "Templates", link: route.templates, icon: <IoMdPricetag /> }
+          // { label: "Customer Details", link: route.contacts, icon:<IoMdPeople /> },
+          // { label: "Customer Grid", link: route.contactGrid, icon:<IoMdPeople /> },
+        ],
+      },
+      {
+        label: "Emails",
+        icon: "ti ti-mail",
+        // subLink1: route.contactGrid,
+        // subLink2: route.contactDetails,
+        submenu: true,
+        showSubRoute: false,
+        submenuItems: [
+          { label: "Emails", link: route.emails, icon: <IoMdMail /> }
           // { label: "Customer Details", link: route.contacts, icon:<IoMdPeople /> },
           // { label: "Customer Grid", link: route.contactGrid, icon:<IoMdPeople /> },
         ],

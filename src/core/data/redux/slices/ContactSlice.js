@@ -5,6 +5,11 @@ import { setSelectedContact } from "./SelectedContactSlice";
 export const fetchContacts = createAsyncThunk(
   "contacts/fetchContacts",
   async ({ filters }, { rejectWithValue }) => {
+    console.log("filters in fetchContacts", filters);
+    const isFavourite = filters.isFavourite;
+    const favouriteContactsPage = filters.favouriteContactsPage;
+    const favouriteContactsLimit = filters.favouriteContactsLimit;
+    const favouriteContactsSearch = filters.favouriteContactsSearch;
     const id = filters.id;
     const page = filters.page;
     const limit = filters.limit;
@@ -17,7 +22,12 @@ export const fetchContacts = createAsyncThunk(
         limit,
         search,
         tag,
+        isFavourite,
+        favouriteContactsPage,
+        favouriteContactsLimit,
+        favouriteContactsSearch
       });
+console.log("response from fetchContacts", response.data);
 
       return {
         data: response.data.data,

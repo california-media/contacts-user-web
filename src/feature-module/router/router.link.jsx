@@ -125,6 +125,7 @@ import Groups from "../crm/groups/Groups";
 import Contacts from "../crm/contacts/contacts";
 import UpgradePlan from "../settings/generalSettings/upgradePlan";
 import MyScans from "../settings/generalSettings/myScans";
+import Emails from "../crm/emails/Emails";
 // import Projects from "../crm/projects";
 // import Task from "../crm/task";
 // import CompaniesDetails from "../crm/companies/companiesDetails";
@@ -451,6 +452,12 @@ export const publicRoutes = [
     element: <Templates />,
     route: Route,
     title:'Templates'
+  },
+  {
+    path: route.emails,
+    element: <Emails />,
+    route: Route,
+    title:'Emails'
   },
   // {
   //   path: route.accordion,

@@ -22,7 +22,7 @@ const EditCell = ({
   record,
 }) => {
   const [newValue, setNewValue] = useState(fieldValue);
-    const popupRef = useRef(null);
+  const popupRef = useRef(null);
 
   const route = all_routes;
   const all_companies = [
@@ -47,7 +47,7 @@ const EditCell = ({
     onClose();
   };
 
- useEffect(() => {
+  useEffect(() => {
     if (isActive) {
       document.addEventListener("mousedown", handleClickOutside);
     } else {
@@ -61,16 +61,16 @@ const EditCell = ({
   const handleClickOutside = (event) => {
     // Check if click is outside of popup
     console.log("clicked outside");
-    console.log(popupRef.current,"popupRef.current");
-    console.log(event.target,"event.target");
-    
+    console.log(popupRef.current, "popupRef.current");
+    console.log(event.target, "event.target");
+
     if (popupRef.current && !popupRef.current.contains(event.target)) {
       handleCancel(); // <-- Call handleCancel if outside
     }
   };
   useEffect(() => {
-  console.log("Popup Ref: ", popupRef.current); // <-- Should not be null
-}, [isActive]);
+    console.log("Popup Ref: ", popupRef.current); // <-- Should not be null
+  }, [isActive]);
   return (
     <div
       className="editable-cell"
@@ -83,8 +83,7 @@ const EditCell = ({
         padding: "5px",
       }}
     >
-      {console.log(fieldValue,"fieldValuefieldValuefieldValue")
-      }
+      {console.log(fieldValue, "fieldValuefieldValuefieldValue")}
       {routeLink ? (
         <Link to={routeLink} state={{ record }} className="d-flex flex-column">
           {textColor ? (
@@ -125,10 +124,10 @@ const EditCell = ({
           title="Edit"
           style={{
             cursor: "pointer",
-                background: "linear-gradient(180deg, #fff, #f5f7f9)",
-    border: "1px solid #cfd7df",
-    padding: "2px 6px",
-    borderRadius: "4px",
+            background: "linear-gradient(180deg, #fff, #f5f7f9)",
+            border: "1px solid #cfd7df",
+            padding: "2px 6px",
+            borderRadius: "4px",
           }}
         >
           ✎

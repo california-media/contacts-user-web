@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { editProfile } from "../../../data/redux/slices/ProfileSlice";
+import DefaultEditor from "react-simple-wysiwyg";
 
 const EmailTemplateOffcanvas = () => {
   const [formData, setFormData] = useState({
@@ -108,7 +109,14 @@ const EmailTemplateOffcanvas = () => {
                   <div className="col-12">
             <div className="mb-3">
                   <label className="col-form-label ms-3">Body</label>
-                    <textarea
+                  <DefaultEditor name="emailTemplateBody"
+                      placeholder="Enter text here" value={formData.emailTemplateBody} 
+                      onChange={(e) =>{
+                        console.log("Editor value changed:", e.target.value);
+                        
+                        handleInputChange(e.target.name, e.target.value)}
+                  }/>
+                    {/* <textarea
                       rows={5}
                       cols={5}
                       className="form-control"
@@ -118,7 +126,7 @@ const EmailTemplateOffcanvas = () => {
                     handleInputChange(e.target.name, e.target.value)
                   }
                       value={formData.emailTemplateBody}
-                    />
+                    /> */}
                   </div>
                 </div>
           </div>

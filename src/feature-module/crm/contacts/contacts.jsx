@@ -58,6 +58,8 @@ import {
 } from "../../../core/data/redux/slices/SelectedContactSlice";
 import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
 import { IoMdPricetag } from "react-icons/io";
+import DefaultEditor from "react-simple-wysiwyg";
+import { gapi } from "gapi-script";
 
 const Contacts = () => {
   const route = all_routes;
@@ -76,6 +78,7 @@ const Contacts = () => {
   const [show3, setShow3] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedContactGroup, setSelectedContactGroup] = useState([]);
+  const [showFavourites, setShowFavourites] = useState(false);
   const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
     useState("");
   const [editEmailTemplateBody, setEditEmailTemplateBody] = useState("");
@@ -92,7 +95,9 @@ const Contacts = () => {
   const [selectedOption2, setSelectedOption2] = useState("");
   // const [selectedContact, setSelectedContact] = useState(null);
   const [page, setPage] = useState(1);
+  const [favouritePage, setFavouritePage] = useState(1);
   const [limit, setLimit] = useState();
+  const [favouriteLimit, setFavouriteLimit] = useState();
   const selectedContact = useSelector((state) => state.selectedContact);
   const { tags } = useSelector((state) => state.tags);
   const [activeRecordKey, setActiveRecordKey] = useState(null);
@@ -112,6 +117,10 @@ const Contacts = () => {
   const handlePageChange = (newPage, newPageSize) => {
     setPage(newPage);
     setLimit(newPageSize);
+  };
+  const handleFavouritePageChange = (newFavouritePage, newFavouritePageSize) => {
+    setFavouritePage(newFavouritePage);
+    setFavouriteLimit(newFavouritePageSize);
   };
 
   const [selectedDateRange, setSelectedDateRange] = useState({
@@ -587,6 +596,18 @@ const Contacts = () => {
   useEffect(() => {
     setAllContacts(contacts);
   }, [contacts]);
+    useEffect(() => {
+    console.log("Fetching favourite contacts with page:", favouritePage, "and limit:", favouriteLimit);
+    
+    const filters = {
+     isFavourite: true,
+      favouriteContactsPage:favouritePage,
+      favouriteContactsLimit:favouriteLimit,
+      favouriteContactsSearch: "",
+    };
+
+    dispatch(fetchContacts({ filters }));
+  }, [favouritePage, favouriteLimit, dispatch]);
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const filters = {
@@ -599,6 +620,52 @@ const Contacts = () => {
 
     dispatch(fetchContacts({ filters }));
   }, [page, limit, dispatch, searchQuery, selectedContactGroup]);
+
+
+
+  const sendEmail = async () => {
+    if (!selectedContact.emailaddresses[0] || !editEmailTemplateSubject || !editEmailTemplateBody) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const headers = [
+      `To: ${selectedContact.emailaddresses[0]}`,
+      `Subject: ${editEmailTemplateSubject}`,
+      "Content-Type: text/html; charset=utf-8",
+      "",
+      `<p>${editEmailTemplateBody}</p>`,
+    ];
+
+    const email = headers.join("\r\n");
+
+    // const base64EncodedEmail = btoa(unescape(encodeURIComponent(email)))
+    //   .replace(/\+/g, "-")
+    //   .replace(/\//g, "_")
+    //   .replace(/=+$/, "");
+
+     const base64EncodedEmail = btoa(
+    new TextEncoder().encode(email)
+      .reduce((data, byte) => data + String.fromCharCode(byte), '')
+  )
+    try {
+      await gapi.client.gmail.users.messages.send({
+        userId: "me",
+        resource: {
+          raw: base64EncodedEmail,
+        },
+      });
+      alert("Email sent successfully!");
+      // setTo("");
+      // setSubject("");
+      // setMessage("");
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
+  };
+
+
+
 
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
@@ -630,7 +697,32 @@ const Contacts = () => {
 
     // setSelectedContact(record);
   };
+  console.log(showFavourites, "showFavourites in contacts");
+  
+const handleFavouriteToggle = () => {
+  const newValue = !showFavourites;
+  setShowFavourites(newValue);
 
+  if (newValue) {
+    console.log("Fetching favourite contacts...");
+    const filters = {
+      isFavourite: true,
+      favouriteContactsPage: 1,
+      favouriteContactsLimit: 10,
+      favouriteContactsSearch: "",
+    };
+    dispatch(fetchContacts({ filters}));
+  } else {
+    const filters = {
+      page,
+      limit,
+      search: searchQuery,
+      tag: selectedContactGroup,
+    };
+
+    dispatch(fetchContacts({ filters }));
+  }
+};
   const columns = [
     {
       title: "",
@@ -757,8 +849,6 @@ const Contacts = () => {
           </div>
         );
       },
-
-      sorter: (a, b) => a.firstname.localeCompare(b.firstname),
     },
     // {
     //   title: "Company",
@@ -817,11 +907,14 @@ const Contacts = () => {
         },
       }),
       render: (text, record) => {
+        console.log(text, "text in phone render");
+        console.log(record, "record in phone render");
+        
         return (
           <>
             <EditCell
               fieldName="Phone"
-              fieldValue={text}
+              fieldValue={text.length > 0 ? text[0] : ""}
               recordKey={record.contact_id}
               columnKey="phonenumbers"
               routeLink="#"
@@ -841,7 +934,6 @@ const Contacts = () => {
           </>
         );
       },
-      sorter: (a, b) => a.phone.localeCompare(b.phone),
     },
     {
       title: "Email",
@@ -863,7 +955,7 @@ const Contacts = () => {
           <>
             <EditCell
               fieldName="Email"
-              fieldValue={text}
+              fieldValue={text.length > 0 ? text[0] : ""}
               recordKey={record.key}
               columnKey="emailaddresses"
               routeLink="#"
@@ -883,7 +975,6 @@ const Contacts = () => {
           </>
         );
       },
-      sorter: (a, b) => a.emailaddresses.localeCompare(b.emailaddresses),
     },
     {
       title: "Groups",
@@ -912,7 +1003,6 @@ const Contacts = () => {
           </div>
         );
       },
-      // sorter: (a, b) => a.status.localeCompare(b.status),
     },
   ];
 
@@ -1220,73 +1310,46 @@ const Contacts = () => {
                                           </ul>
                                         </div>
                                       </div>
-                                    </div>
-
-                                    {/* <div className="filter-set-content">
-                                      <div className="filter-set-content-head">
+                                      <div className="filter-set-content-head mt-2">
                                         <Link
                                           to="#"
                                           className="collapsed"
                                           data-bs-toggle="collapse"
-                                          data-bs-target="#owner"
+                                          data-bs-target="#Favourite"
                                           aria-expanded="false"
-                                          aria-controls="owner"
+                                          aria-controls="Favourite"
                                         >
-                                          Lead Owner
+                                          Favourite
                                         </Link>
                                       </div>
                                       <div
                                         className="filter-set-contents accordion-collapse collapse"
-                                        id="owner"
+                                        id="Favourite"
                                         data-bs-parent="#accordionExample"
                                       >
                                         <div className="filter-content-list">
-                                          <div className="mb-2 icon-form">
-                                            <span className="form-icon">
-                                              <i className="ti ti-search" />
-                                            </span>
-                                            <input
-                                              type="text"
-                                              className="form-control"
-                                              placeholder="Search Owner"
-                                              value={searchEmployeeInFilter}
-                                              onChange={(e) =>
-                                                setSearchEmployeeInFilter(
-                                                  e.target.value
-                                                )
-                                              }
-                                            />
-                                          </div>
-                                          <ul>
-                                            {filteredEmployees.map(
-                                              (companyEmployee, index) => {
-                                                return (
-                                                  <li key={index}>
-                                                    <div className="filter-checks">
-                                                      <label className="checkboxs">
-                                                        <input
-                                                          type="checkbox"
-                                                          checked={selectedLeadEmployee.includes(
-                                                            companyEmployee.value.toLowerCase()
-                                                          )}
-                                                          onChange={() =>
-                                                            filterLeadEmployee(
-                                                              companyEmployee.value.toLowerCase()
-                                                            )
-                                                          }
-                                                        />
-                                                        <span className="checkmarks" />
-                                                        {companyEmployee.value}
-                                                      </label>
-                                                    </div>
-                                                  </li>
-                                                );
-                                              }
-                                            )}
+                                          <ul className="mb-0">
+                                                <li >
+                                                  <div className="filter-checks">
+                                                    <label className="checkboxs">
+                                                      
+                                                      <input
+                                                        type="checkbox"
+                                                       checked={showFavourites}
+        onChange={handleFavouriteToggle}
+
+                                                      />
+                                                      <span className="checkmarks" />
+                                                      Show Favourite
+                                                    </label>
+                                                  </div>
+                                                </li>
+                                       
+                                      
                                           </ul>
                                         </div>
                                       </div>
-                                    </div> */}
+                                    </div>
                                   </div>
                                   <div className="filter-reset-btns">
                                     <div className="row">
@@ -1464,7 +1527,7 @@ const Contacts = () => {
                         rowKey={(record) => record.key}
                         loading={isLoading}
                         totalCount={totalContacts}
-                        onPageChange={handlePageChange}
+                        onPageChange={showFavourites?handleFavouritePageChange:handlePageChange}
                       />
                     </div>
                     <div className="row align-items-center">
@@ -2003,7 +2066,7 @@ const Contacts = () => {
                 <div className="mb-3">
                   <label className="col-form-label col-md-2">Body</label>
                   <div className="col-md-12">
-                    <textarea
+                    {/* <textarea
                       rows={5}
                       cols={5}
                       className="form-control"
@@ -2011,19 +2074,22 @@ const Contacts = () => {
                       placeholder="Enter text here"
                       onChange={(e) => setEditEmailTemplateBody(e.target.value)}
                       value={editEmailTemplateBody}
-                    />
+                    /> */}
+                    <DefaultEditor className="form-control" value={editEmailTemplateBody} onChange={(e) => setEditEmailTemplateBody(e.target.value)} name="emailTemplateMessage" placeholder="Enter text here" />
                   </div>
                 </div>
                 <button
                   className="btn btn-primary"
-                  onClick={() => {
-                    if (selectedContact?.emailaddresses?.length > 0) {
-                      const url = `mailto:${selectedContact.emailaddresses[0]}?subject=${editEmailTemplateSubject}&body=${editEmailTemplateBody}`;
-                      window.open(url, "_blank");
-                    } else {
-                      alert("Email not available");
-                    }
-                  }}
+                  onClick={sendEmail
+                  //   () => {
+                  //   if (selectedContact?.emailaddresses?.length > 0) {
+                  //     const url = `mailto:${selectedContact.emailaddresses[0]}?subject=${editEmailTemplateSubject}&body=${editEmailTemplateBody}`;
+                  //     window.open(url, "_blank");
+                  //   } else {
+                  //     alert("Email not available");
+                  //   }
+                  // }
+                }
                 >
                   Send Mail
                 </button>

@@ -1,100 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-// import { gapi } from 'gapi-script';
-
-// const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-// const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-// const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly';
-
-// const Templates = () => {
-//    const [isAuthenticated, setIsAuthenticated] = useState(false);
-//   const [messages, setMessages] = useState([]);
-// console.log('CLIENT_ID:', CLIENT_ID);
-// console.log('API_KEY:', API_KEY);
-//   useEffect(() => {
-//     const initClient = () => {
-//       gapi.client.init({
-//         apiKey: API_KEY,
-//         clientId: CLIENT_ID,
-//         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'],
-//         scope: SCOPES,
-//       }).then(() => {
-//         gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-//         updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-//       });
-//     };
-
-//     gapi.load('client:auth2', initClient);
-//   }, []);
-
-//   const updateSigninStatus = (isSignedIn) => {
-//     setIsAuthenticated(isSignedIn);
-//     if (isSignedIn) {
-//       fetchMessages();
-//     }
-//   };
-
-//   const handleAuthClick = () => {
-//     gapi.auth2.getAuthInstance().signIn();
-//   };
-
-//   const handleSignoutClick = () => {
-//     gapi.auth2.getAuthInstance().signOut();
-//   };
-
-//   const fetchMessages = () => {
-//     gapi.client.gmail.users.messages.list({
-//       userId: 'me',
-//       maxResults: 10,
-//     }).then((response) => {
-//       const messages = response.result.messages;
-//       if (messages && messages.length > 0) {
-//         const messagePromises = messages.map((msg) =>
-//           gapi.client.gmail.users.messages.get({
-//             userId: 'me',
-//             id: msg.id,
-//           })
-//         );
-
-//         Promise.all(messagePromises).then((responses) => {
-//           const messageDetails = responses.map((res) => res.result);
-//           setMessages(messageDetails);
-//         });
-//       }
-//     });
-//   };
-//   return (
-//     <div className="page-wrapper">
-//       <div className="content">
-//         <div className="row">
-//           <div>
-//       {!isAuthenticated ? (
-//         <button onClick={handleAuthClick}>Sign in with Google</button>
-//       ) : (
-//         <>
-//           <button onClick={handleSignoutClick}>Sign out</button>
-//           <div>
-//             <h2>Mails:</h2>
-//             {messages.map((message, index) => (
-//               <div key={index}>
-//                 <p>Subject: {message.payload.headers.find(header => header.name === 'Subject')?.value}</p>
-//                 <p>From: {message.payload.headers.find(header => header.name === 'From')?.value}</p>
-//               </div>
-//             ))}
-//           </div>
-//         </>
-//       )}
-//     </div>
-//         </div>
-       
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Templates;
-
-
-
 import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import { FaTasks } from "react-icons/fa";
@@ -117,6 +20,7 @@ import {
   setSelectedTemplate,
 } from "../../../core/data/redux/slices/SelectedTemplateSlice";
 import EmailTemplateOffcanvas from "../../../core/common/offCanvas/templates/EmailTemplateOffcanvas";
+import useDebounce from "../../../core/data/redux/hooks/useDebounce";
 
 const Templates = () => {
   const [columnVisibility, setColumnVisibility] = useState({
@@ -138,8 +42,9 @@ const Templates = () => {
   const [showFavouriteEmailTemplates, setShowFavouriteEmailTemplates] =
     useState(false);
   const dispatch = useDispatch();
+    const debouncedWhatsappSearchQuery = useDebounce(searchWhatsappTemplateQuery)
+    const debouncedEmailSearchQuery = useDebounce(searchEmailTemplateQuery)
   const userProfile = useSelector((state) => state.profile);
-  console.log("userProfile in templates", userProfile);
   const handleWhatsappTemplatePageChange = (
     newWhatsappPage,
     newWhatsappPageSize
@@ -166,29 +71,27 @@ const Templates = () => {
     const filters = {
       whatsappTemplatePage,
       whatsappTemplateLimit,
-      searchWhatsappTemplates: searchWhatsappTemplateQuery,
+      searchWhatsappTemplates: debouncedWhatsappSearchQuery,
     };
-    console.log("whatsapp filters in templates", filters);
 
     dispatch(fetchProfile(filters));
   }, [
     whatsappTemplatePage,
     whatsappTemplateLimit,
-    searchWhatsappTemplateQuery,
+    debouncedWhatsappSearchQuery,
   ]);
   useEffect(() => {
     const filters = {
       emailTemplatePage,
       emailTemplateLimit,
-      searchEmailTemplates: searchEmailTemplateQuery,
+      searchEmailTemplates: debouncedEmailSearchQuery,
     };
-    console.log("email filters in templates", filters);
 
     dispatch(fetchProfile(filters));
   }, [
     emailTemplatePage,
     emailTemplateLimit,
-    searchEmailTemplateQuery,
+    debouncedEmailSearchQuery,
   ]);
   const handleEmailTemplateEditClick = (record) => {
     const updatedRecord = {
@@ -215,7 +118,7 @@ const Templates = () => {
     dispatch(editProfile(toggleFavourite));
   };
   const selectedTemplate = useSelector((state) => state.selectedTemplate);
-  console.log(selectedTemplate, "selected Template");
+
   const handleDeleteTemplate = () => {
     const templateDataDelete = {
       templateType: `${selectedTemplate.templateType}Template`,
@@ -470,7 +373,6 @@ const Templates = () => {
         return template;
       }
     );
-  console.log("filteredWhatsappTemplateData", filteredWhatsappTemplateData);
 
   const filteredEmailTemplateData =
     userProfile?.templates?.emailTemplates?.emailTemplatesData?.filter(
@@ -478,6 +380,9 @@ const Templates = () => {
         return template;
       }
     );
+    const toggleAllFaouriteWhatsappTemplates=()=>{
+
+    }
   return (
     <div className="page-wrapper">
       <div className="content">
@@ -550,7 +455,10 @@ const Templates = () => {
                             <Link
                               to="#"
                               className="btn btn-soft-secondary me-2"
-                              onClick={() => {}}
+                              onClick={
+
+                                toggleAllFaouriteWhatsappTemplates
+                              }
                             >
                               <i
                                 className={`fa ${

@@ -18,11 +18,12 @@ const initialState = {
 export const fetchProfile = createAsyncThunk(
   "profile/fetchProfile",
   async (paginationData, { rejectWithValue }) => {
-    console.log("paginationData in fetchProfile", paginationData);
     
     try {
       const response = await api.post("/getUser",paginationData);
       localStorage.setItem("userId", response.data.data.id);
+      console.log(response.data, "response from fetch profile");
+
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -39,7 +40,6 @@ export const editProfile = createAsyncThunk(
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(response.data, "response from edit profile");
 
       return response.data;
     } catch (error) {
@@ -50,13 +50,11 @@ export const editProfile = createAsyncThunk(
 export const deleteTemplate = createAsyncThunk(
   "profile/deleteTemplate",
   async (deleteTemplateData, { rejectWithValue }) => {
-    console.log("deleteTemplateData", deleteTemplateData);
 
     try {
       const response = await api.delete("/deleteTemplate", {
         data: deleteTemplateData,
       });
-      console.log("response from delete template", response.data.data);
 
       return response.data.data;
     } catch (error) {
@@ -85,11 +83,6 @@ const profileSlice = createSlice({
         state.error = action.error;
       })
       .addCase(editProfile.fulfilled, (state, action) => {
-        console.log("edit profile response action.payload", action.payload);
-        console.log(
-          "edit profile response state (after update)",
-          JSON.parse(JSON.stringify(state))
-        );
         if (
           action.payload.data?.templates?.whatsappTemplates
             ?.whatsappTemplatesData?.[0]
@@ -137,10 +130,6 @@ const profileSlice = createSlice({
       })
       .addCase(deleteTemplate.fulfilled, (state, action) => {
         const { templateType, template_id } = action.payload;
-        console.log(
-          "delete template response state",
-          JSON.parse(JSON.stringify(state))
-        );
 
         if (templateType === "whatsappTemplate") {
           state.templates.whatsappTemplates.whatsappTemplatesData =
