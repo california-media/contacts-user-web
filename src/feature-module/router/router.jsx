@@ -8,13 +8,17 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import { all_routes } from "./all_routes";
 import { fetchProfile } from "../../core/data/redux/slices/ProfileSlice";
 import { fetchTags } from "../../core/data/redux/slices/TagSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import PrivateRoute from "./PrivateRoute";
+import { Toast } from "react-bootstrap";
+import { hideToast } from "../../core/data/redux/slices/ToastSlice";
 
 const ALLRoutes = () => {
   const location = useLocation();
     const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { toasts } = useSelector((state) => state.toast);
+  console.log(toasts,"toastss");
   
   const route = all_routes;
   // Find the current route in either public or auth routes
@@ -81,6 +85,64 @@ const ALLRoutes = () => {
           }
         />
       </Routes>
+     
+     <div className="toast-container position-fixed top-0 end-0 p-3">
+  {toasts.map((toast) => (
+    <Toast
+      key={toast.id}
+      show={true}
+      onClose={() => dispatch(hideToast(toast.id))}
+      delay={toast.delay}
+      autohide
+      className={`colored-toast bg-${toast.variant} text-white mb-2`}
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      {toast.heading ? (
+        <Toast.Header closeButton className={`bg-${toast.variant} text-white`}>
+          <strong className="me-auto">{toast.heading}</strong>
+        </Toast.Header>
+      ) : null}
+      
+      <Toast.Body className="d-flex justify-content-between align-items-start">
+        <span>{toast.message}</span>
+        {!toast.heading && (
+          <button
+            type="button"
+            className="btn-close btn-close-white ms-3"
+            aria-label="Close"
+            onClick={() => dispatch(hideToast(toast.id))}
+          ></button>
+        )}
+      </Toast.Body>
+    </Toast>
+  ))}
+</div>
+
+      {/* <div className="toast-container position-fixed top-0 end-0 p-3">
+  {toasts.map((toast) => (
+    <Toast
+      key={toast.id}
+      show={true}
+      onClose={() => dispatch(hideToast(toast.id))}
+      delay={toast.delay}
+      autohide
+      className={`colored-toast bg-${toast.variant} text-white mb-2`}
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <Toast.Header closeButton className={`bg-${toast.variant} text-white`}>
+        <strong className="me-auto">
+          {toast.heading || ""}
+        </strong>
+      </Toast.Header>
+      <Toast.Body>{toast.message}</Toast.Body>
+    </Toast>
+  ))}
+</div> */}
+
     </>
   );
 };

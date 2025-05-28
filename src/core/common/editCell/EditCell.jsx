@@ -38,7 +38,7 @@ const EditCell = ({
   };
 
   const handleCancel = () => {
-    console.log("Closing the field...");
+
     onClose();
     setNewValue(fieldValue);
   };
@@ -60,9 +60,7 @@ const EditCell = ({
   }, [isActive]);
   const handleClickOutside = (event) => {
     // Check if click is outside of popup
-    console.log("clicked outside");
-    console.log(popupRef.current, "popupRef.current");
-    console.log(event.target, "event.target");
+
 
     if (popupRef.current && !popupRef.current.contains(event.target)) {
       handleCancel(); // <-- Call handleCancel if outside

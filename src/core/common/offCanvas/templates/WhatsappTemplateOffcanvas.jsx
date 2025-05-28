@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { editProfile } from "../../../data/redux/slices/ProfileSlice";
 import { Button, Toast } from "react-bootstrap";
+import { showToast } from "../../../data/redux/slices/ToastSlice";
 
 const WhatsappTemplateOffcanvas = () => {
   const [formData, setFormData] = useState({
@@ -25,9 +26,10 @@ const WhatsappTemplateOffcanvas = () => {
 
     if (result?.status == "success") {
       setShowSuccessToast(true);
+      dispatch(showToast({ message: "Contact saved successfully", variant: "success" }))
     }
 
-    //  document.getElementById("closeWhatsappTemplateOffcanvas")?.click();
+     document.getElementById("closeWhatsappTemplateOffcanvas")?.click();
 
     if (selectedTemplate.whatsappTemplate_id == "") {
       setFormData({
@@ -146,25 +148,7 @@ const WhatsappTemplateOffcanvas = () => {
           </div>
         </form>
       </div>
-      <div className="toast-container position-fixed top-0 end-0 p-3">
-        <Toast
-          show={showSuccessToast}
-          onClose={() => setShowSuccessToast(false)}
-          id="solidPrimaryToast"
-          className="colored-toast bg-primary text-fixed-white"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
-          <Toast.Header closeButton className="bg-primary text-fixed-white">
-            <strong className="me-auto">Toast</strong>
-          </Toast.Header>
-          <Toast.Body>
-            {/* Add your toast content here */}
-            Your toast message here.
-          </Toast.Body>
-        </Toast>
-      </div>
+      
     </div>
   );
 };

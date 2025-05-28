@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../../../axios/axiosInstance";
+import { showToast } from "./ToastSlice";
 
 const initialState = {
   id: "",
@@ -17,7 +18,7 @@ const initialState = {
 
 export const fetchProfile = createAsyncThunk(
   "profile/fetchProfile",
-  async (paginationData, { rejectWithValue }) => {
+  async (paginationData, { rejectWithValue,dispatch }) => {
     
     try {
       const response = await api.post("/getUser",paginationData);
@@ -26,6 +27,9 @@ export const fetchProfile = createAsyncThunk(
 
       return response.data;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
       return rejectWithValue(error.response.data);
     }
   }
@@ -33,31 +37,41 @@ export const fetchProfile = createAsyncThunk(
 
 export const editProfile = createAsyncThunk(
   "profile/editProfile",
-  async (profileData, { rejectWithValue }) => {
+  async (profileData, { rejectWithValue,dispatch }) => {
     try {
       const response = await api.put("/editProfile", profileData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
+dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
       return response.data;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
       return rejectWithValue(error.response.data);
     }
   }
 );
 export const deleteTemplate = createAsyncThunk(
   "profile/deleteTemplate",
-  async (deleteTemplateData, { rejectWithValue }) => {
+  async (deleteTemplateData, { rejectWithValue,dispatch }) => {
 
     try {
       const response = await api.delete("/deleteTemplate", {
         data: deleteTemplateData,
       });
-
+dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
       return response.data.data;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
       return rejectWithValue(error.response.data);
     }
   }

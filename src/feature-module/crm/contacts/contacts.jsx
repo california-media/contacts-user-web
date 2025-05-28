@@ -56,10 +56,11 @@ import {
   setSelectedContact,
   setSelectedContactSlice,
 } from "../../../core/data/redux/slices/SelectedContactSlice";
-import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
+import { addTag, fetchTags } from "../../../core/data/redux/slices/TagSlice";
 import { IoMdPricetag } from "react-icons/io";
 import DefaultEditor from "react-simple-wysiwyg";
 import { gapi } from "gapi-script";
+import CreatableSelect from "react-select/creatable";
 
 const Contacts = () => {
   const route = all_routes;
@@ -71,14 +72,22 @@ const Contacts = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openModal2, setOpenModal2] = useState(false);
   const [openModal3, setOpenModal3] = useState(false);
+  const [removedTags, setRemovedTags] = useState([]);
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
   const [whatsppTemplateTitles, setWhatsppTemplateTitles] = useState([]);
   const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
   const [show3, setShow3] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [allTags, setAllTags] = useState([]);
   const [selectedContactGroup, setSelectedContactGroup] = useState([]);
   const [showFavourites, setShowFavourites] = useState(false);
+  const [activeGroupEdit, setActiveGroupEdit] = useState(null);
+  // Structure: { contactId, tagIndex } or null
+
+  const [groupHoveredIndex, setGroupHoveredIndex] = useState(null);
+
   const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
     useState("");
   const [editEmailTemplateBody, setEditEmailTemplateBody] = useState("");
@@ -88,6 +97,7 @@ const Contacts = () => {
   const [allContacts, setAllContacts] = useState([]);
   const [stars, setStars] = useState({});
   const [newContents, setNewContents] = useState([0]);
+  const [previousTags, setPreviousTags] = useState([]);
   const [statusLead, setStatusLead] = useState({});
   const [deleteModalText, setDeleteModalText] = useState("");
   const [searchEmployeeInFilter, setSearchEmployeeInFilter] = useState("");
@@ -96,6 +106,7 @@ const Contacts = () => {
   // const [selectedContact, setSelectedContact] = useState(null);
   const [page, setPage] = useState(1);
   const [favouritePage, setFavouritePage] = useState(1);
+  const [newTags, setNewTags] = useState([]);
   const [limit, setLimit] = useState();
   const [favouriteLimit, setFavouriteLimit] = useState();
   const selectedContact = useSelector((state) => state.selectedContact);
@@ -112,13 +123,16 @@ const Contacts = () => {
 
   const userProfile = useSelector((state) => state.profile);
 
-  console.log(userProfile, "userProfile in contacts from redux");
-
   const handlePageChange = (newPage, newPageSize) => {
     setPage(newPage);
     setLimit(newPageSize);
   };
-  const handleFavouritePageChange = (newFavouritePage, newFavouritePageSize) => {
+  console.log(showFavourites,"showFavouritesshowFavouritesshowFavourites");
+  
+  const handleFavouritePageChange = (
+    newFavouritePage,
+    newFavouritePageSize
+  ) => {
     setFavouritePage(newFavouritePage);
     setFavouriteLimit(newFavouritePageSize);
   };
@@ -149,6 +163,59 @@ const Contacts = () => {
   const handleClose = () => {
     setActiveCell(null);
   };
+  const handleCreateTag = async (inputValue) => {
+    setNewTags([...newTags, inputValue]);
+    setSelectedTags([
+      ...selectedTags,
+      { value: inputValue, label: inputValue },
+    ]);
+  };
+  useEffect(() => {
+    const tagsArrayOfObject = tags.map((tag) => {
+      return { value: tag.tag, label: tag.tag };
+    });
+    setAllTags(tagsArrayOfObject);
+  }, []);
+
+  const handleUserTags = (tags) => {
+    setSelectedTags(tags);
+
+    const tagsForApi = tags.map((tag) => tag.value);
+
+    const removedTagsFilter = previousTags
+      .filter((prevTag) => !tags.some((tag) => tag.value === prevTag.value))
+      .map((tag) => tag.value);
+    setRemovedTags(removedTagsFilter);
+  };
+
+  const saveCellTags = async () => {
+    const formDataObj = new FormData();
+
+    formDataObj.append("contact_id", selectedContact.contact_id);
+    formDataObj.append(
+      "tags",
+      JSON.stringify(selectedTags.map((tag) => tag.value))
+    );
+
+    try {
+      if (newTags.length > 0) {
+        await dispatch(addTag({ tag: newTags })).unwrap();
+      }
+      await dispatch(saveContact(formDataObj)).unwrap();
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  useEffect(() => {
+    if (selectedContact?.tags) {
+      const formattedTags = selectedContact.tags.map((tag) => ({
+        value: tag,
+        label: tag,
+      }));
+      setSelectedTags(formattedTags);
+      setPreviousTags(formattedTags);
+    }
+  }, [selectedContact]);
 
   useEffect(() => {
     const whatsappTitles =
@@ -176,6 +243,7 @@ const Contacts = () => {
 
   const resetFilters = () => {
     setSelectedContactGroup([]);
+    setShowFavourites(false)
     // setSelectedLeadEmployee([]);
     // setSearchEmployeeInFilter("");
   };
@@ -562,16 +630,8 @@ const Contacts = () => {
     setModalTitle(isEditing ? "Update Contact" : "Add New Contact");
     setAdduser(!adduser);
   };
-  const addcompanyPopup = () => {
-    setAddCompany(!addcompany);
-  };
 
-  // const handleStarToggle = (index) => {
-  //   setStars((prevStars) => ({
-  //     ...prevStars,
-  //     [index]: !prevStars[index],
-  //   }));
-  // };
+
   const handleStarToggle = (index, record) => {
     const formDataObj = new FormData();
     const isFavToggled = !record.isFavourite;
@@ -596,18 +656,17 @@ const Contacts = () => {
   useEffect(() => {
     setAllContacts(contacts);
   }, [contacts]);
-    useEffect(() => {
-    console.log("Fetching favourite contacts with page:", favouritePage, "and limit:", favouriteLimit);
-    
-    const filters = {
-     isFavourite: true,
-      favouriteContactsPage:favouritePage,
-      favouriteContactsLimit:favouriteLimit,
+  useEffect(() => {
+    if(showFavourites)
+      {const filters = {
+      isFavourite: true,
+      favouriteContactsPage: favouritePage,
+      favouriteContactsLimit: favouriteLimit,
       favouriteContactsSearch: "",
     };
 
-    dispatch(fetchContacts({ filters }));
-  }, [favouritePage, favouriteLimit, dispatch]);
+    dispatch(fetchContacts({ filters }));}
+  }, [favouritePage, favouriteLimit]);
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const filters = {
@@ -621,10 +680,12 @@ const Contacts = () => {
     dispatch(fetchContacts({ filters }));
   }, [page, limit, dispatch, searchQuery, selectedContactGroup]);
 
-
-
   const sendEmail = async () => {
-    if (!selectedContact.emailaddresses[0] || !editEmailTemplateSubject || !editEmailTemplateBody) {
+    if (
+      !selectedContact.emailaddresses[0] ||
+      !editEmailTemplateSubject ||
+      !editEmailTemplateBody
+    ) {
       alert("Please fill all fields");
       return;
     }
@@ -644,10 +705,11 @@ const Contacts = () => {
     //   .replace(/\//g, "_")
     //   .replace(/=+$/, "");
 
-     const base64EncodedEmail = btoa(
-    new TextEncoder().encode(email)
-      .reduce((data, byte) => data + String.fromCharCode(byte), '')
-  )
+    const base64EncodedEmail = btoa(
+      new TextEncoder()
+        .encode(email)
+        .reduce((data, byte) => data + String.fromCharCode(byte), "")
+    );
     try {
       await gapi.client.gmail.users.messages.send({
         userId: "me",
@@ -663,9 +725,6 @@ const Contacts = () => {
       console.error("Error sending email:", error);
     }
   };
-
-
-
 
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
@@ -697,32 +756,30 @@ const Contacts = () => {
 
     // setSelectedContact(record);
   };
-  console.log(showFavourites, "showFavourites in contacts");
-  
-const handleFavouriteToggle = () => {
-  const newValue = !showFavourites;
-  setShowFavourites(newValue);
 
-  if (newValue) {
-    console.log("Fetching favourite contacts...");
-    const filters = {
-      isFavourite: true,
-      favouriteContactsPage: 1,
-      favouriteContactsLimit: 10,
-      favouriteContactsSearch: "",
-    };
-    dispatch(fetchContacts({ filters}));
-  } else {
-    const filters = {
-      page,
-      limit,
-      search: searchQuery,
-      tag: selectedContactGroup,
-    };
+  const handleFavouriteToggle = () => {
+    const newValue = !showFavourites;
+    setShowFavourites(newValue);
 
-    dispatch(fetchContacts({ filters }));
-  }
-};
+    if (newValue) {
+      const filters = {
+        isFavourite: true,
+        favouriteContactsPage: 1,
+        favouriteContactsLimit: 10,
+        favouriteContactsSearch: "",
+      };
+      dispatch(fetchContacts({ filters }));
+    } else {
+      const filters = {
+        page,
+        limit,
+        search: searchQuery,
+        tag: selectedContactGroup,
+      };
+
+      dispatch(fetchContacts({ filters }));
+    }
+  };
   const columns = [
     {
       title: "",
@@ -748,7 +805,7 @@ const handleFavouriteToggle = () => {
       dataIndex: "firstname",
       key: "firstname",
       width: 300,
-      fixed:"left",
+      fixed: "left",
       onCell: () => ({
         className: "hoverable-cell", // Adding a class for the cell
       }),
@@ -850,47 +907,7 @@ const handleFavouriteToggle = () => {
         );
       },
     },
-    // {
-    //   title: "Company",
-    //   dataIndex: "customer_company",
-    //   width: 200,
-    //   onCell: (record) => ({
-    //     onMouseEnter: () => {
-    //       const editIcon = document.querySelector(`.edit-icon-${record.key}`);
-    //       if (editIcon) editIcon.style.visibility = "visible";
-    //     },
-    //     onMouseLeave: () => {
-    //       const editIcon = document.querySelector(`.edit-icon-${record.key}`);
-    //       if (editIcon) editIcon.style.visibility = "hidden";
-    //     },
-    //   }),
-    //   render: (text, record) => {
-    //     console.log(record,"Reddddd");
 
-    //     return (
-    //       <>
-    //         <EditCell
-    //           fieldName="Company Name"
-    //           fieldValue={text}
-    //           textColor="#2c5cc5"
-    //           routeLink="#"
-    //           recordKey={record.key}
-    //           columnKey="customer_company"
-    //           isActive={record.key === activeRecordKey}
-    //           onEditClick={() => {
-    //             // setActiveRecordKey(record.key);
-    //             handleEditClick(record.key, "customer_company",record)
-    //           }}
-    //           onClose={() => setActiveRecordKey(null)}
-    //           onSave={(key, value) =>
-    //             handleSaveField(key, "customer_company", value)
-    //           }
-    //         />
-    //       </>
-    //     );
-    //   },
-    //   sorter: (a, b) => a.customer_company.localeCompare(b.customer_company),
-    // },
     {
       title: "Phone",
       dataIndex: "phonenumbers",
@@ -907,9 +924,8 @@ const handleFavouriteToggle = () => {
         },
       }),
       render: (text, record) => {
-        console.log(text, "text in phone render");
         console.log(record, "record in phone render");
-        
+
         return (
           <>
             <EditCell
@@ -976,42 +992,357 @@ const handleFavouriteToggle = () => {
         );
       },
     },
+
+    // {
+    //   title: "Groups",
+    //   dataIndex: "tags",
+    //   render: (tags, record) => {
+    //     return (
+    //       <div className="d-inline-block position-relative">
+    //         {tags.map((tag, index) => {
+    //           const isHovered = groupHoveredIndex === index;
+    //           const isActiveContact =
+    //             activeGroupEdit?.contactId === record.contact_id;
+    //           const isEditingThisTag =
+    //             isActiveContact && activeGroupEdit?.tagIndex === index;
+
+    //           return (
+    //             <div
+    //               key={index}
+    //               className="py-1 px-2 d-inline-block me-2 position-relative"
+    //               style={{
+    //                 background: "#dff0ff",
+    //                 borderRadius: 5,
+    //                 cursor: "pointer",
+    //               }}
+    //               onMouseEnter={() => setGroupHoveredIndex(index)}
+    //               onMouseLeave={() => setGroupHoveredIndex(null)}
+    //               // onClick={() =>
+    //               //   {
+    //               //     dispatch(setSelectedContact(record))
+    //               //     setActiveGroupEdit({ contactId: record.contact_id, tagIndex: index })}
+    //               // }
+    //               onClick={() => {
+    //                 const isAlreadyOpen =
+    //                   activeGroupEdit?.contactId === record.contact_id &&
+    //                   activeGroupEdit?.tagIndex === index;
+
+    //                 console.log(
+    //                   "isAlreadyOpen",
+    //                   isAlreadyOpen,
+    //                   activeGroupEdit
+    //                 );
+
+    //                 if (!isAlreadyOpen) {
+    //                   dispatch(setSelectedContact(record));
+    //                   setActiveGroupEdit({
+    //                     contactId: record.contact_id,
+    //                     tagIndex: index,
+    //                   });
+    //                 }
+    //               }}
+    //             >
+    //               <div className="d-flex align-items-center">
+    //                 <img
+    //                   src="/assets/img/icons/tagIcon.svg"
+    //                   className="me-1"
+    //                   style={{ color: "#264966" }}
+    //                 />
+    //                 <div style={{ color: "#264966", fontSize: 14 }}>
+    //                   {isHovered && isActiveContact && !isEditingThisTag
+    //                     ? "✎ Edit"
+    //                     : tag}
+    //                 </div>
+    //               </div>
+
+    //               {isEditingThisTag && (
+    //                 <div
+    //                   className="popup position-absolute"
+    //                   style={{
+    //                     top: "100%",
+    //                     left: 0,
+    //                     zIndex: 100,
+    //                     backgroundColor: "white",
+    //                     border: "1px solid #ccc",
+    //                     padding: "10px",
+    //                     boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+    //                     minWidth: "250px",
+    //                     marginTop: "5px",
+    //                   }}
+    //                 >
+    //                   <div className="mb-3">
+    //                     <label className="col-form-label">Groups</label>
+
+    //                     <CreatableSelect
+    //                       classNamePrefix="react-select"
+    //                       options={allTags}
+    //                       // isLoading={isLoading}
+    //                       value={selectedTags}
+    //                       onChange={(newValue) => handleUserTags(newValue)}
+    //                       onCreateOption={handleCreateTag}
+    //                       className="js-example-placeholder-multiple select2 js-states"
+    //                       isMulti={true}
+    //                       placeholder="Add Tags"
+    //                     />
+    //                   </div>
+    //                   <div className="d-flex align-items-center justify-content-end">
+    //                     <button
+    //                       type="button"
+    //                       className="btn btn-light me-2"
+    //                       onClick={() => {
+    //                         dispatch(setSelectedContact(null));
+    //                         setActiveGroupEdit(null);
+    //                       }}
+    //                     >
+    //                       Cancel
+    //                     </button>
+    //                     <button
+    //                       type="button"
+    //                       className="btn btn-primary"
+    //                       onClick={() => {
+    //                         saveCellTags();
+    //                         setActiveGroupEdit(null);
+    //                       }}
+    //                     >
+    //                       Save
+    //                     </button>
+    //                   </div>
+    //                 </div>
+    //               )}
+    //             </div>
+    //           );
+    //         })}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       title: "Groups",
       dataIndex: "tags",
-      render: (text, record) => {
-        return (
-          <div>
-            {text.length > 0 && (
-              <div className="d-inline-block">
-                {text.map((tag, index) => {
-                  return (
-                    <div
-                      className="py-1 px-2 d-inline-block me-2"
-                      key={index}
-                      style={{ background: "#dff0ff", borderRadius: 5 }}
+      render: (tags, record) => {
+        const isActiveContact =
+          activeGroupEdit?.contactId === record.contact_id;
+        const isEditingThisTag =
+          isActiveContact && activeGroupEdit?.tagIndex === 0;
+
+        if (tags.length === 0) {
+          return (
+            <div
+              style={{ cursor: "pointer", color: "#92a2b1", fontWeight: 600 }}
+              onClick={() => {
+                const isAlreadyOpen =
+                  activeGroupEdit?.contactId === record.contact_id &&
+                  activeGroupEdit?.tagIndex === 0;
+
+                if (!isAlreadyOpen) {
+                  dispatch(setSelectedContact(record));
+                  setActiveGroupEdit({
+                    contactId: record.contact_id,
+                    tagIndex: 0,
+                  });
+                }
+              }}
+            >
+              + Click to add
+              {isEditingThisTag && (
+                <div
+                  className="popup position-absolute"
+                  style={{
+                    top: "100%",
+                    left: 0,
+                    zIndex: 100,
+                    backgroundColor: "white",
+                    border: "1px solid #ccc",
+                    padding: "10px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                    minWidth: "250px",
+                    marginTop: "5px",
+                  }}
+                >
+                  <div className="mb-3">
+                    <label className="col-form-label">Groups</label>
+                    <CreatableSelect
+                      classNamePrefix="react-select"
+                      options={allTags}
+                      value={selectedTags}
+                      onChange={(newValue) => handleUserTags(newValue)}
+                      onCreateOption={handleCreateTag}
+                      className="js-example-placeholder-multiple select2 js-states"
+                      isMulti={true}
+                      placeholder="Add Tags"
+                    />
+                  </div>
+                  <div className="d-flex align-items-center justify-content-end">
+                    <button
+                      type="button"
+                      className="btn btn-light me-2"
+                      onClick={() => {
+                        dispatch(setSelectedContact(null));
+                        setActiveGroupEdit(null);
+                      }}
                     >
-                     <div className="d-flex align-items-center">
-                        <img src="/assets/img/icons/tagIcon.svg" className="me-1" style={{color:"#264966"}}/>
-                        <div style={{color:"#264966"}}>{tag}</div>
-                     </div>
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => {
+                        saveCellTags();
+                        setActiveGroupEdit(null);
+                      }}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        }
+
+        return (
+          <div className="d-inline-block position-relative">
+            {tags.map((tag, index) => {
+              const isHovered = groupHoveredIndex === index;
+              const isEditingThisTag =
+                isActiveContact && activeGroupEdit?.tagIndex === index;
+
+              return (
+                <div
+                  key={index}
+                  className="py-1 px-2 d-inline-block me-2 position-relative"
+                  style={{
+                    background: "#dff0ff",
+                    borderRadius: 5,
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={() => setGroupHoveredIndex(index)}
+                  onMouseLeave={() => setGroupHoveredIndex(null)}
+                  onClick={() => {
+                    const isAlreadyOpen =
+                      activeGroupEdit?.contactId === record.contact_id &&
+                      activeGroupEdit?.tagIndex === index;
+
+                    if (!isAlreadyOpen) {
+                      dispatch(setSelectedContact(record));
+                      setActiveGroupEdit({
+                        contactId: record.contact_id,
+                        tagIndex: index,
+                      });
+                    }
+                  }}
+                >
+                  <div className="d-flex align-items-center">
+                    <img
+                      src="/assets/img/icons/tagIcon.svg"
+                      className="me-1"
+                      style={{ color: "#264966", width: 15 }}
+                    />
+                    <div style={{ color: "#264966", fontSize: 14 }}>
+                      {tag}
+
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+
+                  {isEditingThisTag && (
+                    <div
+                      className="popup position-absolute"
+                      style={{
+                        top: "100%",
+                        left: 0,
+                        zIndex: 100,
+                        backgroundColor: "white",
+                        border: "1px solid #ccc",
+                        padding: "10px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                        minWidth: "250px",
+                        marginTop: "5px",
+                      }}
+                    >
+                      <div className="mb-3">
+                        <label className="col-form-label">Groups</label>
+
+                        <CreatableSelect
+                          classNamePrefix="react-select"
+                          options={allTags}
+                          value={selectedTags}
+                          onChange={(newValue) => handleUserTags(newValue)}
+                          onCreateOption={handleCreateTag}
+                          className="js-example-placeholder-multiple select2 js-states"
+                          isMulti={true}
+                          placeholder="Add Tags"
+                        />
+                      </div>
+                      <div className="d-flex align-items-center justify-content-end">
+                        <button
+                          type="button"
+                          className="btn btn-light me-2"
+                          onClick={() => {
+                            dispatch(setSelectedContact(null));
+                            setActiveGroupEdit(null);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={() => {
+                            saveCellTags();
+                            setActiveGroupEdit(null);
+                          }}
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         );
       },
     },
+
+    // {
+    //   title: "Groups",
+    //   dataIndex: "tags",
+    //   render: (text, record) => {
+    //     return (
+    //       <div>
+    //         {text.length > 0 && (
+    //           <div className="d-inline-block">
+    //             {text.map((tag, index) => {
+    //               return (
+    //                 <div
+    //                   className="py-1 px-2 d-inline-block me-2"
+    //                   key={index}
+    //                   style={{ background: "#dff0ff", borderRadius: 5 }}
+    //                 >
+    //                   <div className="d-flex align-items-center">
+    //                     <img
+    //                       src="/assets/img/icons/tagIcon.svg"
+    //                       className="me-1"
+    //                       style={{ color: "#264966" }}
+    //                     />
+    //                     <div
+    //                       style={{ color: "#264966" }}
+    //                     >
+    //                       {tag}
+    //                     </div>
+    //                   </div>
+    //                 </div>
+    //               );
+    //             })}
+    //           </div>
+    //         )}
+    //       </div>
+    //     );
+    //   },
+    // },
   ];
 
-  const handleLeadStatus = (rowKey, value) => {
-    setStatusLead((prevState) => ({
-      ...prevState,
-      [rowKey]: value,
-    }));
-  };
   useEffect(() => {
     const initialStatuses = leadsData.reduce((acc, lead) => {
       acc[lead.key] = lead.status;
@@ -1060,9 +1391,6 @@ const handleFavouriteToggle = () => {
 
   const initialSettings = getDateRanges();
 
-  const addNewContent = () => {
-    setNewContents([...newContents, newContents.length]);
-  };
   const filteredData = allContacts.filter((lead) => {
     // const leadDate = new Date(lead.created_date).toDateString();
 
@@ -1072,38 +1400,11 @@ const handleFavouriteToggle = () => {
       columnVisibility["Phone"] ||
       columnVisibility["Email"];
 
-    // const matchesSearchQuery =
-    //   !isAnySearchColumnVisible ||
-    //   (columnVisibility["Name"] &&
-    //     lead?.firstname?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    //   (columnVisibility["Company"] &&
-    //     lead.customer_company
-    //       .toLowerCase()
-    //       .includes(searchQuery.toLowerCase())) ||
-    //   (columnVisibility["Phone"] &&
-    //     lead.phone.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    //   (columnVisibility["Email"] &&
-    //     lead.emailaddresses.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    // Check if lead matches selected statuses
-    // const matchesStatus =
-    // selectedLeadStatus.length === 0 || // If no status is selected, show all
-    // selectedLeadStatus.includes(lead.status.toLowerCase());
-    // Check if lead matches selected employee
     const matchesEmployee =
       selectedLeadEmployee.length === 0 || // If no status is selected, show all
       selectedLeadEmployee.includes(lead.owner.toLowerCase());
 
-    // Check if lead date is within the selected date range
-    // const matchesDateRange =
-    //   selectedDateRange.startDate || selectedDateRange.endDate || // If no date range is selected, show all
-    //   console.log(selectedDateRange.endDate, "selectedDateRange.endDate");
-
-    // (leadDate >= selectedDateRange.startDate && leadDate <= selectedDateRange.endDate);
-
     return matchesEmployee;
-    // && matchesDateRange;
-    // matchesSearchQuery &&
   });
 
   const filterContactGroup = (tag) => {
@@ -1112,13 +1413,6 @@ const handleFavouriteToggle = () => {
         prevStatus.includes(tag)
           ? prevStatus.filter((status) => status !== tag) // Remove status if unchecked
           : [...prevStatus, tag] // Add status if checked
-    );
-  };
-  const filterLeadEmployee = (leadEmployee) => {
-    setSelectedLeadEmployee((prevStatus) =>
-      prevStatus.includes(leadEmployee)
-        ? prevStatus.filter((employee) => employee !== leadEmployee)
-        : [...prevStatus, leadEmployee]
     );
   };
 
@@ -1190,8 +1484,6 @@ const handleFavouriteToggle = () => {
   const visibleColumns = columns.filter(
     (column) => columnVisibility[column.title]
   );
-
-  const numberOfLeads = filteredData.length;
 
   return (
     <>
@@ -1329,23 +1621,21 @@ const handleFavouriteToggle = () => {
                                       >
                                         <div className="filter-content-list">
                                           <ul className="mb-0">
-                                                <li >
-                                                  <div className="filter-checks">
-                                                    <label className="checkboxs">
-                                                      
-                                                      <input
-                                                        type="checkbox"
-                                                       checked={showFavourites}
-        onChange={handleFavouriteToggle}
-
-                                                      />
-                                                      <span className="checkmarks" />
-                                                      Show Favourite
-                                                    </label>
-                                                  </div>
-                                                </li>
-                                       
-                                      
+                                            <li>
+                                              <div className="filter-checks">
+                                                <label className="checkboxs">
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={showFavourites}
+                                                    onChange={
+                                                      handleFavouriteToggle
+                                                    }
+                                                  />
+                                                  <span className="checkmarks" />
+                                                  Show Favourite
+                                                </label>
+                                              </div>
+                                            </li>
                                           </ul>
                                         </div>
                                       </div>
@@ -1527,7 +1817,11 @@ const handleFavouriteToggle = () => {
                         rowKey={(record) => record.key}
                         loading={isLoading}
                         totalCount={totalContacts}
-                        onPageChange={showFavourites?handleFavouritePageChange:handlePageChange}
+                        onPageChange={
+                          showFavourites
+                            ? handleFavouritePageChange
+                            : handlePageChange
+                        }
                       />
                     </div>
                     <div className="row align-items-center">
@@ -1857,7 +2151,7 @@ const handleFavouriteToggle = () => {
                   />
                 </div> */}
 
-                <button
+                {/* <button
                   className="btn btn-primary"
                   onClick={() => {
                     if (selectedContact?.phonenumbers?.length > 0) {
@@ -1869,7 +2163,7 @@ const handleFavouriteToggle = () => {
                   }}
                 >
                   Go directly to WhatsApp
-                </button>
+                </button> */}
               </div>
               <div className="modal-body">
                 <div className="mb-3">
@@ -1905,19 +2199,23 @@ const handleFavouriteToggle = () => {
                     />
                   </div>
                 </div>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    if (selectedContact?.phonenumbers?.length > 0) {
-                      const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${editWhatsappTemplateMessage}`;
-                      window.open(url, "_blank");
-                    } else {
-                      alert("Phone number not available");
-                    }
-                  }}
-                >
-                  Send Message
-                </button>
+               <div className="d-flex justify-content-end">
+                  <button
+                    className="btn text-white"
+                    style={{background:"#25d366"}}
+                    onClick={() => {
+                      if (selectedContact?.phonenumbers?.length > 0) {
+                        const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${editWhatsappTemplateMessage}`;
+                        window.open(url, "_blank");
+                      } else {
+                        alert("Phone number not available");
+                      }
+                    }}
+                  >
+                    <img src="assets/img/icons/whatsappIcon96.png" alt="whatsapp" style={{width:20}} className="me-2" />
+                   Whatsapp Now
+                  </button>
+               </div>
               </div>
             </div>
           </div>
@@ -2075,21 +2373,28 @@ const handleFavouriteToggle = () => {
                       onChange={(e) => setEditEmailTemplateBody(e.target.value)}
                       value={editEmailTemplateBody}
                     /> */}
-                    <DefaultEditor className="form-control" value={editEmailTemplateBody} onChange={(e) => setEditEmailTemplateBody(e.target.value)} name="emailTemplateMessage" placeholder="Enter text here" />
+                    <DefaultEditor
+                      className="form-control"
+                      value={editEmailTemplateBody}
+                      onChange={(e) => setEditEmailTemplateBody(e.target.value)}
+                      name="emailTemplateMessage"
+                      placeholder="Enter text here"
+                    />
                   </div>
                 </div>
                 <button
                   className="btn btn-primary"
-                  onClick={sendEmail
-                  //   () => {
-                  //   if (selectedContact?.emailaddresses?.length > 0) {
-                  //     const url = `mailto:${selectedContact.emailaddresses[0]}?subject=${editEmailTemplateSubject}&body=${editEmailTemplateBody}`;
-                  //     window.open(url, "_blank");
-                  //   } else {
-                  //     alert("Email not available");
-                  //   }
-                  // }
-                }
+                  onClick={
+                    sendEmail
+                    //   () => {
+                    //   if (selectedContact?.emailaddresses?.length > 0) {
+                    //     const url = `mailto:${selectedContact.emailaddresses[0]}?subject=${editEmailTemplateSubject}&body=${editEmailTemplateBody}`;
+                    //     window.open(url, "_blank");
+                    //   } else {
+                    //     alert("Email not available");
+                    //   }
+                    // }
+                  }
                 >
                   Send Mail
                 </button>

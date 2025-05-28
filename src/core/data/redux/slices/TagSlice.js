@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import api from "../../../axios/axiosInstance";
+import { showToast } from "./ToastSlice";
 
 export const fetchTags = createAsyncThunk(
   "tags/fetchTags",
@@ -16,13 +17,18 @@ export const fetchTags = createAsyncThunk(
 
 export const addTag = createAsyncThunk(
   "tags/addTag",
-  async (tag, { rejectWithValue }) => {
+  async (tag, { rejectWithValue,dispatch }) => {
     try {
       const response = await api.post("/addTag", tag);
       console.log(response.data.data, "response from add tag");
-
+dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
       return response.data.data;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
       return rejectWithValue(error.response.data);
     }
   }
@@ -30,14 +36,19 @@ export const addTag = createAsyncThunk(
 
 export const deleteTag = createAsyncThunk(
   "tags/deleteTag",
-  async (tagId, { rejectWithValue }) => {
+  async (tagId, { rejectWithValue,dispatch }) => {
     try {
       const response = await api.delete("/deleteTag", {
         data: { tag_id: tagId },
       });
-
+dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
       return response.data.data.tag_id;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
       return rejectWithValue(error.response.data);
     }
   }

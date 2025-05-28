@@ -6,6 +6,7 @@ import tagReducer from "./slices/TagSlice"
 import contactReducer from "./slices/ContactSlice"
 import selectedContactReducer from "./slices/SelectedContactSlice"
 import selectedTemplateReducer from "./slices/SelectedTemplateSlice"
+import toastReducer from "./slices/ToastSlice"
 import { persistStore, persistReducer } from 'redux-persist'
 import storageSession from 'redux-persist/lib/storage/session'
 
@@ -21,7 +22,8 @@ const combinedReducer = combineReducers({
   tags: tagReducer,
   contacts: contactReducer,
   selectedTemplate:selectedTemplateReducer,
-  selectedContact: selectedContactReducer
+  selectedContact: selectedContactReducer,
+  toast:toastReducer,
 });
 
 const rootReducer = (state,action) => {

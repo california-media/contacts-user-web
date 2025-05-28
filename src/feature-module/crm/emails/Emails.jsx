@@ -15,24 +15,24 @@ const Emails = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [filter, setFilter] = useState("INBOX");
-const [showCompose, setShowCompose] = useState(false);
+  const [showCompose, setShowCompose] = useState(false);
 
   const [formData, setFormData] = useState({
-  to: "",
-  subject: "",
-  body: ""
-});
-const handleInputChange = (e) => {
-  const { name, value } = e.target;
-  setFormData((prev) => ({ ...prev, [name]: value }));
-};
+    to: "",
+    subject: "",
+    body: "",
+  });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-const handleSend = () => {
-  // Replace with actual send logic
-  console.log("Sending email:", formData);
-  setShowCompose(false);
-  setFormData({ to: "", subject: "", body: "" });
-};
+  const handleSend = () => {
+    // Replace with actual send logic
+    console.log("Sending email:", formData);
+    setShowCompose(false);
+    setFormData({ to: "", subject: "", body: "" });
+  };
   console.log("CLIENT_ID:", CLIENT_ID);
   console.log("API_KEY:", API_KEY);
   useEffect(() => {
@@ -247,7 +247,11 @@ const handleSend = () => {
           )} */}
           <div className="col-lg-3 col-md-12">
             <div className="compose-btn">
-              <Link to="#" className="btn btn-primary btn-block w-100" onClick={() => setShowCompose(true)}>
+              <Link
+                to="#"
+                className="btn btn-primary btn-block w-100"
+                onClick={() => setShowCompose(true)}
+              >
                 Compose
               </Link>
             </div>
@@ -347,46 +351,48 @@ const handleSend = () => {
           <div className="col-lg-9 col-md-12">
             <div className="card">
               <div className="card-body">
-                {showCompose ?
-                 <div className="compose-container">
-    <h3>Compose Email</h3>
-    <div>
-      <label>To:</label>
-      <input
-        type="email"
-        name="to"
-        value={formData.to}
-        onChange={handleInputChange}
-      />
-    </div>
-    <div>
-      <label>Subject:</label>
-      <input
-        type="text"
-        name="subject"
-        value={formData.subject}
-        onChange={handleInputChange}
-      />
-    </div>
-    <div>
-      <label>Body:</label>
-      <textarea
-        name="body"
-        rows="10"
-        value={formData.body}
-        onChange={handleInputChange}
-      />
-    </div>
-    <div style={{ marginTop: "10px" }}>
-      <button onClick={handleSend}>Send</button>
-      <button onClick={() => setShowCompose(false)} style={{ marginLeft: "10px" }}>
-        Cancel
-      </button>
-    </div>
-  </div>
-                
-                
-                :<>
+                {showCompose ? (
+                  <div className="compose-container">
+                    <h3>Compose Email</h3>
+                    <div>
+                      <label>To:</label>
+                      <input
+                        type="email"
+                        name="to"
+                        value={formData.to}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <label>Subject:</label>
+                      <input
+                        type="text"
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <label>Body:</label>
+                      <textarea
+                        name="body"
+                        rows="10"
+                        value={formData.body}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div style={{ marginTop: "10px" }}>
+                      <button onClick={handleSend}>Send</button>
+                      <button
+                        onClick={() => setShowCompose(false)}
+                        style={{ marginLeft: "10px" }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
                     <div className="email-header">
                       <div className="row">
                         <div className="col-lg-9 top-action-left col-sm-12">
@@ -570,12 +576,14 @@ const handleSend = () => {
                                 const date = message.payload.headers.find(
                                   (header) => header.name === "Date"
                                 )?.value;
-    
+
                                 return (
                                   <React.Fragment key={index}>
                                     <tr
                                       className="unread clickable-row cursor-pointer"
-                                      onClick={() => setSelectedMessage(message)}
+                                      onClick={() =>
+                                        setSelectedMessage(message)
+                                      }
                                     >
                                       <td>
                                         <label className="checkboxs">
@@ -603,7 +611,7 @@ const handleSend = () => {
                                       <td></td>
                                       <td className="mail-date">{date}</td>
                                     </tr>
-    
+
                                     {/* Show message body if selected */}
                                     {selectedMessage?.id === message.id && (
                                       <tr>
@@ -663,7 +671,8 @@ const handleSend = () => {
                         </div>
                       )}
                     </div>
-                </>}
+                  </>
+                )}
               </div>
             </div>
           </div>

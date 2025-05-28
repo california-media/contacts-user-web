@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../axios/axiosInstance";
 import { setSelectedContact } from "./SelectedContactSlice";
+import { showToast } from "./ToastSlice";
 
 export const fetchContacts = createAsyncThunk(
   "contacts/fetchContacts",
@@ -25,9 +26,9 @@ export const fetchContacts = createAsyncThunk(
         isFavourite,
         favouriteContactsPage,
         favouriteContactsLimit,
-        favouriteContactsSearch
+        favouriteContactsSearch,
       });
-console.log("response from fetchContacts", response.data);
+      console.log("response from fetchContacts", response.data);
 
       return {
         data: response.data.data,
@@ -42,7 +43,6 @@ console.log("response from fetchContacts", response.data);
 export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
-
     try {
       const response = await api.post("addEditContact", formData, {
         headers: {
@@ -50,38 +50,55 @@ export const saveContact = createAsyncThunk(
         },
       });
       console.log(response.data.data, "response from add edit contact");
-
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
       dispatch(setSelectedContact(response.data.data));
       return response.data.data;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+
       return rejectWithValue(error.response.data);
     }
   }
 );
 export const deleteContact = createAsyncThunk(
   "contacts/deleteContact",
-  async (contactId, { rejectWithValue }) => {
+  async (contactId, { rejectWithValue, dispatch }) => {
     try {
       const response = await api.delete("/deleteContact", {
         data: { contact_id: contactId },
       });
-
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
       return contactId;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
       return rejectWithValue(error.response.data);
     }
   }
 );
 export const deleteTask = createAsyncThunk(
   "tasks/deleteTask",
-  async (deleteTaskData, { rejectWithValue }) => {
+  async (deleteTaskData, { rejectWithValue, dispatch }) => {
     try {
       const response = await api.delete("/deleteTask", {
         data: deleteTaskData,
       });
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
       return response.data.data.task_id;
       // return deleteTaskData.task_id;
     } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
       return rejectWithValue(error.response.data);
     }
   }
@@ -130,8 +147,6 @@ const contactSlice = createSlice({
         state.totalContacts += 1;
       }
     });
-
-
 
     builder.addCase(deleteContact.fulfilled, (state, action) => {
       state.contacts = state.contacts.filter(

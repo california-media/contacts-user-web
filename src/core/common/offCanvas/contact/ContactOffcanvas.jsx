@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { saveContact } from "../../../data/redux/slices/ContactSlice";
 import PhoneInput from "react-phone-input-2";
 import { addTag } from "../../../data/redux/slices/TagSlice";
+import { showToast } from "../../../data/redux/slices/ToastSlice";
 
 const LeadOffcanvas = ({selectedContact}) => {
   const [show, setShow] = useState(false);
@@ -83,6 +84,8 @@ const LeadOffcanvas = ({selectedContact}) => {
      await dispatch(saveContact(formDataObj)).unwrap();
 document.getElementById("closeContactOffcanvas")?.click();
       setIsLoading(false);
+            
+      
     } catch (error) {
       console.error("Error:", error);
       setIsLoading(false);
