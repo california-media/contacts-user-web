@@ -41,7 +41,7 @@ import { useAppDispatch, useAppSelector } from "../../../core/data/redux/hooks";
 
 import { setPhone } from "../../../core/data/redux/slices/appCommonSlice";
 import EditCell from "../../../core/common/editCell/EditCell";
-import { Pagination } from "antd";
+import { message, Pagination } from "antd";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
 import api from "../../../core/axios/axiosInstance";
@@ -61,6 +61,7 @@ import { IoMdPricetag } from "react-icons/io";
 import DefaultEditor from "react-simple-wysiwyg";
 import { gapi } from "gapi-script";
 import CreatableSelect from "react-select/creatable";
+import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 
 const Contacts = () => {
   const route = all_routes;
@@ -700,11 +701,6 @@ const Contacts = () => {
 
     const email = headers.join("\r\n");
 
-    // const base64EncodedEmail = btoa(unescape(encodeURIComponent(email)))
-    //   .replace(/\+/g, "-")
-    //   .replace(/\//g, "_")
-    //   .replace(/=+$/, "");
-
     const base64EncodedEmail = btoa(
       new TextEncoder()
         .encode(email)
@@ -717,7 +713,7 @@ const Contacts = () => {
           raw: base64EncodedEmail,
         },
       });
-      alert("Email sent successfully!");
+      dispatch(showToast({message:"Email Sent Successfully", variant:"success"}))
       // setTo("");
       // setSubject("");
       // setMessage("");
@@ -838,11 +834,7 @@ const Contacts = () => {
                 </a>
 
                 <Link
-                  // href={
-                  //   record.phonenumbers?.length > 0
-                  //     ? `https://wa.me/${record.phonenumbers[0]}`
-                  //     : "#"
-                  // }
+
                   to="#"
                   data-bs-toggle="modal"
                   data-bs-target="#show_whatsapp_templates"
@@ -1725,7 +1717,7 @@ const Contacts = () => {
                                 </Link>
                                 <div className="dropdown-menu  dropdown-menu-end">
                                   <ul className="mb-0">
-                                    {/* <li>
+                                    <li>
                                       <button
                                         type="button"
                                         className="dropdown-item"
@@ -1734,7 +1726,7 @@ const Contacts = () => {
                                         <i className="ti ti-file-type-pdf text-danger me-1" />
                                         Import
                                       </button>
-                                    </li> */}
+                                    </li>
                                     <li>
                                       <Link
                                         to="#"
@@ -2122,12 +2114,12 @@ const Contacts = () => {
           className="modal custom-modal fade modal-padding"
           id="show_whatsapp_templates"
           role="dialog"
-          style={{ minHeight: 500 }}
+          // style={{ minHeight: 500 }}
         >
           <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Whatsapp Templates</h5>
+                <h5 className="modal-title">Send Whatsapp</h5>
                 <button
                   type="button"
                   className="btn-close position-static"
@@ -2138,7 +2130,7 @@ const Contacts = () => {
                 </button>
               </div>
 
-              <div className="d-flex align-items-center justify-content-end mb-3 mt-4 me-4">
+              <div className="d-flex align-items-center justify-content-end">
                 {/* <div className="icon-form me-2 mb-sm-0">
                   <span className="form-icon">
                     <i className="ti ti-search" />
@@ -2228,7 +2220,7 @@ const Contacts = () => {
           <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Email Templates</h5>
+                <h5 className="modal-title">Send Email</h5>
                 <button
                   type="button"
                   className="btn-close position-static"
@@ -2239,91 +2231,6 @@ const Contacts = () => {
                 </button>
               </div>
               <div className="modal-body">
-                <div className="d-flex align-items-center justify-content-end mb-3">
-                  <button
-                    className="btn btn-primary"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (selectedContact.emailaddresses?.length > 0) {
-                        const recipient = selectedContact.emailaddresses[0];
-
-                        const url = `mailto:${recipient}`;
-
-                        window.open(url);
-                      } else {
-                        alert("Email not available");
-                      }
-                    }}
-                  >
-                    Go directly to Email
-                  </button>
-                </div>
-
-                {/* {userProfile.emailTemplates?.length > 0
-                  ? userProfile.emailTemplates.map((template, index) => {
-                      const emailaddress =
-                        selectedContact.emailaddresses?.length > 0
-                          ? selectedContact.emailaddresses[0]
-                          : null;
-
-                      const subject = encodeURIComponent(
-                        "Hello from Brand Toaster"
-                      );
-                      const body = encodeURIComponent(
-                        "Hi there,\n\nI'd like to connect with you."
-                      );
-                      const recipient = selectedContact.emailaddresses[0];
-
-                      const url = `mailto:${recipient}?subject=${subject}&body=${body}`;
-
-                      return (
-                        <div
-                          key={index}
-                          onClick={() => {
-                            if (emailaddress) {
-                              window.open(url);
-                            } else {
-                              alert("Phone number not available");
-                            }
-                          }}
-                          style={{
-                            backgroundColor: "#f5f5f5",
-                            padding: "10px",
-                            borderRadius: "10px",
-                            marginBottom: "10px",
-                            cursor: "pointer",
-                            position: "relative",
-                          }}
-                        >
-                          <div
-                            className="set-star rating-select"
-                            style={{
-                              position: "absolute",
-                              top: "10px",
-                              right: "10px",
-                            }}
-                          >
-                            <i
-                              className={`fa ${
-                                template.emailTemplateIsFavourite
-                                  ? "fa-solid fa-star"
-                                  : ""
-                              }`}
-                              style={{
-                                color: template.emailTemplateIsFavourite
-                                  ? "gold"
-                                  : "",
-                              }}
-                            ></i>
-                          </div>
-                          <p className="fw-semibold">
-                            {template.emailTemplateSubject}
-                          </p>
-                          <p>{template.emailTemplateBody}</p>
-                        </div>
-                      );
-                    })
-                  : "No templates found"} */}
                 <div className="mb-3">
                   <Select
                     classNamePrefix="react-select"
@@ -2364,15 +2271,6 @@ const Contacts = () => {
                 <div className="mb-3">
                   <label className="col-form-label col-md-2">Body</label>
                   <div className="col-md-12">
-                    {/* <textarea
-                      rows={5}
-                      cols={5}
-                      className="form-control"
-                      name="emailTemplateMessage"
-                      placeholder="Enter text here"
-                      onChange={(e) => setEditEmailTemplateBody(e.target.value)}
-                      value={editEmailTemplateBody}
-                    /> */}
                     <DefaultEditor
                       className="form-control"
                       value={editEmailTemplateBody}
@@ -2382,22 +2280,16 @@ const Contacts = () => {
                     />
                   </div>
                 </div>
-                <button
-                  className="btn btn-primary"
-                  onClick={
-                    sendEmail
-                    //   () => {
-                    //   if (selectedContact?.emailaddresses?.length > 0) {
-                    //     const url = `mailto:${selectedContact.emailaddresses[0]}?subject=${editEmailTemplateSubject}&body=${editEmailTemplateBody}`;
-                    //     window.open(url, "_blank");
-                    //   } else {
-                    //     alert("Email not available");
-                    //   }
-                    // }
-                  }
-                >
-                  Send Mail
-                </button>
+                <div className="d-flex justify-content-end">
+                  <button
+                    className="btn btn-primary"
+                    onClick={
+                      sendEmail
+                    }
+                  >
+                    Send Mail
+                  </button>
+                </div>
               </div>
             </div>
           </div>

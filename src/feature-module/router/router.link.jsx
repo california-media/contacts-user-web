@@ -126,6 +126,8 @@ import Contacts from "../crm/contacts/contacts";
 import UpgradePlan from "../settings/generalSettings/upgradePlan";
 import MyScans from "../settings/generalSettings/myScans";
 import Emails from "../crm/emails/Emails";
+import Calendar from "../crm/calendar/Calendar";
+import EmailSetup from "../settings/generalSettings/emailSetup";
 // import Projects from "../crm/projects";
 // import Task from "../crm/task";
 // import CompaniesDetails from "../crm/companies/companiesDetails";
@@ -459,6 +461,12 @@ export const publicRoutes = [
     route: Route,
     title:'Emails'
   },
+  {
+    path: route.calendar,
+    element: <Calendar />,
+    route: Route,
+    title:'Calendar'
+  },
   // {
   //   path: route.accordion,
   //   element: <Accordion />,
@@ -681,6 +689,12 @@ export const publicRoutes = [
     element: <Security />,
     route: Route,
     title:'Security'
+  },
+  {
+    path: route.emailSetup,
+    element: <EmailSetup />,
+    route: Route,
+    title:'Email Setup'
   },
   // {
   //   path: route.banIpAddrress,

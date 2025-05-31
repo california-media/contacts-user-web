@@ -18,7 +18,7 @@ import PhoneInput from "react-phone-input-2";
 import { addTag } from "../../../data/redux/slices/TagSlice";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
 
-const LeadOffcanvas = ({selectedContact}) => {
+const LeadOffcanvas = ({ selectedContact }) => {
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
   const [phone, setPhone] = useState("");
@@ -37,6 +37,8 @@ const LeadOffcanvas = ({selectedContact}) => {
     contactImageURL: "",
     firstName: "",
     lastName: "",
+    company:"",
+    designation:"",
     email: [],
     phone: "",
     tags: [],
@@ -55,7 +57,6 @@ const LeadOffcanvas = ({selectedContact}) => {
     }));
   };
 
-
   const handleShow = () => setShow(true);
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
@@ -70,6 +71,8 @@ const LeadOffcanvas = ({selectedContact}) => {
     formDataObj.append("contactImage", formData.contactImageURL);
     formDataObj.append("firstname", formData.firstName);
     formDataObj.append("lastname", formData.lastName);
+    formDataObj.append("company", formData.company);
+    formDataObj.append("designation", formData.designation);
     formDataObj.append("emailaddresses", formData.email);
     formDataObj.append(
       "tags",
@@ -81,11 +84,9 @@ const LeadOffcanvas = ({selectedContact}) => {
       if (newTags.length > 0) {
         await dispatch(addTag({ tag: newTags })).unwrap();
       }
-     await dispatch(saveContact(formDataObj)).unwrap();
-document.getElementById("closeContactOffcanvas")?.click();
+      await dispatch(saveContact(formDataObj)).unwrap();
+      document.getElementById("closeContactOffcanvas")?.click();
       setIsLoading(false);
-            
-      
     } catch (error) {
       console.error("Error:", error);
       setIsLoading(false);
@@ -148,7 +149,7 @@ document.getElementById("closeContactOffcanvas")?.click();
         tags: selectedContact.tags || [],
       });
     }
-  }, [selectedContact,dispatch]);
+  }, [selectedContact, dispatch]);
 
   useEffect(() => {
     const offcanvasElement = document.getElementById("contact_offcanvas");
@@ -160,7 +161,6 @@ document.getElementById("closeContactOffcanvas")?.click();
       //   email: "",
       //   phone: "",
       // });
-
       // setSelectedTags([]);
       // setPreviousTags([]);
     };
@@ -273,6 +273,30 @@ document.getElementById("closeContactOffcanvas")?.click();
                   type="text"
                   value={formData.lastName}
                   name="lastName"
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">Company</label>
+                <input
+                  type="text"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">Designation</label>
+                <input
+                  type="text"
+                  name="designation"
+                  value={formData.designation}
                   onChange={handleChange}
                   className="form-control"
                 />

@@ -5,9 +5,9 @@ import DefaultEditor from "react-simple-wysiwyg";
 
 const EmailTemplateOffcanvas = () => {
   const [formData, setFormData] = useState({
-   emailTemplate_id: "",
-   emailTemplateTitle: "",
-   emailTemplateSubject: "",
+    emailTemplate_id: "",
+    emailTemplateTitle: "",
+    emailTemplateSubject: "",
     emailTemplateBody: "",
   });
 
@@ -21,15 +21,15 @@ const EmailTemplateOffcanvas = () => {
   };
   const handleAddEmailTemplate = async (e) => {
     e.preventDefault();
-   await dispatch(editProfile(formData)).unwrap();
-   document.getElementById("closeEmailTemplateOffcanvas")?.click();
-    if(selectedTemplate.emailTemplate_id == "") {
+    await dispatch(editProfile(formData)).unwrap();
+    document.getElementById("closeEmailTemplateOffcanvas")?.click();
+    if (selectedTemplate.emailTemplate_id == "") {
       setFormData({
-     emailTemplate_id: "",
-   emailTemplateTitle: "",
-   emailTemplateSubject: "",
-    emailTemplateBody: "",
-    });
+        emailTemplate_id: "",
+        emailTemplateTitle: "",
+        emailTemplateSubject: "",
+        emailTemplateBody: "",
+      });
     }
   };
   const selectedTemplate = useSelector((state) => state.selectedTemplate);
@@ -106,17 +106,21 @@ const EmailTemplateOffcanvas = () => {
                 />
               </div>
             </div>
-                  <div className="col-12">
-            <div className="mb-3">
-                  <label className="col-form-label ms-3">Body</label>
-                  <DefaultEditor name="emailTemplateBody"
-                      placeholder="Enter text here" value={formData.emailTemplateBody} 
-                      onChange={(e) =>{
-                        console.log("Editor value changed:", e.target.value);
-                        
-                        handleInputChange(e.target.name, e.target.value)}
-                  }/>
-                    {/* <textarea
+            <div className="col-12">
+              <div className="mb-3">
+                <label className="col-form-label ms-3">Body</label>
+                <DefaultEditor
+                  name="emailTemplateBody"
+                  placeholder="Enter text here"
+                  value={formData.emailTemplateBody}
+                  onChange={(e) => {
+                    console.log("Editor value changed:", e.target.value);
+
+                    handleInputChange(e.target.name, e.target.value);
+                  }}
+                  style={{ minHeight: "300px" }}
+                />
+                {/* <textarea
                       rows={5}
                       cols={5}
                       className="form-control"
@@ -127,8 +131,8 @@ const EmailTemplateOffcanvas = () => {
                   }
                       value={formData.emailTemplateBody}
                     /> */}
-                  </div>
-                </div>
+              </div>
+            </div>
           </div>
           <div className="d-flex align-items-center justify-content-end">
             <button
@@ -139,9 +143,7 @@ const EmailTemplateOffcanvas = () => {
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              {selectedTemplate?.emailTemplate_id == ""
-                ? "Create"
-                : "Update"}
+              {selectedTemplate?.emailTemplate_id == "" ? "Create" : "Update"}
             </button>
           </div>
         </form>

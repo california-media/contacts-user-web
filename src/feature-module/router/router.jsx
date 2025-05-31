@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Route, Routes, useLocation, useNavigate } from "react-router";
 import { authRoutes, publicRoutes } from "./router.link";
 import Feature from "../feature";
@@ -12,7 +12,13 @@ import { useDispatch, useSelector } from "react-redux";
 import PrivateRoute from "./PrivateRoute";
 import { Toast } from "react-bootstrap";
 import { hideToast } from "../../core/data/redux/slices/ToastSlice";
-
+import { gapi } from "gapi-script";
+import { GoogleAuthContext } from "../../core/common/context/GoogleAuthContext";
+import { fetchGoogleCalendarEvents } from "../../core/common/googleEvents/GoogleEvents";
+// const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+// const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+// const SCOPES =
+//   "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar";
 const ALLRoutes = () => {
   const location = useLocation();
     const navigate = useNavigate();
@@ -20,6 +26,8 @@ const ALLRoutes = () => {
   const { toasts } = useSelector((state) => state.toast);
   console.log(toasts,"toastss");
   
+const {isGoogleSignedIn} = useContext(GoogleAuthContext)
+
   const route = all_routes;
   // Find the current route in either public or auth routes
   const currentRoute = publicRoutes.find(route => route.path === location.pathname) || 
@@ -41,7 +49,39 @@ const ALLRoutes = () => {
       dispatch(fetchTags());
   }
   },[])
+useEffect(()=>{
+  if(isGoogleSignedIn){
+fetchGoogleCalendarEvents(dispatch);
+  }
+},[isGoogleSignedIn])
 
+//  useEffect(() => {
+//     const initClient = () => {
+//       gapi.client
+//         .init({
+//           apiKey: API_KEY,
+//           clientId: CLIENT_ID,
+//           discoveryDocs: [
+//             "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest",
+//             "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+//           ],
+//           scope: SCOPES,
+//         })
+//         .then(() => {
+//           gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+//           updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+//         });
+//     };
+
+//     gapi.load("client:auth2", initClient);
+//   }, []);
+
+//  const updateSigninStatus = (isSignedIn) => {
+//     setIsAuthenticated(isSignedIn);
+//     if (isSignedIn) {
+//       fetchMails();
+//     }
+//   };
   return (
     <>
       <Helmet>

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { deleteTask } from "./ContactSlice";
+import { deleteMeeting, deleteTask } from "./ContactSlice";
 
 const selectedContactSlice = createSlice({
   name: "selectedContact",
@@ -14,7 +14,8 @@ const selectedContactSlice = createSlice({
     website: "",
     isFavourite: false,
     notes: "",
-    tasks:[]
+    tasks:[],
+    meetings:[]
   },
   reducers: {
     setSelectedContact: (state, action) => {      
@@ -31,14 +32,20 @@ const selectedContactSlice = createSlice({
       website: "",
       isFavourite: false,
       notes: "",
-         tasks:[]
+         tasks:[],
+         meetings:[]
     }),
   },
   extraReducers: (builder) => { // this extra reducer is imported from the ContactSlice 
     builder.addCase(deleteTask.fulfilled, (state, action) => {
+      console.log(action.payload,"payload for deleted meeting")
       const deletedTaskId = action.payload;
       state.tasks = state.tasks.filter((task) => task.task_id !== deletedTaskId);
-    });
+    })
+    builder.addCase(deleteMeeting.fulfilled, (state, action) => {
+      const deletedMeetingId = action.payload;
+      state.meetings = state.meetings.filter((meeting) => meeting.meeting_id !== deletedMeetingId);
+    })
   },
 });
 

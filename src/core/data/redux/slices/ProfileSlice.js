@@ -18,10 +18,9 @@ const initialState = {
 
 export const fetchProfile = createAsyncThunk(
   "profile/fetchProfile",
-  async (paginationData, { rejectWithValue,dispatch }) => {
-    
+  async (paginationData, { rejectWithValue, dispatch }) => {
     try {
-      const response = await api.post("/getUser",paginationData);
+      const response = await api.post("/getUser", paginationData);
       localStorage.setItem("userId", response.data.data.id);
       console.log(response.data, "response from fetch profile");
 
@@ -37,14 +36,14 @@ export const fetchProfile = createAsyncThunk(
 
 export const editProfile = createAsyncThunk(
   "profile/editProfile",
-  async (profileData, { rejectWithValue,dispatch }) => {
+  async (profileData, { rejectWithValue, dispatch }) => {
     try {
       const response = await api.put("/editProfile", profileData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-dispatch(
+      dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
       return response.data;
@@ -58,13 +57,12 @@ dispatch(
 );
 export const deleteTemplate = createAsyncThunk(
   "profile/deleteTemplate",
-  async (deleteTemplateData, { rejectWithValue,dispatch }) => {
-
+  async (deleteTemplateData, { rejectWithValue, dispatch }) => {
     try {
       const response = await api.delete("/deleteTemplate", {
         data: deleteTemplateData,
       });
-dispatch(
+      dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
       return response.data.data;
@@ -116,17 +114,18 @@ const profileSlice = createSlice({
               action.payload.data.templates.whatsappTemplates
                 .whatsappTemplatesData[0]
             );
-            state.templates.whatsappTemplates.whatsappTemplatePagination.totalTemplates+=1;
+            state.templates.whatsappTemplates.whatsappTemplatePagination.totalTemplates += 1;
           }
         } else if (
-          action.payload.data?.templates?.emailTemplates?.emailTemplatesData?.[0]
+          action.payload.data?.templates?.emailTemplates
+            ?.emailTemplatesData?.[0]
         ) {
           const index =
             state.templates.emailTemplates.emailTemplatesData.findIndex(
               (template) =>
                 template.emailTemplate_id ===
-                action.payload.data.templates.emailTemplates.emailTemplatesData[0]
-                  .emailTemplate_id
+                action.payload.data.templates.emailTemplates
+                  .emailTemplatesData[0].emailTemplate_id
             );
           if (index !== -1) {
             state.templates.emailTemplates.emailTemplatesData[index] =
@@ -135,7 +134,7 @@ const profileSlice = createSlice({
             state.templates.emailTemplates.emailTemplatesData.unshift(
               action.payload.data.templates.emailTemplates.emailTemplatesData[0]
             );
-            state.templates.emailTemplates.emailTemplatePagination.totalTemplates+=1;
+            state.templates.emailTemplates.emailTemplatePagination.totalTemplates += 1;
           }
         }
       })
@@ -150,7 +149,7 @@ const profileSlice = createSlice({
             state.templates.whatsappTemplates.whatsappTemplatesData.filter(
               (template) => template.whatsappTemplate_id !== template_id
             );
-          state.templates.whatsappTemplates.whatsappTemplatePagination.totalTemplates-=1;
+          state.templates.whatsappTemplates.whatsappTemplatePagination.totalTemplates -= 1;
         }
         if (templateType === "emailTemplate") {
           state.templates.emailTemplates.emailTemplatesData =
@@ -158,9 +157,8 @@ const profileSlice = createSlice({
               (template) => template.emailTemplate_id !== template_id
             );
         }
-        state.templates.emailTemplates.emailTemplatePagination.totalTemplates-=1;
+        state.templates.emailTemplates.emailTemplatePagination.totalTemplates -= 1;
       });
   },
 });
-
 export default profileSlice.reducer;

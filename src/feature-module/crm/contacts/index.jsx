@@ -57,7 +57,6 @@ import {
   statusList,
   taskType,
   owner as companyEmployee,
-  meetingType,
   all_tags,
   options,
   countryoptions1,
@@ -83,10 +82,13 @@ import { HiEllipsisVertical } from "react-icons/hi2";
 import api from "../../../core/axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  deleteMeeting,
   deleteTask,
   saveContact,
 } from "../../../core/data/redux/slices/ContactSlice";
 import { addTag } from "../../../core/data/redux/slices/TagSlice";
+import { showToast } from "../../../core/data/redux/slices/ToastSlice";
+import { gapi } from "gapi-script";
 const route = all_routes;
 const allNotes = [
   {
@@ -149,70 +151,11 @@ const allNotes = [
   },
 ];
 
-const allTasks = [
-  {
-    name: "California Media",
-    photo: "assets/img/profiles/avatar-19.jpg",
-    title: "Important Meeting",
-    description: "Description 1",
-    taskType: "Follow Up",
-    isCompleted: "false",
-    dateCreated: "16 Sep 2023, 12:10 pm",
-    dueDate: "15 Sep 2024",
-    dueTime: "11.40 pm",
-  },
-  {
-    name: "California Media",
-    photo: "assets/img/profiles/avatar-19.jpg",
-    title: "Important Meeting",
-    description: "Description 2",
-    taskType: "Reminder",
-    isCompleted: "false",
-    dateCreated: "17 Sep 2023, 12:10 pm",
-    dueDate: "15 Oct 2024",
-    dueTime: "11.40 pm",
-  },
-  {
-    name: "California Media",
-    photo: "assets/img/profiles/avatar-19.jpg",
-    title: "Important Meeting",
-    description: "Description 3",
-    taskType: "Reminder",
-    isCompleted: "true",
-    dateCreated: "18 Sep 2023, 12:10 pm",
-    dueDate: "15 Oct 2024",
-    dueTime: "11.40 pm",
-  },
+const meetingType = [
+  { value: "online", label: "Online" },
+  { value: "offline", label: "Offline" },
 ];
 
-const allMeetings = [
-  {
-    title: "Important Meeting",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe explicabo cum quas quasi quo ut culpa exercitationem in! Similique, maxime!",
-    startDate: "9 sep 2024",
-    startTime: "12.45 pm",
-    endDate: "9 sep 2024",
-    endTime: "01.45 pm",
-    meetingType: "Online",
-    createdOnDate: "9 sep 2024",
-    createdOnTime: "01.45 pm",
-    physicalLocation: "Burjuman",
-  },
-  {
-    title: "Not Important Meeting",
-    description:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe explicabo cum quas quasi quo ut culpa exercitationem in! Similique, maxime!",
-    startDate: "9 sep 2024",
-    startTime: "12.45 pm",
-    endDate: "9 sep 2024",
-    endTime: "01.45 pm",
-    meetingType: "Offline",
-    createdOnDate: "9 sep 2024",
-    createdOnTime: "01.45 pm",
-    physicalLocation: "Burjuman",
-  },
-];
 export const initialSettings = {
   endDate: new Date("2020-08-11T12:30:00.000Z"),
   ranges: {
@@ -252,7 +195,7 @@ const ContactsDetails = () => {
 
   const selectedContact = useSelector((state) => state.selectedContact);
   const { tags } = useSelector((state) => state.tags);
-console.log(selectedContact, "selected contact");
+  console.log(selectedContact, "selected contact");
 
   const location = useLocation();
   const { record } = location.state || {};
@@ -269,10 +212,17 @@ console.log(selectedContact, "selected contact");
   const [selectedEmployee, setSelectedEmployee] = useState([]);
   const [hoveredNoteIndex, setHoveredNoteIndex] = useState(null);
   const [deleteModalText, setDeleteModalText] = useState("");
+  const [editEmailTemplateBody, setEditEmailTemplateBody] = useState("");
+  const [editEmailTemplateSubject, setEditEmailTemplateSubject] = useState("");
+  const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
   const [hoveredTaskIndex, setHoveredTaskIndex] = useState(null);
+  const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
+    useState("");
   const [hoveredMeetingIndex, setHoveredMeetingIndex] = useState(null);
   const [haveShippingAddress, setHaveShippingAddress] = useState(false);
+  const [checkMeetingLink, setCheckMeetingLink] = useState(true);
   const [showQuotationViewForm, setShowQuotationViewForm] = useState(false);
+  const [whatsppTemplateTitles, setWhatsppTemplateTitles] = useState([]);
   const [newTags, setNewTags] = useState([]);
   const [previousTags, setPreviousTags] = useState([]);
   const [quotationQuantity, setQuotationQuantity] = useState(false);
@@ -415,18 +365,21 @@ console.log(selectedContact, "selected contact");
     dueTime: dayjs("00:00", "HH:mm"),
   });
   const [meetingFormData, setMeetingFormData] = useState({
+    meeting_id: "",
     meetingDescription: "",
-    meetingType: null,
-    meetingStartDate: new Date(),
+    meetingType: "",
+    meetingLink: "",
+    meetingLocation: "",
+    meetingStartDate: dayjs(),
     meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
-    meetingEndDate: new Date(),
+    meetingEndDate: dayjs(),
     meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
   });
 
   const handleQuotationDropdownEditClick = (record) => {
     setSelectedDropdownQuotation(record);
   };
-
+  const userProfile = useSelector((state) => state.profile);
   const handleQuotationProductInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -435,6 +388,49 @@ console.log(selectedContact, "selected contact");
       ...prevProduct,
       [name]: value,
     }));
+  };
+
+  const sendEmail = async () => {
+    if (
+      !selectedContact.emailaddresses[0] ||
+      !editEmailTemplateSubject ||
+      !editEmailTemplateBody
+    ) {
+      alert("Please fill all fields");
+      return;
+    }
+
+    const headers = [
+      `To: ${selectedContact.emailaddresses[0]}`,
+      `Subject: ${editEmailTemplateSubject}`,
+      "Content-Type: text/html; charset=utf-8",
+      "",
+      `<p>${editEmailTemplateBody}</p>`,
+    ];
+
+    const email = headers.join("\r\n");
+
+    const base64EncodedEmail = btoa(
+      new TextEncoder()
+        .encode(email)
+        .reduce((data, byte) => data + String.fromCharCode(byte), "")
+    );
+    try {
+      await gapi.client.gmail.users.messages.send({
+        userId: "me",
+        resource: {
+          raw: base64EncodedEmail,
+        },
+      });
+      dispatch(
+        showToast({ message: "Email Sent Successfully", variant: "success" })
+      );
+      // setTo("");
+      // setSubject("");
+      // setMessage("");
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
   };
 
   const contentRef = useRef(null);
@@ -446,6 +442,15 @@ console.log(selectedContact, "selected contact");
     };
 
     dispatch(deleteTask(deleteTaskData));
+  };
+  const handleDeleteMeeting = () => {
+    setDeleteModalText("meeting");
+    const deleteMeetingData = {
+      contact_id: selectedContact.contact_id,
+      meeting_id: selectedMeeting.meeting_id,
+    };
+
+    dispatch(deleteMeeting(deleteMeetingData));
   };
   const exportToPDF = () => {
     const input = contentRef.current;
@@ -519,7 +524,7 @@ console.log(selectedContact, "selected contact");
   const handleMeetingInputChange = (name, value) => {
     setMeetingFormData({
       ...meetingFormData,
-      [name]: name === "meetingType" ? value.label : value,
+      [name]: value,
     });
   };
 
@@ -549,25 +554,36 @@ console.log(selectedContact, "selected contact");
   }, [selectedTask]);
 
   useEffect(() => {
+    console.log(selectedMeeting, "selected Meeting details");
+
     if (selectedMeeting) {
+      console.log(selectedMeeting, "selectedmeeting");
+
       setMeetingFormData({
-        meetingTitle: selectedMeeting.title,
-        meetingDescription: selectedMeeting.description,
-        meetingType:
-          meetingType.find(
-            (option) => option.value === selectedMeeting.meetingType
-          ).value || null,
-        dueDate: dayjs(selectedMeeting.dueDate),
-        dueTime: dayjs(selectedMeeting.dueTime, "HH:mm:ss"),
+        meeting_id: selectedMeeting.meeting_id,
+        meetingTitle: selectedMeeting.meetingTitle,
+        meetingDescription: selectedMeeting.meetingDescription,
+        meetingType: selectedMeeting.meetingType,
+        meetingLink: selectedMeeting.meetingLink,
+        meetingLocation: selectedMeeting.meetingLocation,
+        meetingStartDate: dayjs(selectedMeeting.meetingStartDate),
+        meetingStartTime: dayjs(selectedMeeting.meetingStartTime, "HH:mm"),
+        meetingEndDate: dayjs(selectedMeeting.meetingEndDate),
+        meetingEndTime: dayjs(selectedMeeting.meetingEndTime, "HH:mm"),
       });
     } else {
       // Reset form for new task
       setMeetingFormData({
+        meeting_id: "",
         meetingTitle: "",
         meetingDescription: "",
-        meetingType: null,
-        dueDate: dayjs(),
-        dueTime: dayjs("00:00:00", "HH:mm:ss"),
+        meetingType: "",
+        meetingLink: "",
+        meetingLocation: "",
+        meetingStartDate: dayjs(),
+        meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
+        meetingEndDate: dayjs(),
+        meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
       });
     }
   }, [selectedMeeting]);
@@ -650,14 +666,77 @@ console.log(selectedContact, "selected contact");
 
     dispatch(saveContact(formDataObj));
     setTaskFormData({
-    task_id: "",
-    taskDescription: "",
-    taskTitle: "",
-    taskType: null,
-    dueDate: dayjs(),
-    dueTime: dayjs("00:00", "HH:mm"),
-  })
+      task_id: "",
+      taskDescription: "",
+      taskTitle: "",
+      taskType: null,
+      dueDate: dayjs(),
+      dueTime: dayjs("00:00", "HH:mm"),
+    });
   };
+
+  const handleMeetingSubmit = async () => {
+    const formDataObj = new FormData();
+    let finalMeetLink = "";
+
+    if (checkMeetingLink && meetingFormData.meetingLink === "") {
+      try {
+        console.log("generating link");
+
+        finalMeetLink = await generateGoogleMeetingLink();
+      } catch (err) {
+        console.error("Failed to generate meeting link:", err);
+        return; // Stop submission if link generation fails
+      }
+    }
+
+    formDataObj.append("contact_id", selectedContact.contact_id);
+
+    formDataObj.append("meeting_id", meetingFormData.meeting_id);
+    formDataObj.append("meetingType", meetingFormData.meetingType);
+    formDataObj.append("meetingLocation", meetingFormData.meetingLocation);
+    formDataObj.append("meetingLink", finalMeetLink);
+    formDataObj.append(
+      "meetingDescription",
+      meetingFormData.meetingDescription
+    );
+    formDataObj.append("meetingTitle", meetingFormData.meetingTitle);
+
+    formDataObj.append(
+      "meetingStartDate",
+      meetingFormData.meetingStartDate.format("YYYY-MM-DD")
+    );
+    formDataObj.append(
+      "meetingStartTime",
+      meetingFormData.meetingStartTime.format("HH:mm")
+    );
+    formDataObj.append(
+      "meetingEndDate",
+      meetingFormData.meetingEndDate.format("YYYY-MM-DD")
+    );
+    formDataObj.append(
+      "meetingEndTime",
+      meetingFormData.meetingEndTime.format("HH:mm")
+    );
+    console.log(
+      "object before going to api:",
+      Object.fromEntries(formDataObj.entries())
+    );
+
+    dispatch(saveContact(formDataObj));
+
+    setMeetingFormData({
+      meeting_id: "",
+      meetingDescription: "",
+      meetingTitle: "",
+      meetingType: "",
+      meetingStartDate: dayjs(),
+      meetingStartTime: dayjs("00:00", "HH:mm"),
+      meetingEndDate: dayjs(),
+      meetingEndTime: dayjs("00:00", "HH:mm"),
+    });
+  };
+
   const handleHaveShippingAddress = (event) => {
     setHaveShippingAddress(event.target.checked);
   };
@@ -665,6 +744,7 @@ console.log(selectedContact, "selected contact");
   const handleTaskEditClick = (task) => {
     setSelectedTask(task);
   };
+
   const handleNoteEditClick = (note) => {
     setSelectedNote(note);
   };
@@ -761,11 +841,59 @@ console.log(selectedContact, "selected contact");
     );
     setAddedQuotationEntries(updatedQuotationEntries);
   };
+  console.log(meetingFormData, "meeting form data");
+
+  const generateGoogleMeetingLink = () => {
+    return new Promise((resolve, reject) => {
+      const combinedStart = dayjs(meetingFormData.meetingStartDate)
+        .set("hour", dayjs(meetingFormData.meetingStartTime).hour())
+        .set("minute", dayjs(meetingFormData.meetingStartTime).minute())
+        .set("second", 0);
+
+      const combinedEnd = dayjs(meetingFormData.meetingEndDate)
+        .set("hour", dayjs(meetingFormData.meetingEndTime).hour())
+        .set("minute", dayjs(meetingFormData.meetingEndTime).minute())
+        .set("second", 0);
+      console.log(combinedStart, combinedEnd, "start and end date");
+
+      gapi.client.calendar.events
+        .insert({
+          calendarId: "primary",
+          conferenceDataVersion: 1,
+          resource: {
+            summary: meetingFormData.meetingTitle,
+            start: { dateTime: combinedStart.toISOString() },
+            end: { dateTime: combinedEnd.toISOString() },
+            conferenceData: {
+              createRequest: {
+                requestId: "unique-id-" + new Date().getTime(),
+                conferenceSolutionKey: { type: "hangoutsMeet" },
+              },
+            },
+          },
+        })
+        .then((res) => {
+          const meetLink = res.result.conferenceData.entryPoints.find(
+            (e) => e.entryPointType === "video"
+          )?.uri;
+          console.log("Google Meet link:", meetLink);
+          setMeetingFormData((prevData) => ({
+            ...prevData,
+            meetingLink: meetLink,
+          }));
+          resolve(meetLink);
+        })
+        .catch((err) => {
+          reject(err);
+          console.error("Error creating event:", err);
+        });
+    });
+  };
 
   const sortedNotes = sortNotes(allNotes);
   const sortedIncompleteTask = sortIncompleteTask(selectedContact.tasks);
   const sortedCompletedTask = sortCompletedTask(selectedContact.tasks);
-
+  console.log(selectedContact.meetings, "all meetings of selected contacts");
   // const leadInfo = location.state?.record || location.state?.lead || {};
   // Store leadInfo in a state variable
 
@@ -890,104 +1018,6 @@ console.log(selectedContact, "selected contact");
       // setIsLoading(false);
     }
   };
-
-  //  const handleUserTags = async () => {
-  //     setIsLoading(true);
-
-  //     const formDataObj = new FormData();
-
-  //     formDataObj.append("contact_id", selectedContact.contact_id);
-
-  //     formDataObj.append(
-  //       "tags",
-  //       JSON.stringify(selectedTags.map((tag) => tag.value))
-  //     );
-
-  //     try {
-
-  //       if(newTags.length>0){
-  //         dispatch(addTag({ tag: newTags }));
-  //       }
-  //       dispatch(saveContact(formDataObj));
-
-  //       setIsLoading(false);
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  // const handleUserTags = (tags) => {
-  //   setSelectedTags(tags);
-
-  //   // Extract tag values from the current and previous state
-  //   const newTagValues = tags.map((tag) => tag.value);
-  //   const previousTagValues = previousTags.map((tag) => tag.value);
-
-  //   // 🔹 **Find Newly Added Tag**
-  //   const newSelectedTag = tags.find(
-  //     (tag) => !previousTagValues.includes(tag.value)
-  //   );
-
-  //   // 🔹 **Find Removed Tag**
-  //   const removedTag = previousTags.find(
-  //     (tag) => !newTagValues.includes(tag.value)
-  //   );
-
-  //   if (newSelectedTag) {
-
-  //     const addTag = async () => {
-  //       try {
-  //         // 🔹 **Check if it's a custom-created tag**
-  //         if (newSelectedTag.__isNew__) {
-
-  //           // 1️⃣ **Create the tag first**
-  //           const createResponse = await api.post("/addTag", {
-  //             tagName: newSelectedTag.value,
-  //           });
-
-  //           // 2️⃣ **Assign the new tag to the contact**
-  //           await api.post("/assignedContactTag/assign-tag", {
-  //             tagNames: [newSelectedTag.value],
-  //             contactId: leadInfo.contact_id,
-  //           });
-
-  //         } else {
-  //           // If it's an existing tag, just assign it
-  //           const response = await api.post("/assignedContactTag/assign-tag", {
-  //             tagNames: [newSelectedTag.value],
-  //             contactId: leadInfo.contact_id,
-  //           });
-  //         }
-  //       } catch (error) {
-  //         console.error(
-  //           "Failed to add/assign tag:",
-  //           newSelectedTag.value,
-  //           error
-  //         );
-  //       }
-  //     };
-  //     addTag();
-  //   }
-
-  //   if (removedTag) {
-
-  //     const removeTag = async () => {
-  //       try {
-  //         const response = await api.post("/assignedContactTag/unassign-tag", {
-  //           tagNames: [removedTag.value],
-  //           contactId: leadInfo.contact_id,
-  //         });
-  //       } catch (error) {
-  //         console.error("Failed to remove tag:", removedTag.value, error);
-  //       }
-  //     };
-  //     removeTag();
-  //   }
-
-  //   // Update the previous tags state
-  //   setPreviousTags(tags);
-  // };
 
   useEffect(() => {
     const drake = dragula([ViewQuotationTableRef.current]);
@@ -1122,6 +1152,29 @@ console.log(selectedContact, "selected contact");
       ),
     },
   ];
+  useEffect(() => {
+    const whatsappTitles =
+      userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.map(
+        (template) => {
+          return {
+            label: template.whatsappTemplateTitle,
+            value: template.whatsappTemplate_id,
+          };
+        }
+      );
+
+    const emailTitles =
+      userProfile?.templates?.emailTemplates?.emailTemplatesData?.map(
+        (template) => {
+          return {
+            label: template.emailTemplateTitle,
+            value: template.emailTemplate_id,
+          };
+        }
+      );
+    setEmailTemplateTitles(emailTitles);
+    setWhatsppTemplateTitles(whatsappTitles);
+  }, [userProfile]);
   const quotationColumns = [
     {
       title: "",
@@ -1413,7 +1466,6 @@ console.log(selectedContact, "selected contact");
                         to="#"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#contact_offcanvas"
-                        onClick={() => {}}
                       >
                         <CiEdit size={20} />
                       </Link>
@@ -1433,10 +1485,21 @@ console.log(selectedContact, "selected contact");
                     </div>
                     <ul>
                       <div className="row mb-3 d-flex flex-column align-items-center">
-                        <span className="col-12 fw-semibold text-black">
-                          Name
+                        {leadInfo.company && (
+                          <span className="col-12 fw-semibold text-black">
+                            {leadInfo.company}
+                          </span>
+                        )}
+                        <span
+                          className={`col-12 ${
+                            leadInfo.company !== ""
+                              ? "fw-semibold text-black"
+                              : ""
+                          }`}
+                        >
+                          {leadInfo.firstname} {leadInfo.lastname}
                         </span>
-                        <span className="col-12">{leadInfo.firstname}</span>
+                        <span className="col-12 fst-italic">Developer</span>
                       </div>
                       {leadInfo?.phonenumbers?.length > 0 && (
                         <li className="row mb-3">
@@ -1452,7 +1515,7 @@ console.log(selectedContact, "selected contact");
                                 <span>{"+" + number}</span>
                                 <div className="d-flex align-items-center">
                                   <a
-                                    //  href={`tel:${text}`}
+                                    href={`tel:${number}`}
                                     onClick={() => {}}
                                     className="action-icon me-3"
                                     title="Call"
@@ -1460,13 +1523,26 @@ console.log(selectedContact, "selected contact");
                                     <i className="ti ti-phone" />
                                   </a>
 
-                                  <a
+                                  {/* <a
                                     // href={`https://wa.me/${text}`}
                                     className="action-icon"
                                     title="WhatsApp"
                                   >
                                     <i className="fa-brands fa-whatsapp"></i>
-                                  </a>
+                                  </a> */}
+                                  <Link
+                                    to="#"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#show_whatsapp_templates"
+                                    className="link-purple fw-medium action-icon"
+                                    // onClick={() => {
+                                    //   dispatch(setSelectedContact(record));
+                                    // }}
+                                    title="WhatsApp"
+                                    // target="_blank"
+                                  >
+                                    <i className="fa-brands fa-whatsapp"></i>
+                                  </Link>
                                 </div>
                               </div>
                             );
@@ -1485,13 +1561,15 @@ console.log(selectedContact, "selected contact");
                                 key={index}
                               >
                                 <span>{email}</span>
-                                <a
-                                  // href={`mailto:${text}`}
-                                  className="action-icon"
+                                <Link
+                                  to="#"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#show_email_templates"
+                                  className="link-purple fw-medium action-icon"
                                   title="Email"
                                 >
                                   <MdMail />
-                                </a>
+                                </Link>
                               </div>
                             );
                           })}
@@ -2208,9 +2286,10 @@ console.log(selectedContact, "selected contact");
                                             className="styleForDeleteBtn"
                                             data-bs-toggle="modal"
                                             data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={() =>
-                                              setSelectedTask(task)
-                                            }
+                                            onClick={() => {
+                                              setDeleteModalText("task");
+                                              setSelectedTask(task);
+                                            }}
                                           >
                                             <i className="ti ti-trash text-danger" />
                                           </Link>
@@ -2236,7 +2315,11 @@ console.log(selectedContact, "selected contact");
                                           Last Modified on{" "}
                                         </span>{" "}
                                         {/* <span>{task.dateCreated} </span> */}
-                                        <span>{dayjs(task.updatedAt).format("DD MMM YYYY, hh:mm A")}</span>
+                                        <span>
+                                          {dayjs(task.updatedAt).format(
+                                            "DD MMM YYYY, hh:mm A"
+                                          )}
+                                        </span>
                                       </p>
                                       <p>
                                         <span className="fw-medium text-black">
@@ -2343,9 +2426,10 @@ console.log(selectedContact, "selected contact");
                                             className="styleForDeleteBtn"
                                             data-bs-toggle="modal"
                                             data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={() =>
-                                              setSelectedTask(task)
-                                            }
+                                            onClick={() => {
+                                              setDeleteModalText("task");
+                                              setSelectedTask(task);
+                                            }}
                                           >
                                             <i className="ti ti-trash text-danger" />
                                           </Link>
@@ -2397,7 +2481,11 @@ console.log(selectedContact, "selected contact");
                                           {task.taskDueTime && (
                                             <span>{task.taskDueTime}</span>
                                           )} */}
-                                          <span>{dayjs(task.updatedAt).format("DD MMM YYYY, hh:mm A")}</span>
+                                          <span>
+                                            {dayjs(task.updatedAt).format(
+                                              "DD MMM YYYY, hh:mm A"
+                                            )}
+                                          </span>
                                         </span>
                                       </p>
                                       <p>
@@ -2447,7 +2535,18 @@ console.log(selectedContact, "selected contact");
                             className="link-purple fw-medium"
                             onClick={() => {
                               setSelectedMeeting(null);
-                              setSelectedMeetingType(null);
+                              setSelectedMeetingType("");
+                              setMeetingFormData({
+                                meeting_id: "",
+                                meetingDescription: "",
+                                meetingType: "",
+                                meetingLink: "",
+                                meetingLocation: "",
+                                meetingStartDate: dayjs(),
+                                meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
+                                meetingEndDate: dayjs(),
+                                meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
+                              });
                             }}
                           >
                             <i className="ti ti-circle-plus me-1" />
@@ -2457,98 +2556,131 @@ console.log(selectedContact, "selected contact");
                       </div>
                       <div className="card-body">
                         <div className="notes-activity">
-                          {allMeetings.map((meeting, meetingIndex) => {
-                            return (
-                              <div className="card mb-3" key={meetingIndex}>
-                                <div
-                                  className="card-body"
-                                  onMouseEnter={() =>
-                                    setHoveredMeetingIndex(meetingIndex)
-                                  }
-                                  onMouseLeave={() =>
-                                    setHoveredMeetingIndex(null)
-                                  }
-                                >
-                                  <div className="d-flex align-items-center justify-content-between pb-2">
-                                    {hoveredMeetingIndex === meetingIndex && (
-                                      <div
-                                        style={{
-                                          position: "absolute",
-                                          top: 20,
-                                          right: 20,
-                                        }}
-                                      >
-                                        <Link
-                                          to="#"
-                                          className="me-3 styleForEditBtn"
-                                          data-bs-toggle="modal"
-                                          data-bs-target="#add_meeting"
-                                          onClick={() => {
-                                            handleMeetingEditClick(meeting);
+                          {selectedContact.meetings.map(
+                            (meeting, meetingIndex) => {
+                              return (
+                                <div className="card mb-3" key={meetingIndex}>
+                                  <div
+                                    className="card-body"
+                                    onMouseEnter={() =>
+                                      setHoveredMeetingIndex(meetingIndex)
+                                    }
+                                    onMouseLeave={() =>
+                                      setHoveredMeetingIndex(null)
+                                    }
+                                  >
+                                    <div className="d-flex align-items-center justify-content-between pb-2">
+                                      {hoveredMeetingIndex === meetingIndex && (
+                                        <div
+                                          style={{
+                                            position: "absolute",
+                                            top: 20,
+                                            right: 20,
                                           }}
                                         >
-                                          <i className="ti ti-edit text-blue" />
-                                        </Link>
-                                        <Link
-                                          to="#"
-                                          className="styleForDeleteBtn"
-                                          data-bs-toggle="modal"
-                                          data-bs-target={`#delete_${deleteModalText}`}
-                                          onClick={() => {
-                                            setDeleteModalText("meeting");
-                                          }}
+                                          <Link
+                                            to="#"
+                                            className="me-3 styleForEditBtn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#add_meeting"
+                                            onClick={() => {
+                                              handleMeetingEditClick(meeting);
+                                            }}
+                                          >
+                                            <i className="ti ti-edit text-blue" />
+                                          </Link>
+                                          <Link
+                                            to="#"
+                                            className="styleForDeleteBtn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target={`#delete_${deleteModalText}`}
+                                            onClick={() => {
+                                              setDeleteModalText("meeting");
+                                              setSelectedMeeting(meeting);
+                                            }}
+                                          >
+                                            <i className="ti ti-trash text-danger" />
+                                          </Link>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="col-md-11 mb-3">
+                                      {meeting.meetingType == "online" ? (
+                                        <p
+                                          className={`badge badge-soft-black fw-medium me-2`}
                                         >
-                                          <i className="ti ti-trash text-danger" />
-                                        </Link>
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="col-md-11 mb-3">
-                                    {meeting.meetingType == "Online" ? (
-                                      <p
-                                        className={`badge badge-soft-black fw-medium me-2`}
-                                      >
-                                        <RiVideoOnLine className="me-2" />
-                                        {meeting.meetingType}
+                                          <RiVideoOnLine className="me-2" />
+                                          Online
+                                        </p>
+                                      ) : (
+                                        <p
+                                          className={`badge badge-soft-warning fw-medium me-2`}
+                                        >
+                                          <IoLocationSharp className="me-2" />
+                                          Offline
+                                        </p>
+                                      )}
+                                      <p className="fw-medium text-black">
+                                        {meeting.meetingTitle}
                                       </p>
-                                    ) : (
-                                      <p
-                                        className={`badge badge-soft-warning fw-medium me-2`}
-                                      >
-                                        <IoLocationSharp className="me-2" />
-                                        {meeting.meetingType}
-                                      </p>
-                                    )}
-                                    <p className="fw-medium text-black">
-                                      {meeting.title}
-                                    </p>
-                                    <p>{meeting.description}</p>
-                                  </div>
-
-                                  <div className="d-flex justify-content-between align-items-center">
-                                    <p className="mb-0">
-                                      ✎{" "}
-                                      <span className="fw-medium text-black ms-2">
-                                        Created by Jessica on{" "}
+                                      <p>{meeting.meetingDescription}</p>
+                                    </div>
+                                    
+                                    {meeting.meetingType=="online" &&<div className="d-flex justify-content-end mb-2">
+                                      {" "}
+                                      <span className="fw-medium text-black me-1">
+                                        Meeting Link :
                                       </span>{" "}
                                       <span>
-                                        {meeting.createdOnDate}{" "}
-                                        {meeting.createdOnTime && (
-                                          <span>{meeting.createdOnTime}</span>
-                                        )}
+                                        {" "}
+                                        {meeting.meetingLink}
                                       </span>
-                                    </p>
-                                    <p>
-                                      <span className="fw-medium text-black">
-                                        Meeting time :
-                                      </span>{" "}
-                                      {meeting.startDate} {meeting.startTime}
-                                    </p>
+                                    </div>}
+                                    <div className="d-flex justify-content-between align-items-center">
+                                      <p className="mb-0">
+                                        ✎{" "}
+                                        <span className="fw-medium text-black ms-2">
+                                          Last Modified on
+                                        </span>{" "}
+                                        <span>
+                                          {dayjs(meeting.updatedAt).format(
+                                            "DD MMM YYYY, hh:mm A"
+                                          )}
+                                        </span>
+                                      </p>
+                                      <p>
+                                        <span className="fw-medium text-black">
+                                          Meeting Starts at :
+                                        </span>{" "}
+                                        <span
+                                          style={{
+                                            color: dayjs(
+                                              `${
+                                                meeting.meetingStartDate.split(
+                                                  "T"
+                                                )[0]
+                                              }T${meeting.meetingStartTime}`
+                                            ).isBefore(dayjs())
+                                              ? "red"
+                                              : "inherit",
+                                          }}
+                                        >
+                                          {dayjs(
+                                            meeting.meetingStartDate
+                                          ).format("DD MMM YYYY")}
+                                          {", "}
+                                          {dayjs(
+                                            meeting.meetingStartTime,
+                                            "HH:mm"
+                                          ).format("hh:mm A")}
+                                        </span>
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            }
+                          )}
                         </div>
                       </div>
                     </div>
@@ -3908,18 +4040,18 @@ console.log(selectedContact, "selected contact");
                       </span>
                       <DatePicker
                         className="form-control datetimepicker deals-details"
-                        selected={selectedDate}
-                        onChange={handleDateChange}
-                        dateFormat="dd-MM-yyyy"
+                        value={meetingFormData.meetingStartDate}
+                        name="meetingStartDate"
+                        onChange={(date) => {
+                          handleMeetingInputChange("meetingStartDate", date);
+                        }}
+                        format="DD-MM-YYYY"
                       />
                     </div>
                   </div>
 
                   <div className="col-md-6 mb-3">
-                    <label className="col-form-label">
-                      Start Time{" "}
-                      {selectedMeeting ? selectedMeeting.startDate : ""}
-                    </label>
+                    <label className="col-form-label">Start Time </label>
                     <div className="icon-form">
                       <span className="form-icon">
                         <i className="ti ti-clock-hour-10" />
@@ -3927,8 +4059,13 @@ console.log(selectedContact, "selected contact");
                       <TimePicker
                         placeholder="Select Time"
                         className="form-control datetimepicker-time"
-                        onChange={onChange}
+                        name="meetingStartTime"
+                        onChange={(time) =>
+                          handleMeetingInputChange("meetingStartTime", time)
+                        }
+                        value={meetingFormData.meetingStartTime}
                         defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
+                        format="hh:mm A"
                       />
                     </div>
                   </div>
@@ -3942,9 +4079,12 @@ console.log(selectedContact, "selected contact");
                       </span>
                       <DatePicker
                         className="form-control datetimepicker deals-details"
-                        selected={selectedDate}
-                        onChange={handleDateChange}
-                        dateFormat="dd-MM-yyyy"
+                        value={meetingFormData.meetingEndDate}
+                        name="meetingEndDate"
+                        onChange={(date) => {
+                          handleMeetingInputChange("meetingEndDate", date);
+                        }}
+                        format="DD-MM-YYYY"
                       />
                     </div>
                   </div>
@@ -3957,8 +4097,13 @@ console.log(selectedContact, "selected contact");
                       <TimePicker
                         placeholder="Select Time"
                         className="form-control datetimepicker-time"
-                        onChange={onChange}
+                        name="meetingEndTime"
+                        onChange={(time) =>
+                          handleMeetingInputChange("meetingEndTime", time)
+                        }
+                        value={meetingFormData.meetingEndTime}
                         defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
+                        format="hh:mm A"
                       />
                     </div>
                   </div>
@@ -3966,64 +4111,111 @@ console.log(selectedContact, "selected contact");
                 <div className="mb-3">
                   <label className="col-form-label">Meeting Type</label>
                   <Select
-                    // value={selectedMeetingType ? meetingType.find(option => option.value === selectedMeetingType) : null}
-                    // onChange={handleMeetingTypeChange}
+                    value={
+                      meetingFormData?.meetingType
+                        ? meetingType.find(
+                            (option) =>
+                              option.value === meetingFormData?.meetingType
+                          )
+                        : null
+                    }
                     className="select2"
                     options={meetingType}
                     name="meetingType"
-                    value={meetingType.find(
-                      (option) => option.value === meetingFormData.meetingType
-                    )}
                     onChange={(option) =>
-                      handleMeetingInputChange("meetingType", option)
+                      handleMeetingInputChange("meetingType", option.value)
                     }
                     placeholder="Choose"
                     classNamePrefix="react-select"
                   />
                 </div>
 
-                {meetingFormData.meetingType === "Offline" && (
+                {meetingFormData?.meetingType === "offline" && (
                   <div className="mb-3">
                     <label className="col-form-label">Location</label>
-                    <input className="form-control" type="text" />
+                    <input
+                      className="form-control"
+                      name="meetingLocation"
+                      onChange={(e) => {
+                        handleMeetingInputChange(e.target.name, e.target.value);
+                      }}
+                      value={meetingFormData.meetingLocation}
+                      type="text"
+                    />
                   </div>
                 )}
 
-                {meetingFormData.meetingType === "Online" && (
-                  <div className="d-flex align-items-center">
-                    <span
-                      style={{
-                        background: "#dce8ff",
-                        color: "#4a8bff",
-                        padding: 8,
-                        borderRadius: 5,
-                      }}
-                      className="me-3"
-                    >
-                      <ImageWithBasePath
-                        src="assets/img/customIcons/zoomIcon.png"
-                        className="iconWidth me-2"
-                      ></ImageWithBasePath>
-                      <span>Add Zoom Meeting</span>
-                    </span>
+                {meetingFormData?.meetingType === "online" &&
+                meetingFormData?.meetingLink !== "" ? (
+                  <>
+                    <div className="mb-3">
+                      <label className="col-form-label">Meeting Link</label>
+                      <input
+                        className="form-control"
+                        disabled
+                        name="meetingLink"
+                        value={meetingFormData.meetingLink}
+                        onChange={(e) => {
+                          handleMeetingInputChange(
+                            e.target.name,
+                            e.target.value
+                          );
+                        }}
+                        type="text"
+                      />
+                    </div>
+                    {/* <div className="d-flex align-items-center">
+                      <span
+                        style={{
+                          background: "#dce8ff",
+                          color: "#4a8bff",
+                          padding: 8,
+                          borderRadius: 5,
+                        }}
+                        className="me-3"
+                      >
+                        <ImageWithBasePath
+                          src="assets/img/customIcons/zoomIcon.png"
+                          className="iconWidth me-2"
+                        ></ImageWithBasePath>
+                        <span>Add Zoom Meeting</span>
+                      </span>
 
-                    <span
-                      style={{
-                        background: "#dfffec",
-                        color: "#00ac48",
-                        padding: 8,
-                        borderRadius: 5,
-                      }}
-                    >
-                      <ImageWithBasePath
-                        src="assets/img/customIcons/googleMeetIcon.png"
-                        className="iconWidth me-2"
-                      ></ImageWithBasePath>
-                      <span>Add Google Meeting</span>
-                    </span>
-                  </div>
+                      <span
+                        style={{
+                          background: "#dfffec",
+                          color: "#00ac48",
+                          padding: 8,
+                          borderRadius: 5,
+                        }}
+                        onClick={generateGoogleMeetingLink}
+                        // onClick={()=>{}}
+                      >
+                        <ImageWithBasePath
+                          src="assets/img/customIcons/googleMeetIcon.png"
+                          className="iconWidth me-2"
+                        ></ImageWithBasePath>
+                        <span>Add Google Meeting</span>
+                      </span>
+                    </div> */}
+                  </>
+                ) : (
+                  ""
                 )}
 
+                {meetingFormData?.meetingType === "online" &&
+                  meetingFormData?.meetingLink == "" && (
+                    <div className="form-check form-switch">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        checked={checkMeetingLink}
+                        onChange={() => setCheckMeetingLink(!checkMeetingLink)}
+                      />
+                      <div>Generate Meeting Link</div>
+                    </div>
+                  )}
                 <div className="col-lg-12 text-end modal-btn mt-4">
                   <Link
                     to="#"
@@ -4036,6 +4228,9 @@ console.log(selectedContact, "selected contact");
                     className="btn btn-primary"
                     data-bs-dismiss="modal"
                     type="button"
+                    onClick={() => {
+                      handleMeetingSubmit();
+                    }}
                   >
                     Save changes
                   </button>
@@ -5278,7 +5473,177 @@ console.log(selectedContact, "selected contact");
         </div>
       </Modal>
       {/* /Delete Stage */}
-      <DeleteModal text={deleteModalText} onDelete={handleDeleteTask} />
+
+      {/* <DeleteModal text={deleteModalText} onDelete={handleDeleteTask} />
+  <DeleteModal text={deleteModalText} onDelete={handleDeleteMeeting} /> */}
+
+      <DeleteModal
+        text={deleteModalText}
+        onDelete={
+          deleteModalText === "task" ? handleDeleteTask : handleDeleteMeeting
+        }
+      />
+
+      <div
+        className="modal custom-modal fade modal-padding"
+        id="show_whatsapp_templates"
+        role="dialog"
+        // style={{ minHeight: 500 }}
+      >
+        <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Send Whatsapp</h5>
+              <button
+                type="button"
+                className="btn-close position-static"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+
+            <div className="d-flex align-items-center justify-content-end"></div>
+            <div className="modal-body">
+              <div className="mb-3">
+                <Select
+                  classNamePrefix="react-select"
+                  options={whatsppTemplateTitles}
+                  onChange={(selectedOption) => {
+                    setEditWhatsappTemplateMessage(
+                      userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData.find(
+                        (template) =>
+                          template.whatsappTemplate_id === selectedOption.value
+                      )?.whatsappTemplateMessage
+                    );
+                  }}
+                  placeholder="Select a template"
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="col-form-label col-md-2">Message</label>
+                <div className="col-md-12">
+                  <textarea
+                    rows={5}
+                    cols={5}
+                    className="form-control"
+                    name="whatsappTemplateMessage"
+                    placeholder="Enter text here"
+                    onChange={(e) =>
+                      setEditWhatsappTemplateMessage(e.target.value)
+                    }
+                    value={editWhatsappTemplateMessage}
+                  />
+                </div>
+              </div>
+              <div className="d-flex justify-content-end">
+                <button
+                  className="btn text-white"
+                  style={{ background: "#25d366" }}
+                  onClick={() => {
+                    if (selectedContact?.phonenumbers?.length > 0) {
+                      const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${editWhatsappTemplateMessage}`;
+                      window.open(url, "_blank");
+                    } else {
+                      alert("Phone number not available");
+                    }
+                  }}
+                >
+                  <img
+                    src="assets/img/icons/whatsappIcon96.png"
+                    alt="whatsapp"
+                    style={{ width: 20 }}
+                    className="me-2"
+                  />
+                  Whatsapp Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="modal custom-modal fade modal-padding"
+        id="show_email_templates"
+        role="dialog"
+      >
+        <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Send Email</h5>
+              <button
+                type="button"
+                className="btn-close position-static"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            {console.log(emailTemplateTitles,"emailTemplateTitles")
+            }
+            <div className="modal-body">
+              <div className="mb-3">
+                <Select
+                  classNamePrefix="react-select"
+                  options={emailTemplateTitles}
+                  onChange={(selectedOption) => {
+                    setEditEmailTemplateBody(
+                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
+                        (template) =>
+                          template.emailTemplate_id === selectedOption.value
+                      )?.emailTemplateBody
+                    );
+                    setEditEmailTemplateSubject(
+                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
+                        (template) =>
+                          template.emailTemplate_id === selectedOption.value
+                      )?.emailTemplateSubject
+                    );
+                  }}
+                  placeholder="Select a template"
+                />
+              </div>
+
+              <div className="col-12">
+                <div className="mb-3">
+                  <label className="col-form-label ms-3">Subject</label>
+                  <input
+                    type="text"
+                    value={editEmailTemplateSubject}
+                    name="emailTemplateSubject"
+                    onChange={(e) =>
+                      setEditEmailTemplateSubject(e.target.value)
+                    }
+                    className="form-control"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <label className="col-form-label col-md-2">Body</label>
+                <div className="col-md-12">
+                  <DefaultEditor
+                    className="form-control"
+                    value={editEmailTemplateBody}
+                    onChange={(e) => setEditEmailTemplateBody(e.target.value)}
+                    name="emailTemplateMessage"
+                    placeholder="Enter text here"
+                    style={{ height: "300px" }}
+                  />
+                </div>
+              </div>
+              <div className="d-flex justify-content-end">
+                <button className="btn btn-primary" onClick={sendEmail}>
+                  Send Mail
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

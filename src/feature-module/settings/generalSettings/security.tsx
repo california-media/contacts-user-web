@@ -27,6 +27,9 @@ const Security = () => {
                           <Link to={route.security} className="fw-medium active">
                             Security
                           </Link>
+                          <Link to={route.emailSetup} className="fw-medium">
+                                                    Connected Mails
+                                                  </Link>
                           <Link to={route.myScans} className="fw-medium">
                             My Scans
                           </Link>

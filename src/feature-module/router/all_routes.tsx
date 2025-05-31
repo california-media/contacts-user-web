@@ -40,6 +40,7 @@ export const all_routes = {
   contacts: "/contacts",
   templates: "/templates",
   emails:"/emails",
+  calendar:"/calendar",
   // projectsGrid: "/crm/project-grid",
   // ProposalsList: "/crm/proposals-list",
   // ProposalsGrid: "/crm/proposals-grid",
@@ -172,6 +173,7 @@ export const all_routes = {
   myScans: "/general-settings/my-scans",
   profile: "/general-settings/profile",
   security: "/general-settings/security",
+  emailSetup: "/general-settings/emailSetup",
 
   // banIpAddrress: "/other-settings/ban-ip-address",
   // storage: "/other-settings/storage",

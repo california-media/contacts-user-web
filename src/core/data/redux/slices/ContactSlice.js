@@ -43,6 +43,8 @@ export const fetchContacts = createAsyncThunk(
 export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
+ console.log("object before going to api in slice:", Object.fromEntries(formData.entries()));
+    
     try {
       const response = await api.post("addEditContact", formData, {
         headers: {
@@ -94,6 +96,27 @@ export const deleteTask = createAsyncThunk(
         showToast({ message: response.data.message, variant: "success" })
       );
       return response.data.data.task_id;
+      // return deleteTaskData.task_id;
+    } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+export const deleteMeeting = createAsyncThunk(
+  "meetings/deleteMeeting",
+  async (deleteMeetingData, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.delete("/deleteMeeting", {
+        data: deleteMeetingData,
+      });
+
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
+      return response.data.data.meeting_id;
       // return deleteTaskData.task_id;
     } catch (error) {
       dispatch(

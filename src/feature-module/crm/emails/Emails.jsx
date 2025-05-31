@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { gapi } from "gapi-script";
 import DOMPurify from "dompurify";
+import DefaultEditor from "react-simple-wysiwyg";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../core/data/redux/slices/ToastSlice";
+import { GoogleAuthContext } from "../../../core/common/context/GoogleAuthContext";
 
-const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-const SCOPES =
-  "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send";
+// const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+// const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+// const SCOPES =
+//   "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar";
 const Emails = () => {
-  const [to, setTo] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [filter, setFilter] = useState("INBOX");
   const [showCompose, setShowCompose] = useState(false);
-
+  const { isGoogleSignedIn, googleSignIn, googleSignOut } = useContext(GoogleAuthContext);
   const [formData, setFormData] = useState({
     to: "",
     subject: "",
@@ -26,60 +27,57 @@ const Emails = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+  console.log(formData, "formmm dataaa");
+  const dispatch = useDispatch();
 
   const handleSend = () => {
-    // Replace with actual send logic
     console.log("Sending email:", formData);
     setShowCompose(false);
     setFormData({ to: "", subject: "", body: "" });
   };
-  console.log("CLIENT_ID:", CLIENT_ID);
-  console.log("API_KEY:", API_KEY);
-  useEffect(() => {
-    const initClient = () => {
-      gapi.client
-        .init({
-          apiKey: API_KEY,
-          clientId: CLIENT_ID,
-          discoveryDocs: [
-            "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest",
-          ],
-          scope: SCOPES,
-        })
-        .then(() => {
-          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-          updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-        });
-    };
+  // console.log("CLIENT_ID:", CLIENT_ID);
+  // console.log("API_KEY:", API_KEY);
+  // useEffect(() => {
+  //   const initClient = () => {
+  //     gapi.client
+  //       .init({
+  //         apiKey: API_KEY,
+  //         clientId: CLIENT_ID,
+  //         discoveryDocs: [
+  //           "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest",
+  //           "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+  //         ],
+  //         scope: SCOPES,
+  //       })
+  //       .then(() => {
+  //         gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+  //         updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+  //       });
+  //   };
 
-    gapi.load("client:auth2", initClient);
-  }, []);
+  //   gapi.load("client:auth2", initClient);
+  // }, []);
 
-  const updateSigninStatus = (isSignedIn) => {
-    setIsAuthenticated(isSignedIn);
-    if (isSignedIn) {
+  // const updateSigninStatus = (isSignedIn) => {
+  //   setIsAuthenticated(isSignedIn);
+  //   if (isSignedIn) {
+  //     fetchMails();
+  //   }
+  // };
+
+  // const handleAuthClick = () => {
+  //   gapi.auth2.getAuthInstance().signIn();
+  // };
+
+useEffect(()=>{
+if (isGoogleSignedIn) {
       fetchMails();
     }
-  };
-
-  const handleAuthClick = () => {
-    gapi.auth2.getAuthInstance().signIn();
-  };
+},[isGoogleSignedIn])
 
   const handleSignoutClick = () => {
     gapi.auth2.getAuthInstance().signOut();
   };
-
-  //   const decodeEmailBody = (message) => {
-  //     const bodyData =
-  //       message.payload.body.data || message.payload.parts?.[0]?.body?.data || "";
-
-  //     if (!bodyData) return "No content";
-
-  //     // Gmail returns base64url encoded strings — convert to standard base64 first
-  //     const decoded = atob(bodyData.replace(/-/g, "+").replace(/_/g, "/"));
-  //     return decoded;
-  //   };
   const decodeEmailBody = (message) => {
     const encodedBody =
       message?.payload?.body?.data || message?.payload?.parts?.[0]?.body?.data;
@@ -89,41 +87,6 @@ const Emails = () => {
     const decodedBody = atob(encodedBody.replace(/-/g, "+").replace(/_/g, "/"));
     return DOMPurify.sanitize(decodedBody, { ADD_ATTR: ["style"] });
   };
-
-  //   const sendEmail = async () => {
-  //     if (!to || !subject || !message) {
-  //       alert("Please fill all fields");
-  //       return;
-  //     }
-
-  //     const headers = [
-  //       `To: ${to}`,
-  //       `Subject: ${subject}`,
-  //       "Content-Type: text/html; charset=utf-8",
-  //       "",
-  //       `<p>${message}</p>`,
-  //     ];
-
-  //     const email = headers.join("\r\n");
-  //      const base64EncodedEmail = btoa(
-  //     new TextEncoder().encode(email)
-  //       .reduce((data, byte) => data + String.fromCharCode(byte), '')
-  //   )
-  //     try {
-  //       await gapi.client.gmail.users.messages.send({
-  //         userId: "me",
-  //         resource: {
-  //           raw: base64EncodedEmail,
-  //         },
-  //       });
-  //       alert("Email sent successfully!");
-  //       setTo("");
-  //       setSubject("");
-  //       setMessage("");
-  //     } catch (error) {
-  //       console.error("Error sending email:", error);
-  //     }
-  //   };
   const fetchMails = async (label = "INBOX") => {
     try {
       const response = await gapi.client.gmail.users.messages.list({
@@ -145,7 +108,7 @@ const Emails = () => {
           const isStarred = res.result.labelIds?.includes("STARRED");
           messageDetails.push({ ...res.result, isStarred });
 
-          await new Promise((resolve) => setTimeout(resolve, 10)); // prevent rate limits
+          await new Promise((resolve) => setTimeout(resolve, 10));
         } catch (err) {
           console.error("Error fetching message:", err);
         }
@@ -161,90 +124,103 @@ const Emails = () => {
     }
   };
 
-  //   const fetchMails = async () => {
-  //     const response = await gapi.client.gmail.users.messages.list({
-  //       userId: "me",
-  //       labelIds: ["INBOX"],
-  //       maxResults: 50,
-  //     });
+  const createMeetEvent = () => {
+    const start = new Date();
+    const end = new Date(start.getTime() + 30 * 60 * 1000);
 
-  //     const messages = response.result.messages;
-  //     const messageDetails = [];
+    gapi.client.calendar.events
+      .insert({
+        calendarId: "primary",
+        conferenceDataVersion: 1,
+        resource: {
+          summary: "My Meeting",
+          start: { dateTime: start.toISOString() },
+          end: { dateTime: end.toISOString() },
+          conferenceData: {
+            createRequest: {
+              requestId: "unique-id-" + new Date().getTime(),
+              conferenceSolutionKey: { type: "hangoutsMeet" },
+            },
+          },
+        },
+      })
+      .then((res) => {
+        const meetLink = res.result.conferenceData.entryPoints.find(
+          (e) => e.entryPointType === "video"
+        )?.uri;
+        console.log("Google Meet link:", meetLink);
+      })
+      .catch((err) => {
+        console.error("Error creating event:", err);
+      });
+  };
+  const sendEmail = async (e) => {
+    // if (
+    //   !formData.to ||
+    //   !formData.subject ||
+    //   !formData.body
+    // ) {
+    //   alert("Please fill all fields");
+    //   return;
+    // }
+    e.preventDefault();
 
-  //     for (const msg of messages) {
-  //       try {
-  //         const res = await gapi.client.gmail.users.messages.get({
-  //           userId: "me",
-  //           id: msg.id,
-  //         });
+    const headers = [
+      `To: ${formData.to}`,
+      `Subject: ${formData.subject}`,
+      "Content-Type: text/html; charset=utf-8",
+      "",
+      `<p>${formData.body}</p>`,
+    ];
 
-  //         const isStarred = res.result.labelIds?.includes("STARRED");
+    const email = headers.join("\r\n");
 
-  //         messageDetails.push({
-  //           ...res.result,
-  //           isStarred,
-  //         });
+    const base64EncodedEmail = btoa(
+      new TextEncoder()
+        .encode(email)
+        .reduce((data, byte) => data + String.fromCharCode(byte), "")
+    );
+    try {
+      await gapi.client.gmail.users.messages.send({
+        userId: "me",
+        resource: {
+          raw: base64EncodedEmail,
+        },
+      });
+      dispatch(
+        showToast({ message: "Email sent successfully", variant: "success" })
+      );
+      setFormData({
+        to: "",
+        subject: "",
+        body: "",
+      });
+    } catch (error) {
+      dispatch(showToast({ message: "Email not sent", variant: "danger" }));
+      console.error("Error sending email:", error);
+    }
+  };
 
-  //         await new Promise((resolve) => setTimeout(resolve, 10));
-  //       } catch (err) {
-  //         console.error("Rate limit error:", err);
-  //       }
-  //     }
-
-  //     setMessages(
-  //       messageDetails.sort(
-  //         (a, b) => parseInt(b.internalDate) - parseInt(a.internalDate)
-  //       )
-  //     );
-  //   };
   return (
     <div className="page-wrapper">
       <div className="content">
         <div className="row">
-          {!isAuthenticated ? (
-            <button onClick={handleAuthClick}>Sign in with Google</button>
+          {/* <iframe
+            src="https://calendar.google.com/calendar/embed?src=waqar.78692@gmail.com"
+            width="800"
+            height="600"
+            frameborder="0"
+            scrolling="no"
+          ></iframe> */}
+          <button onClick={createMeetEvent}>Create Google Meet Link</button>
+          {/* {!isSignedIn ? (
+            <button onClick={signIn}>Sign in with Google</button>
           ) : (
             <>
-              <button onClick={handleSignoutClick}>Sign out</button>
-            </>
-          )}
-
-          {/* {isAuthenticated && (
-            <>
-              <div style={{ margin: "20px 0" }}>
-                <input
-                  type="email"
-                  placeholder="Recipient"
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  style={{
-                    marginBottom: "10px",
-                    width: "100%",
-                    padding: "8px",
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder="Subject"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  style={{
-                    marginBottom: "10px",
-                    width: "100%",
-                    padding: "8px",
-                  }}
-                />
-                <textarea
-                  placeholder="Message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={5}
-                  style={{ width: "100%", padding: "8px" }}
-                />
-              </div>
-              <button onClick={sendEmail}>Send Email</button>
+              <button onClick={signOut}>Sign out</button>
             </>
           )} */}
+
           <div className="col-lg-3 col-md-12">
             <div className="compose-btn">
               <Link
@@ -353,43 +329,55 @@ const Emails = () => {
               <div className="card-body">
                 {showCompose ? (
                   <div className="compose-container">
-                    <h3>Compose Email</h3>
-                    <div>
-                      <label>To:</label>
-                      <input
-                        type="email"
-                        name="to"
-                        value={formData.to}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Subject:</label>
-                      <input
-                        type="text"
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <label>Body:</label>
-                      <textarea
-                        name="body"
-                        rows="10"
-                        value={formData.body}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div style={{ marginTop: "10px" }}>
-                      <button onClick={handleSend}>Send</button>
-                      <button
-                        onClick={() => setShowCompose(false)}
-                        style={{ marginLeft: "10px" }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                    <form onSubmit={sendEmail}>
+                      <h3>Compose Email</h3>
+                      <div className="mb-3">
+                        <label>To:</label>
+                        <input
+                          type="email"
+                          name="to"
+                          className="form-control"
+                          value={formData.to}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label>Subject:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="subject"
+                          value={formData.subject}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div>
+                        <label>Body:</label>
+                        <DefaultEditor
+                          name="body"
+                          placeholder="Enter text here"
+                          onChange={handleInputChange}
+                          value={formData.body}
+                        />
+                      </div>
+                      <div className="d-flex justify-content-end mt-4">
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => setShowCompose(false)}
+                          style={{ marginRight: "10px" }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="btn btn-primary"
+                          onClick={sendEmail}
+                        >
+                          Send
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 ) : (
                   <>
