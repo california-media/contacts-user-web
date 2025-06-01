@@ -10,7 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
   const route = all_routes;
   const [isPasswordVisible, setPasswordVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [showCallingComponent, setShowCallingComponent] = useState(false);
@@ -22,57 +22,29 @@ const Login = () => {
   useEffect(() => {
     localStorage.setItem("menuOpened", "Dashboard");
   }, []);
-  // const handleLogin = async (e) => {
-  //   e.preventDefault();
-  //   console.log("clicked");
-
-  //   try {
-
-  //     console.log(email, password, "email and password data");
-
-  //     const response = await fetch(
-  //       "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/login",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ email, password }),
-  //       }
-  //     );
-  //     console.log(response, "response");
-  //     if (!response.ok) {
-  //       console.log("Network response was not ok");
-  //       return;
-
-  //     }
-
-  //     else {
-  //       const result = await response.json();
-  //       console.log(result, "resulttt");
-  //       navigate(route.dashboard);
-  //     }
-  //   } catch (error) {
-  //     console.error("API call error:", error);
-  //   }
-  // };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate(route.dashboard);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage({text:"",type:""})
-    setIsLoading(true)
+    setMessage({ text: "", type: "" });
+    setIsLoading(true);
     try {
       const response = await api.post("user/login", { email, password });
 
       if (response.data.status === "success") {
-        localStorage.setItem("token",response.data.data.token)        
-        setMessage({text:response.data.message, type:"success"});
+        localStorage.setItem("token", response.data.data.token);
+        setMessage({ text: response.data.message, type: "success" });
         navigate(route.dashboard);
-        setIsLoading(false)
+        setIsLoading(false);
       }
     } catch (error) {
-      setMessage({text:error.response.data.message, type:"error"});
-      setIsLoading(false)
+      setMessage({ text: error.response.data.message, type: "error" });
+      setIsLoading(false);
     }
   };
 

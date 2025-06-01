@@ -14,6 +14,8 @@ const initialState = {
   // emailTemplates: [],
   favouriteCount: 0,
   tagCount: 0,
+  isLoading: false,
+  error: null,
 };
 
 export const fetchProfile = createAsyncThunk(

@@ -62,6 +62,10 @@ import DefaultEditor from "react-simple-wysiwyg";
 import { gapi } from "gapi-script";
 import CreatableSelect from "react-select/creatable";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
+import EmailTemplateModal from "../../../core/common/modals/EmailTemplateModal";
+import WhatsappTemplateModal from "../../../core/common/modals/WhatsappTemplateModal";
+import useDebounce from "../../../core/common/customHooks/useDebounce";
+import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndicator";
 
 const Contacts = () => {
   const route = all_routes;
@@ -76,8 +80,6 @@ const Contacts = () => {
   const [removedTags, setRemovedTags] = useState([]);
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
-  const [whatsppTemplateTitles, setWhatsppTemplateTitles] = useState([]);
-  const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [show3, setShow3] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,10 +91,6 @@ const Contacts = () => {
 
   const [groupHoveredIndex, setGroupHoveredIndex] = useState(null);
 
-  const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
-    useState("");
-  const [editEmailTemplateBody, setEditEmailTemplateBody] = useState("");
-  const [editEmailTemplateSubject, setEditEmailTemplateSubject] = useState("");
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [allContacts, setAllContacts] = useState([]);
@@ -128,8 +126,8 @@ const Contacts = () => {
     setPage(newPage);
     setLimit(newPageSize);
   };
-  console.log(showFavourites,"showFavouritesshowFavouritesshowFavourites");
-  
+  console.log(showFavourites, "showFavouritesshowFavouritesshowFavourites");
+
   const handleFavouritePageChange = (
     newFavouritePage,
     newFavouritePageSize
@@ -218,33 +216,9 @@ const Contacts = () => {
     }
   }, [selectedContact]);
 
-  useEffect(() => {
-    const whatsappTitles =
-      userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.map(
-        (template) => {
-          return {
-            label: template.whatsappTemplateTitle,
-            value: template.whatsappTemplate_id,
-          };
-        }
-      );
-
-    const emailTitles =
-      userProfile?.templates?.emailTemplates?.emailTemplatesData?.map(
-        (template) => {
-          return {
-            label: template.emailTemplateTitle,
-            value: template.emailTemplate_id,
-          };
-        }
-      );
-    setEmailTemplateTitles(emailTitles);
-    setWhatsppTemplateTitles(whatsappTitles);
-  }, [userProfile]);
-
   const resetFilters = () => {
     setSelectedContactGroup([]);
-    setShowFavourites(false)
+    setShowFavourites(false);
     // setSelectedLeadEmployee([]);
     // setSearchEmployeeInFilter("");
   };
@@ -582,7 +556,7 @@ const Contacts = () => {
   // const handleCancel = () => {
   //   setPopupVisible(false);
   // };
-
+  const debouncedContactSearchQuery = useDebounce(searchQuery);
   const handleSaveField = (key, field, value) => {
     // Update the selectedContact with the new value
     const updatedContact = { ...selectedContact, [field]: value };
@@ -632,7 +606,6 @@ const Contacts = () => {
     setAdduser(!adduser);
   };
 
-
   const handleStarToggle = (index, record) => {
     const formDataObj = new FormData();
     const isFavToggled = !record.isFavourite;
@@ -658,15 +631,16 @@ const Contacts = () => {
     setAllContacts(contacts);
   }, [contacts]);
   useEffect(() => {
-    if(showFavourites)
-      {const filters = {
-      isFavourite: true,
-      favouriteContactsPage: favouritePage,
-      favouriteContactsLimit: favouriteLimit,
-      favouriteContactsSearch: "",
-    };
+    if (showFavourites) {
+      const filters = {
+        isFavourite: true,
+        favouriteContactsPage: favouritePage,
+        favouriteContactsLimit: favouriteLimit,
+        favouriteContactsSearch: "",
+      };
 
-    dispatch(fetchContacts({ filters }));}
+      dispatch(fetchContacts({ filters }));
+    }
   }, [favouritePage, favouriteLimit]);
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -674,53 +648,59 @@ const Contacts = () => {
       id: userId,
       page,
       limit,
-      search: searchQuery,
+      search: debouncedContactSearchQuery,
       tag: selectedContactGroup,
     };
 
     dispatch(fetchContacts({ filters }));
-  }, [page, limit, dispatch, searchQuery, selectedContactGroup]);
+  }, [
+    page,
+    limit,
+    dispatch,
+    debouncedContactSearchQuery,
+    selectedContactGroup,
+  ]);
 
-  const sendEmail = async () => {
-    if (
-      !selectedContact.emailaddresses[0] ||
-      !editEmailTemplateSubject ||
-      !editEmailTemplateBody
-    ) {
-      alert("Please fill all fields");
-      return;
-    }
+  // const sendEmail = async () => {
+  //   if (
+  //     !selectedContact.emailaddresses[0] ||
+  //     !editEmailTemplateSubject ||
+  //     !editEmailTemplateBody
+  //   ) {
+  //     alert("Please fill all fields");
+  //     return;
+  //   }
 
-    const headers = [
-      `To: ${selectedContact.emailaddresses[0]}`,
-      `Subject: ${editEmailTemplateSubject}`,
-      "Content-Type: text/html; charset=utf-8",
-      "",
-      `<p>${editEmailTemplateBody}</p>`,
-    ];
+  //   const headers = [
+  //     `To: ${selectedContact.emailaddresses[0]}`,
+  //     `Subject: ${editEmailTemplateSubject}`,
+  //     "Content-Type: text/html; charset=utf-8",
+  //     "",
+  //     `<p>${editEmailTemplateBody}</p>`,
+  //   ];
 
-    const email = headers.join("\r\n");
+  //   const email = headers.join("\r\n");
 
-    const base64EncodedEmail = btoa(
-      new TextEncoder()
-        .encode(email)
-        .reduce((data, byte) => data + String.fromCharCode(byte), "")
-    );
-    try {
-      await gapi.client.gmail.users.messages.send({
-        userId: "me",
-        resource: {
-          raw: base64EncodedEmail,
-        },
-      });
-      dispatch(showToast({message:"Email Sent Successfully", variant:"success"}))
-      // setTo("");
-      // setSubject("");
-      // setMessage("");
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
-  };
+  //   const base64EncodedEmail = btoa(
+  //     new TextEncoder()
+  //       .encode(email)
+  //       .reduce((data, byte) => data + String.fromCharCode(byte), "")
+  //   );
+  //   try {
+  //     await gapi.client.gmail.users.messages.send({
+  //       userId: "me",
+  //       resource: {
+  //         raw: base64EncodedEmail,
+  //       },
+  //     });
+  //     dispatch(showToast({message:"Email Sent Successfully", variant:"success"}))
+  //     // setTo("");
+  //     // setSubject("");
+  //     // setMessage("");
+  //   } catch (error) {
+  //     console.error("Error sending email:", error);
+  //   }
+  // };
 
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
@@ -834,7 +814,6 @@ const Contacts = () => {
                 </a>
 
                 <Link
-
                   to="#"
                   data-bs-toggle="modal"
                   data-bs-target="#show_whatsapp_templates"
@@ -1230,10 +1209,7 @@ const Contacts = () => {
                       className="me-1"
                       style={{ color: "#264966", width: 15 }}
                     />
-                    <div style={{ color: "#264966", fontSize: 14 }}>
-                      {tag}
-
-                    </div>
+                    <div style={{ color: "#264966", fontSize: 14 }}>{tag}</div>
                   </div>
 
                   {isEditingThisTag && (
@@ -1781,7 +1757,7 @@ const Contacts = () => {
                     </div>
                     {/* /Search */}
                   </div>
-                  <div className="card-body">
+                  <div className="card-body justify-content-center">
                     {/* Filter */}
                     <div className="d-flex align-items-center justify-content-end flex-wrap row-gap-2 mb-4">
                       {/* <div className="d-flex align-items-center flex-wrap row-gap-2">
@@ -1802,20 +1778,24 @@ const Contacts = () => {
                     </div>
                     {/* /Filter */}
                     {/* Contact List */}
-                    <div className="table-responsive custom-table">
-                      <Table
-                        dataSource={filteredData}
-                        columns={visibleColumns}
-                        rowKey={(record) => record.key}
-                        loading={isLoading}
-                        totalCount={totalContacts}
-                        onPageChange={
-                          showFavourites
-                            ? handleFavouritePageChange
-                            : handlePageChange
-                        }
-                      />
-                    </div>
+
+                  
+                      <div className="table-responsive custom-table">
+                        <Table
+                          dataSource={filteredData}
+                          columns={visibleColumns}
+                          rowKey={(record) => record.key}
+                          loading={isLoading}
+                          totalCount={totalContacts}
+                          onPageChange={
+                            showFavourites
+                              ? handleFavouritePageChange
+                              : handlePageChange
+                          }
+                        />
+                      </div>
+                 
+
                     <div className="row align-items-center">
                       <div className="col-md-6">
                         <div className="datatable-length" />
@@ -2110,190 +2090,8 @@ const Contacts = () => {
           <div className="modal-footer"></div>
         </Modal>
         {/* import leads */}
-        <div
-          className="modal custom-modal fade modal-padding"
-          id="show_whatsapp_templates"
-          role="dialog"
-          // style={{ minHeight: 500 }}
-        >
-          <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Send Whatsapp</h5>
-                <button
-                  type="button"
-                  className="btn-close position-static"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
-              </div>
-
-              <div className="d-flex align-items-center justify-content-end">
-                {/* <div className="icon-form me-2 mb-sm-0">
-                  <span className="form-icon">
-                    <i className="ti ti-search" />
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search Template"
-                    onChange={() => {}}
-                  />
-                </div> */}
-
-                {/* <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    if (selectedContact?.phonenumbers?.length > 0) {
-                      const url = `https://wa.me/${selectedContact.phonenumbers[0]}`;
-                      window.open(url, "_blank");
-                    } else {
-                      alert("Phone number not available");
-                    }
-                  }}
-                >
-                  Go directly to WhatsApp
-                </button> */}
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <Select
-                    classNamePrefix="react-select"
-                    options={whatsppTemplateTitles}
-                    onChange={(selectedOption) => {
-                      setEditWhatsappTemplateMessage(
-                        userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData.find(
-                          (template) =>
-                            template.whatsappTemplate_id ===
-                            selectedOption.value
-                        )?.whatsappTemplateMessage
-                      );
-                    }}
-                    placeholder="Select a template"
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="col-form-label col-md-2">Message</label>
-                  <div className="col-md-12">
-                    <textarea
-                      rows={5}
-                      cols={5}
-                      className="form-control"
-                      name="whatsappTemplateMessage"
-                      placeholder="Enter text here"
-                      onChange={(e) =>
-                        setEditWhatsappTemplateMessage(e.target.value)
-                      }
-                      value={editWhatsappTemplateMessage}
-                    />
-                  </div>
-                </div>
-               <div className="d-flex justify-content-end">
-                  <button
-                    className="btn text-white"
-                    style={{background:"#25d366"}}
-                    onClick={() => {
-                      if (selectedContact?.phonenumbers?.length > 0) {
-                        const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${editWhatsappTemplateMessage}`;
-                        window.open(url, "_blank");
-                      } else {
-                        alert("Phone number not available");
-                      }
-                    }}
-                  >
-                    <img src="assets/img/icons/whatsappIcon96.png" alt="whatsapp" style={{width:20}} className="me-2" />
-                   Whatsapp Now
-                  </button>
-               </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="modal custom-modal fade modal-padding"
-          id="show_email_templates"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Send Email</h5>
-                <button
-                  type="button"
-                  className="btn-close position-static"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <Select
-                    classNamePrefix="react-select"
-                    options={emailTemplateTitles}
-                    onChange={(selectedOption) => {
-                      setEditEmailTemplateBody(
-                        userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
-                          (template) =>
-                            template.emailTemplate_id === selectedOption.value
-                        )?.emailTemplateBody
-                      );
-                      setEditEmailTemplateSubject(
-                        userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
-                          (template) =>
-                            template.emailTemplate_id === selectedOption.value
-                        )?.emailTemplateSubject
-                      );
-                    }}
-                    placeholder="Select a template"
-                  />
-                </div>
-
-                <div className="col-12">
-                  <div className="mb-3">
-                    <label className="col-form-label ms-3">Subject</label>
-                    <input
-                      type="text"
-                      value={editEmailTemplateSubject}
-                      name="emailTemplateSubject"
-                      onChange={(e) =>
-                        setEditEmailTemplateSubject(e.target.value)
-                      }
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="col-form-label col-md-2">Body</label>
-                  <div className="col-md-12">
-                    <DefaultEditor
-                      className="form-control"
-                      value={editEmailTemplateBody}
-                      onChange={(e) => setEditEmailTemplateBody(e.target.value)}
-                      name="emailTemplateMessage"
-                      placeholder="Enter text here"
-                    />
-                  </div>
-                </div>
-                <div className="d-flex justify-content-end">
-                  <button
-                    className="btn btn-primary"
-                    onClick={
-                      sendEmail
-                    }
-                  >
-                    Send Mail
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <EmailTemplateModal />
+        <WhatsappTemplateModal />
       </>
     </>
   );

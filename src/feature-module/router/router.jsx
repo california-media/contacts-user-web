@@ -21,67 +21,70 @@ import { fetchGoogleCalendarEvents } from "../../core/common/googleEvents/Google
 //   "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar";
 const ALLRoutes = () => {
   const location = useLocation();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toasts } = useSelector((state) => state.toast);
-  console.log(toasts,"toastss");
-  
-const {isGoogleSignedIn} = useContext(GoogleAuthContext)
+  console.log(toasts, "toastss");
+
+  const { isGoogleSignedIn } = useContext(GoogleAuthContext);
 
   const route = all_routes;
   // Find the current route in either public or auth routes
-  const currentRoute = publicRoutes.find(route => route.path === location.pathname) || 
-                       authRoutes.find(route => route.path === location.pathname);
+  const currentRoute =
+    publicRoutes.find((route) => route.path === location.pathname) ||
+    authRoutes.find((route) => route.path === location.pathname);
 
   // Construct the full title
-  const fullTitle = currentRoute?.title 
+  const fullTitle = currentRoute?.title
     ? `${currentRoute.title} | Contacts Web`
     : "Contacts Web";
 
   useEffect(() => {
     document.title = fullTitle;
   }, [fullTitle]);
-  useEffect(()=>{
-  const token = localStorage.getItem("token");
-  if(token){
-    // navigate(route.dashboard);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // navigate(route.dashboard);
+      console.log("fetching profile...");
+
       dispatch(fetchProfile());
       dispatch(fetchTags());
-  }
-  },[])
-useEffect(()=>{
-  if(isGoogleSignedIn){
-fetchGoogleCalendarEvents(dispatch);
-  }
-},[isGoogleSignedIn])
+    }
+  }, []);
+  useEffect(() => {
+    if (isGoogleSignedIn) {
+      fetchGoogleCalendarEvents(dispatch);
+    }
+  }, [isGoogleSignedIn]);
 
-//  useEffect(() => {
-//     const initClient = () => {
-//       gapi.client
-//         .init({
-//           apiKey: API_KEY,
-//           clientId: CLIENT_ID,
-//           discoveryDocs: [
-//             "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest",
-//             "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
-//           ],
-//           scope: SCOPES,
-//         })
-//         .then(() => {
-//           gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-//           updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-//         });
-//     };
+  //  useEffect(() => {
+  //     const initClient = () => {
+  //       gapi.client
+  //         .init({
+  //           apiKey: API_KEY,
+  //           clientId: CLIENT_ID,
+  //           discoveryDocs: [
+  //             "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest",
+  //             "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+  //           ],
+  //           scope: SCOPES,
+  //         })
+  //         .then(() => {
+  //           gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+  //           updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+  //         });
+  //     };
 
-//     gapi.load("client:auth2", initClient);
-//   }, []);
+  //     gapi.load("client:auth2", initClient);
+  //   }, []);
 
-//  const updateSigninStatus = (isSignedIn) => {
-//     setIsAuthenticated(isSignedIn);
-//     if (isSignedIn) {
-//       fetchMails();
-//     }
-//   };
+  //  const updateSigninStatus = (isSignedIn) => {
+  //     setIsAuthenticated(isSignedIn);
+  //     if (isSignedIn) {
+  //       fetchMails();
+  //     }
+  //   };
   return (
     <>
       <Helmet>
@@ -100,24 +103,32 @@ fetchGoogleCalendarEvents(dispatch);
           ))}
         </Route>
       </Routes> */}
- <Routes>
+      <Routes>
         {/* Public Route - Login */}
         <Route path="/" element={<Login />} />
 
         {/* Private Routes */}
-       <Route
+        <Route
           path="/*"
           element={
             <PrivateRoute>
               <Routes>
                 <Route element={<Feature />}>
                   {publicRoutes.map((route, idx) => (
-                    <Route path={route.path} element={route.element} key={idx} />
+                    <Route
+                      path={route.path}
+                      element={route.element}
+                      key={idx}
+                    />
                   ))}
                 </Route>
                 <Route element={<AuthFeature />}>
                   {authRoutes.map((route, idx) => (
-                    <Route path={route.path} element={route.element} key={idx} />
+                    <Route
+                      path={route.path}
+                      element={route.element}
+                      key={idx}
+                    />
                   ))}
                 </Route>
               </Routes>
@@ -125,40 +136,43 @@ fetchGoogleCalendarEvents(dispatch);
           }
         />
       </Routes>
-     
-     <div className="toast-container position-fixed top-0 end-0 p-3">
-  {toasts.map((toast) => (
-    <Toast
-      key={toast.id}
-      show={true}
-      onClose={() => dispatch(hideToast(toast.id))}
-      delay={toast.delay}
-      autohide
-      className={`colored-toast bg-${toast.variant} text-white mb-2`}
-      role="alert"
-      aria-live="assertive"
-      aria-atomic="true"
-    >
-      {toast.heading ? (
-        <Toast.Header closeButton className={`bg-${toast.variant} text-white`}>
-          <strong className="me-auto">{toast.heading}</strong>
-        </Toast.Header>
-      ) : null}
-      
-      <Toast.Body className="d-flex justify-content-between align-items-start">
-        <span>{toast.message}</span>
-        {!toast.heading && (
-          <button
-            type="button"
-            className="btn-close btn-close-white ms-3"
-            aria-label="Close"
-            onClick={() => dispatch(hideToast(toast.id))}
-          ></button>
-        )}
-      </Toast.Body>
-    </Toast>
-  ))}
-</div>
+
+      <div className="toast-container position-fixed top-0 end-0 p-3">
+        {toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            show={true}
+            onClose={() => dispatch(hideToast(toast.id))}
+            delay={toast.delay}
+            autohide
+            className={`colored-toast bg-${toast.variant} text-white mb-2`}
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
+            {toast.heading ? (
+              <Toast.Header
+                closeButton
+                className={`bg-${toast.variant} text-white`}
+              >
+                <strong className="me-auto">{toast.heading}</strong>
+              </Toast.Header>
+            ) : null}
+
+            <Toast.Body className="d-flex justify-content-between align-items-start">
+              <span>{toast.message}</span>
+              {!toast.heading && (
+                <button
+                  type="button"
+                  className="btn-close btn-close-white ms-3"
+                  aria-label="Close"
+                  onClick={() => dispatch(hideToast(toast.id))}
+                ></button>
+              )}
+            </Toast.Body>
+          </Toast>
+        ))}
+      </div>
 
       {/* <div className="toast-container position-fixed top-0 end-0 p-3">
   {toasts.map((toast) => (
@@ -182,7 +196,6 @@ fetchGoogleCalendarEvents(dispatch);
     </Toast>
   ))}
 </div> */}
-
     </>
   );
 };

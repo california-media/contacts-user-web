@@ -2,13 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Spin, Table } from "antd";
 import { RiArrowLeftWideLine, RiArrowRightWideLine } from "react-icons/ri";
 
-const Datatable = ({ columns, dataSource, loading, totalCount, onPageChange }) => {
+const Datatable = ({
+  columns,
+  dataSource,
+  loading,
+  totalCount,
+  onPageChange,
+  onRowSelectionChange,
+}) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [paginationConfig, setPaginationConfig] = useState({
     current: 1,
     pageSize: 10,
     showQuickJumper: true,
-    showTotal: (total, range) => `Showing ${range[0]}–${range[1]} of ${total} results`,
+    showTotal: (total, range) =>
+      `Showing ${range[0]}–${range[1]} of ${total} results`,
     showSizeChanger: true,
     pageSizeOptions: ["10", "20", "30"],
     total: totalCount,
@@ -49,8 +57,14 @@ const Datatable = ({ columns, dataSource, loading, totalCount, onPageChange }) =
   };
 
   // ✅ Row selection logic
-  const onSelectChange = (newSelectedRowKeys) => {
+  // const onSelectChange = (newSelectedRowKeys) => {
+  //   setSelectedRowKeys(newSelectedRowKeys);
+  // };
+  const onSelectChange = (newSelectedRowKeys, selectedRows) => {
     setSelectedRowKeys(newSelectedRowKeys);
+    if (onRowSelectionChange) {
+      onRowSelectionChange(newSelectedRowKeys, selectedRows);
+    }
   };
 
   const rowSelection = {

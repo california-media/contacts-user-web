@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProfile } from "../../../core/data/redux/slices/ProfileSlice";
 import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
 import { QRCode } from "antd";
+import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndicator";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -233,7 +234,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              {userProfile.contactCount}
+                              {userProfile.isLoading?<LoadingIndicator/>:userProfile.contactCount}
                             </p>
                           </div>
                           <div
@@ -290,7 +291,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              {tags.length}
+                              {userProfile.isLoading?<LoadingIndicator/>:tags.length}
                             </p>
                           </div>
                           <div

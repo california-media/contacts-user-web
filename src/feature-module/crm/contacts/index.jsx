@@ -89,6 +89,9 @@ import {
 import { addTag } from "../../../core/data/redux/slices/TagSlice";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 import { gapi } from "gapi-script";
+import EmailTemplateModal from "../../../core/common/modals/EmailTemplateModal";
+import WhatsappTemplateModal from "../../../core/common/modals/WhatsappTemplateModal";
+import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
 const route = all_routes;
 const allNotes = [
   {
@@ -212,9 +215,6 @@ const ContactsDetails = () => {
   const [selectedEmployee, setSelectedEmployee] = useState([]);
   const [hoveredNoteIndex, setHoveredNoteIndex] = useState(null);
   const [deleteModalText, setDeleteModalText] = useState("");
-  const [editEmailTemplateBody, setEditEmailTemplateBody] = useState("");
-  const [editEmailTemplateSubject, setEditEmailTemplateSubject] = useState("");
-  const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
   const [hoveredTaskIndex, setHoveredTaskIndex] = useState(null);
   const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
     useState("");
@@ -222,7 +222,6 @@ const ContactsDetails = () => {
   const [haveShippingAddress, setHaveShippingAddress] = useState(false);
   const [checkMeetingLink, setCheckMeetingLink] = useState(true);
   const [showQuotationViewForm, setShowQuotationViewForm] = useState(false);
-  const [whatsppTemplateTitles, setWhatsppTemplateTitles] = useState([]);
   const [newTags, setNewTags] = useState([]);
   const [previousTags, setPreviousTags] = useState([]);
   const [quotationQuantity, setQuotationQuantity] = useState(false);
@@ -388,49 +387,6 @@ const ContactsDetails = () => {
       ...prevProduct,
       [name]: value,
     }));
-  };
-
-  const sendEmail = async () => {
-    if (
-      !selectedContact.emailaddresses[0] ||
-      !editEmailTemplateSubject ||
-      !editEmailTemplateBody
-    ) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    const headers = [
-      `To: ${selectedContact.emailaddresses[0]}`,
-      `Subject: ${editEmailTemplateSubject}`,
-      "Content-Type: text/html; charset=utf-8",
-      "",
-      `<p>${editEmailTemplateBody}</p>`,
-    ];
-
-    const email = headers.join("\r\n");
-
-    const base64EncodedEmail = btoa(
-      new TextEncoder()
-        .encode(email)
-        .reduce((data, byte) => data + String.fromCharCode(byte), "")
-    );
-    try {
-      await gapi.client.gmail.users.messages.send({
-        userId: "me",
-        resource: {
-          raw: base64EncodedEmail,
-        },
-      });
-      dispatch(
-        showToast({ message: "Email Sent Successfully", variant: "success" })
-      );
-      // setTo("");
-      // setSubject("");
-      // setMessage("");
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
   };
 
   const contentRef = useRef(null);
@@ -625,7 +581,7 @@ const ContactsDetails = () => {
     try {
       // First, create the tag
       await dispatch(addTag({ tag: [inputValue] })).unwrap();
-
+      setNewTags([]);
       // Then, assign the tag to the contact with updated tag list
       const formDataObj = new FormData();
       formDataObj.append(
@@ -1152,29 +1108,6 @@ const ContactsDetails = () => {
       ),
     },
   ];
-  useEffect(() => {
-    const whatsappTitles =
-      userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.map(
-        (template) => {
-          return {
-            label: template.whatsappTemplateTitle,
-            value: template.whatsappTemplate_id,
-          };
-        }
-      );
-
-    const emailTitles =
-      userProfile?.templates?.emailTemplates?.emailTemplatesData?.map(
-        (template) => {
-          return {
-            label: template.emailTemplateTitle,
-            value: template.emailTemplate_id,
-          };
-        }
-      );
-    setEmailTemplateTitles(emailTitles);
-    setWhatsppTemplateTitles(whatsappTitles);
-  }, [userProfile]);
   const quotationColumns = [
     {
       title: "",
@@ -1472,7 +1405,7 @@ const ContactsDetails = () => {
                     </div>
                     <div style={{ display: "flex" }}>
                       <div className="profilePic">
-                        <img
+                       {leadInfo.contactImageURL? <img
                           src={
                             leadInfo.contactImageURL
                               ? leadInfo.contactImageURL
@@ -1481,6 +1414,9 @@ const ContactsDetails = () => {
                           className="profilePic"
                           id="profileImage"
                         />
+                      :
+                      <AvatarInitialStyles name={leadInfo.firstname +" "+ leadInfo.lastname}/>
+                      }
                       </div>
                     </div>
                     <ul>
@@ -1492,7 +1428,7 @@ const ContactsDetails = () => {
                         )}
                         <span
                           className={`col-12 ${
-                            leadInfo.company !== ""
+                            leadInfo.company == ""
                               ? "fw-semibold text-black"
                               : ""
                           }`}
@@ -2625,17 +2561,16 @@ const ContactsDetails = () => {
                                       </p>
                                       <p>{meeting.meetingDescription}</p>
                                     </div>
-                                    
-                                    {meeting.meetingType=="online" &&<div className="d-flex justify-content-end mb-2">
-                                      {" "}
-                                      <span className="fw-medium text-black me-1">
-                                        Meeting Link :
-                                      </span>{" "}
-                                      <span>
+
+                                    {meeting.meetingType == "online" && (
+                                      <div className="d-flex justify-content-end mb-2">
                                         {" "}
-                                        {meeting.meetingLink}
-                                      </span>
-                                    </div>}
+                                        <span className="fw-medium text-black me-1">
+                                          Meeting Link :
+                                        </span>{" "}
+                                        <span> {meeting.meetingLink}</span>
+                                      </div>
+                                    )}
                                     <div className="d-flex justify-content-between align-items-center">
                                       <p className="mb-0">
                                         ✎{" "}
@@ -5484,166 +5419,8 @@ const ContactsDetails = () => {
         }
       />
 
-      <div
-        className="modal custom-modal fade modal-padding"
-        id="show_whatsapp_templates"
-        role="dialog"
-        // style={{ minHeight: 500 }}
-      >
-        <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Send Whatsapp</h5>
-              <button
-                type="button"
-                className="btn-close position-static"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-
-            <div className="d-flex align-items-center justify-content-end"></div>
-            <div className="modal-body">
-              <div className="mb-3">
-                <Select
-                  classNamePrefix="react-select"
-                  options={whatsppTemplateTitles}
-                  onChange={(selectedOption) => {
-                    setEditWhatsappTemplateMessage(
-                      userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData.find(
-                        (template) =>
-                          template.whatsappTemplate_id === selectedOption.value
-                      )?.whatsappTemplateMessage
-                    );
-                  }}
-                  placeholder="Select a template"
-                />
-              </div>
-
-              <div className="mb-3">
-                <label className="col-form-label col-md-2">Message</label>
-                <div className="col-md-12">
-                  <textarea
-                    rows={5}
-                    cols={5}
-                    className="form-control"
-                    name="whatsappTemplateMessage"
-                    placeholder="Enter text here"
-                    onChange={(e) =>
-                      setEditWhatsappTemplateMessage(e.target.value)
-                    }
-                    value={editWhatsappTemplateMessage}
-                  />
-                </div>
-              </div>
-              <div className="d-flex justify-content-end">
-                <button
-                  className="btn text-white"
-                  style={{ background: "#25d366" }}
-                  onClick={() => {
-                    if (selectedContact?.phonenumbers?.length > 0) {
-                      const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${editWhatsappTemplateMessage}`;
-                      window.open(url, "_blank");
-                    } else {
-                      alert("Phone number not available");
-                    }
-                  }}
-                >
-                  <img
-                    src="assets/img/icons/whatsappIcon96.png"
-                    alt="whatsapp"
-                    style={{ width: 20 }}
-                    className="me-2"
-                  />
-                  Whatsapp Now
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="modal custom-modal fade modal-padding"
-        id="show_email_templates"
-        role="dialog"
-      >
-        <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Send Email</h5>
-              <button
-                type="button"
-                className="btn-close position-static"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            {console.log(emailTemplateTitles,"emailTemplateTitles")
-            }
-            <div className="modal-body">
-              <div className="mb-3">
-                <Select
-                  classNamePrefix="react-select"
-                  options={emailTemplateTitles}
-                  onChange={(selectedOption) => {
-                    setEditEmailTemplateBody(
-                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
-                        (template) =>
-                          template.emailTemplate_id === selectedOption.value
-                      )?.emailTemplateBody
-                    );
-                    setEditEmailTemplateSubject(
-                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
-                        (template) =>
-                          template.emailTemplate_id === selectedOption.value
-                      )?.emailTemplateSubject
-                    );
-                  }}
-                  placeholder="Select a template"
-                />
-              </div>
-
-              <div className="col-12">
-                <div className="mb-3">
-                  <label className="col-form-label ms-3">Subject</label>
-                  <input
-                    type="text"
-                    value={editEmailTemplateSubject}
-                    name="emailTemplateSubject"
-                    onChange={(e) =>
-                      setEditEmailTemplateSubject(e.target.value)
-                    }
-                    className="form-control"
-                  />
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <label className="col-form-label col-md-2">Body</label>
-                <div className="col-md-12">
-                  <DefaultEditor
-                    className="form-control"
-                    value={editEmailTemplateBody}
-                    onChange={(e) => setEditEmailTemplateBody(e.target.value)}
-                    name="emailTemplateMessage"
-                    placeholder="Enter text here"
-                    style={{ height: "300px" }}
-                  />
-                </div>
-              </div>
-              <div className="d-flex justify-content-end">
-                <button className="btn btn-primary" onClick={sendEmail}>
-                  Send Mail
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <EmailTemplateModal />
+      <WhatsappTemplateModal />
     </>
   );
 };

@@ -12,12 +12,6 @@
 // const Profile = () => {
 //   const userProfile = useSelector((state) => state.profile);
 
-
-
-
-
-
-  
 //   const [isLoading, setIsLoading] = useState(false);
 //   const [message, setMessage] = useState({ text: "", type: "" });
 //   const [profileFirstName, setProfileFirstName] = useState(
@@ -43,7 +37,7 @@
 //     formData.append("email", profileEmail)
 //     formData.append("number", profilePhoneNumber);
 //     formData.append("countryCode", profileCountryCode);
-  
+
 //     dispatch(editProfile(formData))
 //   };
 //   const handlePhoneInputChange = (value, data) => {
@@ -268,19 +262,19 @@ const Profile = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-console.log(userProfile,"userProfile");
+  console.log(userProfile, "userProfile");
 
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
     email: "",
-    phoneNumber: "",
+    phoneNumbers: "",
   });
 
-    const handleOnPhoneChange = (value) => {
+  const handleOnPhoneChange = (value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      phoneNumber: value,
+      phoneNumbers: value,
     }));
   };
 
@@ -294,6 +288,7 @@ console.log(userProfile,"userProfile");
       });
     }
   }, [userProfile]);
+  console.log(userProfile, "user profile from profile");
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
@@ -303,7 +298,8 @@ console.log(userProfile,"userProfile");
     data.append("firstname", formData.firstname);
     data.append("lastname", formData.lastname);
     data.append("email", formData.email);
-    data.append("number", formData.phoneNumber);
+    data.append("numbernumbers", formData.phoneNumbers);
+console.log(Object.fromEntries(data),"profile data before going to redux");
 
     dispatch(editProfile(data));
     setIsLoading(false);
@@ -386,19 +382,23 @@ console.log(userProfile,"userProfile");
                           <div className="profile-upload-content">
                             <label className="profile-upload-btn">
                               <i className="ti ti-file-broken" /> Upload File
-                              <input type="file" id="imag" className="input-img" />
+                              <input
+                                type="file"
+                                id="imag"
+                                className="input-img"
+                              />
                             </label>
                             <p>JPG, GIF or PNG. Max size of 800K</p>
                           </div>
                         </div>
 
-                        <ImageWithBasePath
+                        {/* <ImageWithBasePath
                           src="assets/img/myQr.png"
                           className="img-fluid"
                           width={150}
                           height={150}
                           alt="QR Code"
-                        />
+                        /> */}
                       </div>
 
                       <div className="border-bottom mb-3">
@@ -406,7 +406,8 @@ console.log(userProfile,"userProfile");
                           <div className="col-md-4">
                             <div className="mb-3">
                               <label className="form-label">
-                                First Name <span className="text-danger">*</span>
+                                First Name{" "}
+                                <span className="text-danger">*</span>
                               </label>
                               <input
                                 type="text"
@@ -436,19 +437,20 @@ console.log(userProfile,"userProfile");
                           <div className="col-md-4">
                             <div className="mb-3">
                               <label className="form-label">
-                                Phone Number <span className="text-danger">*</span>
+                                Phone Number{" "}
+                                <span className="text-danger">*</span>
                               </label>
                               <PhoneInput
-                          country={"us"} // Default country
-                          value={formData.phone}
-                          onChange={handleOnPhoneChange}
-                          enableSearch
-                          inputProps={{
-                            name: "phone",
-                            required: true,
-                            autoFocus: true,
-                          }}
-                        />
+                                country={"us"} // Default country
+                                value={formData.phone}
+                                onChange={handleOnPhoneChange}
+                                enableSearch
+                                inputProps={{
+                                  name: "phone",
+                                  required: true,
+                                  autoFocus: true,
+                                }}
+                              />
                             </div>
                           </div>
 

@@ -2,10 +2,13 @@ import React from "react";
 
 
 const AvatarInitialStyles = ({ name }) => {
+console.log(name,"namee");
 
   const getInitials = (contactPerson) => {
-    const firstName = contactPerson.trim();
-    return firstName.charAt(0).toUpperCase();
+    const names= contactPerson.trim().split(" ")
+    const firstInitial = names[0]?.charAt(0).toUpperCase() || "";
+    const lastInitial = names[1]?.charAt(0).toUpperCase() || "";
+    return firstInitial + lastInitial;
   };
 
   const getAvatarStyles = (initial) => {
