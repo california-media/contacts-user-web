@@ -28,6 +28,7 @@ const Calendar = () => {
   const {isGoogleSignedIn} = useContext(GoogleAuthContext)
   const events = useSelector((state)=>state.event.data)
 
+  console.log(defaultEvents,"default events");
   
 
 useEffect(()=>{
@@ -219,7 +220,8 @@ setDefaultEvents(events)
                     weekends={weekendsVisible}
                     // initialEvents={defaultEvents}
                     select={handleDateSelect}
-                    eventClick={(clickInfo) => handleEventClick(clickInfo)}
+                    // eventClick={(clickInfo) => handleEventClick(clickInfo)}
+                    eventClick={(eventInfo) => console.log("clicked",eventInfo)}
                   />
                 </div>
               </div>
