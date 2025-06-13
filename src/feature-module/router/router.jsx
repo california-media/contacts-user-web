@@ -15,7 +15,6 @@ import { hideToast } from "../../core/data/redux/slices/ToastSlice";
 import { gapi } from "gapi-script";
 import { GoogleAuthContext } from "../../core/common/context/GoogleAuthContext";
 import { fetchGoogleCalendarEvents } from "../../core/common/googleEvents/GoogleEvents";
-import Register from "../auth/register";
 // const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 // const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 // const SCOPES =
@@ -107,8 +106,15 @@ const ALLRoutes = () => {
       <Routes>
         {/* Public Route - Login */}
         <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
+<Route element={<Feature />}>
+                  {publicRoutes.map((route, idx) => (
+                    <Route
+                      path={route.path}
+                      element={route.element}
+                      key={idx}
+                    />
+                  ))}
+                </Route>
         {/* Private Routes */}
         <Route
           path="/*"
