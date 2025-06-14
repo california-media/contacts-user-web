@@ -5,6 +5,7 @@ import { all_routes } from "../router/all_routes";
 import Calling from "../crm/calling";
 import axios from "axios";
 import api from "../../core/axios/axiosInstance";
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Login = () => {
   const togglePasswordVisibility = () => {
     setPasswordVisible((prevState) => !prevState);
   };
+  const clientId = "401067515093-9j7faengj216m6uc9csubrmo3men1m7p.apps.googleusercontent.com";
   useEffect(() => {
     localStorage.setItem("menuOpened", "Dashboard");
   }, []);
@@ -181,6 +183,18 @@ const Login = () => {
                               alt="Google"
                             />
                           </Link>
+
+
+                          {/* <GoogleOAuthProvider clientId={clientId}>
+     <GoogleLogin
+       onSuccess={credentialResponse => {
+         console.log(credentialResponse);
+       }}
+       onError={() => {
+         console.log('Login Failed');
+       }}
+     />
+   </GoogleOAuthProvider> */}
                         </div>
                       </div>
                       <div className="text-center">

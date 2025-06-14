@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import {
@@ -16,6 +16,7 @@ import { Modal } from "react-bootstrap";
 import api from "../../../axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { addTag, deleteTag } from "../../../data/redux/slices/TagSlice";
+import EmojiPicker from "emoji-picker-react";
 
 const GroupsOffcanvas = () => {
   const [show, setShow] = useState(false);
@@ -25,9 +26,35 @@ const GroupsOffcanvas = () => {
   const [owner, setOwner] = useState(["Collab"]);
   const [openGroupDeleteModal, setOpenGroupDeleteModal] = useState(false);
   const [allTags, setAllTags] = useState([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [currentEmoji, setCurrentEmoji] = useState("🏷️");
+  const pickerRef = useRef(null);
+  const buttonRef = useRef(null);
 
+  const addEmoji = (emojiData) => {
+    console.log(emojiData, "emojidata");
 
-const dispatch = useDispatch()
+    setCurrentEmoji(emojiData.emoji);
+  };
+
+  // 🔒 Close picker on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        pickerRef.current &&
+        !pickerRef.current.contains(event.target) &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const dispatch = useDispatch();
 
   const handleShow = () => setShow(true);
   const addNewContent = () => {
@@ -49,27 +76,12 @@ const dispatch = useDispatch()
   useEffect(() => {
     setAllTags(tags);
   }, [tags]);
-  
+
   const handleAddTag = async (e) => {
     e.preventDefault();
-    
-    dispatch(addTag({tag:[tagValue]}));
+
+    dispatch(addTag({ tag: [tagValue] }));
     setTagValue("");
-    // try {
-    //   console.log("ran till here 1");
-
-    //   const response = await api.post("addTag", { tag: tagValue });
-
-    //   if (response.data.status === "success") {
-    //     setAllTags([
-    //       ...allTags,
-    //       { tag: tagValue, tag_id: response.data.data.tag_id },
-    //     ]);
-    //     setTagValue("");
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
   const handleDeleteTag = async () => {
     try {
@@ -98,7 +110,7 @@ const dispatch = useDispatch()
         </button>
       </div>
       <div className="offcanvas-body">
-        <form onSubmit={handleAddTag}>
+        {/* <form onSubmit={handleAddTag}>
           <div className="row">
             <label className="col-form-label ms-3">Groups</label>
             <div className="col-md-9">
@@ -137,26 +149,71 @@ const dispatch = useDispatch()
               />
             </span>
           );
-        })}
-        {/* {
-          <>
-            <span className="groupContainer">
-              website
+        })} */}
+        <form onSubmit={handleAddTag}>
+          <div className="row">
+            {/* <label className="col-form-label ms-3">Groups</label> */}
+            <div className="col-md-12">
+              <div className="mb-3 position-relative d-flex gap-3 align-items-center">
+                <div className="flex-grow-1">
+                  <input
+                    type="text"
+                    value={tagValue}
+                    onChange={(e) => setTagValue(e.target.value)}
+                    className="form-control"
+                    placeholder="Add Group"
+                  />
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    className="btn btn-light  "
+                    ref={buttonRef}
+                    onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  >
+                    {currentEmoji}
+                  </button>
+                </div>
+
+                {showEmojiPicker && (
+                  <div
+                    ref={pickerRef}
+                    className="emoji-picker-popup"
+                    style={{
+                      position: "absolute",
+                      zIndex: 9999,
+                      top: "100%",
+                      right: 0,
+                    }}
+                  >
+                    <EmojiPicker onEmojiClick={addEmoji} />
+                  </div>
+                )}
+                <div>
+                  <button type="submit" className="btn btn-primary">
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div className="tags-list mt-3">
+          {allTags.map((tag, index) => (
+            <p className="groupContainer" key={index}>
+              {tag.tag}
               <MdCancel
                 className="groupDeleteIconStyle"
                 onClick={() => {
+                  setTagToBeDeleted(tag);
                   setOpenGroupDeleteModal(true);
                 }}
               />
-            </span>
-            <span className="groupContainer"  onClick={() => {
-                  setOpenGroupDeleteModal(true);
-                }}>
-              supplier
-              <MdCancel className="groupDeleteIconStyle" onClick={() => {}} />
-            </span>
-          </>
-        } */}
+            </p>
+          ))}
+        </div>
+
         <Modal
           show={openGroupDeleteModal}
           onHide={() => setOpenGroupDeleteModal(false)}

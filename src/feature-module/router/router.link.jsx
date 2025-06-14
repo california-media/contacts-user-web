@@ -199,11 +199,11 @@ export const publicRoutes = [
   //   title:'Deals Dashboard'
   // },
   {
-    path: '/',
+    path: '/dashboard',
     name: 'Root',
-    element: <Navigate to="/login" />,
+    element: <Dashboard />,
     route: Route,
-    title:'Login'
+    title:'Dashboard'
   },
   // {
   //   path: route.audioCall,
