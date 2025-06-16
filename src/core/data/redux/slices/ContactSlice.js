@@ -44,13 +44,13 @@ export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
  console.log("object before going to api in slice:", Object.fromEntries(formData.entries()));
-    
     try {
       const response = await api.post("addEditContact", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+      console.log("response from saveContact", response.data);
       console.log(response.data.data, "response from add edit contact");
       dispatch(
         showToast({ message: response.data.message, variant: "success" })

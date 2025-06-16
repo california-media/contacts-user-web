@@ -5,7 +5,7 @@ import { all_routes } from "../router/all_routes";
 import Calling from "../crm/calling";
 import axios from "axios";
 import api from "../../core/axios/axiosInstance";
-import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +20,8 @@ const Login = () => {
   const togglePasswordVisibility = () => {
     setPasswordVisible((prevState) => !prevState);
   };
-  const clientId = "401067515093-9j7faengj216m6uc9csubrmo3men1m7p.apps.googleusercontent.com";
+  const clientId =
+    "401067515093-9j7faengj216m6uc9csubrmo3men1m7p.apps.googleusercontent.com";
   useEffect(() => {
     localStorage.setItem("menuOpened", "Dashboard");
   }, []);
@@ -49,6 +50,23 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+  const handleGoogleLogin = async (credentialResponse) =>{
+    try {
+      console.log("credentialResponse.credential",credentialResponse.credential);
+      
+        const response = await api.post("user/login", { googleToken: credentialResponse.credential});
+        
+      if (response.data.status === "success") {
+        localStorage.setItem("token", response.data.data.token);
+        setMessage({ text: response.data.message, type: "success" });
+        navigate(route.dashboard);
+        setIsLoading(false);
+      }
+    } catch (error) {
+       setMessage({ text: error.response.data.message, type: "error" });
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="account-content">
@@ -173,7 +191,7 @@ const Login = () => {
                     <>
                       <div className="d-flex align-items-center justify-content-center flex-wrap mb-3">
                         <div className="text-center me-2 flex-fill">
-                          <Link
+                          {/* <Link
                             to="#"
                             className="br-10 p-2 px-4 btn bg-white d-flex align-items-center justify-content-center"
                           >
@@ -182,19 +200,22 @@ const Login = () => {
                               src="assets/img/icons/google-logo.svg"
                               alt="Google"
                             />
-                          </Link>
+                          </Link> */}
 
-
-                          {/* <GoogleOAuthProvider clientId={clientId}>
-     <GoogleLogin
-       onSuccess={credentialResponse => {
-         console.log(credentialResponse);
-       }}
-       onError={() => {
-         console.log('Login Failed');
-       }}
-     />
-   </GoogleOAuthProvider> */}
+                          <GoogleOAuthProvider clientId={clientId}>
+                             <div className="d-flex justify-content-center">
+                            <GoogleLogin
+                              onSuccess={(credentialResponse) => {
+                                console.log(credentialResponse,"credentialResponse");
+                                
+                               handleGoogleLogin(credentialResponse)
+                              }}
+                              onError={() => {
+                                console.log("Login Failed");
+                              }}
+                            />
+                            </div>
+                          </GoogleOAuthProvider>
                         </div>
                       </div>
                       <div className="text-center">

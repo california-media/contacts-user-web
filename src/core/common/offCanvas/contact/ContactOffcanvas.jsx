@@ -81,7 +81,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
     formDataObj.append("phonenumbers", formData.phone);
 
     try {
-      if (newTags.length > 0) {
+      if (newTags.length > 0) {        
         await dispatch(addTag({ tag: newTags })).unwrap();
       }
       await dispatch(saveContact(formDataObj)).unwrap();
@@ -145,6 +145,8 @@ const LeadOffcanvas = ({ selectedContact }) => {
         firstName: selectedContact.firstname || "",
         lastName: selectedContact.lastname || "",
         email: selectedContact.emailaddresses || "",
+        designation: selectedContact.designation || "",
+        company: selectedContact.company || "",
         phone: selectedContact.phonenumbers?.[0] || "",
         tags: selectedContact.tags || [],
       });

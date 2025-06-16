@@ -867,7 +867,7 @@ const Contacts = () => {
                   data-bs-toggle="modal"
                   data-bs-target={`#delete_${deleteModalText}`}
                   onClick={() => {
-                    setDeleteModalText("lead");
+                    setDeleteModalText("contact");
                   }}
                 >
                   <i className="ti ti-trash text-danger"></i> Delete
@@ -963,130 +963,6 @@ const Contacts = () => {
         );
       },
     },
-
-    // {
-    //   title: "Groups",
-    //   dataIndex: "tags",
-    //   render: (tags, record) => {
-    //     return (
-    //       <div className="d-inline-block position-relative">
-    //         {tags.map((tag, index) => {
-    //           const isHovered = groupHoveredIndex === index;
-    //           const isActiveContact =
-    //             activeGroupEdit?.contactId === record.contact_id;
-    //           const isEditingThisTag =
-    //             isActiveContact && activeGroupEdit?.tagIndex === index;
-
-    //           return (
-    //             <div
-    //               key={index}
-    //               className="py-1 px-2 d-inline-block me-2 position-relative"
-    //               style={{
-    //                 background: "#dff0ff",
-    //                 borderRadius: 5,
-    //                 cursor: "pointer",
-    //               }}
-    //               onMouseEnter={() => setGroupHoveredIndex(index)}
-    //               onMouseLeave={() => setGroupHoveredIndex(null)}
-    //               // onClick={() =>
-    //               //   {
-    //               //     dispatch(setSelectedContact(record))
-    //               //     setActiveGroupEdit({ contactId: record.contact_id, tagIndex: index })}
-    //               // }
-    //               onClick={() => {
-    //                 const isAlreadyOpen =
-    //                   activeGroupEdit?.contactId === record.contact_id &&
-    //                   activeGroupEdit?.tagIndex === index;
-
-    //                 console.log(
-    //                   "isAlreadyOpen",
-    //                   isAlreadyOpen,
-    //                   activeGroupEdit
-    //                 );
-
-    //                 if (!isAlreadyOpen) {
-    //                   dispatch(setSelectedContact(record));
-    //                   setActiveGroupEdit({
-    //                     contactId: record.contact_id,
-    //                     tagIndex: index,
-    //                   });
-    //                 }
-    //               }}
-    //             >
-    //               <div className="d-flex align-items-center">
-    //                 <img
-    //                   src="/assets/img/icons/tagIcon.svg"
-    //                   className="me-1"
-    //                   style={{ color: "#264966" }}
-    //                 />
-    //                 <div style={{ color: "#264966", fontSize: 14 }}>
-    //                   {isHovered && isActiveContact && !isEditingThisTag
-    //                     ? "✎ Edit"
-    //                     : tag}
-    //                 </div>
-    //               </div>
-
-    //               {isEditingThisTag && (
-    //                 <div
-    //                   className="popup position-absolute"
-    //                   style={{
-    //                     top: "100%",
-    //                     left: 0,
-    //                     zIndex: 100,
-    //                     backgroundColor: "white",
-    //                     border: "1px solid #ccc",
-    //                     padding: "10px",
-    //                     boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-    //                     minWidth: "250px",
-    //                     marginTop: "5px",
-    //                   }}
-    //                 >
-    //                   <div className="mb-3">
-    //                     <label className="col-form-label">Groups</label>
-
-    //                     <CreatableSelect
-    //                       classNamePrefix="react-select"
-    //                       options={allTags}
-    //                       // isLoading={isLoading}
-    //                       value={selectedTags}
-    //                       onChange={(newValue) => handleUserTags(newValue)}
-    //                       onCreateOption={handleCreateTag}
-    //                       className="js-example-placeholder-multiple select2 js-states"
-    //                       isMulti={true}
-    //                       placeholder="Add Tags"
-    //                     />
-    //                   </div>
-    //                   <div className="d-flex align-items-center justify-content-end">
-    //                     <button
-    //                       type="button"
-    //                       className="btn btn-light me-2"
-    //                       onClick={() => {
-    //                         dispatch(setSelectedContact(null));
-    //                         setActiveGroupEdit(null);
-    //                       }}
-    //                     >
-    //                       Cancel
-    //                     </button>
-    //                     <button
-    //                       type="button"
-    //                       className="btn btn-primary"
-    //                       onClick={() => {
-    //                         saveCellTags();
-    //                         setActiveGroupEdit(null);
-    //                       }}
-    //                     >
-    //                       Save
-    //                     </button>
-    //                   </div>
-    //                 </div>
-    //               )}
-    //             </div>
-    //           );
-    //         })}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       title: "Groups",
       dataIndex: "tags",
@@ -1273,42 +1149,6 @@ const Contacts = () => {
       },
     },
 
-    // {
-    //   title: "Groups",
-    //   dataIndex: "tags",
-    //   render: (text, record) => {
-    //     return (
-    //       <div>
-    //         {text.length > 0 && (
-    //           <div className="d-inline-block">
-    //             {text.map((tag, index) => {
-    //               return (
-    //                 <div
-    //                   className="py-1 px-2 d-inline-block me-2"
-    //                   key={index}
-    //                   style={{ background: "#dff0ff", borderRadius: 5 }}
-    //                 >
-    //                   <div className="d-flex align-items-center">
-    //                     <img
-    //                       src="/assets/img/icons/tagIcon.svg"
-    //                       className="me-1"
-    //                       style={{ color: "#264966" }}
-    //                     />
-    //                     <div
-    //                       style={{ color: "#264966" }}
-    //                     >
-    //                       {tag}
-    //                     </div>
-    //                   </div>
-    //                 </div>
-    //               );
-    //             })}
-    //           </div>
-    //         )}
-    //       </div>
-    //     );
-    //   },
-    // },
   ];
 
   useEffect(() => {
@@ -1779,22 +1619,20 @@ const Contacts = () => {
                     {/* /Filter */}
                     {/* Contact List */}
 
-                  
-                      <div className="table-responsive custom-table">
-                        <Table
-                          dataSource={filteredData}
-                          columns={visibleColumns}
-                          rowKey={(record) => record.key}
-                          loading={isLoading}
-                          totalCount={totalContacts}
-                          onPageChange={
-                            showFavourites
-                              ? handleFavouritePageChange
-                              : handlePageChange
-                          }
-                        />
-                      </div>
-                 
+                    <div className="table-responsive custom-table">
+                      <Table
+                        dataSource={filteredData}
+                        columns={visibleColumns}
+                        rowKey={(record) => record.key}
+                        loading={isLoading}
+                        totalCount={totalContacts}
+                        onPageChange={
+                          showFavourites
+                            ? handleFavouritePageChange
+                            : handlePageChange
+                        }
+                      />
+                    </div>
 
                     <div className="row align-items-center">
                       <div className="col-md-6">

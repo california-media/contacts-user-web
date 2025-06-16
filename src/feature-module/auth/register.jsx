@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../router/all_routes";
 import api from "../../core/axios/axiosInstance";
+import { RecaptchaVerifier,signInWithPhoneNumber } from "firebase/auth";
+import { auth } from "../../core/utils/firebase";
 
 const Register = () => {
   const route = all_routes;
@@ -11,7 +13,7 @@ const Register = () => {
     confirmPassword: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
+  const [userInput, setUserInput] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -22,27 +24,90 @@ const Register = () => {
       [field]: !prevState[field],
     }));
   };
+  // const handleRegister = async (e) => {
+  //   e.preventDefault();
+  //   setMessage({ text: "", type: "" });
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await api.post("user/signup", { userInput, password });
+
+  //     if (response.data.status === "success") {
+  //       setMessage({ text: response.data.message, type: "success" });
+  //       setIsLoading(false);
+  //     }
+  //   } catch (error) {
+  //     setMessage({ text: error.response.data.message, type: "error" });
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
   const handleRegister = async (e) => {
-    e.preventDefault();
-    setMessage({ text: "", type: "" });
-    setIsLoading(true);
+  e.preventDefault();
+  setMessage({ text: "", type: "" });
+  setIsLoading(true);
 
+  const isPhone = /^\+?[0-9]{10,15}$/.test(userInput); // Simple phone validation
+
+  if (isPhone) {
+    // Phone number path - use Firebase OTP
     try {
-      const response = await api.post("user/signup", { email, password });
-
-      if (response.data.status === "success") {
-        setMessage({ text: response.data.message, type: "success" });
-        setIsLoading(false);
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+          size: "invisible",
+          callback: () => {},
+        });
       }
-    } catch (error) {
-      setMessage({ text: error.response.data.message, type: "error" });
+
+      const confirmationResult = await signInWithPhoneNumber(
+        auth,
+        userInput,
+        window.recaptchaVerifier
+      );
+
+      window.confirmationResult = confirmationResult;
+      setMessage({ text: "OTP sent successfully!", type: "success" });
+    } catch (err) {
+      console.error(err);
+      setMessage({ text: err.message, type: "error" });
+    } finally {
       setIsLoading(false);
     }
-  };
+
+  } else {
+    // Email path - just show "Coming soon" or skip
+    setMessage({ text: "Email registration is not supported yet.", type: "error" });
+    setIsLoading(false);
+  }
+};
+
+
+  //   useEffect(() => {
+  //   window.recaptchaVerifier = new RecaptchaVerifier(
+  //     auth,
+  //     "recaptcha-container",
+  //     {
+  //       size: "invisible",
+  //       callback: (response) => {},
+  //       "expired-callback": () => {
+  //         // Token expired, maybe notify user or reinit
+  //       },
+  //     }
+  //   );
+
+  //   return () => {
+  //     if (window.recaptchaVerifier) {
+  //       window.recaptchaVerifier.clear();
+  //       delete window.recaptchaVerifier;
+  //     }
+  //   };
+  // }, []);
   return (
     <div className="account-content">
       <div className="container-fluid">
         <div className="row">
+          <div id="recaptcha-container" />
           <div className="col-md-12 p-0">
             <div className="d-flex flex-wrap w-100 vh-100 overflow-hidden account-bg-02">
               <div className="d-flex align-items-center justify-content-center flex-wrap vh-100 overflow-auto p-4 w-100 bg-backdrop">
@@ -59,15 +124,15 @@ const Register = () => {
                       <h4 className="mb-2 fs-20">Register</h4>
                     </div>
                     <div className="mb-3">
-                      <label className="col-form-label">Email Address</label>
+                      <label className="col-form-label">Email / Phone number</label>
                       <div className="position-relative">
                         <span className="input-icon-addon">
-                          <i className="ti ti-mail" />
+                          <i className="ti ti-user" />
                         </span>
                         <input
                           type="text"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          value={userInput}
+                          onChange={(e) => setUserInput(e.target.value)}
                           required
                           className="form-control"
                         />
@@ -155,7 +220,7 @@ const Register = () => {
                         </Link>
                       </h6>
                     </div>
-                    <div className="form-set-login or-text mb-3">
+                    {/* <div className="form-set-login or-text mb-3">
                       <h4>OR</h4>
                     </div>
                     <div className="d-flex align-items-center justify-content-center flex-wrap mb-3">
@@ -171,12 +236,12 @@ const Register = () => {
                           />
                         </Link>
                       </div>
-                    </div>
-                    <div className="text-center">
+                    </div> */}
+                    {/* <div className="text-center">
                       <p className="fw-medium text-gray">
                         Copyright © 2025 - California Media
                       </p>
-                    </div>
+                    </div> */}
                   </div>
                 </form>
               </div>

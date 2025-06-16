@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import CollapseHeader from "../../../core/common/collapse-header";
 import { SlPeople } from "react-icons/sl";
 import { FaTasks } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { myScans } from "../../../core/data/redux/slices/MyScansSlice";
 const route = all_routes;
 const MyScans = () => {
+  const dispatch = useDispatch();
+  const allScans = useSelector((state) => state.myScans);
+
+  console.log(allScans, "all scanss");
+  useEffect(() => {
+    dispatch(myScans());
+  }, []);
+
   return (
     <div>
       {/* Page Wrapper */}
@@ -28,8 +38,8 @@ const MyScans = () => {
                             Security
                           </Link>
                           <Link to={route.emailSetup} className="fw-medium">
-                                                    Connected Mails
-                                                  </Link>
+                            Connected Mails
+                          </Link>
                           <Link to={route.myScans} className="fw-medium">
                             My Scans
                           </Link>
@@ -85,6 +95,32 @@ const MyScans = () => {
                               <h4 className="fw-semibold">My Scans</h4>
                               <div></div>
                             </div>
+                            <div className="row mt-5 px-5">
+                              {allScans
+                                .filter((scan) => scan.iScanned === false)
+                                .map((scan) => (
+                                  <div className="col-md-4 mb-3" key={scan.id}>
+                                    <div className="card">
+                                      <div className="card-body text-center">
+                                        <img
+                                          src={scan.profileImageURL}
+                                          alt="Profile"
+                                          className="rounded-circle mb-2"
+                                          style={{
+                                            width: "80px",
+                                            height: "80px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                        <h5 className="card-title">
+                                          {scan.email}
+                                        </h5>
+                                        {/* Add any other info here */}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
                           </div>
                         </div>
                         <div className="tab-pane " id="scannedMe">
@@ -92,6 +128,32 @@ const MyScans = () => {
                             <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
                               <h4 className="fw-semibold">Scanned Me</h4>
                               <div className="d-inline-flex align-items-center"></div>
+                            </div>
+                            <div className="row mt-5">
+                              {allScans
+                                .filter((scan) => scan.iScanned === true)
+                                .map((scan) => (
+                                  <div className="col-md-4 mb-3" key={scan.id}>
+                                    <div className="card">
+                                      <div className="card-body text-center">
+                                        <img
+                                          src={scan.profileImageURL}
+                                          alt="Profile"
+                                          className="rounded-circle mb-2"
+                                          style={{
+                                            width: "80px",
+                                            height: "80px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                        <h5 className="card-title">
+                                          {scan.email}
+                                        </h5>
+                                        {/* Add any other info here */}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
                             </div>
                           </div>
                         </div>

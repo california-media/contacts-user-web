@@ -6,6 +6,7 @@ import tagReducer from "./slices/TagSlice"
 import contactReducer from "./slices/ContactSlice"
 import selectedContactReducer from "./slices/SelectedContactSlice"
 import selectedTemplateReducer from "./slices/SelectedTemplateSlice"
+import myScansReducer from "./slices/MyScansSlice"
 import toastReducer from "./slices/ToastSlice"
 import eventReducer from "./slices/EventSlice"
 import { persistStore, persistReducer } from 'redux-persist'
@@ -14,7 +15,7 @@ import storageSession from 'redux-persist/lib/storage/session'
 const persistConfig = {
   key: "root",
   storage: storageSession,
-  whitelist: ["getUser","tags","contacts","selectedContact","setSelectedTemplate","event"],
+  whitelist: ["getUser","tags","contacts","selectedContact","setSelectedTemplate","event","myScans"],
 };
 const combinedReducer = combineReducers({
   common: commonSlice,       
@@ -26,6 +27,7 @@ const combinedReducer = combineReducers({
   selectedContact: selectedContactReducer,
   toast:toastReducer,
   event:eventReducer,
+  myScans:myScansReducer,
 });
 
 const rootReducer = (state,action) => {

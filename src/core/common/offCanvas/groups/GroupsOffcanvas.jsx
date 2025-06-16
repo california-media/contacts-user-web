@@ -17,6 +17,7 @@ import api from "../../../axios/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { addTag, deleteTag } from "../../../data/redux/slices/TagSlice";
 import EmojiPicker from "emoji-picker-react";
+import { showToast } from "../../../data/redux/slices/ToastSlice";
 
 const GroupsOffcanvas = () => {
   const [show, setShow] = useState(false);
@@ -79,6 +80,19 @@ const GroupsOffcanvas = () => {
 
   const handleAddTag = async (e) => {
     e.preventDefault();
+
+    if (tagValue == "") {
+      return dispatch(
+        showToast({ message: "Tag is empty", variant: "danger" })
+      );
+    }
+    if (
+      allTags.some((t) => t.tag.toLowerCase().includes(tagValue.toLowerCase()))
+    ) {
+      return dispatch(
+        showToast({ message: "Tag already present", variant: "danger" })
+      );
+    }
 
     dispatch(addTag({ tag: [tagValue] }));
     setTagValue("");

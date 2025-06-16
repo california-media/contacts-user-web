@@ -9,7 +9,6 @@ import { GoogleAuthContext } from "../../../core/common/context/GoogleAuthContex
 const route = all_routes;
 const EmailSetup = () => {
   const { isGoogleSignedIn, googleSignIn, googleSignOut } = useContext(GoogleAuthContext);
-  console.log(isGoogleSignedIn, googleSignIn, googleSignOut,"isGoogleSignedIn, googleSignIn, googleSignOut");
   
   const handleGoogleToggle = () => {
     if (isGoogleSignedIn) {

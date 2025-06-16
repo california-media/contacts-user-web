@@ -17,11 +17,13 @@ export const fetchTags = createAsyncThunk(
 
 export const addTag = createAsyncThunk(
   "tags/addTag",
-  async (tag, { rejectWithValue,dispatch }) => {
+  async (tag, { rejectWithValue, dispatch }) => {
+    console.log(tag,"taggggggsss");
+    
     try {
       const response = await api.post("/addTag", tag);
       console.log(response.data.data, "response from add tag");
-dispatch(
+      dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
       return response.data.data;
@@ -36,12 +38,12 @@ dispatch(
 
 export const deleteTag = createAsyncThunk(
   "tags/deleteTag",
-  async (tagId, { rejectWithValue,dispatch }) => {
+  async (tagId, { rejectWithValue, dispatch }) => {
     try {
       const response = await api.delete("/deleteTag", {
         data: { tag_id: tagId },
       });
-dispatch(
+      dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
       return response.data.data.tag_id;
