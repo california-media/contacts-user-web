@@ -61,6 +61,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
+console.log(selectedTags,"selected tags");
 
   const handleContact = async () => {
     setIsLoading(true);

@@ -837,7 +837,7 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 8px !important;
 }
 .groupDeleteIconStyle{
   margin-left: 20px;

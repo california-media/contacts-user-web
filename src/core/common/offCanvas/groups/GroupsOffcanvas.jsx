@@ -74,6 +74,8 @@ const GroupsOffcanvas = () => {
   //   fetchTags();
   // }, []);
   const { tags, loading, error } = useSelector((state) => state.tags);
+  console.log(tags,"tagsss");
+  
   useEffect(() => {
     setAllTags(tags);
   }, [tags]);
@@ -94,7 +96,7 @@ const GroupsOffcanvas = () => {
       );
     }
 
-    dispatch(addTag({ tag: [tagValue] }));
+    dispatch(addTag([{ tag: tagValue, emoji: currentEmoji }]));
     setTagValue("");
   };
   const handleDeleteTag = async () => {
@@ -215,16 +217,21 @@ const GroupsOffcanvas = () => {
 
         <div className="tags-list mt-3">
           {allTags.map((tag, index) => (
-            <p className="groupContainer" key={index}>
-              {tag.tag}
-              <MdCancel
-                className="groupDeleteIconStyle"
-                onClick={() => {
-                  setTagToBeDeleted(tag);
-                  setOpenGroupDeleteModal(true);
-                }}
-              />
-            </p>
+            <div key={index}>
+              <p className="groupContainer">
+               <div>
+                  <span className="me-2">{tag.emoji}</span>
+                  <span>{tag.tag}</span>
+               </div>
+                <MdCancel
+                  className="groupDeleteIconStyle"
+                  onClick={() => {
+                    setTagToBeDeleted(tag);
+                    setOpenGroupDeleteModal(true);
+                  }}
+                />
+              </p>
+            </div>
           ))}
         </div>
 
