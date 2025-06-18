@@ -61,8 +61,8 @@ const ALLRoutes = () => {
         {/* Public Route - Login */}
         <Route path="/" element={<Login />} />
         <Route element={<AuthFeature />}>
-          {authRoutes.map((route, idx) => (
-            <Route path={route.path} element={route.element} key={idx} />
+          {authRoutes.map((route, index) => (
+            <Route path={route.path} element={route.element} key={index} />
           ))}
         </Route>
         {/* Private Routes */}
@@ -72,11 +72,11 @@ const ALLRoutes = () => {
             <PrivateRoute>
               <Routes>
                 <Route element={<Feature />}>
-                  {publicRoutes.map((route, idx) => (
+                  {publicRoutes.map((route, index) => (
                     <Route
                       path={route.path}
                       element={route.element}
-                      key={idx}
+                      key={index}
                     />
                   ))}
                 </Route>

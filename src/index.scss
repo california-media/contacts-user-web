@@ -853,3 +853,6 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
 .bgWhiteOnLinkHover:hover{
   background-color: #fff !important;
 }
+.EmojiPickerReact > div:last-child {
+  display: none !important;
+}

@@ -306,6 +306,8 @@ const Login = () => {
   };
 
   const handleGoogleLogin = async (credentialResponse) => {
+    console.log("Google Token : ",credentialResponse.credential);
+    
     try {
       const response = await api.post("user/login", {
         googleToken: credentialResponse.credential,
@@ -340,9 +342,9 @@ const Login = () => {
                         alt="Logo"
                       />
                     </div>
-                    <div className="mb-4 text-center">
+                    {/* <div className="mb-4 text-center">
                       <h4>Sign In</h4>
-                    </div>
+                    </div> */}
                     <div className="d-flex justify-content-center gap-3 mb-3">
                       <button
                         type="button"

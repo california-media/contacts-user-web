@@ -110,6 +110,8 @@ const Contacts = () => {
   const [favouriteLimit, setFavouriteLimit] = useState();
   const selectedContact = useSelector((state) => state.selectedContact);
   const { tags } = useSelector((state) => state.tags);
+  console.log(tags, "tagsssdsfsd");
+
   const [activeRecordKey, setActiveRecordKey] = useState(null);
   const [activeCell, setActiveCell] = useState(null);
 
@@ -163,21 +165,28 @@ const Contacts = () => {
     setActiveCell(null);
   };
   const handleCreateTag = async (inputValue) => {
-    setNewTags([...newTags, inputValue]);
+    setNewTags([...newTags, { tag: inputValue, emoji: "🏷️" }]);
     setSelectedTags([
       ...selectedTags,
-      { value: inputValue, label: inputValue },
+      { value: inputValue, label: `🏷️ ${inputValue}`, emoji: "🏷️" },
     ]);
   };
   useEffect(() => {
     const tagsArrayOfObject = tags.map((tag) => {
-      return { value: tag.tag, label: tag.tag };
+      return {
+        value: tag.tag,
+        label: `${tag.emoji}${" "}${tag.tag}`,
+        emoji: tag.emoji,
+      };
     });
     setAllTags(tagsArrayOfObject);
   }, []);
 
+  console.log(selectedTags, "sekljhsdfhsd");
+
   const handleUserTags = (tags) => {
     setSelectedTags(tags);
+    console.log(tags, "handle user tags");
 
     const tagsForApi = tags.map((tag) => tag.value);
 
@@ -189,16 +198,21 @@ const Contacts = () => {
 
   const saveCellTags = async () => {
     const formDataObj = new FormData();
+console.log(selectedTags,"selectghgj");
 
     formDataObj.append("contact_id", selectedContact.contact_id);
     formDataObj.append(
       "tags",
-      JSON.stringify(selectedTags.map((tag) => tag.value))
+      JSON.stringify(selectedTags.map((tag) =>({ tag:tag.value,emoji:tag.emoji})))
+    );
+
+    console.log(
+      Object.entries(formDataObj, "formDataObj from contacts before tag api")
     );
 
     try {
       if (newTags.length > 0) {
-        await dispatch(addTag({ tag: newTags })).unwrap();
+        await dispatch(addTag( newTags)).unwrap();
       }
       await dispatch(saveContact(formDataObj)).unwrap();
     } catch (error) {
@@ -208,8 +222,9 @@ const Contacts = () => {
   useEffect(() => {
     if (selectedContact?.tags) {
       const formattedTags = selectedContact.tags.map((tag) => ({
-        value: tag,
-        label: tag,
+        value: tag.tag,
+        label: `${tag.emoji} ${tag.tag}`,
+        emoji: tag.emoji,
       }));
       setSelectedTags(formattedTags);
       setPreviousTags(formattedTags);
@@ -1080,12 +1095,14 @@ const Contacts = () => {
                   }}
                 >
                   <div className="d-flex align-items-center">
-                    <img
+                    {/* <img
                       src="/assets/img/icons/tagIcon.svg"
                       className="me-1"
                       style={{ color: "#264966", width: 15 }}
-                    />
-                    <div style={{ color: "#264966", fontSize: 14 }}>{tag}</div>
+                    /> */}
+                    <div style={{ color: "#264966", fontSize: 14 }}>
+                      {tag.emoji} {tag.tag}
+                    </div>
                   </div>
 
                   {isEditingThisTag && (
@@ -1148,7 +1165,6 @@ const Contacts = () => {
         );
       },
     },
-
   ];
 
   useEffect(() => {
@@ -1374,6 +1390,11 @@ const Contacts = () => {
                                         <div className="filter-content-list">
                                           <ul>
                                             {tags.map((tag, index) => {
+                                              console.log(
+                                                tag,
+                                                "tagkjdgfhdsgfjh"
+                                              );
+
                                               return (
                                                 <li key={index}>
                                                   <div className="filter-checks">

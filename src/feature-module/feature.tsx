@@ -20,12 +20,12 @@ const Feature = () => {
     <div className={`
       ${miniSidebar ? "mini-sidebar" : ""}
       ${expandMenu ? "expand-menu" : ""}`}>
-     
        <div
         className={`main-wrapper 
         ${headerCollapse ? "header-collapse" : ""} 
         ${mobileSidebar ? "slide-nav" : ""}`}
       >
+        
         <Header />
         <Sidebar/>
         <Outlet />

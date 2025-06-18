@@ -519,9 +519,9 @@ const Register = () => {
                         alt="Logo"
                       />
                     </div>
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                       <h4 className="mb-2 fs-20">Register</h4>
-                    </div>
+                    </div> */}
                     <div className="mb-3 d-flex justify-content-center gap-3">
                       <button
                         type="button"

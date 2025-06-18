@@ -128,6 +128,7 @@ import MyScans from "../settings/generalSettings/myScans";
 import Emails from "../crm/emails/Emails";
 import Calendar from "../crm/calendar/Calendar";
 import EmailSetup from "../settings/generalSettings/emailSetup";
+import ShareProfile from "../../core/common/shareProfile/ShareProfile";
 // import Projects from "../crm/projects";
 // import Task from "../crm/task";
 // import CompaniesDetails from "../crm/companies/companiesDetails";
@@ -1304,6 +1305,14 @@ export const authRoutes = [
     route: Route,
     title:'Register'
   },
+  {
+    // path: route.shareProfile,
+    path: `${route.shareProfile}/:serialNumber`,  
+    element: <ShareProfile />,
+    route: Route,
+    title:'Share Profile'
+  },
+
   // {
   //   path: route.twoStepVerification,
   //   element: <TwoStepVerification />,

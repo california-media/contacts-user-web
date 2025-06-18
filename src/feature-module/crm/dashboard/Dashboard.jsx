@@ -194,13 +194,21 @@ const Dashboard = () => {
                       <FaRegEye />
                       <p className="profileCardText">456</p>
                     </div>
-                    <div className="profileCardShareButton">
-                      <TbLocation
+                    {/* <div className="profileCardShareButton"> */}
+                      {/* <TbLocation
                         color="#fff"
                         size={22}
                         className="profileCardShareIcon"
-                      />
-                    </div>
+                      /> */}
+                      <Link style={{width:30, marginRight:20}} to={`${route.shareProfile}/${userProfile.firstname}${userProfile.serialNumber}`} target="_blank">
+                        <ImageWithBasePath 
+                        src="assets/img/icons/shareIcon.png"
+                          className="img-fluid"
+                          alt="Logo"
+                          
+                        />
+                      </Link>
+                    {/* </div> */}
                   </div>
                 </div>
               </div>
@@ -335,7 +343,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              Scanned Cards
+                              Scans
                             </p>
                             <p
                               style={{
@@ -344,7 +352,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              50
+                             {userProfile.isLoading?<LoadingIndicator/>:userProfile.totalScans} 
                             </p>
                           </div>
                           <div
@@ -397,7 +405,7 @@ const Dashboard = () => {
                                 color: "#000",
                               }}
                             >
-                              12
+                              {userProfile.isLoading?<LoadingIndicator/>:userProfile.totalTemplates}
                             </p>
                           </div>
                           <div
@@ -497,7 +505,7 @@ const Dashboard = () => {
                                     color: "#000",
                                   }}
                                 >
-                                  Scanned Cards
+                                  Scans
                                 </p>
                                 <p
                                   style={{
@@ -599,7 +607,7 @@ const Dashboard = () => {
                                     color: "#000",
                                   }}
                                 >
-                                  Scanned Cards
+                                  Scans
                                 </p>
                                 <p
                                   style={{

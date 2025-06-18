@@ -1,44 +1,278 @@
+// import React, { useEffect, useRef, useState } from "react";
+// import { Link } from "react-router-dom";
+// import Select from "react-select";
+// import {
+//   options,
+//   optionssymbol,
+//   optionschoose,
+//   optionsource,
+//   optionindustry,
+// } from "../../selectoption/selectoption";
+// import { SelectWithImage2 } from "../../selectWithImage2";
+// import { TagsInput } from "react-tag-input-component";
+// import { MdCancel } from "react-icons/md";
+// import DeleteGroupModal from "../../modals/DeleteGroupModal";
+// import { Modal } from "react-bootstrap";
+// import api from "../../../axios/axiosInstance";
+// import { useDispatch, useSelector } from "react-redux";
+// import { addTag, deleteTag } from "../../../data/redux/slices/TagSlice";
+// import EmojiPicker from "emoji-picker-react";
+// import { showToast } from "../../../data/redux/slices/ToastSlice";
+
+// const GroupsOffcanvas = () => {
+//   const [show, setShow] = useState(false);
+//   const [newContents, setNewContents] = useState([0]);
+//   const [tagValue, setTagValue] = useState("");
+//   const [tagToBeDeleted, setTagToBeDeleted] = useState({});
+//   const [owner, setOwner] = useState(["Collab"]);
+//   const [openGroupDeleteModal, setOpenGroupDeleteModal] = useState(false);
+//   const [allTags, setAllTags] = useState([]);
+//   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+//   const [currentEmoji, setCurrentEmoji] = useState("🏷️");
+//   const pickerRef = useRef(null);
+//   const buttonRef = useRef(null);
+
+//   const addEmoji = (emojiData) => {
+//     console.log(emojiData, "emojidata");
+
+//     setCurrentEmoji(emojiData.emoji);
+//   };
+
+//   // 🔒 Close picker on outside click
+//   useEffect(() => {
+//     function handleClickOutside(event) {
+//       if (
+//         pickerRef.current &&
+//         !pickerRef.current.contains(event.target) &&
+//         !buttonRef.current.contains(event.target)
+//       ) {
+//         setShowEmojiPicker(false);
+//       }
+//     }
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => {
+//       document.removeEventListener("mousedown", handleClickOutside);
+//     };
+//   }, []);
+
+//   const dispatch = useDispatch();
+
+//   const handleShow = () => setShow(true);
+//   const addNewContent = () => {
+//     setNewContents([...newContents, newContents.length]);
+//   };
+//   // useEffect(() => {
+//   //   const fetchTags = async () => {
+//   //     try {
+//   //       const response = await api.get("getTag");
+//   //       console.log(response.data.data, "response.data");
+//   //       setAllTags(response.data.data);
+//   //     } catch (error) {
+//   //       console.log(error);
+//   //     }
+//   //   };
+//   //   fetchTags();
+//   // }, []);
+//   const { tags, loading, error } = useSelector((state) => state.tags);
+//   console.log(tags,"tagsss");
+
+//   useEffect(() => {
+//     setAllTags(tags);
+//   }, [tags]);
+
+//   const handleAddTag = async (e) => {
+//     e.preventDefault();
+
+//     if (tagValue == "") {
+//       return dispatch(
+//         showToast({ message: "Tag is empty", variant: "danger" })
+//       );
+//     }
+//     if (
+//       allTags.some((t) => t.tag.toLowerCase().includes(tagValue.toLowerCase()))
+//     ) {
+//       return dispatch(
+//         showToast({ message: "Tag already present", variant: "danger" })
+//       );
+//     }
+
+//     dispatch(addTag([{ tag: tagValue, emoji: currentEmoji }]));
+//     setTagValue("");
+//   };
+//   const handleDeleteTag = async () => {
+//     try {
+//       await dispatch(deleteTag(tagToBeDeleted.tag_id)).unwrap();
+//       // Only runs if the delete was successful
+//       setOpenGroupDeleteModal(false);
+//     } catch (error) {
+//       console.error("Failed to delete the tag:", error);
+//     }
+//   };
+//   return (
+//     <div
+//       className="offcanvas offcanvas-end offcanvas-large"
+//       tabIndex={-1}
+//       id="groups_offcanvas"
+//     >
+//       <div className="offcanvas-header border-bottom">
+//         <h5 className="fw-semibold">Groups</h5>
+//         <button
+//           type="button"
+//           className="btn-close custom-btn-close border p-1 me-0 d-flex align-items-center justify-content-center rounded-circle"
+//           data-bs-dismiss="offcanvas"
+//           aria-label="Close"
+//         >
+//           <i className="ti ti-x" />
+//         </button>
+//       </div>
+//       <div className="offcanvas-body">
+//         <form onSubmit={handleAddTag}>
+//           <div className="row">
+//             <div className="col-md-12">
+//               <div className="mb-3 position-relative d-flex gap-3 align-items-center">
+//                 <div className="flex-grow-1">
+//                   <input
+//                     type="text"
+//                     value={tagValue}
+//                     onChange={(e) => setTagValue(e.target.value)}
+//                     className="form-control"
+//                     placeholder="Add Group"
+//                   />
+//                 </div>
+//                 <div>
+//                   <button
+//                     type="button"
+//                     className="btn btn-light  "
+//                     ref={buttonRef}
+//                     onClick={() => setShowEmojiPicker((prev) => !prev)}
+//                   >
+//                     {currentEmoji}
+//                   </button>
+//                 </div>
+
+//                 {showEmojiPicker && (
+//                   <div
+//                     ref={pickerRef}
+//                     className="emoji-picker-popup"
+//                     style={{
+//                       position: "absolute",
+//                       zIndex: 9999,
+//                       top: "100%",
+//                       right: 0,
+//                     }}
+//                   >
+//                     <EmojiPicker onEmojiClick={addEmoji} />
+//                   </div>
+//                 )}
+//                 <div>
+//                   <button type="submit" className="btn btn-primary">
+//                     Add
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </form>
+
+//         <div className="tags-list mt-3">
+//           {allTags.map((tag, index) => (
+//             <div key={index}>
+//               <p className="groupContainer">
+//                <div>
+//                   <span className="me-2">{tag.emoji}</span>
+//                   <span>{tag.tag}</span>
+//                </div>
+//                 <MdCancel
+//                   className="groupDeleteIconStyle"
+//                   onClick={() => {
+//                     setTagToBeDeleted(tag);
+//                     setOpenGroupDeleteModal(true);
+//                   }}
+//                 />
+//               </p>
+//             </div>
+//           ))}
+//         </div>
+
+//         <Modal
+//           show={openGroupDeleteModal}
+//           onHide={() => setOpenGroupDeleteModal(false)}
+//         >
+//           <div className="modal-header border-0 m-0 justify-content-end">
+//             <button
+//               className="btn-close"
+//               onClick={() => setOpenGroupDeleteModal(false)}
+//               aria-label="Close"
+//             >
+//               <i className="ti ti-x" />
+//             </button>
+//           </div>
+//           <div className="modal-body">
+//             <div className="success-message text-center">
+//               <div className="success-popup-icon bg-danger-light">
+//                 <i className="ti ti-trash-x" />
+//               </div>
+//               <h3>Are you sure, you want to delete the group</h3>
+//               <p>This group will be removed from all your contacts</p>
+//               <div className="col-lg-12 text-center modal-btn">
+//                 <Link
+//                   to="#"
+//                   className="btn btn-light"
+//                   data-bs-dismiss="modal"
+//                   onClick={() => setOpenGroupDeleteModal(false)}
+//                 >
+//                   Cancel
+//                 </Link>
+//                 <Link
+//                   to="#"
+//                   onClick={handleDeleteTag}
+//                   className="btn btn-primary"
+//                 >
+//                   Delete
+//                 </Link>
+//               </div>
+//             </div>
+//           </div>
+//         </Modal>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default GroupsOffcanvas;
+
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import Select from "react-select";
-import {
-  options,
-  optionssymbol,
-  optionschoose,
-  optionsource,
-  optionindustry,
-} from "../../selectoption/selectoption";
-import { SelectWithImage2 } from "../../selectWithImage2";
-import { TagsInput } from "react-tag-input-component";
 import { MdCancel } from "react-icons/md";
-import DeleteGroupModal from "../../modals/DeleteGroupModal";
 import { Modal } from "react-bootstrap";
-import api from "../../../axios/axiosInstance";
-import { useDispatch, useSelector } from "react-redux";
-import { addTag, deleteTag } from "../../../data/redux/slices/TagSlice";
 import EmojiPicker from "emoji-picker-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addTag,
+  deleteTag,
+  editTag,
+} from "../../../data/redux/slices/TagSlice";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
 
 const GroupsOffcanvas = () => {
-  const [show, setShow] = useState(false);
-  const [newContents, setNewContents] = useState([0]);
   const [tagValue, setTagValue] = useState("");
-  const [tagToBeDeleted, setTagToBeDeleted] = useState({});
-  const [owner, setOwner] = useState(["Collab"]);
-  const [openGroupDeleteModal, setOpenGroupDeleteModal] = useState(false);
-  const [allTags, setAllTags] = useState([]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [currentEmoji, setCurrentEmoji] = useState("🏷️");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [tagToBeDeleted, setTagToBeDeleted] = useState(null);
+  const [openGroupDeleteModal, setOpenGroupDeleteModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editTagId, setEditTagId] = useState(null);
+
   const pickerRef = useRef(null);
   const buttonRef = useRef(null);
 
-  const addEmoji = (emojiData) => {
-    console.log(emojiData, "emojidata");
+  const dispatch = useDispatch();
+  const { tags: allTags } = useSelector((state) => state.tags);
 
+  const addEmoji = (emojiData) => {
     setCurrentEmoji(emojiData.emoji);
   };
 
-  // 🔒 Close picker on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -50,64 +284,85 @@ const GroupsOffcanvas = () => {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const dispatch = useDispatch();
-
-  const handleShow = () => setShow(true);
-  const addNewContent = () => {
-    setNewContents([...newContents, newContents.length]);
+  const resetForm = () => {
+    setTagValue("");
+    setCurrentEmoji("🏷️");
+    setIsEditMode(false);
+    setEditTagId(null);
   };
-  // useEffect(() => {
-  //   const fetchTags = async () => {
-  //     try {
-  //       const response = await api.get("getTag");
-  //       console.log(response.data.data, "response.data");
-  //       setAllTags(response.data.data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   fetchTags();
-  // }, []);
-  const { tags, loading, error } = useSelector((state) => state.tags);
-  console.log(tags,"tagsss");
-  
-  useEffect(() => {
-    setAllTags(tags);
-  }, [tags]);
 
-  const handleAddTag = async (e) => {
+  const handleAddOrUpdateTag = (e) => {
     e.preventDefault();
 
-    if (tagValue == "") {
+    if (tagValue.trim() === "") {
       return dispatch(
         showToast({ message: "Tag is empty", variant: "danger" })
       );
     }
-    if (
-      allTags.some((t) => t.tag.toLowerCase().includes(tagValue.toLowerCase()))
-    ) {
+
+    const tagExists = allTags.some(
+      (t) =>
+        t.tag.toLowerCase() === tagValue.toLowerCase() &&
+        (!isEditMode || t.tag_id !== editTagId)
+    );
+
+    if (!isEditMode && tagExists) {
       return dispatch(
         showToast({ message: "Tag already present", variant: "danger" })
       );
     }
 
-    dispatch(addTag([{ tag: tagValue, emoji: currentEmoji }]));
-    setTagValue("");
+    const payload = {
+      tag: tagValue,
+      emoji: currentEmoji,
+      ...(isEditMode && { tag_id: editTagId }),
+    };
+
+    const action = isEditMode ? editTag(payload) : addTag([payload]);
+
+    dispatch(action)
+      .unwrap()
+       .then(() => {
+      setTagValue("");
+      setCurrentEmoji("🏷️");
+      setIsEditMode(false);
+      setEditTagId(null);
+    })
+      .catch((error) => {
+       
+        console.error("Tag operation failed:", error);
+      });
   };
-  const handleDeleteTag = async () => {
-    try {
-      await dispatch(deleteTag(tagToBeDeleted.tag_id)).unwrap();
-      // Only runs if the delete was successful
-      setOpenGroupDeleteModal(false);
-    } catch (error) {
-      console.error("Failed to delete the tag:", error);
-    }
+
+
+
+
+
+  const handleDeleteTag = () => {
+    if (!tagToBeDeleted?.tag_id) return;
+    dispatch(deleteTag(tagToBeDeleted.tag_id))
+      .unwrap()
+      .then(() => {
+        setOpenGroupDeleteModal(false);
+        if (editTagId === tagToBeDeleted.tag_id) {
+          resetForm();
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to delete tag:", error);  
+      });
   };
+
+  const handleEditTag = (tag) => {
+    setTagValue(tag.tag);
+    setCurrentEmoji(tag.emoji);
+    setIsEditMode(true);
+    setEditTagId(tag.tag_id);
+  };
+
   return (
     <div
       className="offcanvas offcanvas-end offcanvas-large"
@@ -125,50 +380,10 @@ const GroupsOffcanvas = () => {
           <i className="ti ti-x" />
         </button>
       </div>
+
       <div className="offcanvas-body">
-        {/* <form onSubmit={handleAddTag}>
+        <form onSubmit={handleAddOrUpdateTag}>
           <div className="row">
-            <label className="col-form-label ms-3">Groups</label>
-            <div className="col-md-9">
-              <div className="mb-3">
-                <input
-                  type="text"
-                  value={tagValue}
-                  onChange={(e) => {
-                    setTagValue(e.target.value);
-                  }}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-md-3">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                // onClick={() => {}}
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </form>
-        {allTags.map((tag, index) => {
-          return (
-            <span className="groupContainer mb-2" key={index}>
-              {tag.tag}
-              <MdCancel
-                className="groupDeleteIconStyle"
-                onClick={() => {
-                  setTagToBeDeleted(tag);
-                  setOpenGroupDeleteModal(true);
-                }}
-              />
-            </span>
-          );
-        })} */}
-        <form onSubmit={handleAddTag}>
-          <div className="row">
-            {/* <label className="col-form-label ms-3">Groups</label> */}
             <div className="col-md-12">
               <div className="mb-3 position-relative d-flex gap-3 align-items-center">
                 <div className="flex-grow-1">
@@ -180,10 +395,11 @@ const GroupsOffcanvas = () => {
                     placeholder="Add Group"
                   />
                 </div>
+
                 <div>
                   <button
                     type="button"
-                    className="btn btn-light  "
+                    className="btn btn-light"
                     ref={buttonRef}
                     onClick={() => setShowEmojiPicker((prev) => !prev)}
                   >
@@ -205,10 +421,20 @@ const GroupsOffcanvas = () => {
                     <EmojiPicker onEmojiClick={addEmoji} />
                   </div>
                 )}
-                <div>
+
+                <div className="d-flex gap-2">
                   <button type="submit" className="btn btn-primary">
-                    Add
+                    {isEditMode ? "Update" : "Add"}
                   </button>
+                  {isEditMode && (
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={resetForm}
+                    >
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -218,14 +444,19 @@ const GroupsOffcanvas = () => {
         <div className="tags-list mt-3">
           {allTags.map((tag, index) => (
             <div key={index}>
-              <p className="groupContainer">
-               <div>
+              <p
+                className="groupContainer d-flex justify-content-between align-items-center"
+                style={{ cursor: "pointer" }}
+                onClick={() => handleEditTag(tag)}
+              >
+                <div>
                   <span className="me-2">{tag.emoji}</span>
                   <span>{tag.tag}</span>
-               </div>
+                </div>
                 <MdCancel
                   className="groupDeleteIconStyle"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering edit
                     setTagToBeDeleted(tag);
                     setOpenGroupDeleteModal(true);
                   }}
@@ -253,8 +484,8 @@ const GroupsOffcanvas = () => {
               <div className="success-popup-icon bg-danger-light">
                 <i className="ti ti-trash-x" />
               </div>
-              <h3>Are you sure, you want to delete the group</h3>
-              <p>This group will be removed from all your contacts</p>
+              <h3>Are you sure you want to delete this group?</h3>
+              <p>This group will be removed from all your contacts.</p>
               <div className="col-lg-12 text-center modal-btn">
                 <Link
                   to="#"
@@ -281,3 +512,256 @@ const GroupsOffcanvas = () => {
 };
 
 export default GroupsOffcanvas;
+
+// import React, { useEffect, useRef, useState } from "react";
+// import { Link } from "react-router-dom";
+// import { MdCancel } from "react-icons/md";
+// import { Modal } from "react-bootstrap";
+// import EmojiPicker from "emoji-picker-react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { addTag, deleteTag } from "../../../data/redux/slices/TagSlice";
+// import { showToast } from "../../../data/redux/slices/ToastSlice";
+
+// const GroupsOffcanvas = () => {
+//   const [tagValue, setTagValue] = useState("");
+//   const [currentEmoji, setCurrentEmoji] = useState("🏷️");
+//   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+//   const [tagToBeDeleted, setTagToBeDeleted] = useState(null);
+//   const [openGroupDeleteModal, setOpenGroupDeleteModal] = useState(false);
+//   const [isEditMode, setIsEditMode] = useState(false);
+//   const [editTagId, setEditTagId] = useState(null);
+
+//   const pickerRef = useRef(null);
+//   const buttonRef = useRef(null);
+
+//   const dispatch = useDispatch();
+//   const { tags: allTags } = useSelector((state) => state.tags);
+
+//   const addEmoji = (emojiData) => {
+//     setCurrentEmoji(emojiData.emoji);
+//   };
+
+//   // Close picker on outside click
+//   useEffect(() => {
+//     function handleClickOutside(event) {
+//       if (
+//         pickerRef.current &&
+//         !pickerRef.current.contains(event.target) &&
+//         !buttonRef.current.contains(event.target)
+//       ) {
+//         setShowEmojiPicker(false);
+//       }
+//     }
+//     document.addEventListener("mousedown", handleClickOutside);
+//     return () => document.removeEventListener("mousedown", handleClickOutside);
+//   }, []);
+
+//   const resetForm = () => {
+//     setTagValue("");
+//     setCurrentEmoji("🏷️");
+//     setIsEditMode(false);
+//     setEditTagId(null);
+//   };
+
+//   const handleAddOrUpdateTag = (e) => {
+//     e.preventDefault();
+
+//     if (tagValue.trim() === "") {
+//       return dispatch(showToast({ message: "Tag is empty", variant: "danger" }));
+//     }
+
+//     const tagExists = allTags.some(
+//       (t) => t.tag.toLowerCase() === tagValue.toLowerCase() && (!isEditMode || t.tag_id !== editTagId)
+//     );
+
+//     if (!isEditMode && tagExists) {
+//       return dispatch(showToast({ message: "Tag already present", variant: "danger" }));
+//     }
+
+//     const payload = [
+//       {
+//         tag: tagValue,
+//         emoji: currentEmoji,
+//         ...(isEditMode && { tag_id: editTagId }),
+//       },
+//     ];
+
+//     dispatch(addTag(payload))
+//       .unwrap()
+//       .then(() => {
+//         dispatch(
+//           showToast({
+//             message: isEditMode ? "Tag updated successfully" : "Tag added successfully",
+//             variant: "success",
+//           })
+//         );
+//         resetForm();
+//       })
+//       .catch((error) => {
+//         dispatch(
+//           showToast({
+//             message: isEditMode ? "Failed to update tag" : "Failed to add tag",
+//             variant: "danger",
+//           })
+//         );
+//         console.error("Tag operation failed:", error);
+//       });
+//   };
+
+//   const handleDeleteTag = () => {
+//     if (!tagToBeDeleted?.tag_id) return;
+//     dispatch(deleteTag(tagToBeDeleted.tag_id))
+//       .unwrap()
+//       .then(() => {
+//         setOpenGroupDeleteModal(false);
+//         dispatch(showToast({ message: "Tag deleted", variant: "success" }));
+//         if (editTagId === tagToBeDeleted.tag_id) {
+//           resetForm();
+//         }
+//       })
+//       .catch((error) => {
+//         console.error("Failed to delete tag:", error);
+//         dispatch(showToast({ message: "Failed to delete tag", variant: "danger" }));
+//       });
+//   };
+
+//   const handleEditTag = (tag) => {
+//     setTagValue(tag.tag);
+//     setCurrentEmoji(tag.emoji);
+//     setIsEditMode(true);
+//     setEditTagId(tag.tag_id);
+//   };
+
+//   return (
+//     <div
+//       className="offcanvas offcanvas-end offcanvas-large"
+//       tabIndex={-1}
+//       id="groups_offcanvas"
+//     >
+//       <div className="offcanvas-header border-bottom">
+//         <h5 className="fw-semibold">Groups</h5>
+//         <button
+//           type="button"
+//           className="btn-close custom-btn-close border p-1 me-0 d-flex align-items-center justify-content-center rounded-circle"
+//           data-bs-dismiss="offcanvas"
+//           aria-label="Close"
+//         >
+//           <i className="ti ti-x" />
+//         </button>
+//       </div>
+
+//       <div className="offcanvas-body">
+//         <form onSubmit={handleAddOrUpdateTag}>
+//           <div className="row">
+//             <div className="col-md-12">
+//               <div className="mb-3 position-relative d-flex gap-3 align-items-center">
+//                 <div className="flex-grow-1">
+//                   <input
+//                     type="text"
+//                     value={tagValue}
+//                     onChange={(e) => setTagValue(e.target.value)}
+//                     className="form-control"
+//                     placeholder="Add Group"
+//                   />
+//                 </div>
+
+//                 <div>
+//                   <button
+//                     type="button"
+//                     className="btn btn-light"
+//                     ref={buttonRef}
+//                     onClick={() => setShowEmojiPicker((prev) => !prev)}
+//                   >
+//                     {currentEmoji}
+//                   </button>
+//                 </div>
+
+//                 {showEmojiPicker && (
+//                   <div
+//                     ref={pickerRef}
+//                     className="emoji-picker-popup"
+//                     style={{
+//                       position: "absolute",
+//                       zIndex: 9999,
+//                       top: "100%",
+//                       right: 0,
+//                     }}
+//                   >
+//                     <EmojiPicker onEmojiClick={addEmoji} />
+//                   </div>
+//                 )}
+
+//                 <div>
+//                   <button type="submit" className="btn btn-primary">
+//                     {isEditMode ? "Update" : "Add"}
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </form>
+
+//         <div className="tags-list mt-3">
+//           {allTags.map((tag, index) => (
+//             <div key={index}>
+//               <p
+//                 className="groupContainer d-flex justify-content-between align-items-center"
+//                 style={{ cursor: "pointer" }}
+//                 onClick={() => handleEditTag(tag)}
+//               >
+//                 <div>
+//                   <span className="me-2">{tag.emoji}</span>
+//                   <span>{tag.tag}</span>
+//                 </div>
+//                 <MdCancel
+//                   className="groupDeleteIconStyle"
+//                   onClick={(e) => {
+//                     e.stopPropagation(); // Prevent triggering edit
+//                     setTagToBeDeleted(tag);
+//                     setOpenGroupDeleteModal(true);
+//                   }}
+//                 />
+//               </p>
+//             </div>
+//           ))}
+//         </div>
+
+//         <Modal show={openGroupDeleteModal} onHide={() => setOpenGroupDeleteModal(false)}>
+//           <div className="modal-header border-0 m-0 justify-content-end">
+//             <button
+//               className="btn-close"
+//               onClick={() => setOpenGroupDeleteModal(false)}
+//               aria-label="Close"
+//             >
+//               <i className="ti ti-x" />
+//             </button>
+//           </div>
+//           <div className="modal-body">
+//             <div className="success-message text-center">
+//               <div className="success-popup-icon bg-danger-light">
+//                 <i className="ti ti-trash-x" />
+//               </div>
+//               <h3>Are you sure you want to delete this group?</h3>
+//               <p>This group will be removed from all your contacts.</p>
+//               <div className="col-lg-12 text-center modal-btn">
+//                 <Link
+//                   to="#"
+//                   className="btn btn-light"
+//                   data-bs-dismiss="modal"
+//                   onClick={() => setOpenGroupDeleteModal(false)}
+//                 >
+//                   Cancel
+//                 </Link>
+//                 <Link to="#" onClick={handleDeleteTag} className="btn btn-primary">
+//                   Delete
+//                 </Link>
+//               </div>
+//             </div>
+//           </div>
+//         </Modal>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default GroupsOffcanvas;

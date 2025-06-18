@@ -21,9 +21,28 @@ export const addTag = createAsyncThunk(
   "tags/addTag",
   async (tag, { rejectWithValue, dispatch }) => {
     console.log(tag,"taggggggsss");
-    
     try {
       const response = await api.post("/addTag", tag);
+      console.log(response.data.data, "response from add tag");
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
+      return response.data.data;
+    } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+export const editTag = createAsyncThunk(
+  "tags/editTag",
+  async (tag, { rejectWithValue, dispatch }) => {
+    console.log(tag,"taggggggsssedit");
+    
+    try {
+      const response = await api.post("/editTag", tag);
       console.log(response.data.data, "response from add tag");
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
@@ -106,6 +125,15 @@ const tagSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     });
+   builder.addCase(editTag.fulfilled, (state, action) => {
+  const [updatedTag] = action.payload; // extract the first (and only) item from array
+
+  const index = state.tags.findIndex(tag => tag.tag_id === updatedTag.tag_id);
+  if (index !== -1) {
+    state.tags[index] = updatedTag;
+  }
+});
+
   },
 });
 

@@ -114,19 +114,15 @@ export const SidebarData = [
           // { label: "Customer Grid", link: route.contactGrid, icon:<IoMdPeople /> },
         ],
       },
-      {
-        label: "Emails",
-        icon: "ti ti-mail",
-        // subLink1: route.contactGrid,
-        // subLink2: route.contactDetails,
-        submenu: true,
-        showSubRoute: false,
-        submenuItems: [
-          { label: "Emails", link: route.emails, icon: <IoMdMail /> }
-          // { label: "Customer Details", link: route.contacts, icon:<IoMdPeople /> },
-          // { label: "Customer Grid", link: route.contactGrid, icon:<IoMdPeople /> },
-        ],
-      },
+      // {
+      //   label: "Emails",
+      //   icon: "ti ti-mail",
+      //   submenu: true,
+      //   showSubRoute: false,
+      //   submenuItems: [
+      //     { label: "Emails", link: route.emails, icon: <IoMdMail /> }
+      //   ],
+      // },
       {
         label: "Calendar",
         icon: "ti ti-calendar",

@@ -19,6 +19,8 @@ import { addTag } from "../../../data/redux/slices/TagSlice";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
 
 const LeadOffcanvas = ({ selectedContact }) => {
+  console.log(selectedContact,"selectedContact at the top");
+  
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
   const [phone, setPhone] = useState("");
@@ -37,13 +39,14 @@ const LeadOffcanvas = ({ selectedContact }) => {
     contactImageURL: "",
     firstName: "",
     lastName: "",
-    company:"",
-    designation:"",
+    company: "",
+    designation: "",
     email: [],
     phone: "",
     tags: [],
   });
   const { tags, loading, error } = useSelector((state) => state.tags);
+console.log(tags,"tagssssssss");
 
   const dispatch = useDispatch();
   const offcanvasRef = useRef(null);
@@ -61,9 +64,11 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
-console.log(selectedTags,"selected tags");
+  console.log(selectedTags, "selected tags");
 
   const handleContact = async () => {
+    console.log("hagsfas");
+    
     setIsLoading(true);
 
     const formDataObj = new FormData();
@@ -77,13 +82,13 @@ console.log(selectedTags,"selected tags");
     formDataObj.append("emailaddresses", formData.email);
     formDataObj.append(
       "tags",
-      JSON.stringify(selectedTags.map((tag) => tag.value))
+      JSON.stringify(selectedTags.map((tag) => ({tag:tag.value,emoji: tag.emoji})))
     );
     formDataObj.append("phonenumbers", formData.phone);
-
+Object.entries(formDataObj,"formdatabeforegoing")
     try {
-      if (newTags.length > 0) {        
-        await dispatch(addTag({ tag: newTags })).unwrap();
+      if (newTags.length > 0) {
+        await dispatch(addTag(newTags)).unwrap();
       }
       await dispatch(saveContact(formDataObj)).unwrap();
       document.getElementById("closeContactOffcanvas")?.click();
@@ -101,34 +106,51 @@ console.log(selectedTags,"selected tags");
       [name]: value,
     }));
   };
+  // useEffect(() => {
+  //   const tagMap = tags.map((tag) => ({
+  //     value: tag.tag,
+  //     label: tag.tag,
+  //   }));
+  //   setAllTags(tagMap);
+  // }, [tags]);
   useEffect(() => {
-    const tagMap = tags.map((tag) => ({
-      value: tag.tag,
-      label: tag.tag,
-    }));
-    setAllTags(tagMap);
-  }, [tags]);
+  const filteredTags = tags.filter(
+    (tag) => tag.tag_id && tag.tag && tag.emoji
+  );
+  const tagMap = filteredTags.map((tag) => ({
+    value: tag.tag,
+    label: `${tag.emoji} ${tag.tag}`,
+    emoji:tag.emoji
+  }));
+  setAllTags(tagMap);
+}, [tags]);
+console.log(allTags,"all tagsss");
+
   const handleCreateTag = async (inputValue) => {
-    setNewTags([...newTags, inputValue]);
+   setNewTags([...newTags, { tag: inputValue, emoji: "🏷️" }]);
     setSelectedTags([
       ...selectedTags,
-      { value: inputValue, label: inputValue },
+      { value: inputValue, label: `🏷️ ${inputValue}`,emoji:"🏷️" },
     ]);
   };
 
   useEffect(() => {
+    console.log(selectedContact?.tags,"selectedContact?.tags");
+    
     if (selectedContact?.tags) {
       const formattedTags = selectedContact.tags.map((tag) => ({
-        value: tag,
-        label: tag,
+        value: tag.tag,
+       label: `${tag.emoji} ${tag.tag}`,
       }));
       setSelectedTags(formattedTags);
       setPreviousTags(formattedTags);
     }
   }, [selectedContact]);
+console.log(selectedTags,"selected tags from contact offcanvas");
 
   const handleUserTags = (tags) => {
     setSelectedTags(tags);
+console.log(tags,"tags which you selected");
 
     const tagsForApi = tags.map((tag) => tag.value);
 
@@ -328,7 +350,7 @@ console.log(selectedTags,"selected tags");
                           Phone <span className="text-danger">*</span>
                         </label>
                         <PhoneInput
-                          country={"us"} // Default country
+                          country={"ae"} // Default country
                           value={formData.phone}
                           onChange={handleOnPhoneChange}
                           enableSearch

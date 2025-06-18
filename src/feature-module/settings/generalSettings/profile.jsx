@@ -258,11 +258,13 @@ const route = all_routes;
 
 const Profile = () => {
   const userProfile = useSelector((state) => state.profile);
+
+  
   const dispatch = useDispatch();
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-  console.log(userProfile, "userProfile");
+
 
   const [formData, setFormData] = useState({
     firstname: "",
@@ -284,7 +286,7 @@ const Profile = () => {
         firstname: userProfile.firstname || "",
         lastname: userProfile.lastname || "",
         email: userProfile.email || "",
-        phoneNumber: userProfile?.phonenumber?.number || "",
+        phoneNumbers: userProfile?.phonenumbers[0]|| "",
       });
     }
   }, [userProfile]);
@@ -298,7 +300,7 @@ const Profile = () => {
     data.append("firstname", formData.firstname);
     data.append("lastname", formData.lastname);
     data.append("email", formData.email);
-    data.append("numbernumbers", formData.phoneNumbers);
+    data.append("phonenumbers", formData.phoneNumbers);
 console.log(Object.fromEntries(data),"profile data before going to redux");
 
     dispatch(editProfile(data));
@@ -441,8 +443,8 @@ console.log(Object.fromEntries(data),"profile data before going to redux");
                                 <span className="text-danger">*</span>
                               </label>
                               <PhoneInput
-                                country={"us"} // Default country
-                                value={formData.phone}
+                                country={"ae"} // Default country
+                                value={formData.phoneNumbers}
                                 onChange={handleOnPhoneChange}
                                 enableSearch
                                 inputProps={{

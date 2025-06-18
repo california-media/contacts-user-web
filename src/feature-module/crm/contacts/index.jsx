@@ -270,10 +270,12 @@ const ContactsDetails = () => {
   };
   useEffect(() => {
     const tagsArrayOfObject = tags.map((tag) => {
-      return { value: tag.tag, label: tag.tag };
+      return { value: tag.tag, label: `${tag.emoji} ${tag.tag}`,emoji:tag.emoji };
     });
     setAllTags(tagsArrayOfObject);
   }, []);
+  console.log(allTags,"all tagssssdf");
+  
   const [isEditor3, setIsEditor3] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [isEditor2, setIsEditor2] = useState(false);
@@ -317,12 +319,12 @@ const ContactsDetails = () => {
       amount: 5000,
     },
   ]);
-  useEffect(() => {
-    const arrayOfObjects = tags.map((tag) => {
-      return { value: tag.tag, label: tag.tag };
-    });
-    setAllTags(arrayOfObjects);
-  }, []);
+  // useEffect(() => {
+  //   const arrayOfObjects = tags.map((tag) => {
+  //     return { value: tag.tag, label: tag.tag };
+  //   });
+  //   setAllTags(arrayOfObjects);
+  // }, []);
 
   const [selectedNote, setSelectedNote] = useState(null);
   const [sortOrder, setSortOrder] = useState("Descending");
@@ -577,8 +579,10 @@ const navigate = useNavigate()
   };
 
   const handleCreateTag = async (inputValue) => {
-    const newTag = { value: inputValue, label: inputValue };
-
+    console.log(inputValue,"handlecreatetagcalled");
+    
+    const newTag = { value: inputValue, emoji:"🏷️", label: `🏷️ ${inputValue}` };
+const tagForApi = { tag: inputValue, emoji:"🏷️", };
     // Optimistically update selectedTags
     const updatedTags = [...selectedTags, newTag];
 
@@ -587,13 +591,13 @@ const navigate = useNavigate()
     setAllTags((prev) => [...prev, newTag]);
     try {
       // First, create the tag
-      await dispatch(addTag({ tag: [inputValue] })).unwrap();
+      await dispatch(addTag([tagForApi])).unwrap();
       setNewTags([]);
       // Then, assign the tag to the contact with updated tag list
       const formDataObj = new FormData();
       formDataObj.append(
         "tags",
-        JSON.stringify(updatedTags.map((tag) => tag.value))
+        JSON.stringify(updatedTags.map((tag) => ({tag:tag.value,emoji:tag.emoji})))
       );
       formDataObj.append("contact_id", selectedContact.contact_id);
 
@@ -972,7 +976,7 @@ const navigate = useNavigate()
   const handleUserTags = (tags) => {
     setSelectedTags(tags);
 
-    const tagsForApi = tags.map((tag) => tag.value);
+    const tagsForApi = tags.map((tag) => ({tag:tag.value,emoji:tag.emoji}));
     const formDataObj = new FormData();
 
     formDataObj.append("tags", JSON.stringify(tagsForApi));
@@ -980,7 +984,7 @@ const navigate = useNavigate()
 
     try {
       if (newTags.length > 0) {
-        dispatch(addTag({ tag: newTags }));
+        dispatch(addTag( newTags));
       }
       dispatch(saveContact(formDataObj));
 
@@ -1315,8 +1319,9 @@ const navigate = useNavigate()
       // Format the existing tags for CreatableSelect
 
       const formattedTags = leadInfo.tags.map((tag) => ({
-        value: tag,
-        label: tag,
+        value: tag.tag,
+        label: `${tag.emoji} ${tag.tag}`,
+emoji:tag.emoji
       }));
 
       setSelectedTags(formattedTags);
@@ -1592,7 +1597,7 @@ const navigate = useNavigate()
                           className="nav-link active"
                         >
                           <FaTasks className="me-2" />
-                          Tasks
+                          Notes
                         </Link>
                       </li>
                       <li className="nav-item" role="presentation">
@@ -2158,7 +2163,7 @@ const navigate = useNavigate()
                   <div className="tab-pane fade active show" id="tasks">
                     <div className="card">
                       <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
-                        <h4 className="fw-semibold mb-0">Tasks</h4>
+                        <h4 className="fw-semibold mb-0">Notes</h4>
                         <div className="d-inline-flex align-items-center">
                           {/* <div className="form-sort me-3 mt-0">
                             <i className="ti ti-sort-ascending-2" />
@@ -2276,7 +2281,7 @@ const navigate = useNavigate()
                                           )}
                                         </span>
                                       </p>
-                                      <p>
+                                      {/* <p>
                                         <span className="fw-medium text-black">
                                           Due date :
                                         </span>{" "}
@@ -2300,7 +2305,7 @@ const navigate = useNavigate()
                                             "HH:mm"
                                           ).format("hh:mm A")}
                                         </span>
-                                      </p>
+                                      </p> */}
                                     </div>
                                   </div>
                                 </div>
@@ -2312,7 +2317,7 @@ const navigate = useNavigate()
                     {/* for completed task */}
                     <div className="card">
                       <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
-                        <h4 className="fw-semibold mb-0">Completed Tasks</h4>
+                        <h4 className="fw-semibold mb-0">Completed Notes</h4>
                         {/* <div className="d-inline-flex align-items-center">
                           <div className="form-sort me-3 mt-0">
                             <i className="ti ti-sort-ascending-2" />
@@ -2443,7 +2448,7 @@ const navigate = useNavigate()
                                           </span>
                                         </span>
                                       </p>
-                                      <p>
+                                      {/* <p>
                                         <span className="fw-medium text-black">
                                           Due date :
                                         </span>{" "}
@@ -2457,7 +2462,7 @@ const navigate = useNavigate()
                                             "HH:mm"
                                           ).format("hh:mm A")}
                                         </span>
-                                      </p>
+                                      </p> */}
                                     </div>
                                   </div>
                                 </div>
@@ -3816,7 +3821,7 @@ const navigate = useNavigate()
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title">
-                {selectedTask ? "Edit Task" : "Add new Task"}
+                {selectedTask ? "Edit Note" : "Add new Notes"}
               </h5>
               <button
                 type="button"
@@ -3874,7 +3879,7 @@ const navigate = useNavigate()
                   />
                 </div> */}
 
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label className="col-form-label">Due Date</label>
                   <div className="icon-form-end">
                     <span className="form-icon">
@@ -3905,7 +3910,7 @@ const navigate = useNavigate()
                     defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
                     format="hh:mm A"
                   />
-                </div>
+                </div> */}
 
                 <div className="col-lg-12 text-end modal-btn">
                   <Link
@@ -4137,9 +4142,11 @@ const navigate = useNavigate()
                         <div>Generate Meeting Link</div>
                       </div>
                       {!isGoogleSignedIn &&<><div className="text-danger mt-2">*Generating meeting links Google Account is Required</div>
-                      <div className="mt-2"><Link to={route.emailSetup} onClick={()=>{
-                        document.getElementById("closeMeetingModal")?.click();
-                        }}>Click here </Link>to connect your Google Account</div>
+                      <div className="mt-2"><Link to={route.emailSetup} target="_blank"
+                      // onClick={()=>{
+                      //   document.getElementById("closeMeetingModal")?.click();
+                      //   }}
+                        >Click here </Link>to connect your Google Account</div>
                       </>}
                     </div>
                   )}
