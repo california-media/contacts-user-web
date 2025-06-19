@@ -129,6 +129,7 @@ import Emails from "../crm/emails/Emails";
 import Calendar from "../crm/calendar/Calendar";
 import EmailSetup from "../settings/generalSettings/emailSetup";
 import ShareProfile from "../../core/common/shareProfile/ShareProfile";
+import UserVerification from "../otherPages/UserVerification";
 // import Projects from "../crm/projects";
 // import Task from "../crm/task";
 // import CompaniesDetails from "../crm/companies/companiesDetails";
@@ -1311,6 +1312,13 @@ export const authRoutes = [
     element: <ShareProfile />,
     route: Route,
     title:'Share Profile'
+  },
+  {
+    // path: route.shareProfile,
+    path: `${route.userVerification}/:verificationToken`,  
+    element: <UserVerification />,
+    route: Route,
+    title:'User Verification'
   },
 
   // {

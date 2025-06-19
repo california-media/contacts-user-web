@@ -22,7 +22,6 @@ export const eventSlice = createSlice({
   },
   reducers: {
      mergeGoogleEvents: (state, action) => {
-        console.log(action.payload,"payload from google events");
         
     const nonGoogleEvents = state.data.filter(event => !event.googleEvent);
     state.data = [...nonGoogleEvents, ...action.payload];

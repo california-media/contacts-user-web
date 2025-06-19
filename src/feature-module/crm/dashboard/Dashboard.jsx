@@ -29,7 +29,6 @@ const Dashboard = () => {
   const qrCodeRef = useRef();
   const userProfile = useSelector((state) => state.profile);
   const { tags, loading, error } = useSelector((state) => state.tags);
-  console.log(userProfile, "user profile in dashboard from redux");
 
   const [sline] = useState({
     chart: {
@@ -105,6 +104,7 @@ const Dashboard = () => {
     });
     setQrCodeValue(getQrCodeValue);
   }, [userProfile]);
+  
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
@@ -143,11 +143,12 @@ const Dashboard = () => {
                     className="profileCoverImg"
                   />
                   <div style={{ background: "#000", position: "relative" }}>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <ImageWithBasePath
-                        src="assets/img/profileImage.jpeg"
+                    <div style={{ display: "flex", justifyContent: "center"}}>
+                      <img
+                        src={userProfile.profileImageURL}
                         alt="Profile Banner"
                         className="profileCardImg"
+                        style={{ border:"1px solid white" }}
                       />
                     </div>
                     <div

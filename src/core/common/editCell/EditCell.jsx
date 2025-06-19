@@ -67,7 +67,6 @@ const EditCell = ({
     }
   };
   useEffect(() => {
-    console.log("Popup Ref: ", popupRef.current); // <-- Should not be null
   }, [isActive]);
   return (
     <div
@@ -81,7 +80,6 @@ const EditCell = ({
         padding: "5px",
       }}
     >
-      {console.log(fieldValue, "fieldValuefieldValuefieldValue")}
       {routeLink ? (
         <Link to={routeLink} state={{ record }} className="d-flex flex-column">
           {textColor ? (

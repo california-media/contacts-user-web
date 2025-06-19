@@ -11,7 +11,6 @@ const MyScans = () => {
   const dispatch = useDispatch();
   const allScans = useSelector((state) => state.myScans);
 
-  console.log(allScans, "all scanss");
   useEffect(() => {
     dispatch(myScans());
   }, []);

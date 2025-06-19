@@ -38,7 +38,6 @@ const selectedContactSlice = createSlice({
   },
   extraReducers: (builder) => { // this extra reducer is imported from the ContactSlice 
     builder.addCase(deleteTask.fulfilled, (state, action) => {
-      console.log(action.payload,"payload for deleted meeting")
       const deletedTaskId = action.payload;
       state.tasks = state.tasks.filter((task) => task.task_id !== deletedTaskId);
     })

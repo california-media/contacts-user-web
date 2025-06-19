@@ -104,7 +104,6 @@
 //   //   e.preventDefault();
 //   //   setMessage({ text: "", type: "" });
 //   //   setIsLoading(true);
-//   //   console.log(phoneNumber, "phonenumber");
 
 //   //   const isPhone = /^\+?[0-9]{10,15}$/.test(phoneNumber);
 
@@ -481,10 +480,11 @@ const Register = () => {
       };
 
       const res = await api.post("user/signup/verify", payload);
-      setMessage({
-        text: "Registration successful! Please login.",
-        type: "success",
-      });
+      
+      // setMessage({
+      //   text: "Registration successful! Please login.",
+      //   type: "success",
+      // });
       setShowOtpInput(false);
     } catch (err) {
       setMessage({

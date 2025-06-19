@@ -24,7 +24,6 @@ export const fetchProfile = createAsyncThunk(
     try {
       const response = await api.post("/getUser", paginationData);
       localStorage.setItem("userId", response.data.data.id);
-      console.log(response.data, "response from fetch profile");
 
       return response.data;
     } catch (error) {

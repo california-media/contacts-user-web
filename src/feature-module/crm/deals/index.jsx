@@ -291,7 +291,6 @@ const Deals = () => {
       acc[deal.key] = deal.dealStatus;
       return acc;
     }, {});
-    console.log(statusDeal, "status Deal");
 
     setStatusDeal(initialStatuses);
   }, [dealsData]);
@@ -395,7 +394,6 @@ const Deals = () => {
               onSave={(key, value) => handleSaveField(key, "customer_company", value)}
               onEditClick={() => {
                 // This is where you can handle your click without the need for a separate function
-                console.log("Clicked on company:", companyDetails);
                 // Here you could directly use companyDetails for whatever you need
               }}
               onClose={handleClose}

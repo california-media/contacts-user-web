@@ -270,12 +270,16 @@ const ContactsDetails = () => {
   };
   useEffect(() => {
     const tagsArrayOfObject = tags.map((tag) => {
-      return { value: tag.tag, label: `${tag.emoji} ${tag.tag}`,emoji:tag.emoji };
+      return {
+        value: tag.tag,
+        label: `${tag.emoji} ${tag.tag}`,
+        emoji: tag.emoji,
+      };
     });
     setAllTags(tagsArrayOfObject);
   }, []);
-  console.log(allTags,"all tagssssdf");
-  
+  console.log(allTags, "all tagssssdf");
+
   const [isEditor3, setIsEditor3] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [isEditor2, setIsEditor2] = useState(false);
@@ -397,7 +401,7 @@ const ContactsDetails = () => {
       [name]: value,
     }));
   };
-const navigate = useNavigate()
+  const navigate = useNavigate();
   const contentRef = useRef(null);
   const handleDeleteTask = () => {
     setDeleteModalText("task");
@@ -579,10 +583,14 @@ const navigate = useNavigate()
   };
 
   const handleCreateTag = async (inputValue) => {
-    console.log(inputValue,"handlecreatetagcalled");
-    
-    const newTag = { value: inputValue, emoji:"🏷️", label: `🏷️ ${inputValue}` };
-const tagForApi = { tag: inputValue, emoji:"🏷️", };
+    console.log(inputValue, "handlecreatetagcalled");
+
+    const newTag = {
+      value: inputValue,
+      emoji: "🏷️",
+      label: `🏷️ ${inputValue}`,
+    };
+    const tagForApi = { tag: inputValue, emoji: "🏷️" };
     // Optimistically update selectedTags
     const updatedTags = [...selectedTags, newTag];
 
@@ -597,7 +605,9 @@ const tagForApi = { tag: inputValue, emoji:"🏷️", };
       const formDataObj = new FormData();
       formDataObj.append(
         "tags",
-        JSON.stringify(updatedTags.map((tag) => ({tag:tag.value,emoji:tag.emoji})))
+        JSON.stringify(
+          updatedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
+        )
       );
       formDataObj.append("contact_id", selectedContact.contact_id);
 
@@ -976,7 +986,10 @@ const tagForApi = { tag: inputValue, emoji:"🏷️", };
   const handleUserTags = (tags) => {
     setSelectedTags(tags);
 
-    const tagsForApi = tags.map((tag) => ({tag:tag.value,emoji:tag.emoji}));
+    const tagsForApi = tags.map((tag) => ({
+      tag: tag.value,
+      emoji: tag.emoji,
+    }));
     const formDataObj = new FormData();
 
     formDataObj.append("tags", JSON.stringify(tagsForApi));
@@ -984,7 +997,7 @@ const tagForApi = { tag: inputValue, emoji:"🏷️", };
 
     try {
       if (newTags.length > 0) {
-        dispatch(addTag( newTags));
+        dispatch(addTag(newTags));
       }
       dispatch(saveContact(formDataObj));
 
@@ -1321,7 +1334,7 @@ const tagForApi = { tag: inputValue, emoji:"🏷️", };
       const formattedTags = leadInfo.tags.map((tag) => ({
         value: tag.tag,
         label: `${tag.emoji} ${tag.tag}`,
-emoji:tag.emoji
+        emoji: tag.emoji,
       }));
 
       setSelectedTags(formattedTags);
@@ -1445,21 +1458,32 @@ emoji:tag.emoji
                     </div>
                     <ul>
                       <div className="row mb-3 d-flex flex-column align-items-center">
-                        {leadInfo.company && (
-                          <span className="col-12 fw-semibold text-black">
-                            {leadInfo.company}
+                        <div className="d-flex align-items-center mb-2">
+                          <i class="fa-regular fa-building me-2"></i>
+                          {leadInfo.company && (
+                            <span className="col-12 fw-semibold text-black">
+                              {leadInfo.company}
+                            </span>
+                          )}
+                        </div>
+                        <div className="d-flex align-items-center mb-2">
+                          <i class="fa-regular fa-user me-2"></i>
+                          <span
+                            className={`col-12 ${
+                              leadInfo.company == ""
+                                ? "fw-semibold text-black"
+                                : ""
+                            }`}
+                          >
+                            {leadInfo.firstname} {leadInfo.lastname}
                           </span>
-                        )}
-                        <span
-                          className={`col-12 ${
-                            leadInfo.company == ""
-                              ? "fw-semibold text-black"
-                              : ""
-                          }`}
-                        >
-                          {leadInfo.firstname} {leadInfo.lastname}
-                        </span>
-                        <span className="col-12 fst-italic">Developer</span>
+                        </div>
+                        <div className="d-flex align-items-center mb-2">
+                          <i class="fa-solid fa-briefcase me-2"></i>
+                          <span className="col-12 fst-italic">
+                            {leadInfo.designation}
+                          </span>
+                        </div>
                       </div>
                       {leadInfo?.phonenumbers?.length > 0 && (
                         <li className="row mb-3">
@@ -1540,7 +1564,11 @@ emoji:tag.emoji
                         <span className="col-12 fw-semibold text-black">
                           Date Created
                         </span>
-                        <span className="col-12">{leadInfo.created_date}</span>
+                        <span className="col-12">
+                          {dayjs(leadInfo.createdAt).format(
+                            "DD MMM YYYY, hh:mm A"
+                          )}
+                        </span>
                       </li>
                     </ul>
                     {/* <h6 className="fw-semibold">Owner</h6>
@@ -4137,17 +4165,31 @@ emoji:tag.emoji
                           type="checkbox"
                           role="switch"
                           checked={checkMeetingLink}
-                          onChange={() => setCheckMeetingLink(!checkMeetingLink)}
+                          onChange={() =>
+                            setCheckMeetingLink(!checkMeetingLink)
+                          }
                         />
                         <div>Generate Meeting Link</div>
                       </div>
-                      {!isGoogleSignedIn &&<><div className="text-danger mt-2">*Generating meeting links Google Account is Required</div>
-                      <div className="mt-2"><Link to={route.emailSetup} target="_blank"
-                      // onClick={()=>{
-                      //   document.getElementById("closeMeetingModal")?.click();
-                      //   }}
-                        >Click here </Link>to connect your Google Account</div>
-                      </>}
+                      {!isGoogleSignedIn && (
+                        <>
+                          <div className="text-danger mt-2">
+                            *Generating meeting links Google Account is Required
+                          </div>
+                          <div className="mt-2">
+                            <Link
+                              to={route.emailSetup}
+                              target="_blank"
+                              // onClick={()=>{
+                              //   document.getElementById("closeMeetingModal")?.click();
+                              //   }}
+                            >
+                              Click here{" "}
+                            </Link>
+                            to connect your Google Account
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
 

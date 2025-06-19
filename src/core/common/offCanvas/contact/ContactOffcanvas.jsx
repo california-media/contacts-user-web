@@ -19,7 +19,6 @@ import { addTag } from "../../../data/redux/slices/TagSlice";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
 
 const LeadOffcanvas = ({ selectedContact }) => {
-  console.log(selectedContact,"selectedContact at the top");
   
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
@@ -46,7 +45,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
     tags: [],
   });
   const { tags, loading, error } = useSelector((state) => state.tags);
-console.log(tags,"tagssssssss");
 
   const dispatch = useDispatch();
   const offcanvasRef = useRef(null);
@@ -64,10 +62,8 @@ console.log(tags,"tagssssssss");
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
   };
-  console.log(selectedTags, "selected tags");
 
   const handleContact = async () => {
-    console.log("hagsfas");
     
     setIsLoading(true);
 
@@ -124,7 +120,6 @@ Object.entries(formDataObj,"formdatabeforegoing")
   }));
   setAllTags(tagMap);
 }, [tags]);
-console.log(allTags,"all tagsss");
 
   const handleCreateTag = async (inputValue) => {
    setNewTags([...newTags, { tag: inputValue, emoji: "🏷️" }]);
@@ -135,7 +130,6 @@ console.log(allTags,"all tagsss");
   };
 
   useEffect(() => {
-    console.log(selectedContact?.tags,"selectedContact?.tags");
     
     if (selectedContact?.tags) {
       const formattedTags = selectedContact.tags.map((tag) => ({
@@ -146,11 +140,9 @@ console.log(allTags,"all tagsss");
       setPreviousTags(formattedTags);
     }
   }, [selectedContact]);
-console.log(selectedTags,"selected tags from contact offcanvas");
 
   const handleUserTags = (tags) => {
     setSelectedTags(tags);
-console.log(tags,"tags which you selected");
 
     const tagsForApi = tags.map((tag) => tag.value);
 

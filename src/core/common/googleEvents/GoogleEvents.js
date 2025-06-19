@@ -16,7 +16,6 @@ const now = new Date();
         maxResults: 100,
         orderBy: "startTime",
       });
-      console.log("All events from the google :", response.result.items);
 
       const events = response.result.items.map((event) => ({
         title: event.summary || "Untitled",

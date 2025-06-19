@@ -8,7 +8,6 @@ export const fetchTags = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get("/getTag");
-      console.log(response.data,"response from tags");
       
       return response.data.data;
     } catch (error) {
@@ -20,10 +19,8 @@ export const fetchTags = createAsyncThunk(
 export const addTag = createAsyncThunk(
   "tags/addTag",
   async (tag, { rejectWithValue, dispatch }) => {
-    console.log(tag,"taggggggsss");
     try {
       const response = await api.post("/addTag", tag);
-      console.log(response.data.data, "response from add tag");
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
@@ -39,11 +36,9 @@ export const addTag = createAsyncThunk(
 export const editTag = createAsyncThunk(
   "tags/editTag",
   async (tag, { rejectWithValue, dispatch }) => {
-    console.log(tag,"taggggggsssedit");
     
     try {
       const response = await api.post("/editTag", tag);
-      console.log(response.data.data, "response from add tag");
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );

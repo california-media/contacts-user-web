@@ -114,8 +114,6 @@ const EmailTemplateOffcanvas = () => {
                   placeholder="Enter text here"
                   value={formData.emailTemplateBody}
                   onChange={(e) => {
-                    console.log("Editor value changed:", e.target.value);
-
                     handleInputChange(e.target.name, e.target.value);
                   }}
                   style={{ minHeight: "300px" }}

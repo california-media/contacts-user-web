@@ -121,8 +121,7 @@ const Templates = () => {
     dispatch(deleteTemplate(templateDataDelete));
   };
 const handleBulkSelection = (selectedRowKeys, selectedRows) => {
-  console.log("Selected Row Keys: ", selectedRowKeys);      // array of IDs
-  console.log("Selected Rows Data: ", selectedRows);         // array of full row objects
+
 };
 
   const whatsappTemplateColumns = [

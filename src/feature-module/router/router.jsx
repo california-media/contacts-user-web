@@ -18,7 +18,6 @@ const ALLRoutes = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { toasts } = useSelector((state) => state.toast);
-  console.log(toasts, "toastss");
 
   const { isGoogleSignedIn } = useContext(GoogleAuthContext);
 
@@ -40,7 +39,6 @@ const ALLRoutes = () => {
     const token = localStorage.getItem("token");
     if (token) {
       // navigate(route.dashboard);
-      console.log("fetching profile...");
 
       dispatch(fetchProfile());
       dispatch(fetchTags());

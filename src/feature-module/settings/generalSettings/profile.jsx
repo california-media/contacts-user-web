@@ -246,7 +246,7 @@
 // export default Profile;
 
 import React, { useEffect, useState } from "react";
-import ImageWithBasePath from "../../../core/common/imageWithBasePath";
+
 import { Link } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import { useDispatch, useSelector } from "react-redux";
@@ -259,18 +259,19 @@ const route = all_routes;
 const Profile = () => {
   const userProfile = useSelector((state) => state.profile);
 
-  
+  console.log(userProfile, "userProfile");
+
   const dispatch = useDispatch();
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-
 
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
     email: "",
     phoneNumbers: "",
+    profileImage: null,
   });
 
   const handleOnPhoneChange = (value) => {
@@ -286,11 +287,12 @@ const Profile = () => {
         firstname: userProfile.firstname || "",
         lastname: userProfile.lastname || "",
         email: userProfile.email || "",
-        phoneNumbers: userProfile?.phonenumbers[0]|| "",
+        phoneNumbers: userProfile?.phonenumbers[0] || "",
+        profileImage: userProfile.profileImageURL || null,
       });
     }
   }, [userProfile]);
-  console.log(userProfile, "user profile from profile");
+  console.log(formData.profileImage, "formData image");
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
@@ -301,21 +303,10 @@ const Profile = () => {
     data.append("lastname", formData.lastname);
     data.append("email", formData.email);
     data.append("phonenumbers", formData.phoneNumbers);
-console.log(Object.fromEntries(data),"profile data before going to redux");
+    data.append("profileImage", formData.profileImage);
 
     dispatch(editProfile(data));
     setIsLoading(false);
-  };
-
-  const handlePhoneInputChange = (value, data) => {
-    const code = data.dialCode;
-    const number = value.replace(code, "").trim();
-
-    setFormData((prev) => ({
-      ...prev,
-      countryCode: code,
-      phoneNumber: number,
-    }));
   };
 
   const handleChange = (e) => {
@@ -362,16 +353,29 @@ console.log(Object.fromEntries(data),"profile data before going to redux");
                     <h4 className="fw-semibold mb-3">Profile Settings</h4>
                     <form onSubmit={handleEditProfile}>
                       <div className="mb-3 d-flex justify-content-between align-items-center">
-                        <div className="profile-upload">
+                        <div
+                          className="profile-upload"
+                          style={{
+                            border: formData.profileImage
+                              ? ""
+                              : "2px dashed #E8E8E8",
+                          }}
+                        >
                           <div className="profile-upload-img">
-                            <span>
-                              <i className="ti ti-photo" />
-                            </span>
+                            {!formData.profileImage && (
+                              <span>
+                                <i className="ti ti-photo" />
+                              </span>
+                            )}
                             <img
-                              id="ImgPreview"
-                              src="assets/img/profiles/avatar-02.jpg"
+                              // id="ImgPreview"
+                              src={
+                                formData.profileImage instanceof File
+                                  ? URL.createObjectURL(formData.profileImage)
+                                  : formData.profileImage
+                              }
                               alt="Profile"
-                              className="preview1"
+                              // className="preview1"
                             />
                             <button
                               type="button"
@@ -388,19 +392,21 @@ console.log(Object.fromEntries(data),"profile data before going to redux");
                                 type="file"
                                 id="imag"
                                 className="input-img"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      profileImage: file,
+                                    }));
+                                  }
+                                }}
                               />
                             </label>
-                            <p>JPG, GIF or PNG. Max size of 800K</p>
+                            <p>Supported file types PNG, JPG</p>
                           </div>
                         </div>
-
-                        {/* <ImageWithBasePath
-                          src="assets/img/myQr.png"
-                          className="img-fluid"
-                          width={150}
-                          height={150}
-                          alt="QR Code"
-                        /> */}
                       </div>
 
                       <div className="border-bottom mb-3">

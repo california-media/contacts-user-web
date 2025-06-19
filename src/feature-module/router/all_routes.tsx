@@ -29,6 +29,7 @@ export const all_routes = {
   leadsKanban: "/leads-kanban",
   pipeline: "/crm/pipeline",
   shareProfile:"/shareProfile",
+  userVerification:"/user-verification",
   // projects: "/crm/projects",
   // companyDetails: "/crm/company-details",
   // projectDetails: "/crm/project-details",

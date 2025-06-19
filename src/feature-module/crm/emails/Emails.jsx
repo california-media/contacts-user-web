@@ -27,16 +27,15 @@ const Emails = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  console.log(formData, "formmm dataaa");
+
   const dispatch = useDispatch();
 
   const handleSend = () => {
-    console.log("Sending email:", formData);
+
     setShowCompose(false);
     setFormData({ to: "", subject: "", body: "" });
   };
-  // console.log("CLIENT_ID:", CLIENT_ID);
-  // console.log("API_KEY:", API_KEY);
+
   // useEffect(() => {
   //   const initClient = () => {
   //     gapi.client
@@ -148,7 +147,6 @@ if (isGoogleSignedIn) {
         const meetLink = res.result.conferenceData.entryPoints.find(
           (e) => e.entryPointType === "video"
         )?.uri;
-        console.log("Google Meet link:", meetLink);
       })
       .catch((err) => {
         console.error("Error creating event:", err);
