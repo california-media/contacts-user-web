@@ -3,7 +3,6 @@ import ImageWithBasePath from "../imageWithBasePath";
 import { FaPhoneAlt, FaRegEye } from "react-icons/fa";
 import { IoMdMail } from "react-icons/io";
 import { QRCode } from "antd";
-import { useSelector } from "react-redux";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
@@ -67,6 +66,9 @@ const ShareProfile = () => {
       modalRef.current.click();
     }
   }, []);
+  const handleExchangeSubmit = async (e) => {
+    e.preventDefault();
+  }
   return (
     <>
       <div
@@ -166,7 +168,7 @@ const ShareProfile = () => {
               </button>
             </div>
             <div className="modal-body">
-              <form>
+              <form onSubmit={handleExchangeSubmit}>
                 <div className="mb-3">
                   <label className="col-form-label">
                     Name <span className="text-danger"> *</span>
@@ -223,7 +225,7 @@ const ShareProfile = () => {
                   <button
                     className="btn btn-primary"
                     data-bs-dismiss="modal"
-                    type="button"
+                    type="submit"
                     onClick={() => {}}
                   >
                     Connect

@@ -1,34 +1,35 @@
-import React, { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 
 const UserVerification = () => {
   const [searchParams] = useSearchParams();
-  const verificationToken = searchParams.get('verificationToken');
-
+  const verificationToken = searchParams.get("verificationToken");
+  const [message, setMessage] = useState("Verifying...");
   useEffect(() => {
     const verifyUser = async () => {
       try {
         if (verificationToken) {
           const response = await axios.post(
-            'https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup',
-             {verifyToken: verificationToken }
+            "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup",
+            { verifyToken: verificationToken }
           );
-
+          setMessage(response.data.message || "Verification successful!");
           console.log("Signup successful:", response.data);
         }
       } catch (error) {
         console.error("Signup failed:", error.response?.data || error.message);
-
+        setMessage(
+          error.response?.data?.message ||
+            "Verification failed. Please try again."
+        );
       }
     };
 
     verifyUser();
   }, [verificationToken]);
 
-  return (
-    <div>Thanks for confirmation</div>
-  );
+  return <div>{message}</div>;
 };
 
 export default UserVerification;
