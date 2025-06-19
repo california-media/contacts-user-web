@@ -1,11 +1,9 @@
 import React from 'react'
-import { useLocation } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 
 const UserVerification = () => {
-const location = useLocation();
-
-const queryParams = new URLSearchParams(location.search);
-const verificationToken = queryParams.get('verificationToken');
+const [searchParams] = useSearchParams();
+const verificationToken = searchParams.get('verificationToken');
   return (
     <div>UserVerification token {verificationToken}</div>
   )

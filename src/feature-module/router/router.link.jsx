@@ -1315,7 +1315,7 @@ export const authRoutes = [
   },
   {
     // path: route.shareProfile,
-    path: `${route.userVerification}/:verificationToken`,  
+    path: `${route.userVerification}`,  
     element: <UserVerification />,
     route: Route,
     title:'User Verification'
