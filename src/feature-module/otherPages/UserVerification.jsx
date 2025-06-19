@@ -12,15 +12,14 @@ const UserVerification = () => {
         if (verificationToken) {
           const response = await axios.post(
             'https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup',
-            { verificationToken }
+             verificationToken 
           );
 
           console.log("Signup successful:", response.data);
-          // You can show success UI or redirect here
         }
       } catch (error) {
         console.error("Signup failed:", error.response?.data || error.message);
-        // You can show error UI here
+
       }
     };
 

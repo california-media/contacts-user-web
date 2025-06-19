@@ -422,11 +422,13 @@ const Register = () => {
           ? { phonenumber: phoneNumber }
           : { email }),
       };
+console.log(payload,"payloaddd");
 
       const res = await api.post("user/signup", payload);
-      setMessage({ text: "Registration successful!", type: "success" });
-      // optionally navigate after registration
-      // navigate(route.login);
+      console.log(res.data, "resdata");
+      
+      setMessage({ text: res.data.message, type: "success" });
+
     } catch (err) {
       setMessage({
         text: err.response?.data?.message || "Registration failed",
