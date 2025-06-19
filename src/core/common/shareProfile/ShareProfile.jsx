@@ -18,17 +18,7 @@ const ShareProfile = () => {
     phone: "",
   });
 
-
-    const modalRef = useRef(null);
-
-  useEffect(() => {
-    if (modalRef.current && window.bootstrap?.Modal) {
-      const modal = new window.bootstrap.Modal(modalRef.current);
-      modal.show();
-    } else {
-      console.warn("Bootstrap Modal is not loaded. Check script import.");
-    }
-  }, []);
+  const modalRef = useRef(null);
 
   const { serialNumber } = useParams();
   useEffect(() => {
@@ -72,6 +62,11 @@ const ShareProfile = () => {
       phone: value,
     }));
   };
+  useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.click();
+    }
+  }, []);
   return (
     <>
       <div
@@ -137,6 +132,7 @@ const ShareProfile = () => {
                   data-bs-target="#exchange_contact"
                   type="button"
                   className="btn btn-primary"
+                  ref={modalRef}
                 >
                   Exchange Contact
                 </Link>
@@ -153,7 +149,6 @@ const ShareProfile = () => {
         className="modal custom-modal fade modal-padding"
         id="exchange_contact"
         role="dialog"
-             ref={modalRef}
       >
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
