@@ -44,6 +44,8 @@ export const editProfile = createAsyncThunk(
           "Content-Type": "multipart/form-data",
         },
       });
+      console.log("Edit profile response:", response.data);
+      
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );

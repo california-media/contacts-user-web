@@ -111,7 +111,7 @@ const MyScans = () => {
                                             objectFit: "cover",
                                           }}
                                         />
-                                        <h5 className="card-title">
+                                        <h5 className="card-title text-lowercase">
                                           {scan.email}
                                         </h5>
                                         {/* Add any other info here */}
@@ -145,7 +145,7 @@ const MyScans = () => {
                                             objectFit: "cover",
                                           }}
                                         />
-                                        <h5 className="card-title">
+                                        <h5 className="card-title text-lowercase">
                                           {scan.email}
                                         </h5>
                                         {/* Add any other info here */}

@@ -30,6 +30,7 @@ export const all_routes = {
   pipeline: "/crm/pipeline",
   shareProfile:"/shareProfile",
   userVerification:"/user-verification",
+  registrationForm:"/registration-form",
   // projects: "/crm/projects",
   // companyDetails: "/crm/company-details",
   // projectDetails: "/crm/project-details",

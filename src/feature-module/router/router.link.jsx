@@ -130,6 +130,7 @@ import Calendar from "../crm/calendar/Calendar";
 import EmailSetup from "../settings/generalSettings/emailSetup";
 import ShareProfile from "../../core/common/shareProfile/ShareProfile";
 import UserVerification from "../otherPages/UserVerification";
+import PostRegistrationForm from "../otherPages/PostRegistrationForm";
 // import Projects from "../crm/projects";
 // import Task from "../crm/task";
 // import CompaniesDetails from "../crm/companies/companiesDetails";
@@ -468,6 +469,12 @@ export const publicRoutes = [
     element: <Calendar />,
     route: Route,
     title:'Calendar'
+  },
+  {
+    path: route.registrationForm,
+    element: <PostRegistrationForm />,
+    route: Route,
+    title:'Registration Form'
   },
   // {
   //   path: route.accordion,

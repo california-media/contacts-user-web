@@ -1,250 +1,3 @@
-// import React, { useState } from "react";
-// import ImageWithBasePath from "../../../core/common/imageWithBasePath";
-// import { Link } from "react-router-dom";
-// import { all_routes } from "../../router/all_routes";
-// import CollapseHeader from "../../../core/common/collapse-header";
-// import { useDispatch, useSelector } from "react-redux";
-// import api from "../../../core/axios/axiosInstance";
-// import "react-phone-input-2/lib/bootstrap.css";
-// import PhoneInput from "react-phone-input-2";
-// import { editProfile } from "../../../core/data/redux/slices/ProfileSlice";
-// const route = all_routes;
-// const Profile = () => {
-//   const userProfile = useSelector((state) => state.profile);
-
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [message, setMessage] = useState({ text: "", type: "" });
-//   const [profileFirstName, setProfileFirstName] = useState(
-//     userProfile.firstname
-//   );
-//   const [profileLastName, setProfileLastName] = useState(userProfile.lastname);
-//   const [profileEmail, setProfileEmail] = useState(userProfile.email);
-//   const [profilePhoneNumber, setProfilePhoneNumber] = useState(
-//     userProfile?.phonenumber?.number
-//   );
-//   const [profileCountryCode, setProfileCountryCode] = useState(
-//     userProfile?.phonenumber?.countryCode
-//   );
-
-//   const dispatch = useDispatch();
-
-//   const handleEditProfile = async (e) => {
-//     setIsLoading(true);
-//     e.preventDefault();
-//     const formData = new FormData();
-//     formData.append("firstname", profileFirstName);
-//     formData.append("lastname", profileLastName);
-//     formData.append("email", profileEmail)
-//     formData.append("number", profilePhoneNumber);
-//     formData.append("countryCode", profileCountryCode);
-
-//     dispatch(editProfile(formData))
-//   };
-//   const handlePhoneInputChange = (value, data) => {
-//     const countryCode = data.dialCode;
-//     const phoneNumberWithoutCountryCode = value
-//       .replace(data.dialCode, "")
-//       .trim();
-
-//     setProfileCountryCode(countryCode);
-//     setProfilePhoneNumber(phoneNumberWithoutCountryCode);
-//   };
-//   return (
-//     <div className="page-wrapper">
-//       <div className="content">
-//         <div className="row">
-//           <div className="col-md-12">
-//             <div className="row">
-//               <div className="col-xl-3 col-lg-12 theiaStickySidebar">
-//                 {/* Settings Sidebar */}
-//                 <div className="card">
-//                   <div className="card-body">
-//                     <div className="settings-sidebar">
-//                       <h4 className="fw-semibold mb-3">Settings</h4>
-//                       <div className="list-group list-group-flush settings-sidebar">
-//                         <Link to={route.profile} className="fw-medium active">
-//                           Profile
-//                         </Link>
-//                         <Link to={route.security} className="fw-medium">
-//                           Security
-//                         </Link>
-//                         <Link to={route.emailSetup} className="fw-medium">
-//                           Connected Mails
-//                         </Link>
-//                         <Link to={route.myScans} className="fw-medium">
-//                           My Scans
-//                         </Link>
-//                         <Link to={route.upgradePlan} className="fw-medium">
-//                           Upgrade Plan
-//                         </Link>
-//                       </div>
-//                     </div>
-//                   </div>
-//                 </div>
-//                 {/* /Settings Sidebar */}
-//               </div>
-//               <div className="col-xl-9 col-lg-12">
-//                 {/* Settings Info */}
-//                 <div className="card">
-//                   <div className="card-body">
-//                     <h4 className="fw-semibold mb-3">Profile Settings</h4>
-//                     <form onSubmit={handleEditProfile}>
-//                       <div className="mb-3 d-flex justify-content-between align-items-center">
-//                         <div className="profile-upload">
-//                           <div className="profile-upload-img">
-//                             <span>
-//                               <i className="ti ti-photo" />
-//                             </span>
-//                             <img
-//                               id="ImgPreview"
-//                               src="assets/img/profiles/avatar-02.jpg"
-//                               alt="img"
-//                               className="preview1"
-//                             />
-//                             <button
-//                               type="button"
-//                               id="removeImage1"
-//                               className="profile-remove"
-//                             >
-//                               <i className="feather-x" />
-//                             </button>
-//                           </div>
-//                           <div className="profile-upload-content">
-//                             <label className="profile-upload-btn">
-//                               <i className="ti ti-file-broken" /> Upload File
-//                               <input
-//                                 type="file"
-//                                 id="imag"
-//                                 className="input-img"
-//                               />
-//                             </label>
-//                             <p>JPG, GIF or PNG. Max size of 800K</p>
-//                           </div>
-//                         </div>
-//                         <ImageWithBasePath
-//                           src="assets/img/myQr.png"
-//                           className="img-fluid"
-//                           width={150}
-//                           height={150}
-//                           alt="Logo"
-//                         />
-//                       </div>
-//                       <div className="border-bottom mb-3">
-//                         <div className="row">
-//                           <div className="col-md-4">
-//                             <div className="mb-3">
-//                               <label className="form-label">
-//                                 First Name{" "}
-//                                 <span className="text-danger">*</span>
-//                               </label>
-//                               <input
-//                                 type="text"
-//                                 value={profileFirstName}
-//                                 onChange={(e) => {
-//                                   setProfileFirstName(e.target.value);
-//                                 }}
-//                                 className="form-control"
-//                               />
-//                             </div>
-//                           </div>
-//                           <div className="col-md-4">
-//                             <div className="mb-3">
-//                               <label className="form-label">
-//                                 Last Name <span className="text-danger">*</span>
-//                               </label>
-//                               <input
-//                                 type="text"
-//                                 value={profileLastName}
-//                                 onChange={(e) => {
-//                                   setProfileLastName(e.target.value);
-//                                 }}
-//                                 className="form-control"
-//                               />
-//                             </div>
-//                           </div>
-//                           <div className="col-md-4">
-//                             <div className="mb-3">
-//                               <label className="form-label">
-//                                 Phone Number{" "}
-//                                 <span className="text-danger">*</span>
-//                               </label>
-//                               <PhoneInput
-//                                 // country={"ae"}
-//                                 // value={""}
-//                                 value={profileCountryCode + profilePhoneNumber}
-//                                 inputStyle={{ display: "block" }}
-//                                 onChange={handlePhoneInputChange}
-//                                 enableSearch
-//                                 searchPlaceholder="Search..."
-//                                 // searchStyle={{ width: 280, marginLeft: 0 }}
-//                               />
-//                             </div>
-//                           </div>
-//                           <div className="col-md-4">
-//                             <div className="mb-3">
-//                               <label className="form-label">
-//                                 Email <span className="text-danger">*</span>
-//                               </label>
-//                               <input
-//                                 type="text"
-//                                 value={profileEmail}
-//                                 onChange={(e) => {
-//                                   setProfileEmail(e.target.value);
-//                                 }}
-//                                 className="form-control"
-//                               />
-//                             </div>
-//                           </div>
-//                         </div>
-//                       </div>
-//                       {message.text && (
-//                         <p
-//                           className={`fw-medium ${
-//                             message.type === "success"
-//                               ? "text-success"
-//                               : "text-danger"
-//                           }`}
-//                         >
-//                           {message.text}
-//                         </p>
-//                       )}
-//                       {/* <div className="row">
-//                         <div className="col-md-12">
-//                           <div className="mb-3">
-//                             <label className="form-label">
-//                               Address <span className="text-danger">*</span>
-//                             </label>
-//                             <input type="text" className="form-control" />
-//                           </div>
-//                         </div>
-//                       </div> */}
-//                       <div>
-//                         <Link to="#" className="btn btn-light me-2">
-//                           Cancel
-//                         </Link>
-//                         <button
-//                           type="submit"
-//                           className="btn btn-primary"
-//                           style={{ width: 150 }}
-//                         >
-//                           Save Changes
-//                         </button>
-//                       </div>
-//                     </form>
-//                   </div>
-//                 </div>
-//                 {/* /Settings Info */}
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Profile;
-
 import React, { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
@@ -272,6 +25,12 @@ const Profile = () => {
     email: "",
     phoneNumbers: "",
     profileImage: null,
+    instagram: "",
+    twitter: "",
+    linkedin: "",
+    facebook: "",
+    telegram: "",
+    designation: "",
   });
 
   const handleOnPhoneChange = (value) => {
@@ -289,6 +48,12 @@ const Profile = () => {
         email: userProfile.email || "",
         phoneNumbers: userProfile?.phonenumbers[0] || "",
         profileImage: userProfile.profileImageURL || null,
+        instagram: userProfile.instagram || "",
+        twitter: userProfile.twitter || "",
+        linkedin: userProfile.linkedin || "",
+        facebook: userProfile.facebook || "",
+        telegram: userProfile.telegram || "",
+        designation: userProfile.designation || "",
       });
     }
   }, [userProfile]);
@@ -304,6 +69,13 @@ const Profile = () => {
     data.append("email", formData.email);
     data.append("phonenumbers", formData.phoneNumbers);
     data.append("profileImage", formData.profileImage);
+    data.append("instagram", formData.instagram);
+    data.append("twitter", formData.twitter);
+    data.append("linkedin", formData.linkedin);
+    data.append("facebook", formData.facebook);
+    data.append("telegram", formData.telegram);
+    data.append("designation", formData.designation);
+    console.log(Object.fromEntries(data.entries()), "formData before dispatch");
 
     dispatch(editProfile(data));
     setIsLoading(false);
@@ -350,7 +122,7 @@ const Profile = () => {
               <div className="col-xl-9 col-lg-12">
                 <div className="card">
                   <div className="card-body">
-                    <h4 className="fw-semibold mb-3">Profile Settings</h4>
+                    <h4 className="fw-semibold mb-3">Personal Details</h4>
                     <form onSubmit={handleEditProfile}>
                       <div className="mb-3 d-flex justify-content-between align-items-center">
                         <div
@@ -441,6 +213,23 @@ const Profile = () => {
                               />
                             </div>
                           </div>
+                          <div className="col-md-4">
+                            <div className="mb-3">
+                              <label className="form-label">
+                                Designation{" "}
+                                <span className="text-grey">
+                                  <i>(job profile)</i>
+                                </span>
+                              </label>
+                              <input
+                                type="text"
+                                name="designation"
+                                value={formData.designation}
+                                onChange={handleChange}
+                                className="form-control"
+                              />
+                            </div>
+                          </div>
 
                           <div className="col-md-4">
                             <div className="mb-3">
@@ -474,6 +263,157 @@ const Profile = () => {
                                 onChange={handleChange}
                                 className="form-control"
                               />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="row mt-4">
+                          <h4 className="fw-semibold mb-3">Social Profiles</h4>
+                          <div className="col-md-4">
+                            <div className="mb-3 row">
+                              <label className="form-label">
+                                Instagram <span className="text-danger"></span>
+                              </label>
+
+                              <div className="input-group">
+                                <span
+                                  className="input-group-text"
+                                  id="basic-addon1"
+                                >
+                                  <img
+                                    src="/assets/img/icons/instagramIcon.png"
+                                    alt="Instagram"
+                                    style={{ width: 20, height: 20 }}
+                                  />
+                                </span>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Username"
+                                  name="instagram"
+                                  value={formData.instagram}
+                                  onChange={handleChange}
+                                  aria-label="Instagram URL"
+                                  aria-describedby="basic-addon1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="mb-3 row">
+                              <label className="form-label">
+                                Twitter <span className="text-danger"></span>
+                              </label>
+
+                              <div className="input-group">
+                                <span
+                                  className="input-group-text"
+                                  id="basic-addon1"
+                                >
+                                  <img
+                                    src="/assets/img/icons/twitterIcon.png"
+                                    alt="Instagram"
+                                    style={{ width: 20, height: 20 }}
+                                  />
+                                </span>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Twitter URL"
+                                  name="twitter"
+                                  value={formData.twitter}
+                                  onChange={handleChange}
+                                  aria-label="Username"
+                                  aria-describedby="basic-addon1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="mb-3 row">
+                              <label className="form-label">
+                                Linkedin <span className="text-danger"></span>
+                              </label>
+
+                              <div className="input-group">
+                                <span
+                                  className="input-group-text"
+                                  id="basic-addon1"
+                                >
+                                  <img
+                                    src="/assets/img/icons/linkedinIcon.png"
+                                    alt="Instagram"
+                                    style={{ width: 20, height: 20 }}
+                                  />
+                                </span>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Linkedin URL"
+                                  name="linkedin"
+                                  value={formData.linkedin}
+                                  onChange={handleChange}
+                                  aria-label="Username"
+                                  aria-describedby="basic-addon1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="mb-3 row">
+                              <label className="form-label">
+                                Facebook <span className="text-danger"></span>
+                              </label>
+
+                              <div className="input-group">
+                                <span
+                                  className="input-group-text"
+                                  id="basic-addon1"
+                                >
+                                  <img
+                                    src="/assets/img/icons/facebookIcon.png"
+                                    alt="Instagram"
+                                    style={{ width: 20, height: 20 }}
+                                  />
+                                </span>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Facebook URL"
+                                  value={formData.facebook}
+                                  onChange={handleChange}
+                                  name="facebook"
+                                  aria-label="Username"
+                                  aria-describedby="basic-addon1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-4">
+                            <div className="mb-3 row">
+                              <label className="form-label">
+                                Telegram <span className="text-danger"></span>
+                              </label>
+
+                              <div className="input-group">
+                                <span
+                                  className="input-group-text"
+                                  id="basic-addon1"
+                                >
+                                  <img
+                                    src="/assets/img/icons/telegramIcon.png"
+                                    alt="Instagram"
+                                    style={{ width: 20, height: 20 }}
+                                  />
+                                </span>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Telegram URL"
+                                  name="telegram"
+                                  aria-label="Username"
+                                  aria-describedby="basic-addon1"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>

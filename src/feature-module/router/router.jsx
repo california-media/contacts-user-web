@@ -20,7 +20,7 @@ const ALLRoutes = () => {
   const { toasts } = useSelector((state) => state.toast);
 
   const { isGoogleSignedIn } = useContext(GoogleAuthContext);
-
+  const routesWithoutFeature = ["/registration-form"];
   const route = all_routes;
   // Find the current route in either public or auth routes
   const currentRoute =
@@ -69,7 +69,7 @@ const ALLRoutes = () => {
           element={
             <PrivateRoute>
               <Routes>
-                <Route element={<Feature />}>
+                {/* <Route element={<Feature />}>
                   {publicRoutes.map((route, index) => (
                     <Route
                       path={route.path}
@@ -77,7 +77,26 @@ const ALLRoutes = () => {
                       key={index}
                     />
                   ))}
-                </Route>
+                </Route> */}
+                {publicRoutes.map((route, index) => {
+                  const shouldUseFeature = !routesWithoutFeature.includes(
+                    route.path.split("/")[1]
+                      ? `/${route.path.split("/")[1]}`
+                      : route.path
+                  );
+
+                  return shouldUseFeature ? (
+                    <Route element={<Feature />} key={index}>
+                      <Route path={route.path} element={route.element} />
+                    </Route>
+                  ) : (
+                    <Route
+                      path={route.path}
+                      element={route.element}
+                      key={index}
+                    />
+                  );
+                })}
               </Routes>
             </PrivateRoute>
           }

@@ -29,6 +29,7 @@ const Dashboard = () => {
   const qrCodeRef = useRef();
   const userProfile = useSelector((state) => state.profile);
   const { tags, loading, error } = useSelector((state) => state.tags);
+console.log("userProfile in dashboardss", userProfile);
 
   const [sline] = useState({
     chart: {
@@ -121,6 +122,7 @@ const Dashboard = () => {
       setResult(text);
     });
   };
+
   return (
     <>
       <div className="page-wrapper" style={{ backgroundColor: "#fff" }}>
@@ -193,7 +195,7 @@ const Dashboard = () => {
                       style={{ paddingLeft: 20 }}
                     >
                       <FaRegEye />
-                      <p className="profileCardText">456</p>
+                      <p className="profileCardText">{userProfile.whoScannedMeCount}</p>
                     </div>
                     {/* <div className="profileCardShareButton"> */}
                       {/* <TbLocation
@@ -437,9 +439,10 @@ const Dashboard = () => {
                     <div className="row">
                       <div className="col-md-6 fitContentHeight">
                         <Link
-                          className="dropdown-item p-0 bgWhiteOnLinkHover"
-                          data-bs-toggle="offcanvas"
-                          data-bs-target="#groups_offcanvas"
+                          // className="dropdown-item p-0 bgWhiteOnLinkHover"
+                          // data-bs-toggle="offcanvas"
+                          // data-bs-target="#groups_offcanvas"
+                          to={route.registrationForm}
                         >
                           <div className="dashboardSmallCards">
                             <div
