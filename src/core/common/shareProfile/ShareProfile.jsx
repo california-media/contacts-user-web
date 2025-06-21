@@ -6,6 +6,8 @@ import { QRCode } from "antd";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
+import AvatarInitialStyles from "../nameInitialStyles/AvatarInitialStyles";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 const ShareProfile = () => {
   const qrCodeRef = useRef();
@@ -21,6 +23,7 @@ const ShareProfile = () => {
     phone: "",
     password: "",
   });
+  console.log(userProfile, "userProfile from ShareProfile");
 
   const modalRef = useRef(null);
 
@@ -146,32 +149,52 @@ END:VCARD
               />
               <div style={{ background: "#000", position: "relative" }}>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <img
+                  {/* <img
                     src={userProfile.profileImageURL}
                     alt="Profile Banner"
                     className="profileCardImg"
                     style={{ border: "1px solid white" }}
-                  />
+                  /> */}
+                  {userProfile.profileImageURL ? (
+                    <div className="profileCardImg">
+                      <AvatarInitialStyles
+                        name={`${userProfile.firstname} ${userProfile.lastname}`}
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={userProfile.profileImageURL}
+                      alt="Profile Banner"
+                      className="profileCardImg"
+                      style={{ border: "1px solid white" }}
+                    />
+                  )}
                 </div>
                 <div style={{ padding: 20, color: "#fff", paddingBottom: 120 }}>
                   <p className="text-center fs-4 text-capitalize mb-0">
                     {userProfile.firstname} {userProfile.lastname}{" "}
                   </p>
-                  {userProfile.designation&&<p className="text-center fs-6">
-                    <i>{userProfile.designation}</i>
-                  </p>}
-                  {userProfile?.phonenumbers?.length>0 && <div className="profileCardTextContainer">
-                    <FaPhoneAlt />
-                    <p className="profileCardText">
-                      {userProfile?.phonenumbers?.length > 0
-                        ? userProfile?.phonenumbers[0]
-                        : "No phone Number"}
+                  {userProfile.designation && (
+                    <p className="text-center fs-6">
+                      <i>{userProfile.designation}</i>
                     </p>
-                  </div>}
-                  {userProfile.email && <div className="profileCardTextContainer">
-                    <IoMdMail />
-                    <p className="profileCardText">{userProfile.email}</p>
-                  </div>}
+                  )}
+                  {userProfile?.phonenumbers?.length > 0 && (
+                    <div className="profileCardTextContainer">
+                      <FaPhoneAlt />
+                      <p className="profileCardText">
+                        {userProfile?.phonenumbers?.length > 0
+                          ? userProfile?.phonenumbers[0]
+                          : "No phone Number"}
+                      </p>
+                    </div>
+                  )}
+                  {userProfile.email && (
+                    <div className="profileCardTextContainer">
+                      <IoMdMail />
+                      <p className="profileCardText">{userProfile.email}</p>
+                    </div>
+                  )}
 
                   <div className="profileCardQrCodeContainer">
                     <div ref={qrCodeRef}>
@@ -186,85 +209,156 @@ END:VCARD
                 </div>
               </div>
 
+              <div className="profileCardLowerIcons px-4 d-flex flex-wrap gap-3 justify-content-start">
+                {userProfile?.phonenumbers?.length > 0 && (
+                  <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Phone Number</Tooltip>
+                      }
+                  >
+                    <a
+                      href={`tel:${userProfile.phonenumbers[0]}`}
+                      className="icon-wrapper phone"
+                    >
+                      <img
+                        src="/assets/img/icons/phoneCallIcon.png"
+                        alt="Phone"
+                      />
+                    </a>
+                  </OverlayTrigger>
+                )}
+                {userProfile.email && (
+                   <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Email</Tooltip>
+                      }
+                  >
+                  <a
+                    href={`mailto:${userProfile.email}`}
+                    className="icon-wrapper mail"
+                  >
+                    <img src="/assets/img/icons/mailIcon.png" alt="Mail" />
+                  </a>
+                  </OverlayTrigger>
+                )}
+                {userProfile?.phonenumbers?.length > 0 && (
+                   <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Whatsapp</Tooltip>
+                      }
+                  >
+                  <a
+                    href={`https://wa.me/${userProfile?.phonenumbers?.[0]}`}
+                    target="_blank"
+                    className="icon-wrapper whatsapp no-filter"
+                  >
+                    <img
+                      src="/assets/img/icons/whatsappIcon96.png"
+                      alt="WhatsApp"
+                    />
+                  </a>
+                  </OverlayTrigger>
+                )}
+                {userProfile.instagram && (
+                   <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Instagram</Tooltip>
+                      }
+                  >
+                  <a
+                    href={userProfile.instagram}
+                    target="_blank"
+                    className="icon-wrapper instagram no-filter"
+                  >
+                    <img
+                      src="/assets/img/icons/instagramIcon.png"
+                      alt="Instagram"
+                    />
+                  </a>
+                  </OverlayTrigger>
+                )}
+                {userProfile.twitter && (
+                   <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Twitter</Tooltip>
+                      }
+                  >
+                  <a
+                    href={userProfile.twitter}
+                    target="_blank"
+                    className="icon-wrapper twitter no-filter"
+                  >
+                    <img
+                      src="/assets/img/icons/twitterIcon.png"
+                      alt="Twitter"
+                    />
+                  </a>
+                  </OverlayTrigger>
+                )}
+                {userProfile.linkedin && (
+                   <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Linkedin</Tooltip>
+                      }
+                  >
+                  <a
+                    href={userProfile.linkedin}
+                    target="_blank"
+                    className="icon-wrapper linkedin no-filter"
+                  >
+                    <img
+                      src="/assets/img/icons/linkedinIcon.png"
+                      alt="LinkedIn"
+                    />
+                  </a>
+                  </OverlayTrigger>
+                )}
+                {userProfile.facebook && (
+                   <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Facebook</Tooltip>
+                      }
+                  >
+                  <a
+                    href={userProfile.facebook}
+                    target="_blank"
+                    className="icon-wrapper facebook no-filter"
+                  >
+                    <img
+                      src="/assets/img/icons/facebookIcon.png"
+                      alt="Facebook"
+                    />
+                  </a>
+                  </OverlayTrigger>
+                )}
+                {userProfile.telegram && (
+                   <OverlayTrigger
+                    placement="bottom"
+                      overlay={
+                        <Tooltip id="tooltip-bottom">Telegram</Tooltip>
+                      }
+                  >
+                  <a
+                    href={userProfile.telegram}
+                    target="_blank"
+                    className="icon-wrapper telegram no-filter"
+                  >
+                    <img
+                      src="/assets/img/icons/telegramIcon.png"
+                      alt="Telegram"
+                    />
+                  </a>
+                  </OverlayTrigger>
+                )}
+              </div>
 
-<div className="profileCardLowerIcons px-4 d-flex flex-wrap gap-3 justify-content-start">
-  {userProfile?.phonenumbers?.length>0 &&<a href={`tel:${userProfile.phonenumbers[0]}`} className="icon-wrapper phone">
-    <img src="/assets/img/icons/phoneCallIcon.png" alt="Phone" />
-  </a>}
-  {userProfile.email && <a href={`mailto:${userProfile.email}`} className="icon-wrapper mail">
-    <img src="/assets/img/icons/mailIcon.png" alt="Mail" />
-  </a>}
-  {userProfile?.phonenumbers?.length>0 &&<Link to={`https://wa.me/${userProfile?.phonenumbers?.[0]}`}
-  target="_blank" className="icon-wrapper whatsapp no-filter">
-    <img src="/assets/img/icons/whatsappIcon96.png" alt="WhatsApp" />
-  </Link>}
-  {userProfile.instagram &&<Link to={userProfile.instagram} target="_blank" className="icon-wrapper instagram no-filter">
-    <img src="/assets/img/icons/instagramIcon.png" alt="Instagram" />
-  </Link>}
-  {userProfile.twitter &&<Link to={userProfile.twitter} target="_blank" className="icon-wrapper twitter no-filter">
-    <img src="/assets/img/icons/twitterIcon.png" alt="Twitter" />
-  </Link>}
-  {userProfile.linkedin&&<Link to={userProfile.linkedin} target="_blank" className="icon-wrapper linkedin no-filter">
-    <img src="/assets/img/icons/linkedinIcon.png" alt="LinkedIn" />
-  </Link>}
-  {userProfile.facebook && <Link to={userProfile.facebook} target="_blank" className="icon-wrapper facebook no-filter">
-    <img src="/assets/img/icons/facebookIcon.png" alt="Facebook" />
-  </Link>}
-  {userProfile.telegram && <Link to={userProfile.telegram} target="_blank" className="icon-wrapper telegram no-filter">
-    <img src="/assets/img/icons/telegramIcon.png" alt="Telegram" />
-  </Link>}
-</div>
-
-
-
-
-
-              {/* <div className="profileCardLowerIcons px-4">
-                <div className="d-flex justify-content-between bg-black p-2 rounded-5">
-                  <img
-                    src="/assets/img/icons/phoneCallIcon.png"
-                    alt="Instagram"
-                    style={{ width: 20, height: 20 }}
-                  />
-                </div>
-                <img
-                  src="/assets/img/icons/mailIcon.png"
-                  alt="Instagram"
-                  style={{ width: 20, height: 20 }}
-                />
-                <div className="d-flex justify-content-between bg-black p-2 rounded-5">
-                  <img
-                    src="/assets/img/icons/whatsappIcon96.png"
-                    alt="Instagram"
-                    style={{ width: 20, height: 20 }}
-                  />
-                </div>
-                <img
-                  src="/assets/img/icons/instagramIcon.png"
-                  alt="Instagram"
-                  style={{ width: 20, height: 20 }}
-                />
-                <img
-                  src="/assets/img/icons/twitterIcon.png"
-                  alt="Instagram"
-                  style={{ width: 20, height: 20 }}
-                />
-                <img
-                  src="/assets/img/icons/linkedinIcon.png"
-                  alt="Instagram"
-                  style={{ width: 20, height: 20 }}
-                />
-                <img
-                  src="/assets/img/icons/facebookIcon.png"
-                  alt="Instagram"
-                  style={{ width: 20, height: 20 }}
-                />
-                <img
-                  src="/assets/img/icons/telegramIcon.png"
-                  alt="Instagram"
-                  style={{ width: 20, height: 20 }}
-                />
-              </div> */}
             </div>
             <div className="d-flex justify-content-between mt-5">
               <Link
@@ -376,10 +470,6 @@ END:VCARD
                 {showSocialLinks && (
                   <>
                     <div className="mb-3">
-                      <label className="form-label">
-                        Instagram <span className="text-danger"></span>
-                      </label>
-
                       <div className="input-group">
                         <span className="input-group-text" id="basic-addon1">
                           <img
@@ -391,18 +481,14 @@ END:VCARD
                         <input
                           type="text"
                           className="form-control"
-                          placeholder="Username"
-                          aria-label="Username"
+                          placeholder="Instagram"
+                          aria-label="Instagram"
                           aria-describedby="basic-addon1"
                         />
                       </div>
                     </div>
 
                     <div className="mb-3">
-                      <label className="form-label">
-                        Twitter <span className="text-danger"></span>
-                      </label>
-
                       <div className="input-group">
                         <span className="input-group-text" id="basic-addon1">
                           <img
@@ -414,18 +500,14 @@ END:VCARD
                         <input
                           type="text"
                           className="form-control"
-                          placeholder="Username"
-                          aria-label="Username"
+                          placeholder="Twitter"
+                          aria-label="Twitter"
                           aria-describedby="basic-addon1"
                         />
                       </div>
                     </div>
 
                     <div className="mb-3">
-                      <label className="form-label">
-                        Linkedin <span className="text-danger"></span>
-                      </label>
-
                       <div className="input-group">
                         <span className="input-group-text" id="basic-addon1">
                           <img
@@ -437,17 +519,13 @@ END:VCARD
                         <input
                           type="text"
                           className="form-control"
-                          placeholder="Username"
-                          aria-label="Username"
+                          placeholder="Linkedin"
+                          aria-label=" Linkedin"
                           aria-describedby="basic-addon1"
                         />
                       </div>
                     </div>
                     <div className="mb-3">
-                      <label className="form-label">
-                        Facebook <span className="text-danger"></span>
-                      </label>
-
                       <div className="input-group">
                         <span className="input-group-text" id="basic-addon1">
                           <img
@@ -459,17 +537,13 @@ END:VCARD
                         <input
                           type="text"
                           className="form-control"
-                          placeholder="Username"
-                          aria-label="Username"
+                          placeholder="Facebook"
+                          aria-label="Facebook"
                           aria-describedby="basic-addon1"
                         />
                       </div>
                     </div>
                     <div className="mb-3">
-                      <label className="form-label">
-                        Telegram <span className="text-danger"></span>
-                      </label>
-
                       <div className="input-group">
                         <span className="input-group-text" id="basic-addon1">
                           <img
@@ -481,8 +555,8 @@ END:VCARD
                         <input
                           type="text"
                           className="form-control"
-                          placeholder="Username"
-                          aria-label="Username"
+                          placeholder="Telegram"
+                          aria-label="Telegram"
                           aria-describedby="basic-addon1"
                         />
                       </div>

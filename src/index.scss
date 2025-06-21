@@ -865,7 +865,21 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
 .icon-wrapper {
   width: 45px;
   height: 45px;
-  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: 1px solid #e8e8e8;
+   border-radius: 8px;
+    background: #fafafa;
+  cursor: pointer;
+}
+.icon-wrapper-sm {
+  width: 35px;
+  height: 35px;
+  border: 1px solid #e8e8e8;
+   border-radius: 8px;
+    background: #fafafa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -873,36 +887,31 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
   cursor: pointer;
 }
 
-.icon-wrapper img {
+.icon-wrapper img, .icon-wrapper-sm img {
   width: 20px;
   height: 20px;
-  filter: brightness(0) invert(1); /* Default to white for black icons */
   transition: 0.3s ease;
 }
 
 /* Don't apply filter to original colorful icons */
-.icon-wrapper.no-filter img {
+.icon-wrapper.no-filter img, .icon-wrapper-sm.no-filter img {
   filter: none !important;
 }
 
 /* Brand background colors */
-.icon-wrapper.phone { background-color: rgba(74, 74, 74,1); }
-.icon-wrapper.mail { background-color: rgba(199, 22, 16,1); }
-.icon-wrapper.whatsapp { background-color: rgba(37, 211, 102,1); }
-.icon-wrapper.instagram {
-  background: radial-gradient(circle at 30% 107%, rgba(253, 244, 151,1) 0%, rgba(253, 89, 73,1) 45%, rgba(214, 36, 159,1) 60%, rgba(40, 90, 235,1) 90%);
-}
-.icon-wrapper.twitter { background-color: rgba(29, 161, 242,1); }
-.icon-wrapper.linkedin { background-color: rgba(0, 119, 181,1); }
-.icon-wrapper.facebook { background-color: rgba(59, 89, 152,1); }
-.icon-wrapper.telegram { background-color: rgba(0, 136, 204,1); }
+// .icon-wrapper.phone,.icon-wrapper-sm.phone { background-color: rgba(74, 74, 74,1); }
+// .icon-wrapper.mail, .icon-wrapper-sm.mail{ background-color: rgba(199, 22, 16,1); }
+// .icon-wrapper.whatsapp,.icon-wrapper-sm.whatsapp { background-color: rgba(37, 211, 102,1); }
+// .icon-wrapper.instagram, .icon-wrapper-sm.instagram {
+//   background: radial-gradient(circle at 30% 107%, rgba(253, 244, 151,1) 0%, rgba(253, 89, 73,1) 45%, rgba(214, 36, 159,1) 60%, rgba(40, 90, 235,1) 90%);
+// }
+// .icon-wrapper.twitter, .icon-wrapper-sm.twitter { background-color: rgba(29, 161, 242,1); }
+// .icon-wrapper.linkedin, .icon-wrapper-sm.linkedin { background-color: rgba(0, 119, 181,1); }
+// .icon-wrapper.facebook, .icon-wrapper-sm.facebook { background-color: rgba(59, 89, 152,1); }
+// .icon-wrapper.telegram, .icon-wrapper-sm.telegram { background-color: rgba(0, 136, 204,1); }
 
 /* Hover effect */
-.icon-wrapper:hover {
+.icon-wrapper:hover, .icon-wrapper-sm:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-.icon-wrapper:hover img {
-  filter: brightness(1) invert(0); /* Optional hover change */
 }

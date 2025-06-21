@@ -18,6 +18,7 @@ import { fetchProfile } from "../../../core/data/redux/slices/ProfileSlice";
 import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
 import { QRCode } from "antd";
 import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndicator";
+import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -29,7 +30,7 @@ const Dashboard = () => {
   const qrCodeRef = useRef();
   const userProfile = useSelector((state) => state.profile);
   const { tags, loading, error } = useSelector((state) => state.tags);
-console.log("userProfile in dashboardss", userProfile);
+  console.log("userProfile in dashboardss", userProfile);
 
   const [sline] = useState({
     chart: {
@@ -105,7 +106,7 @@ console.log("userProfile in dashboardss", userProfile);
     });
     setQrCodeValue(getQrCodeValue);
   }, [userProfile]);
-  
+
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
@@ -145,13 +146,21 @@ console.log("userProfile in dashboardss", userProfile);
                     className="profileCoverImg"
                   />
                   <div style={{ background: "#000", position: "relative" }}>
-                    <div style={{ display: "flex", justifyContent: "center"}}>
-                      <img
-                        src={userProfile.profileImageURL}
-                        alt="Profile Banner"
-                        className="profileCardImg"
-                        style={{ border:"1px solid white" }}
-                      />
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                      {userProfile.profileImageURL ? (
+                        <div className="profileCardImg">
+                          <AvatarInitialStyles
+                            name={`${userProfile.firstname} ${userProfile.lastname}`}
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={userProfile.profileImageURL}
+                          alt="Profile Banner"
+                          className="profileCardImg"
+                          style={{ border: "1px solid white" }}
+                        />
+                      )}
                     </div>
                     <div
                       style={{ padding: 20, color: "#fff", paddingBottom: 120 }}
@@ -179,11 +188,18 @@ console.log("userProfile in dashboardss", userProfile);
                           className="profileCardQrCode"
                         /> */}
                         <div ref={qrCodeRef}>
-                          <QRCode
+                          {/* <QRCode
                             value={qrCodeValue}
                             size={150}
                             className="profileCardQrCode"
                             bgColor="#ffffff"
+                          /> */}
+                          <img
+                          src={userProfile.qrCode}
+                          alt="Profile Banner"
+                          className="profileCardQrCode"
+                          style={{ width: 150, height: 150, borderRadius: 10 }}
+
                           />
                         </div>
                       </div>
@@ -195,22 +211,27 @@ console.log("userProfile in dashboardss", userProfile);
                       style={{ paddingLeft: 20 }}
                     >
                       <FaRegEye />
-                      <p className="profileCardText">{userProfile.whoScannedMeCount}</p>
+                      <p className="profileCardText">
+                        {userProfile.whoScannedMeCount}
+                      </p>
                     </div>
                     {/* <div className="profileCardShareButton"> */}
-                      {/* <TbLocation
+                    {/* <TbLocation
                         color="#fff"
                         size={22}
                         className="profileCardShareIcon"
                       /> */}
-                      <Link style={{width:30, marginRight:20}} to={`${route.shareProfile}/${userProfile.firstname}${userProfile.serialNumber}`} target="_blank">
-                        <ImageWithBasePath 
+                    <Link
+                      style={{ width: 30, marginRight: 20 }}
+                      to={`${route.shareProfile}/${userProfile.firstname}${userProfile.serialNumber}`}
+                      target="_blank"
+                    >
+                      <ImageWithBasePath
                         src="assets/img/icons/shareIcon.png"
-                          className="img-fluid"
-                          alt="Logo"
-                          
-                        />
-                      </Link>
+                        className="img-fluid"
+                        alt="Logo"
+                      />
+                    </Link>
                     {/* </div> */}
                   </div>
                 </div>
@@ -245,7 +266,11 @@ console.log("userProfile in dashboardss", userProfile);
                                 color: "#000",
                               }}
                             >
-                              {userProfile.isLoading?<LoadingIndicator/>:userProfile.contactCount}
+                              {userProfile.isLoading ? (
+                                <LoadingIndicator />
+                              ) : (
+                                userProfile.contactCount
+                              )}
                             </p>
                           </div>
                           <div
@@ -262,11 +287,15 @@ console.log("userProfile in dashboardss", userProfile);
                             <MdPeople color="#8280ff" size={35} />
                           </div>
                         </div>
-                          <div className="d-flex align-items-center mt-2">
-                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
-                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
-                              </p>
-                              </div>
+                        <div className="d-flex align-items-center mt-2">
+                          <img
+                            src="/assets/img/icons/trendingIcon.svg"
+                            className="me-2"
+                          />
+                          <p style={{ color: "#39b49b", marginBottom: 0 }}>
+                            No change from last month
+                          </p>
+                        </div>
                       </div>
                     </Link>
                   </div>
@@ -302,7 +331,11 @@ console.log("userProfile in dashboardss", userProfile);
                                 color: "#000",
                               }}
                             >
-                              {userProfile.isLoading?<LoadingIndicator/>:tags.length}
+                              {userProfile.isLoading ? (
+                                <LoadingIndicator />
+                              ) : (
+                                tags.length
+                              )}
                             </p>
                           </div>
                           <div
@@ -320,10 +353,14 @@ console.log("userProfile in dashboardss", userProfile);
                           </div>
                         </div>
                         <div className="d-flex align-items-center mt-2">
-                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
-                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
-                              </p>
-                              </div>
+                          <img
+                            src="/assets/img/icons/trendingIcon.svg"
+                            className="me-2"
+                          />
+                          <p style={{ color: "#39b49b", marginBottom: 0 }}>
+                            No change from last month
+                          </p>
+                        </div>
                       </div>
                     </Link>
                   </div>
@@ -355,7 +392,11 @@ console.log("userProfile in dashboardss", userProfile);
                                 color: "#000",
                               }}
                             >
-                             {userProfile.isLoading?<LoadingIndicator/>:userProfile.totalScans} 
+                              {userProfile.isLoading ? (
+                                <LoadingIndicator />
+                              ) : (
+                                userProfile.totalScans
+                              )}
                             </p>
                           </div>
                           <div
@@ -373,15 +414,19 @@ console.log("userProfile in dashboardss", userProfile);
                           </div>
                         </div>
                         <div className="d-flex align-items-center mt-2">
-                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
-                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
-                              </p>
-                              </div>
+                          <img
+                            src="/assets/img/icons/trendingIcon.svg"
+                            className="me-2"
+                          />
+                          <p style={{ color: "#39b49b", marginBottom: 0 }}>
+                            No change from last month
+                          </p>
+                        </div>
                       </div>
                     </Link>
                   </div>
                   <div className="col-md-3 fitContentHeight">
-                    <Link to={route.myScans}>
+                    <Link to={route.templates}>
                       <div className="dashboardSmallCards">
                         <div
                           style={{
@@ -408,7 +453,11 @@ console.log("userProfile in dashboardss", userProfile);
                                 color: "#000",
                               }}
                             >
-                              {userProfile.isLoading?<LoadingIndicator/>:userProfile.totalTemplates}
+                              {userProfile.isLoading ? (
+                                <LoadingIndicator />
+                              ) : (
+                                userProfile.totalTemplates
+                              )}
                             </p>
                           </div>
                           <div
@@ -426,10 +475,14 @@ console.log("userProfile in dashboardss", userProfile);
                           </div>
                         </div>
                         <div className="d-flex align-items-center mt-2">
-                            <img src="/assets/img/icons/trendingIcon.svg" className="me-2"/>
-                            <p style={{color:"#39b49b",marginBottom:0}}>No change from last month
-                              </p>
-                              </div>
+                          <img
+                            src="/assets/img/icons/trendingIcon.svg"
+                            className="me-2"
+                          />
+                          <p style={{ color: "#39b49b", marginBottom: 0 }}>
+                            No change from last month
+                          </p>
+                        </div>
                       </div>
                     </Link>
                   </div>

@@ -6,10 +6,13 @@ import { SlPeople } from "react-icons/sl";
 import { FaTasks } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { myScans } from "../../../core/data/redux/slices/MyScansSlice";
+import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
+
 const route = all_routes;
 const MyScans = () => {
   const dispatch = useDispatch();
   const allScans = useSelector((state) => state.myScans);
+  console.log(allScans, "allScans");
 
   useEffect(() => {
     dispatch(myScans());
@@ -98,27 +101,47 @@ const MyScans = () => {
                               {allScans
                                 .filter((scan) => scan.iScanned === false)
                                 .map((scan) => (
-                                  <div className="col-md-4 mb-3" key={scan.id}>
+                                  <div className="col-md-2 mb-3" key={scan.id}>
                                     <div className="card">
-                                      <div className="card-body text-center">
-                                        <img
-                                          src={scan.profileImageURL}
-                                          alt="Profile"
-                                          className="rounded-circle mb-2"
-                                          style={{
-                                            width: "80px",
-                                            height: "80px",
-                                            objectFit: "cover",
-                                          }}
-                                        />
-                                        <h5 className="card-title text-lowercase">
-                                          {scan.email}
+                                      <div className="card-body">
+                                        {/* {scan.profileImageURL ? (
+                                          <AvatarInitialStyles
+                                            name={`${scan.firstname} ${scan.lastname}`}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={scan.profileImageURL}
+                                            alt="Profile Image"
+                                            className="rounded-circle mb-2"
+                                            style={{
+                                              width: "80px",
+                                              height: "80px",
+                                              objectFit: "cover",
+                                            }}
+                                          />
+                                        )} */}
+                                        <h5 className="fw-bold">
+                                         <div className="d-flex align-items-center">   <span className="text-capitalize">{scan.firstname} {scan.lastname}</span></div>
                                         </h5>
-                                        {/* Add any other info here */}
+                                        <h6 className="text-lowercase">
+                                          <div className="d-flex align-items-center">
+                                           <i class="fa-regular fa-envelope me-2"></i>
+                                           <a href={`mailto:${scan.email}`}> {scan.email}</a>
+                                          </div>
+                                        </h6>
+                                        <h6 className="text-lowercase">
+                                          <div className="d-flex align-items-center">
+                                          <img src="/assets/img/icons/uaeFlag.png" width={15} className="me-1"/>
+                                           <a href={`tel:+${scan.phonenumbers[0]}`}>+ {scan.phonenumbers[0]}</a>
+                                          </div>
+                                        </h6>
+                               
                                       </div>
                                     </div>
                                   </div>
                                 ))}
+
+                             
                             </div>
                           </div>
                         </div>
@@ -129,7 +152,49 @@ const MyScans = () => {
                               <div className="d-inline-flex align-items-center"></div>
                             </div>
                             <div className="row mt-5">
-                              {allScans
+                               {allScans
+                                .filter((scan) => scan.iScanned === true)
+                                .map((scan) => (
+                                  <div className="col-md-2 mb-3" key={scan.id}>
+                                    <div className="card">
+                                      <div className="card-body">
+                                        {/* {scan.profileImageURL ? (
+                                          <AvatarInitialStyles
+                                            name={`${scan.firstname} ${scan.lastname}`}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={scan.profileImageURL}
+                                            alt="Profile Image"
+                                            className="rounded-circle mb-2"
+                                            style={{
+                                              width: "80px",
+                                              height: "80px",
+                                              objectFit: "cover",
+                                            }}
+                                          />
+                                        )} */}
+                                        <h5 className="fw-bold">
+                                         <div className="d-flex align-items-center"><span className="text-capitalize">{scan.firstname} {scan.lastname}</span></div>
+                                        </h5>
+                                        <h6 className="text-lowercase">
+                                          <div className="d-flex align-items-center">
+                                           <i class="fa-regular fa-envelope me-2"></i>
+                                           <a href={`mailto:${scan.email}`}> {scan.email}</a>
+                                          </div>
+                                        </h6>
+                                        <h6 className="text-lowercase">
+                                          <div className="d-flex align-items-center">
+                                          <img src="/assets/img/icons/uaeFlag.png" width={15} className="me-1"/>
+                                           <a href={`tel:+${scan.phonenumbers[0]}`}>+ {scan.phonenumbers[0]}</a>
+                                          </div>
+                                        </h6>
+                               
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              {/* {allScans
                                 .filter((scan) => scan.iScanned === true)
                                 .map((scan) => (
                                   <div className="col-md-4 mb-3" key={scan.id}>
@@ -148,11 +213,11 @@ const MyScans = () => {
                                         <h5 className="card-title text-lowercase">
                                           {scan.email}
                                         </h5>
-                                        {/* Add any other info here */}
+                           
                                       </div>
                                     </div>
                                   </div>
-                                ))}
+                                ))} */}
                             </div>
                           </div>
                         </div>

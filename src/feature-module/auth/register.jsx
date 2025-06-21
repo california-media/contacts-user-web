@@ -418,17 +418,14 @@ const Register = () => {
       setIsLoading(true);
       const payload = {
         password,
-        ...(activeTab === "phone"
-          ? { phonenumber: phoneNumber }
-          : { email }),
+        ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
       };
-console.log(payload,"payloaddd");
+      console.log(payload, "payloaddd");
 
       const res = await api.post("user/signup", payload);
       console.log(res.data, "resdata");
-      
-      setMessage({ text: res.data.message, type: "success" });
 
+      setMessage({ text: res.data.message, type: "success" });
     } catch (err) {
       setMessage({
         text: err.response?.data?.message || "Registration failed",
@@ -446,7 +443,10 @@ console.log(payload,"payloaddd");
           <div className="col-md-12 p-0">
             <div className="d-flex flex-wrap w-100 vh-100 overflow-hidden account-bg-02">
               <div className="d-flex align-items-center justify-content-center flex-wrap vh-100 overflow-auto p-4 w-100 bg-backdrop">
-                <form className="flex-fill" onSubmit={(e) => e.preventDefault()}>
+                <form
+                  className="flex-fill"
+                  onSubmit={(e) => e.preventDefault()}
+                >
                   <div className="mx-auto mw-450">
                     <div className="text-center mb-4">
                       <ImageWithBasePath
@@ -459,7 +459,11 @@ console.log(payload,"payloaddd");
                     <div className="mb-3 d-flex justify-content-center gap-3">
                       <button
                         type="button"
-                        className={`btn ${activeTab === "email" ? "btn-primary" : "btn-outline-primary"}`}
+                        className={`btn ${
+                          activeTab === "email"
+                            ? "btn-primary"
+                            : "btn-outline-primary"
+                        }`}
                         onClick={() => {
                           setActiveTab("email");
                           setMessage({ text: "", type: "" });
@@ -469,7 +473,11 @@ console.log(payload,"payloaddd");
                       </button>
                       <button
                         type="button"
-                        className={`btn ${activeTab === "phone" ? "btn-primary" : "btn-outline-primary"}`}
+                        className={`btn ${
+                          activeTab === "phone"
+                            ? "btn-primary"
+                            : "btn-outline-primary"
+                        }`}
                         onClick={() => {
                           setActiveTab("phone");
                           setMessage({ text: "", type: "" });
@@ -508,14 +516,18 @@ console.log(payload,"payloaddd");
                       <label className="col-form-label">Password</label>
                       <div className="pass-group">
                         <input
-                          type={passwordVisibility.password ? "text" : "password"}
+                          type={
+                            passwordVisibility.password ? "text" : "password"
+                          }
                           className="pass-input form-control"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />
                         <span
                           className={`ti toggle-passwords ${
-                            passwordVisibility.password ? "ti-eye" : "ti-eye-off"
+                            passwordVisibility.password
+                              ? "ti-eye"
+                              : "ti-eye-off"
                           }`}
                           onClick={() => togglePasswordVisibility("password")}
                         ></span>
@@ -576,7 +588,6 @@ console.log(payload,"payloaddd");
 };
 
 export default Register;
-
 
 // import React, { useState, useEffect } from "react";
 // import ImageWithBasePath from "../../core/common/imageWithBasePath";

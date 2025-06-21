@@ -47,6 +47,8 @@ export const saveContact = createAsyncThunk(
           "Content-Type": "multipart/form-data",
         },
       });
+      console.log("Response from saveContact:", response.data);
+      
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );

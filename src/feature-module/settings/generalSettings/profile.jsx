@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/bootstrap.css";
 import { editProfile } from "../../../core/data/redux/slices/ProfileSlice";
+import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
 
 const route = all_routes;
 
@@ -39,6 +40,7 @@ const Profile = () => {
       phoneNumbers: value,
     }));
   };
+  console.log(formData, "formDataa");
 
   useEffect(() => {
     if (userProfile) {
@@ -68,7 +70,10 @@ const Profile = () => {
     data.append("lastname", formData.lastname);
     data.append("email", formData.email);
     data.append("phonenumbers", formData.phoneNumbers);
-    data.append("profileImage", formData.profileImage);
+    // data.append("profileImage", formData.profileImage);
+    if (formData.profileImage instanceof File) {
+      data.append("profileImage", formData.profileImage);
+    }
     data.append("instagram", formData.instagram);
     data.append("twitter", formData.twitter);
     data.append("linkedin", formData.linkedin);
@@ -125,15 +130,8 @@ const Profile = () => {
                     <h4 className="fw-semibold mb-3">Personal Details</h4>
                     <form onSubmit={handleEditProfile}>
                       <div className="mb-3 d-flex justify-content-between align-items-center">
-                        <div
-                          className="profile-upload"
-                          style={{
-                            border: formData.profileImage
-                              ? ""
-                              : "2px dashed #E8E8E8",
-                          }}
-                        >
-                          <div className="profile-upload-img">
+                        <div className="profile-upload">
+                          {/* <div className="profile-upload-img">
                             {!formData.profileImage && (
                               <span>
                                 <i className="ti ti-photo" />
@@ -156,10 +154,55 @@ const Profile = () => {
                             >
                               <i className="feather-x" />
                             </button>
+                          </div> */}
+
+                          <div
+                            className="profile-upload-img position-relative"
+                            style={{
+                              border: formData.profileImage
+                                ? ""
+                                : "2px dashed #E8E8E8",
+                            }}
+                          >
+                            {formData.profileImage && (
+                              <Link
+                                style={{
+                                  width: 20,
+                                  height: 20,
+                                  top: -5,
+                                  right: -5,
+                                }}
+                                onClick={() =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    profileImage: "",
+                                  }))
+                                }
+                                id="removeImage1"
+                                className="position-absolute p-1 bg-danger text-white d-flex justify-content-center align-items-center rounded-circle"
+                              >
+                                <i className="feather-x" />
+                              </Link>
+                            )}
+                            {!formData.profileImage ? (
+                              <AvatarInitialStyles
+                                name={`${formData.firstname} ${formData.lastname}`}
+                                divStyles={{width: 80, height: 80}}
+                              />
+                            ) : (
+                              <img
+                                src={
+                                  formData.profileImage instanceof File
+                                    ? URL.createObjectURL(formData.profileImage)
+                                    : formData.profileImage
+                                }
+                                alt="Profile"
+                              />
+                            )}
                           </div>
                           <div className="profile-upload-content">
                             <label className="profile-upload-btn">
-                              <i className="ti ti-file-broken" /> Upload File
+                              <i className="ti ti-file-broken" /> Upload Photo
                               <input
                                 type="file"
                                 id="imag"
@@ -270,10 +313,6 @@ const Profile = () => {
                           <h4 className="fw-semibold mb-3">Social Profiles</h4>
                           <div className="col-md-4">
                             <div className="mb-3 row">
-                              <label className="form-label">
-                                Instagram <span className="text-danger"></span>
-                              </label>
-
                               <div className="input-group">
                                 <span
                                   className="input-group-text"
@@ -288,11 +327,11 @@ const Profile = () => {
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="Username"
+                                  placeholder="Instagram"
                                   name="instagram"
                                   value={formData.instagram}
                                   onChange={handleChange}
-                                  aria-label="Instagram URL"
+                                  aria-label="Instagram"
                                   aria-describedby="basic-addon1"
                                 />
                               </div>
@@ -300,10 +339,6 @@ const Profile = () => {
                           </div>
                           <div className="col-md-4">
                             <div className="mb-3 row">
-                              <label className="form-label">
-                                Twitter <span className="text-danger"></span>
-                              </label>
-
                               <div className="input-group">
                                 <span
                                   className="input-group-text"
@@ -318,11 +353,11 @@ const Profile = () => {
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="Twitter URL"
+                                  placeholder="Twitter"
                                   name="twitter"
                                   value={formData.twitter}
                                   onChange={handleChange}
-                                  aria-label="Username"
+                                  aria-label="Twitter"
                                   aria-describedby="basic-addon1"
                                 />
                               </div>
@@ -330,10 +365,6 @@ const Profile = () => {
                           </div>
                           <div className="col-md-4">
                             <div className="mb-3 row">
-                              <label className="form-label">
-                                Linkedin <span className="text-danger"></span>
-                              </label>
-
                               <div className="input-group">
                                 <span
                                   className="input-group-text"
@@ -348,11 +379,11 @@ const Profile = () => {
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="Linkedin URL"
+                                  placeholder="Linkedin"
                                   name="linkedin"
                                   value={formData.linkedin}
                                   onChange={handleChange}
-                                  aria-label="Username"
+                                  aria-label="Linkedin"
                                   aria-describedby="basic-addon1"
                                 />
                               </div>
@@ -360,10 +391,6 @@ const Profile = () => {
                           </div>
                           <div className="col-md-4">
                             <div className="mb-3 row">
-                              <label className="form-label">
-                                Facebook <span className="text-danger"></span>
-                              </label>
-
                               <div className="input-group">
                                 <span
                                   className="input-group-text"
@@ -378,11 +405,11 @@ const Profile = () => {
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="Facebook URL"
+                                  placeholder="Facebook"
                                   value={formData.facebook}
                                   onChange={handleChange}
                                   name="facebook"
-                                  aria-label="Username"
+                                  aria-label="Facebook"
                                   aria-describedby="basic-addon1"
                                 />
                               </div>
@@ -390,10 +417,6 @@ const Profile = () => {
                           </div>
                           <div className="col-md-4">
                             <div className="mb-3 row">
-                              <label className="form-label">
-                                Telegram <span className="text-danger"></span>
-                              </label>
-
                               <div className="input-group">
                                 <span
                                   className="input-group-text"
@@ -408,9 +431,9 @@ const Profile = () => {
                                 <input
                                   type="text"
                                   className="form-control"
-                                  placeholder="Telegram URL"
+                                  placeholder="Telegram"
                                   name="telegram"
-                                  aria-label="Username"
+                                  aria-label="Telegram"
                                   aria-describedby="basic-addon1"
                                 />
                               </div>

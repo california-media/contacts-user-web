@@ -1,7 +1,7 @@
 import React from "react";
 
 
-const AvatarInitialStyles = ({ name }) => {
+const AvatarInitialStyles = ({ name, divStyles }) => {
 console.log(name,"namee");
 
   const getInitials = (contactPerson) => {
@@ -56,6 +56,7 @@ console.log(name,"namee");
         backgroundColor: avatarStyles.bg,
         // borderColor: avatarStyles.border,
         color: avatarStyles.text,
+        ...divStyles
       }}
     >
       {initial}

@@ -1456,6 +1456,99 @@ const ContactsDetails = () => {
                         )}
                       </div>
                     </div>
+                    <div className=" px-2 mb-4 d-flex flex-wrap gap-3 justify-content-start">
+                                    {leadInfo?.phonenumbers?.length > 0 && (
+                                      <a
+                                        href={`tel:${leadInfo.phonenumbers[0]}`}
+                                        className="icon-wrapper-sm phone"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/phoneCallIcon.png"
+                                          alt="Phone"
+                                        />
+                                      </a>
+                                    )}
+                                    {leadInfo.email && (
+                                      <a
+                                        href={`mailto:${leadInfo.email}`}
+                                        className="icon-wrapper-sm mail"
+                                      >
+                                        <img src="/assets/img/icons/mailIcon.png" alt="Mail" />
+                                      </a>
+                                    )}
+                                    {leadInfo?.phonenumbers?.length > 0 && (
+                                      <Link
+                                        to={`https://wa.me/${leadInfo?.phonenumbers?.[0]}`}
+                                        target="_blank"
+                                        className="icon-wrapper-sm whatsapp no-filter"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/whatsappIcon96.png"
+                                          alt="WhatsApp"
+                                        />
+                                      </Link>
+                                    )}
+                                    {leadInfo.instagram && (
+                                      <Link
+                                        to={leadInfo.instagram}
+                                        target="_blank"
+                                        className="icon-wrapper-sm instagram no-filter"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/instagramIcon.png"
+                                          alt="Instagram"
+                                        />
+                                      </Link>
+                                    )}
+                                    {leadInfo.twitter && (
+                                      <Link
+                                        to={leadInfo.twitter}
+                                        target="_blank"
+                                        className="icon-wrapper-sm twitter no-filter"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/twitterIcon.png"
+                                          alt="Twitter"
+                                        />
+                                      </Link>
+                                    )}
+                                    {leadInfo.linkedin && (
+                                      <Link
+                                        to={leadInfo.linkedin}
+                                        target="_blank"
+                                        className="icon-wrapper-sm linkedin no-filter"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/linkedinIcon.png"
+                                          alt="LinkedIn"
+                                        />
+                                      </Link>
+                                    )}
+                                    {leadInfo.facebook && (
+                                      <Link
+                                        to={leadInfo.facebook}
+                                        target="_blank"
+                                        className="icon-wrapper-sm facebook no-filter"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/facebookIcon.png"
+                                          alt="Facebook"
+                                        />
+                                      </Link>
+                                    )}
+                                    {leadInfo.telegram && (
+                                      <Link
+                                        to={leadInfo.telegram}
+                                        target="_blank"
+                                        className="icon-wrapper-sm telegram no-filter"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/telegramIcon.png"
+                                          alt="Telegram"
+                                        />
+                                      </Link>
+                                    )}
+                                  </div>
                     <ul>
                       <div className="row mb-3 d-flex flex-column align-items-center">
                         <div className="d-flex align-items-center mb-2">

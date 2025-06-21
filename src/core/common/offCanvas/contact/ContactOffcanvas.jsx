@@ -19,7 +19,6 @@ import { addTag } from "../../../data/redux/slices/TagSlice";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
 
 const LeadOffcanvas = ({ selectedContact }) => {
-  
   const [show, setShow] = useState(false);
   const [newContents, setNewContents] = useState([0]);
   const [phone, setPhone] = useState("");
@@ -29,6 +28,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [previousTags, setPreviousTags] = useState([]);
   const [removedTags, setRemovedTags] = useState([]);
+    const [showSocialLinks, setShowSocialLinks] = useState(false);
   // const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [newTags, setNewTags] = useState([]);
@@ -43,6 +43,11 @@ const LeadOffcanvas = ({ selectedContact }) => {
     email: [],
     phone: "",
     tags: [],
+    instagram:"",
+    twitter:"",
+    linkedin:"",
+    facebook:"",
+    telegram:"",
   });
   const { tags, loading, error } = useSelector((state) => state.tags);
 
@@ -64,7 +69,6 @@ const LeadOffcanvas = ({ selectedContact }) => {
   };
 
   const handleContact = async () => {
-    
     setIsLoading(true);
 
     const formDataObj = new FormData();
@@ -78,10 +82,17 @@ const LeadOffcanvas = ({ selectedContact }) => {
     formDataObj.append("emailaddresses", formData.email);
     formDataObj.append(
       "tags",
-      JSON.stringify(selectedTags.map((tag) => ({tag:tag.value,emoji: tag.emoji})))
+      JSON.stringify(
+        selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
+      )
     );
     formDataObj.append("phonenumbers", formData.phone);
-Object.entries(formDataObj,"formdatabeforegoing")
+    formDataObj.append("instagram", formData.instagram);
+    formDataObj.append("twitter", formData.twitter);
+    formDataObj.append("linkedin", formData.linkedin);
+    formDataObj.append("facebook", formData.facebook);
+    formDataObj.append("telegram", formData.telegram);
+    // Object.entries(formDataObj, "formdatabeforegoing");
     try {
       if (newTags.length > 0) {
         await dispatch(addTag(newTags)).unwrap();
@@ -110,31 +121,30 @@ Object.entries(formDataObj,"formdatabeforegoing")
   //   setAllTags(tagMap);
   // }, [tags]);
   useEffect(() => {
-  const filteredTags = tags.filter(
-    (tag) => tag.tag_id && tag.tag && tag.emoji
-  );
-  const tagMap = filteredTags.map((tag) => ({
-    value: tag.tag,
-    label: `${tag.emoji} ${tag.tag}`,
-    emoji:tag.emoji
-  }));
-  setAllTags(tagMap);
-}, [tags]);
+    const filteredTags = tags.filter(
+      (tag) => tag.tag_id && tag.tag && tag.emoji
+    );
+    const tagMap = filteredTags.map((tag) => ({
+      value: tag.tag,
+      label: `${tag.emoji} ${tag.tag}`,
+      emoji: tag.emoji,
+    }));
+    setAllTags(tagMap);
+  }, [tags]);
 
   const handleCreateTag = async (inputValue) => {
-   setNewTags([...newTags, { tag: inputValue, emoji: "🏷️" }]);
+    setNewTags([...newTags, { tag: inputValue, emoji: "🏷️" }]);
     setSelectedTags([
       ...selectedTags,
-      { value: inputValue, label: `🏷️ ${inputValue}`,emoji:"🏷️" },
+      { value: inputValue, label: `🏷️ ${inputValue}`, emoji: "🏷️" },
     ]);
   };
 
   useEffect(() => {
-    
     if (selectedContact?.tags) {
       const formattedTags = selectedContact.tags.map((tag) => ({
         value: tag.tag,
-       label: `${tag.emoji} ${tag.tag}`,
+        label: `${tag.emoji} ${tag.tag}`,
       }));
       setSelectedTags(formattedTags);
       setPreviousTags(formattedTags);
@@ -164,6 +174,11 @@ Object.entries(formDataObj,"formdatabeforegoing")
         company: selectedContact.company || "",
         phone: selectedContact.phonenumbers?.[0] || "",
         tags: selectedContact.tags || [],
+        instagram: selectedContact.instagram || "",
+        twitter: selectedContact.twitter || "",
+        linkedin: selectedContact.linkedin || "",
+        facebook: selectedContact.facebook || "",
+        telegram: selectedContact.telegram || "",
       });
     }
   }, [selectedContact, dispatch]);
@@ -376,7 +391,141 @@ Object.entries(formDataObj,"formdatabeforegoing")
                 />
               </div>
             </div>
+
+
+
+
+
+
+
+                {showSocialLinks && (
+                  <>
+                    <div className="mb-3">
+                      <div className="input-group">
+                        <span className="input-group-text" id="basic-addon1">
+                          <img
+                            src="/assets/img/icons/instagramIcon.png"
+                            alt="Instagram"
+                            style={{ width: 20, height: 20 }}
+                          />
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Instagram"
+                          name="instagram"
+                          value={formData.instagram}
+                          onChange={handleChange}
+                          aria-label="Instagram"
+                          aria-describedby="basic-addon1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <div className="input-group">
+                        <span className="input-group-text" id="basic-addon1">
+                          <img
+                            src="/assets/img/icons/twitterIcon.png"
+                            alt="Instagram"
+                            style={{ width: 20, height: 20 }}
+                          />
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Twitter"
+                          name="twitter"
+                          value={formData.twitter}
+                          onChange={handleChange}
+                          aria-label="Twitter"
+                          aria-describedby="basic-addon1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-3">
+                      <div className="input-group">
+                        <span className="input-group-text" id="basic-addon1">
+                          <img
+                            src="/assets/img/icons/linkedinIcon.png"
+                            alt="Instagram"
+                            style={{ width: 20, height: 20 }}
+                          />
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Linkedin"
+                          name="linkedin"
+                          value={formData.linkedin}
+                          onChange={handleChange}
+                          aria-label="Linkedin"
+                          aria-describedby="basic-addon1"
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="input-group">
+                        <span className="input-group-text" id="basic-addon1">
+                          <img
+                            src="/assets/img/icons/facebookIcon.png"
+                            alt="Instagram"
+                            style={{ width: 20, height: 20 }}
+                          />
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Facebook"
+                          name="facebook"
+                          value={formData.facebook}
+                          onChange={handleChange}
+                          aria-label="Facebook"
+                          aria-describedby="basic-addon1"
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="input-group">
+                        <span className="input-group-text" id="basic-addon1">
+                          <img
+                            src="/assets/img/icons/telegramIcon.png"
+                            alt="Instagram"
+                            style={{ width: 20, height: 20 }}
+                          />
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Telegram"
+                          name="telegram"
+                          value={formData.telegram}
+                          onChange={handleChange}
+                          aria-label="Telegram"
+                          aria-describedby="basic-addon1"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+
+
           </div>
+
+
+<div className="text-center my-3">
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary rounded-pill px-4 d-inline-flex align-items-center gap-2 show-more-btn"
+                    onClick={() => setShowSocialLinks(!showSocialLinks)}
+                  >
+                    {showSocialLinks ? "Hide Social Links" : "Show More"}
+                  </button>
+                </div>
+
+
           <div className="d-flex align-items-center justify-content-end">
             <button
               type="button"
