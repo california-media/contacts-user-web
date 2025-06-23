@@ -28,8 +28,8 @@ const UpgradePlan = () => {
                             Security
                           </Link>
                           <Link to={route.emailSetup} className="fw-medium">
-                                                    Connected Mails
-                                                  </Link>
+                            Connected Mails
+                          </Link>
                           <Link to={route.myScans} className="fw-medium">
                             My Scans
                           </Link>
@@ -48,17 +48,21 @@ const UpgradePlan = () => {
                     <div className="card-body pb-0">
                       <h4 className="fw-semibold mb-3">Upgrade Plan</h4>
                       <div className="row justify-content-center">
-                        <div className="col-lg-4 col-md-6">
-                          <div className="card border">
+                        <div className="col-lg-3 col-md-6 mb-4">
+                          <div className="card custom-card border">
                             <div className="card-body">
                               <div className="text-center border-bottom pb-3 mb-3">
-                                <span>Basic</span>
+                                <span>Starter</span>
                                 <h2 className="d-flex align-items-end justify-content-center mt-1">
-                                 FREE
+                                  FREE
                                   {/* <span className="fs-14 fw-medium ms-2">
                                     / month
                                   </span> */}
                                 </h2>
+                                <span>
+                                  Perfect for Individual users trying out
+                                  digital Networking
+                                </span>
                               </div>
                               <div className="d-block">
                                 <div>
@@ -66,33 +70,51 @@ const UpgradePlan = () => {
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    10 Contacts
+                                    1 Digital Card
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    10 Leads
+                                    Profile Short URL
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    20 Companies
+                                    Unlimited QR Scans
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    50 Compaigns
+                                    Reminders + Notes + Calendar Integration
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    100 Projects
+                                    Scan up to 10 business cards/month
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    QR Sharing + Link Sharing
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Email & Whatsapp
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Limited Template Access
+                                  </p>
+                                  {/* <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-danger d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-x" />
                                     </span>
@@ -109,28 +131,31 @@ const UpgradePlan = () => {
                                       <i className="ti ti-x" />
                                     </span>
                                     Pipelines
-                                  </p>
-                                </div>
-                                <div className="text-center mt-3">
-                                  <Link to="#" className="btn btn-primary">
-                                    Choose
-                                  </Link>
+                                  </p> */}
                                 </div>
                               </div>
                             </div>
+                            <div className="text-center mb-3">
+                              <Link to="#" className="btn btn-primary">
+                                Choose
+                              </Link>
+                            </div>
                           </div>
                         </div>
-                        <div className="col-lg-4 col-md-6">
-                          <div className="card border">
+                        <div className="col-lg-3 col-md-6 mb-4">
+                          <div className="card custom-card border">
                             <div className="card-body">
                               <div className="text-center border-bottom pb-3 mb-3">
-                                <span>Enterprise</span>
+                                <span>Pro</span>
                                 <h2 className="d-flex align-items-end justify-content-center mt-1">
-                                  AED 200
+                                  AED 9.99
                                   <span className="fs-14 fw-medium ms-2">
                                     / month
                                   </span>
                                 </h2>
+                                <span>
+                                  Best for Professional who Network daily.
+                                </span>
                               </div>
                               <div className="d-block">
                                 <div>
@@ -138,74 +163,14 @@ const UpgradePlan = () => {
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    20 Contacts
+                                    Everything in starter
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    20 Leads
+                                    5 Digital Cards
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
-                                      <i className="ti ti-check" />
-                                    </span>
-                                    50 Companies
-                                  </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
-                                      <i className="ti ti-check" />
-                                    </span>
-                                    Unlimited Compaigns
-                                  </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
-                                      <i className="ti ti-check" />
-                                    </span>
-                                    Unlimited Projects
-                                  </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-danger d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
-                                      <i className="ti ti-x" />
-                                    </span>
-                                    Deals
-                                  </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-danger d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
-                                      <i className="ti ti-x" />
-                                    </span>
-                                    Tasks
-                                  </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark">
-                                    <span className="bg-danger d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
-                                      <i className="ti ti-x" />
-                                    </span>
-                                    Pipelines
-                                  </p>
-                                </div>
-                                <div className="text-center mt-3">
-                                  <Link to="#" className="btn btn-primary">
-                                    Choose
-                                  </Link>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        {/* <div className="col-lg-4 col-md-6">
-                          <div className="card border">
-                            <div className="card-body">
-                              <div className="text-center border-bottom pb-3 mb-3">
-                                <span>Enterprise</span>
-                                <h2 className="d-flex align-items-end justify-content-center mt-1">
-                                  $400
-                                  <span className="fs-14 fw-medium ms-2">
-                                    / month
-                                  </span>
-                                </h2>
-                              </div>
-                              <div className="d-block">
-                                <div>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
@@ -216,54 +181,169 @@ const UpgradePlan = () => {
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    Unlimited Leads
+                                    AI Template Suggestions (Email/WhatsApp)
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    Unlimited Companies
+                                    Unlimited Scan business cards/month
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    Unlimited Compaigns
+                                    Contact Requests & Tagging
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    Unlimited Projects
+                                    Reminders + Notes + Calendar Integration
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    Deals
+                                    Export CSV/VCF
                                   </p>
                                   <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
                                     <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
-                                    Tasks
+                                    Priority support
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
-                                      <i className="ti ti-check" />
-                                    </span>
-                                    Pipelines
-                                  </p>
-                                </div>
-                                <div className="text-center mt-3">
-                                  <Link to="#" className="btn btn-primary">
-                                    Choose
-                                  </Link>
                                 </div>
                               </div>
                             </div>
+                            <div className="text-center mb-3">
+                              <Link to="#" className="btn btn-primary">
+                                Choose
+                              </Link>
+                            </div>
                           </div>
-                        </div> */}
+                        </div>
+                        <div className="col-lg-3 col-md-6 mb-4">
+                          <div className="card custom-card border">
+                            <div className="card-body">
+                              <div className="text-center border-bottom pb-3 mb-3">
+                                <span>Business</span>
+                                <h2 className="d-flex align-items-end justify-content-center mt-1">
+                                  AED 49.99
+                                  <span className="fs-14 fw-medium ms-2">
+                                    / month
+                                  </span>
+                                </h2>
+                                <span>For Large Teams & Corporates</span>
+                              </div>
+                              <div className="d-block">
+                                <div>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Everything in Pro
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Advance Integrations ( Zapier, CRM, APP)
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Data Compliance (GDPR / ISO)
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    SLA / UPTIME GUARANTEE
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Account Manager
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-center mb-3">
+                              <Link to="#" className="btn btn-primary">
+                                Choose
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-lg-3 col-md-6 mb-4">
+                          <div className="card custom-card border">
+                            <div className="card-body">
+                              <div className="text-center border-bottom pb-3 mb-3">
+                                <span>Enterprise</span>
+                                <h2 className="d-flex align-items-end justify-content-center mt-1">
+                                  Custom Pricing
+                                </h2>
+                                <span>
+                                  For Large Teams, Event Organizers & Corporate
+                                </span>
+                              </div>
+                              <div className="d-block">
+                                <div>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    White-Label Solution
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Advance Integrations ( Zapier, CRM, APP)
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Dedicated Account
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    NFC Card Integration & Bulk Orders
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Data Compliance (GDPR / ISO)
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    SLA / UPTIME GUARANTEE
+                                  </p>
+                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
+                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                      <i className="ti ti-check" />
+                                    </span>
+                                    Dedicated Account Manager
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-center mb-3">
+                              <Link to="#" className="btn btn-primary">
+                                Choose
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -147,7 +147,7 @@ const Dashboard = () => {
                   />
                   <div style={{ background: "#000", position: "relative" }}>
                     <div style={{ display: "flex", justifyContent: "center" }}>
-                      {userProfile.profileImageURL ? (
+                      {!userProfile.profileImageURL ? (
                         <div className="profileCardImg">
                           <AvatarInitialStyles
                             name={`${userProfile.firstname} ${userProfile.lastname}`}
@@ -212,7 +212,7 @@ const Dashboard = () => {
                     >
                       <FaRegEye />
                       <p className="profileCardText">
-                        {userProfile.whoScannedMeCount}
+                        {userProfile.shareProfileCount}
                       </p>
                     </div>
                     {/* <div className="profileCardShareButton"> */}
@@ -340,8 +340,8 @@ const Dashboard = () => {
                           </div>
                           <div
                             style={{
-                              width: 50,
-                              height: 50,
+                              width: 70,
+                              height: 70,
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
@@ -528,8 +528,8 @@ const Dashboard = () => {
                               </div>
                               <div
                                 style={{
-                                  width: 50,
-                                  height: 50,
+                                  width: 70,
+                                  height: 70,
                                   display: "flex",
                                   justifyContent: "center",
                                   alignItems: "center",
@@ -630,8 +630,8 @@ const Dashboard = () => {
                               </div>
                               <div
                                 style={{
-                                  width: 50,
-                                  height: 50,
+                                  width: 70,
+                                  height: 70,
                                   display: "flex",
                                   justifyContent: "center",
                                   alignItems: "center",

@@ -81,7 +81,11 @@ export const deleteTemplate = createAsyncThunk(
 const profileSlice = createSlice({
   name: "profile",
   initialState,
-  reducers: {},
+  reducers: {
+    resetProfile: (state) => {
+      Object.assign(state, initialState);
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProfile.pending, (state) => {
@@ -165,3 +169,4 @@ const profileSlice = createSlice({
   },
 });
 export default profileSlice.reducer;
+export const { resetProfile } = profileSlice.actions;

@@ -13,11 +13,13 @@ import { useAppSelector } from "../../data/redux/hooks";
 import { setPhone } from "../../data/redux/slices/appCommonSlice";
 import { resetSelectedContact } from "../../data/redux/slices/SelectedContactSlice";
 import { resetSelectedTemplate } from "../../data/redux/slices/SelectedTemplateSlice";
+import { resetProfile } from "../../data/redux/slices/ProfileSlice";
 
 const Header = () => {
   const route = all_routes;
   const location = useLocation();
   const dispatch = useDispatch();
+
   const mobileSidebar = useSelector((state) => state.common.mobileSidebar);
   const miniSidebar = useSelector((state) => state.common.miniSidebar);
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -53,6 +55,7 @@ const Header = () => {
 const handleLogout =()=>{
   localStorage.removeItem("userId");
   localStorage.removeItem("token");
+  dispatch(resetProfile());
   dispatch(resetSelectedContact())
   dispatch(resetSelectedTemplate())
 

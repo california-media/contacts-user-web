@@ -915,3 +915,54 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
   transform: scale(1.1);
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
+
+// Card style for payment plans
+
+.card.custom-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card.custom-card .card-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+
+//Hide scrollbar
+.no-scrollbar {
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
+
+//quill email rich text editor
+
+.my-quill {
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.my-quill .ql-toolbar {
+  flex: 0 0 auto;
+}
+
+.my-quill .ql-container {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.my-quill .ql-editor {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}

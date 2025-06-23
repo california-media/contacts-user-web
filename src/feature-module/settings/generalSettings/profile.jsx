@@ -71,9 +71,14 @@ const Profile = () => {
     data.append("email", formData.email);
     data.append("phonenumbers", formData.phoneNumbers);
     // data.append("profileImage", formData.profileImage);
-    if (formData.profileImage instanceof File) {
-      data.append("profileImage", formData.profileImage);
-    }
+    if (formData.profileImage === null) {
+  data.append("profileImageURL", null);
+} else if (formData.profileImage instanceof File) {
+  data.append("profileImageURL", formData.profileImage);
+}
+    // if (formData.profileImage instanceof File) {
+    //   data.append("profileImage", formData.profileImage);
+    // }
     data.append("instagram", formData.instagram);
     data.append("twitter", formData.twitter);
     data.append("linkedin", formData.linkedin);
@@ -163,7 +168,8 @@ const Profile = () => {
                                 ? ""
                                 : "2px dashed #E8E8E8",
                             }}
-                          >
+                          >{console.log(formData.profileImage,"formData.profileImage")
+                          }
                             {formData.profileImage && (
                               <Link
                                 style={{
@@ -175,7 +181,7 @@ const Profile = () => {
                                 onClick={() =>
                                   setFormData((prev) => ({
                                     ...prev,
-                                    profileImage: "",
+                                    profileImage: null,
                                   }))
                                 }
                                 id="removeImage1"

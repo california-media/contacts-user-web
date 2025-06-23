@@ -7,6 +7,7 @@ import { FaTasks } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { myScans } from "../../../core/data/redux/slices/MyScansSlice";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 const route = all_routes;
 const MyScans = () => {
@@ -99,12 +100,21 @@ const MyScans = () => {
                             </div>
                             <div className="row mt-5 px-5">
                               {allScans
-                                .filter((scan) => scan.iScanned === false)
-                                .map((scan) => (
-                                  <div className="col-md-2 mb-3" key={scan.id}>
-                                    <div className="card">
-                                      <div className="card-body">
-                                        {/* {scan.profileImageURL ? (
+                                .filter((scan) => scan.iScanned === true)
+                                .map((scan) => {
+                                  const phone = `+${scan.phonenumbers[0]}`;
+                                  const phoneNumber =
+                                    parsePhoneNumberFromString(phone);
+                                  const country =
+                                    phoneNumber?.country?.toLowerCase();
+                                  return (
+                                    <div
+                                      className="col-md-3 mb-3"
+                                      key={scan.id}
+                                    >
+                                      <div className="card">
+                                        <div className="card-body">
+                                          {/* {scan.profileImageURL ? (
                                           <AvatarInitialStyles
                                             name={`${scan.firstname} ${scan.lastname}`}
                                           />
@@ -120,28 +130,52 @@ const MyScans = () => {
                                             }}
                                           />
                                         )} */}
-                                        <h5 className="fw-bold">
-                                         <div className="d-flex align-items-center">   <span className="text-capitalize">{scan.firstname} {scan.lastname}</span></div>
-                                        </h5>
-                                        <h6 className="text-lowercase">
-                                          <div className="d-flex align-items-center">
-                                           <i class="fa-regular fa-envelope me-2"></i>
-                                           <a href={`mailto:${scan.email}`}> {scan.email}</a>
-                                          </div>
-                                        </h6>
-                                        <h6 className="text-lowercase">
+                                          <h5 className="fw-bold">
+                                            <div className="d-flex align-items-center">
+                                              {" "}
+                                              <span className="text-capitalize">
+                                                {scan.firstname} {scan.lastname}
+                                              </span>
+                                            </div>
+                                          </h5>
+                                          <h6 className="text-lowercase">
+                                            <div className="d-flex align-items-center">
+                                              <i class="fa-regular fa-envelope me-2"></i>
+                                              <a href={`mailto:${scan.email}`}>
+                                                {" "}
+                                                {scan.email}
+                                              </a>
+                                            </div>
+                                          </h6>
+                                          {/* <h6 className="text-lowercase">
                                           <div className="d-flex align-items-center">
                                           <img src="/assets/img/icons/uaeFlag.png" width={15} className="me-1"/>
                                            <a href={`tel:+${scan.phonenumbers[0]}`}>+ {scan.phonenumbers[0]}</a>
                                           </div>
-                                        </h6>
-                               
+                                        </h6> */}
+
+                                          <h6 className="text-lowercase">
+                                            <div className="d-flex align-items-center">
+                                              {country && (
+                                                <img
+                                                  src={`https://flagcdn.com/24x18/${country}.png`}
+                                                  width={15}
+                                                  className="me-1"
+                                                  alt={country}
+                                                />
+                                              )}
+                                              <a
+                                                href={`tel:+${scan.phonenumbers[0]}`}
+                                              >
+                                                +{scan.phonenumbers[0]}
+                                              </a>
+                                            </div>
+                                          </h6>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                ))}
-
-                             
+                                  );
+                                })}
                             </div>
                           </div>
                         </div>
@@ -152,13 +186,22 @@ const MyScans = () => {
                               <div className="d-inline-flex align-items-center"></div>
                             </div>
                             <div className="row mt-5">
-                               {allScans
-                                .filter((scan) => scan.iScanned === true)
-                                .map((scan) => (
-                                  <div className="col-md-2 mb-3" key={scan.id}>
-                                    <div className="card">
-                                      <div className="card-body">
-                                        {/* {scan.profileImageURL ? (
+                              {allScans
+                                .filter((scan) => scan.iScanned === false)
+                                .map((scan) => {
+                                  const phone = `+${scan.phonenumbers[0]}`;
+                                  const phoneNumber =
+                                    parsePhoneNumberFromString(phone);
+                                  const country =
+                                    phoneNumber?.country?.toLowerCase();
+                                  return (
+                                    <div
+                                      className="col-md-3 mb-3"
+                                      key={scan.id}
+                                    >
+                                      <div className="card">
+                                        <div className="card-body overflow-x-auto no-scrollbar">
+                                          {/* {scan.profileImageURL ? (
                                           <AvatarInitialStyles
                                             name={`${scan.firstname} ${scan.lastname}`}
                                           />
@@ -174,26 +217,44 @@ const MyScans = () => {
                                             }}
                                           />
                                         )} */}
-                                        <h5 className="fw-bold">
-                                         <div className="d-flex align-items-center"><span className="text-capitalize">{scan.firstname} {scan.lastname}</span></div>
-                                        </h5>
-                                        <h6 className="text-lowercase">
-                                          <div className="d-flex align-items-center">
-                                           <i class="fa-regular fa-envelope me-2"></i>
-                                           <a href={`mailto:${scan.email}`}> {scan.email}</a>
-                                          </div>
-                                        </h6>
-                                        <h6 className="text-lowercase">
-                                          <div className="d-flex align-items-center">
-                                          <img src="/assets/img/icons/uaeFlag.png" width={15} className="me-1"/>
-                                           <a href={`tel:+${scan.phonenumbers[0]}`}>+ {scan.phonenumbers[0]}</a>
-                                          </div>
-                                        </h6>
-                               
+                                          <h5 className="fw-bold">
+                                            <div className="d-flex align-items-center">
+                                              <span className="text-capitalize">
+                                                {scan.firstname} {scan.lastname}
+                                              </span>
+                                            </div>
+                                          </h5>
+                                          <h6 className="text-lowercase">
+                                            <div className="d-flex align-items-center">
+                                              <i class="fa-regular fa-envelope me-2"></i>
+                                              <a href={`mailto:${scan.email}`}>
+                                                {" "}
+                                                {scan.email}
+                                              </a>
+                                            </div>
+                                          </h6>
+                                          <h6 className="text-lowercase">
+                                            <div className="d-flex align-items-center">
+                                              {country && (
+                                                <img
+                                                  src={`https://flagcdn.com/24x18/${country}.png`}
+                                                  width={15}
+                                                  className="me-1"
+                                                  alt={country}
+                                                />
+                                              )}
+                                              <a
+                                                href={`tel:+${scan.phonenumbers[0]}`}
+                                              >
+                                                +{scan.phonenumbers[0]}
+                                              </a>
+                                            </div>
+                                          </h6>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               {/* {allScans
                                 .filter((scan) => scan.iScanned === true)
                                 .map((scan) => (

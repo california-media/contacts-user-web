@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 const UserVerification = () => {
   const [searchParams] = useSearchParams();
   const verificationToken = searchParams.get("verificationToken");
   const [message, setMessage] = useState("Verifying...");
+
+const navigate = useNavigate()
+
   useEffect(() => {
     const verifyUser = async () => {
       try {
@@ -16,6 +19,7 @@ const UserVerification = () => {
           );
           setMessage(response.data.message || "Verification successful!");
           console.log("Signup successful:", response.data);
+          navigate("/registration-form", { replace: true });
         }
       } catch (error) {
         console.error("Signup failed:", error.response?.data || error.message);

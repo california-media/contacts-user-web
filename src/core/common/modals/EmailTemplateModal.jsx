@@ -1,10 +1,12 @@
 import { gapi } from "gapi-script";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import { showToast } from "../../data/redux/slices/ToastSlice";
 import DefaultEditor from "react-simple-wysiwyg";
 import { useDispatch, useSelector } from "react-redux";
 import { GoogleAuthContext } from "../context/GoogleAuthContext";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const EmailTemplateModal = () => {
   const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
@@ -13,7 +15,8 @@ const EmailTemplateModal = () => {
   const userProfile = useSelector((state) => state.profile);
   const selectedContact = useSelector((state) => state.selectedContact);
   const dispatch = useDispatch();
-  const {isGoogleSignedIn} = useContext(GoogleAuthContext)
+  const { isGoogleSignedIn } = useContext(GoogleAuthContext);
+  const quillRef = useRef(null);
 
   useEffect(() => {
     const emailTitles =
@@ -27,8 +30,22 @@ const EmailTemplateModal = () => {
       );
     setEmailTemplateTitles(emailTitles);
   }, [userProfile]);
-
+  const insertTag = (tag) => {
+    const editor = quillRef.current?.getEditor(); // get Quill instance
+    if (editor) {
+      const range = editor.getSelection(); // current cursor location
+      if (range) {
+        editor.insertText(range.index, tag);
+        editor.setSelection(range.index + tag.length); // move cursor
+      }
+    }
+  };
   const sendEmail = async () => {
+      const finalEmailBody = editEmailTemplateBody
+    .replace(/{{firstName}}/g, selectedContact.firstname || "")
+    .replace(/{{lastName}}/g, selectedContact.lastname || "")
+    .replace(/{{email}}/g, selectedContact.emailaddresses?.[0] || "")
+    .replace(/{{designation}}/g, selectedContact.designation || "");
     if (
       !selectedContact.emailaddresses[0] ||
       !editEmailTemplateSubject ||
@@ -43,7 +60,7 @@ const EmailTemplateModal = () => {
       `Subject: ${editEmailTemplateSubject}`,
       "Content-Type: text/html; charset=utf-8",
       "",
-      `<p>${editEmailTemplateBody}</p>`,
+      `<p>${finalEmailBody}</p>`,
     ];
 
     const email = headers.join("\r\n");
@@ -69,11 +86,42 @@ const EmailTemplateModal = () => {
       // setMessage("");
     } catch (error) {
       dispatch(
-        showToast({ message: !isGoogleSignedIn?"Please Login to send Mail":"Error Sending Mail", variant: "danger" })
+        showToast({
+          message: !isGoogleSignedIn
+            ? "Please Login to send Mail"
+            : "Error Sending Mail",
+          variant: "danger",
+        })
       );
       console.error("Error sending email:", error?.result?.error?.message);
     }
   };
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
+      ["blockquote", "code-block"],
+      ["link", "image"],
+      ["clean"],
+    ],
+  };
+
+  const formats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "bullet",
+    "align",
+    "blockquote",
+    "code-block",
+    "link",
+    "image",
+  ];
   return (
     <div
       className="modal custom-modal fade modal-padding"
@@ -100,6 +148,8 @@ const EmailTemplateModal = () => {
                 classNamePrefix="react-select"
                 options={emailTemplateTitles}
                 onChange={(selectedOption) => {
+                  console.log("Selected option:", selectedOption);
+                  
                   setEditEmailTemplateBody(
                     userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
                       (template) =>
@@ -129,16 +179,34 @@ const EmailTemplateModal = () => {
                 />
               </div>
             </div>
-
+            <select
+              className="form-select"
+              aria-label="Default select example"
+              onChange={(e) => {
+                if (e.target.value) insertTag(e.target.value);
+                e.target.selectedIndex = 0; // reset dropdown
+              }}
+            >
+              <option value="">Insert Tag</option>
+              <option value="{{firstName}}">First Name</option>
+              <option value="{{lastName}}">Last Name</option>
+              <option value="{{designation}}">Designation</option>
+              <option value="{{email}}">Email</option>
+            </select>
             <div className="mb-3">
-              <label className="col-form-label col-md-2">Body</label>
+              <label className="col-form-label col-md-2 ms-3">Body</label>
               <div className="col-md-12">
-                <DefaultEditor
-                  className="form-control"
+                <ReactQuill
+                  ref={quillRef}
+                  theme="snow"
                   value={editEmailTemplateBody}
-                  onChange={(e) => setEditEmailTemplateBody(e.target.value)}
+                  onChange={setEditEmailTemplateBody}
                   name="emailTemplateMessage"
+                  className="form-control my-quill"
                   placeholder="Enter text here"
+                  modules={modules}
+                  formats={formats}
+                  style={{ height: "300px" }}
                 />
               </div>
             </div>
