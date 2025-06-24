@@ -18,7 +18,8 @@ const navigate = useNavigate()
             { verifyToken: verificationToken }
           );
           setMessage(response.data.message || "Verification successful!");
-          console.log("Signup successful:", response.data);
+          console.log("Signup successful:", response.data.data.token);
+          localStorage.setItem("token", response.data.data.token);
           navigate("/registration-form", { replace: true });
         }
       } catch (error) {

@@ -141,11 +141,11 @@ const Dashboard = () => {
 
                 <div className="dashboardProfileContainer">
                   <ImageWithBasePath
-                    src="assets/img/profileBanner.jpeg"
+                    src="assets/img/Banner1.png"
                     alt="Profile Banner"
                     className="profileCoverImg"
                   />
-                  <div style={{ background: "#000", position: "relative" }}>
+                  <div style={{ background: "#fff", position: "relative",  }}>
                     <div style={{ display: "flex", justifyContent: "center" }}>
                       {!userProfile.profileImageURL ? (
                         <div className="profileCardImg">
@@ -165,19 +165,25 @@ const Dashboard = () => {
                     <div
                       style={{ padding: 20, color: "#fff", paddingBottom: 120 }}
                     >
-                      <p className="text-center fs-4 text-capitalize">
+                      <p className="text-center text-dark fs-4 text-capitalize mb-0">
                         {userProfile.firstname} {userProfile.lastname}{" "}
                       </p>
+                      {console.log(userProfile.phonenumbers, "userProfilenumber")}
+                      <p className="text-center text-dark fs-6">
+                        <i>{userProfile.designation} </i>
+                      </p>
+                      {userProfile.phonenumbers.length > 0 ? (
+                        <div className="profileCardTextContainer">
+                          <FaPhoneAlt color="#000"/>
+                          <p className="profileCardText">
+                            {userProfile.phonenumbers[0]}
+                          </p>
+                        </div>
+                      ) : (
+                        ""
+                      )}
                       <div className="profileCardTextContainer">
-                        <FaPhoneAlt />
-                        <p className="profileCardText">
-                          {userProfile.phonenumbers.length > 0
-                            ? userProfile.phonenumbers[0]
-                            : "No phone Number"}
-                        </p>
-                      </div>
-                      <div className="profileCardTextContainer">
-                        <IoMdMail />
+                        <IoMdMail color="#000"/>
                         <p className="profileCardText">{userProfile.email}</p>
                       </div>
 
@@ -195,11 +201,14 @@ const Dashboard = () => {
                             bgColor="#ffffff"
                           /> */}
                           <img
-                          src={userProfile.qrCode}
-                          alt="Profile Banner"
-                          className="profileCardQrCode"
-                          style={{ width: 150, height: 150, borderRadius: 10 }}
-
+                            src={userProfile.qrCode}
+                            alt="Profile Banner"
+                            className="profileCardQrCode"
+                            style={{
+                              width: 150,
+                              height: 150,
+                              borderRadius: 10,
+                            }}
                           />
                         </div>
                       </div>
