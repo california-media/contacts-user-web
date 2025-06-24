@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Wizard, useWizard } from "react-use-wizard";
 import { motion, AnimatePresence } from "framer-motion";
 import "./postRegistrationForm.css";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import api from "../../core/axios/axiosInstance";
 import PhoneInput from "react-phone-input-2";
 
@@ -21,7 +21,7 @@ const StepWrapper = ({ children }) => (
   </AnimatePresence>
 );
 
-const Step1 = ({ formData, setFormData }) => {
+const Step1 = ({ formData, setFormData,passedData }) => {
   const { nextStep } = useWizard();
   const handleOnPhoneChange = (value) => {
     setFormData((prevFormData) => ({
@@ -59,22 +59,24 @@ const Step1 = ({ formData, setFormData }) => {
         </div>
         <input
           className="prf-input"
+          type="text"
+          placeholder="Company"
+          name="companyName"
+          value={formData.companyName}
+          onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+          required
+        />
+        {console.log("Passed Data:", passedData)}
+        
+       {passedData?.registeredWith =="email"? <input
+          className="prf-input"
           type="email"
           placeholder="Email"
           name="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           required
-        />
-        {/* <input
-          className="prf-input"
-          type="tel"
-          name="phonenumber"
-          value={formData.phonenumber}
-
-          placeholder="Phone Number"
-          required
-        /> */}
+        />:
         <div className="mb-4">
           <PhoneInput
             country={"ae"} // Default country
@@ -87,7 +89,7 @@ const Step1 = ({ formData, setFormData }) => {
               autoFocus: true,
             }}
           />
-        </div>
+        </div>}
         <select
           className="prf-input"
           value={formData.gender}
@@ -179,15 +181,12 @@ const Step2 = ({ formData, setFormData }) => {
   );
 };
 
-const Step3 = ({ formData, setFormData }) => {
+const Step3 = ({ formData, setFormData,navigate }) => {
   const { nextStep, previousStep } = useWizard();
 
   return (
     <StepWrapper key="step3">
       <>
-        <div className="text-end cursor-pointer" onClick={nextStep}>
-          Skip
-        </div>
         <h3>Select a category that best describes you</h3>
         <div className="prf-grid">
           {[
@@ -252,7 +251,7 @@ const Step3 = ({ formData, setFormData }) => {
             Back
           </button>
           <div>
-            <button className="prf-next me-2" onClick={()=>handleSubmit(formData)}>
+            <button className="prf-next me-2" onClick={()=>handleSubmit({formData, navigate})}>
               Finish
             </button>
           </div>
@@ -262,35 +261,38 @@ const Step3 = ({ formData, setFormData }) => {
   );
 };
 
-const Success = () => {
-  const navigate = useNavigate();
+// const Success = () => {
+  
+//   const navigate = useNavigate();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate("/dashboard");
-    }, 3000);
+//   useEffect(() => {
+//     const timer = setTimeout(() => {
+//       navigate("/dashboard");
+//     }, 3000);
 
-    return () => clearTimeout(timer);
-  }, [navigate]);
+//     return () => clearTimeout(timer);
+//   }, [navigate]);
 
-  return (
-    <StepWrapper key="success">
-      <>
-        <h2>🎉 You're All Set!</h2>
-        <p>
-          Thanks for completing the onboarding. You will be redirected to the
-          dashboard.
-        </p>
-      </>
-    </StepWrapper>
-  );
-};
+//   return (
+//     <StepWrapper key="success">
+//       <>
+//         <h2>🎉 You're All Set!</h2>
+//         <p>
+//           Thanks for completing the onboarding. You will be redirected to the
+//           dashboard.
+//         </p>
+//       </>
+//     </StepWrapper>
+//   );
+// };
 
-const handleSubmit = async (formData) => {
+const handleSubmit = async ({formData, navigate}) => {
+
   console.log("Submitting form data:", formData);
   
   try {
     const result = await api.post("/user-info/onboarding-submit", formData);
+     navigate("/dashboard");
     console.log(result.data," Submission successful");
   } catch (error) {
     console.error("Submission error:", error);
@@ -298,13 +300,18 @@ const handleSubmit = async (formData) => {
 };
 
 const PostRegistrationForm = () => {
+const navigate = useNavigate();
+const location = useLocation();
+  const passedData = location.state;
+
+  console.log("Received data from previous route:", passedData);
+
   const [formData, setFormData] = useState({
     helps: [],
     goals: "",
     categories: "",
     employeeCount: "",
     companyName: "",
-    isFirstCRM: true,
     firstname: "",
     lastname: "",
     gender: "",
@@ -316,10 +323,10 @@ const PostRegistrationForm = () => {
   return (
     <div className="prf-container">
       <Wizard>
-        <Step1 formData={formData} setFormData={setFormData} />
+        <Step1 formData={formData} passedData={passedData} setFormData={setFormData} />
         <Step2 formData={formData} setFormData={setFormData} />
-        <Step3 formData={formData} setFormData={setFormData} />
-        <Success formData={formData} />
+        <Step3 formData={formData} setFormData={setFormData} navigate={navigate}/>
+        {/* <Success formData={formData} /> */}
       </Wizard>
     </div>
   );

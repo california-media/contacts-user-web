@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { components } from "react-select";
 
 const UserVerification = () => {
   const [searchParams] = useSearchParams();
@@ -20,7 +21,9 @@ const navigate = useNavigate()
           setMessage(response.data.message || "Verification successful!");
           console.log("Signup successful:", response.data.data.token);
           localStorage.setItem("token", response.data.data.token);
-          navigate("/registration-form", { replace: true,state: response.data.data });
+          setTimeout(()=>{
+            navigate("/registration-form", { replace: true,state: response.data.data });
+          },2000)
         }
       } catch (error) {
         console.error("Signup failed:", error.response?.data || error.message);
@@ -34,7 +37,8 @@ const navigate = useNavigate()
     verifyUser();
   }, [verificationToken]);
 
-  return <div>{message}</div>;
+  return <div className="d-flex justify-content-center fs-3">{message}</div>;
 };
 
 export default UserVerification;
+         
