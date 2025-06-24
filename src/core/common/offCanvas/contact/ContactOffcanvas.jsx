@@ -87,12 +87,11 @@ const LeadOffcanvas = ({ selectedContact }) => {
       )
     );
     formDataObj.append("phonenumbers", formData.phone);
-    // formDataObj.append("instagram", formData.instagram);
-    // formDataObj.append("twitter", formData.twitter);
-    // formDataObj.append("linkedin", formData.linkedin);
-    // formDataObj.append("facebook", formData.facebook);
-    // formDataObj.append("telegram", formData.telegram);
-    // Object.entries(formDataObj, "formdatabeforegoing");
+    formDataObj.append("instagram", formData.instagram);
+    formDataObj.append("twitter", formData.twitter);
+    formDataObj.append("linkedin", formData.linkedin);
+    formDataObj.append("facebook", formData.facebook);
+    formDataObj.append("telegram", formData.telegram);
     try {
       if (newTags.length > 0) {
         await dispatch(addTag(newTags)).unwrap();

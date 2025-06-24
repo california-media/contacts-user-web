@@ -20,7 +20,7 @@ const navigate = useNavigate()
           setMessage(response.data.message || "Verification successful!");
           console.log("Signup successful:", response.data.data.token);
           localStorage.setItem("token", response.data.data.token);
-          navigate("/registration-form", { replace: true });
+          navigate("/registration-form", { replace: true,state: response.data.data });
         }
       } catch (error) {
         console.error("Signup failed:", error.response?.data || error.message);

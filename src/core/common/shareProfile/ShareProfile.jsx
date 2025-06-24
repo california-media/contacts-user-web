@@ -143,11 +143,11 @@ END:VCARD
           <div className="col-md-5">
             <div className="dashboardProfileContainer">
               <ImageWithBasePath
-                src="assets/img/profileBanner.jpeg"
+                src="assets/img/Banner1.png"
                 alt="Profile Banner"
                 className="profileCoverImg"
               />
-              <div style={{ background: "#000", position: "relative" }}>
+              <div style={{ background: "#fff", position: "relative" }}>
                 <div style={{ display: "flex", justifyContent: "center" }}>
                   {/* <img
                     src={userProfile.profileImageURL}
@@ -155,7 +155,7 @@ END:VCARD
                     className="profileCardImg"
                     style={{ border: "1px solid white" }}
                   /> */}
-                  {userProfile.profileImageURL ? (
+                  {!userProfile.profileImageURL ? (
                     <div className="profileCardImg">
                       <AvatarInitialStyles
                         name={`${userProfile.firstname} ${userProfile.lastname}`}
@@ -166,12 +166,12 @@ END:VCARD
                       src={userProfile.profileImageURL}
                       alt="Profile Banner"
                       className="profileCardImg"
-                      style={{ border: "1px solid white" }}
+                      style={{ border: "1px solid black" }}
                     />
                   )}
                 </div>
                 <div style={{ padding: 20, color: "#fff", paddingBottom: 120 }}>
-                  <p className="text-center fs-4 text-capitalize mb-0">
+                  <p className="text-center fs-4 text-capitalize mb-0 text-black">
                     {userProfile.firstname} {userProfile.lastname}{" "}
                   </p>
                   {userProfile.designation && (
@@ -181,7 +181,7 @@ END:VCARD
                   )}
                   {userProfile?.phonenumbers?.length > 0 && (
                     <div className="profileCardTextContainer">
-                      <FaPhoneAlt />
+                      <FaPhoneAlt color="#000" />
                       <p className="profileCardText">
                         {userProfile?.phonenumbers?.length > 0
                           ? userProfile?.phonenumbers[0]
@@ -191,7 +191,7 @@ END:VCARD
                   )}
                   {userProfile.email && (
                     <div className="profileCardTextContainer">
-                      <IoMdMail />
+                      <IoMdMail color="#000"/>
                       <p className="profileCardText">{userProfile.email}</p>
                     </div>
                   )}

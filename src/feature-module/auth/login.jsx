@@ -79,7 +79,7 @@ const Login = () => {
     } catch (error) {
       setMessage(error?.response?.data?.message || "Login failed");
       if (error?.response?.data?.message?.toLowerCase().includes("verify")) {
-        setMessage(error?.response?.data?.message); // just the text!
+        setMessage(error?.response?.data?.message);
       } else {
         setMessage(error?.response?.data?.message || "Login failed");
       }

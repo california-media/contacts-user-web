@@ -255,6 +255,65 @@ const MyScans = () => {
                                     </div>
                                   );
                                 })}
+
+                              <div className="col-md-3 mb-3">
+                                <div className="card">
+                                  <div className="card-body overflow-x-auto no-scrollbar">
+                                    {/* {scan.profileImageURL ? (
+                                          <AvatarInitialStyles
+                                            name={`${scan.firstname} ${scan.lastname}`}
+                                          />
+                                        ) : (
+                                          <img
+                                            src={scan.profileImageURL}
+                                            alt="Profile Image"
+                                            className="rounded-circle mb-2"
+                                            style={{
+                                              width: "80px",
+                                              height: "80px",
+                                              objectFit: "cover",
+                                            }}
+                                          />
+                                        )} */}
+                                    <h5 className="fw-bold">
+                                      <div className="d-flex align-items-center">
+                                        <span className="text-capitalize">
+                                          Waqar Ahmad
+                                        </span>
+                                      </div>
+                                    </h5>
+                                    <h6 className="text-lowercase">
+                                      <div className="d-flex align-items-center">
+                                        <i class="fa-regular fa-envelope me-2"></i>
+                                        <a
+                                          href={`mailto:waqar@californiamedia.ae`}
+                                        >
+                                          {" "}
+                                          waqar@californiamedia.ae
+                                        </a>
+                                      </div>
+                                    </h6>
+                                    <h6 className="text-lowercase">
+                                      <div className="d-flex align-items-center">
+                                        <img
+                                          src={`https://flagcdn.com/24x18/ae.png`}
+                                          width={15}
+                                          className="me-1"
+                                          alt={"ae"}
+                                        />
+
+                                        <a href={`tel:+123456789`}>
+                                          +123456789
+                                        </a>
+                                      </div>
+                                    </h6>
+                                    <button className="btn btn-sm btn-outline-primary mt-3 w-100" onClick={()=>{}}>
+                                      <i className="fa fa-address-book me-2"></i>{" "}
+                                      Add to Contacts
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
                               {/* {allScans
                                 .filter((scan) => scan.iScanned === true)
                                 .map((scan) => (
