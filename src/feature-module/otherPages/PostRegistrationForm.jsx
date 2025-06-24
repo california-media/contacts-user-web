@@ -68,7 +68,7 @@ const Step1 = ({ formData, setFormData,passedData }) => {
         />
         {console.log("Passed Data:", passedData)}
         
-       {passedData?.registeredWith =="email"? <input
+       {passedData?.registeredWith !="email"? <input
           className="prf-input"
           type="email"
           placeholder="Email"
