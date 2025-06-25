@@ -513,91 +513,10 @@ const Dashboard = () => {
                   <div className="col-md-6">
                     <div className="row">
                       <div className="col-md-6">
-                        <div className="col-md-12 mb-4 fitContentHeight">
-                          <Link to={"#"}>
-                            <div className="dashboardSmallCards">
-                              <div>
-                                <p
-                                  style={{
-                                    fontSize: 20,
-                                    marginBottom: 10,
-                                    color: "#000",
-                                  }}
-                                >
-                                  Profile Link
-                                </p>
-                                <div className="position-relative">
-                                  <div className="input-group">
-                                    <input
-                                      className="form-control"
-                                      value={profileLink}
-                                      readOnly
-                                    />
-                                    <button
-                                      className="btn btn-primary"
-                                      onClick={handleCopy}
-                                    >
-                                      <FaRegCopy />
-                                    </button>
-                                  </div>
-                                  {copied && (
-                                    <span
-                                      className="ms-2 text-success"
-                                      style={{
-                                        position: "absolute",
-                                        bottom: -30,
-                                        right: 0,
-                                      }}
-                                    >
-                                      Copied!
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div className="my-3">
-                                  <p>Share via</p>
-                                </div>
-
-                                <div className="d-flex">
-                                  {userProfile?.phonenumbers?.length > 0 && (
-                                    <a
-                                      href={`https://wa.me/?text=${whatsappShareLink}`}
-                                      target="_blank"
-                                      className="icon-wrapper-sm whatsapp no-filter me-3"
-                                    >
-                                      <img
-                                        src="/assets/img/icons/whatsappIcon96.png"
-                                        alt="WhatsApp"
-                                      />
-                                    </a>
-                                  )}
-                                  {userProfile.email && (
-                                    <Link
-                                      to={`mailto:${userProfile.email}`}
-                                      className="icon-wrapper-sm mail me-3"
-                                    >
-                                      <img
-                                        src="/assets/img/icons/mailIcon.png"
-                                        alt="Mail"
-                                      />
-                                    </Link>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </Link>
-                        </div>
-                        <div className="col-md-12 fitContentHeight">
-                          <Link to={route.myScans}>
-                            <div className="dashboardSmallCards">
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                }}
-                              >
+                        <div className="row">
+                          <div className="col-md-12 mb-4 fitContentHeight">
+                            <Link to={"#"}>
+                              <div className="dashboardSmallCards">
                                 <div>
                                   <p
                                     style={{
@@ -606,41 +525,124 @@ const Dashboard = () => {
                                       color: "#000",
                                     }}
                                   >
-                                    Scans
+                                    Profile Link
                                   </p>
-                                  <p
-                                    style={{
-                                      fontSize: 26,
-                                      fontWeight: 500,
-                                      color: "#000",
-                                    }}
-                                  >
-                                    50
-                                  </p>
-                                </div>
-                                <div
-                                  style={{
-                                    width: 70,
-                                    height: 70,
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    backgroundColor: "#d9f7e7",
-                                    borderRadius: 22,
-                                  }}
-                                >
-                                  <IoQrCode color="#4ad991" size={30} />
+                                  <div className="position-relative">
+                                    <div className="input-group">
+                                      <input
+                                        className="form-control"
+                                        value={profileLink}
+                                        readOnly
+                                      />
+                                      <button
+                                        className="btn btn-primary"
+                                        onClick={handleCopy}
+                                      >
+                                        <FaRegCopy />
+                                      </button>
+                                    </div>
+                                    {copied && (
+                                      <span
+                                        className="ms-2 text-success"
+                                        style={{
+                                          position: "absolute",
+                                          bottom: -30,
+                                          right: 0,
+                                        }}
+                                      >
+                                        Copied!
+                                      </span>
+                                    )}
+                                  </div>
+  
+                                  <div className="my-3">
+                                    <p>Share via</p>
+                                  </div>
+  
+                                  <div className="d-flex">
+                                    {userProfile?.phonenumbers?.length > 0 && (
+                                      <a
+                                        href={`https://wa.me/?text=${whatsappShareLink}`}
+                                        target="_blank"
+                                        className="icon-wrapper-sm whatsapp no-filter me-3"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/whatsappIcon96.png"
+                                          alt="WhatsApp"
+                                        />
+                                      </a>
+                                    )}
+                                    {userProfile.email && (
+                                      <Link
+                                        to={`mailto:${userProfile.email}`}
+                                        className="icon-wrapper-sm mail me-3"
+                                      >
+                                        <img
+                                          src="/assets/img/icons/mailIcon.png"
+                                          alt="Mail"
+                                        />
+                                      </Link>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </Link>
+                            </Link>
+                          </div>
+                          <div className="col-md-12 fitContentHeight">
+                            <Link to={route.myScans}>
+                              <div className="dashboardSmallCards">
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                  }}
+                                >
+                                  <div>
+                                    <p
+                                      style={{
+                                        fontSize: 20,
+                                        marginBottom: 10,
+                                        color: "#000",
+                                      }}
+                                    >
+                                      Scans
+                                    </p>
+                                    <p
+                                      style={{
+                                        fontSize: 26,
+                                        fontWeight: 500,
+                                        color: "#000",
+                                      }}
+                                    >
+                                      50
+                                    </p>
+                                  </div>
+                                  <div
+                                    style={{
+                                      width: 70,
+                                      height: 70,
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      backgroundColor: "#d9f7e7",
+                                      borderRadius: 22,
+                                    }}
+                                  >
+                                    <IoQrCode color="#4ad991" size={30} />
+                                  </div>
+                                </div>
+                              </div>
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                      {/* <div className="col-md-6">
+                      <div className="col-md-6">
                         <div className="mb-4 fitContentHeight d-flex h-100 flex-grow-1">
-                          <Link to={"/registration-form"}>
+                          <Link to={"#"} className="w-100">
                             <div className="dashboardSmallCards h-100 w-100">
-                              <div>
+                              {/* <div>
                                 <p
                                   style={{
                                     fontSize: 20,
@@ -707,63 +709,13 @@ const Dashboard = () => {
                                     </Link>
                                   )}
                                 </div>
-                              </div>
+                              </div> */}
                             </div>
                           </Link>
                         </div>
-                      </div> */}
-                    </div>
-                    {/* <div className="row mt-3">
-                      
-                      <div className="col-md-6 fitContentHeight">
-                        <Link to={route.myScans}>
-                          <div className="dashboardSmallCards">
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <div>
-                                <p
-                                  style={{
-                                    fontSize: 20,
-                                    marginBottom: 10,
-                                    color: "#000",
-                                  }}
-                                >
-                                  Scans
-                                </p>
-                                <p
-                                  style={{
-                                    fontSize: 26,
-                                    fontWeight: 500,
-                                    color: "#000",
-                                  }}
-                                >
-                                  50
-                                </p>
-                              </div>
-                              <div
-                                style={{
-                                  width: 70,
-                                  height: 70,
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  backgroundColor: "#d9f7e7",
-                                  borderRadius: 22,
-                                }}
-                              >
-                                <IoQrCode color="#4ad991" size={30} />
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
                       </div>
-                    </div> */}
+                    </div>
+
                   </div>
 
                   <div className="col-md-6">
