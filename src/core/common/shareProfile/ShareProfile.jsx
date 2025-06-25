@@ -175,7 +175,7 @@ END:VCARD
                     {userProfile.firstname} {userProfile.lastname}{" "}
                   </p>
                   {userProfile.designation && (
-                    <p className="text-center fs-6">
+                    <p className="text-center fs-6" style={{ color: "#000" }}>
                       <i>{userProfile.designation}</i>
                     </p>
                   )}

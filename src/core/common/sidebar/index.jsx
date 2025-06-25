@@ -6,11 +6,13 @@ import ImageWithBasePath from "../imageWithBasePath";
 import { useDispatch, useSelector } from "react-redux";
 import { setExpandMenu } from "../../data/redux/commonSlice";
 import Calling from "../../../feature-module/crm/calling";
+import { all_routes } from "../../../feature-module/router/all_routes";
 
 const Sidebar = () => {
   const Location = useLocation();
   const expandMenu = useSelector((state) => state.expandMenu);
   const dispatch = useDispatch();
+    const route = all_routes;
 
   const [subOpen, setSubopen] = useState("");
   const [subsidebar, setSubsidebar] = useState("");
@@ -92,7 +94,7 @@ const Sidebar = () => {
             />
           )}
         > */}
-        <div className="sidebar-inner slimscroll">
+        <div className="sidebar-inner slimscroll d-flex justify-content-between flex-column align-items-center">
           <div id="sidebar-menu" className="sidebar-menu">
             <ul>
               {SidebarData?.map((mainLabel, index) => (
@@ -473,6 +475,7 @@ const Sidebar = () => {
               ))}
             </ul>
           </div>
+          <Link to={route.profile} className="mb-4"><i class="fa-solid fa-gear fs-4"></i></Link>
         </div>
         {/* </Scrollbars> */}
       </div>

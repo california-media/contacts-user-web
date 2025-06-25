@@ -21,7 +21,7 @@ const StepWrapper = ({ children }) => (
   </AnimatePresence>
 );
 
-const Step1 = ({ formData, setFormData,passedData }) => {
+const Step1 = ({ formData, setFormData, passedData }) => {
   const { nextStep } = useWizard();
   const handleOnPhoneChange = (value) => {
     setFormData((prevFormData) => ({
@@ -63,34 +63,41 @@ const Step1 = ({ formData, setFormData,passedData }) => {
           placeholder="Company"
           name="companyName"
           value={formData.companyName}
-          onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, companyName: e.target.value })
+          }
           required
         />
         {console.log("Passed Data:", passedData)}
-        
-       {passedData?.registeredWith !="email"? <input
-          className="prf-input"
-          type="email"
-          placeholder="Email"
-          name="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          required
-        />:
-        <div className="mb-4">
-          <PhoneInput
-            country={"ae"} // Default country
-            value={formData.phone}
-            onChange={handleOnPhoneChange}
-            enableSearch
-            inputProps={{
-              name: "phone",
-              required: true,
-              autoFocus: true,
-            }}
+
+        {passedData?.registeredWith != "email" ? (
+          <input
+            className="prf-input"
+            type="email"
+            placeholder="Email"
+            name="email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+            required
           />
-        </div>}
-        <select
+        ) : (
+          <div className="mb-4">
+            <PhoneInput
+              country={"ae"} // Default country
+              value={formData.phone}
+              onChange={handleOnPhoneChange}
+              enableSearch
+              inputProps={{
+                name: "phone",
+                required: true,
+                autoFocus: true,
+              }}
+            />
+          </div>
+        )}
+        {/* <select
           className="prf-input"
           value={formData.gender}
           onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -100,7 +107,26 @@ const Step1 = ({ formData, setFormData,passedData }) => {
           <option>Male</option>
           <option>Female</option>
           <option>Other</option>
-        </select>
+        </select> */}
+         <div className="prf-grid">
+          {[
+            "Male",
+            "Female",
+            "Other"
+          ].map((userGender) => (
+            <label key={userGender} className="prf-option-btn">
+              <input
+                type="radio"
+                name="employees"
+                value={userGender}
+                onChange={() =>
+                  setFormData((prev) => ({ ...prev, gender: userGender }))
+                }
+              />{" "}
+              {userGender}
+            </label>
+          ))}
+        </div>
         <div className="prf-actions">
           <div />
           <button className="prf-next" onClick={nextStep}>
@@ -181,7 +207,7 @@ const Step2 = ({ formData, setFormData }) => {
   );
 };
 
-const Step3 = ({ formData, setFormData,navigate }) => {
+const Step3 = ({ formData, setFormData, navigate }) => {
   const { nextStep, previousStep } = useWizard();
 
   return (
@@ -251,7 +277,10 @@ const Step3 = ({ formData, setFormData,navigate }) => {
             Back
           </button>
           <div>
-            <button className="prf-next me-2" onClick={()=>handleSubmit({formData, navigate})}>
+            <button
+              className="prf-next me-2"
+              onClick={() => handleSubmit({ formData, navigate })}
+            >
               Finish
             </button>
           </div>
@@ -262,7 +291,7 @@ const Step3 = ({ formData, setFormData,navigate }) => {
 };
 
 // const Success = () => {
-  
+
 //   const navigate = useNavigate();
 
 //   useEffect(() => {
@@ -286,22 +315,21 @@ const Step3 = ({ formData, setFormData,navigate }) => {
 //   );
 // };
 
-const handleSubmit = async ({formData, navigate}) => {
-
+const handleSubmit = async ({ formData, navigate }) => {
   console.log("Submitting form data:", formData);
-  
+
   try {
     const result = await api.post("/user-info/onboarding-submit", formData);
-     navigate("/dashboard");
-    console.log(result.data," Submission successful");
+    navigate("/dashboard");
+    console.log(result.data, " Submission successful");
   } catch (error) {
     console.error("Submission error:", error);
   }
 };
 
 const PostRegistrationForm = () => {
-const navigate = useNavigate();
-const location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const passedData = location.state;
 
   console.log("Received data from previous route:", passedData);
@@ -323,9 +351,17 @@ const location = useLocation();
   return (
     <div className="prf-container">
       <Wizard>
-        <Step1 formData={formData} passedData={passedData} setFormData={setFormData} />
+        <Step1
+          formData={formData}
+          passedData={passedData}
+          setFormData={setFormData}
+        />
         <Step2 formData={formData} setFormData={setFormData} />
-        <Step3 formData={formData} setFormData={setFormData} navigate={navigate}/>
+        <Step3
+          formData={formData}
+          setFormData={setFormData}
+          navigate={navigate}
+        />
         {/* <Success formData={formData} /> */}
       </Wizard>
     </div>

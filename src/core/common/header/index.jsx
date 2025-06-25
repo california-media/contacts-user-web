@@ -19,7 +19,7 @@ const Header = () => {
   const route = all_routes;
   const location = useLocation();
   const dispatch = useDispatch();
-
+ const userProfile = useSelector((state) => state.profile);
   const mobileSidebar = useSelector((state) => state.common.mobileSidebar);
   const miniSidebar = useSelector((state) => state.common.miniSidebar);
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -476,8 +476,8 @@ const handleLogout =()=>{
               >
                 <span className="user-info">
                   <span className="user-letter">
-                    <ImageWithBasePath
-                      src="assets/img/profiles/avatar-20.jpg"
+                    <img
+                      src={userProfile.profileImageURL}
                       alt="Profile"
                     />
                   </span>

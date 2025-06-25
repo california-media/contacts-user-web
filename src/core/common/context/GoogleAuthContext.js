@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import { gapi } from "gapi-script";
+import api from "../../axios/axiosInstance";
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -32,10 +33,34 @@ export const GoogleAuthProvider = ({ children }) => {
     };
 
     gapi.load("client:auth2", initClient);
+
+    const response = api.post("connect/google");
   }, []);
 
-  const googleSignIn = () => gapi.auth2.getAuthInstance().signIn();
-  const googleSignOut = () => gapi.auth2.getAuthInstance().signOut();
+  // const googleSignIn = () => gapi.auth2.getAuthInstance().signIn();
+  // const googleSignOut = () => gapi.auth2.getAuthInstance().signOut();
+
+  const googleSignIn = async () => {
+    try {
+      const authInstance = gapi.auth2.getAuthInstance();
+      const user = await authInstance.signIn();
+
+      const profile = user.getBasicProfile();
+      const email = profile.getEmail();
+
+      const response = await api.post("connect/google", { email });
+      console.log(response.data.url, "response from google api");
+
+      console.log("Google email sent to backend:", email);
+      setIsGoogleSignedIn(true);
+    } catch (error) {
+      console.error("Google Sign-In failed", error);
+    }
+  };
+  const googleSignOut = () => {
+    gapi.auth2.getAuthInstance().signOut();
+    setIsGoogleSignedIn(false);
+  };
 
   return (
     <GoogleAuthContext.Provider

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Select from "react-select";
 import {
@@ -17,6 +17,9 @@ import { saveContact } from "../../../data/redux/slices/ContactSlice";
 import PhoneInput from "react-phone-input-2";
 import { addTag } from "../../../data/redux/slices/TagSlice";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
+import { GoogleAuthContext } from "../../context/GoogleAuthContext";
+import { all_routes } from "../../../../feature-module/router/all_routes";
+import { gapi } from "gapi-script";
 
 const LeadOffcanvas = ({ selectedContact }) => {
   const [show, setShow] = useState(false);
@@ -28,11 +31,15 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [previousTags, setPreviousTags] = useState([]);
   const [removedTags, setRemovedTags] = useState([]);
-    const [showSocialLinks, setShowSocialLinks] = useState(false);
+  const [showSocialLinks, setShowSocialLinks] = useState(false);
   // const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [newTags, setNewTags] = useState([]);
   const [allTags, setAllTags] = useState([]);
+  const [checkSendMailToContact, setCheckSendMailToContact] = useState(false);
+  const { isGoogleSignedIn } = useContext(GoogleAuthContext);
+  console.log(selectedContact, "gfhgfhh");
+
   const [formData, setFormData] = useState({
     contact_id: "",
     contactImageURL: "",
@@ -43,17 +50,18 @@ const LeadOffcanvas = ({ selectedContact }) => {
     email: [],
     phone: "",
     tags: [],
-    instagram:"",
-    twitter:"",
-    linkedin:"",
-    facebook:"",
-    telegram:"",
+    instagram: "",
+    twitter: "",
+    linkedin: "",
+    facebook: "",
+    telegram: "",
   });
   const { tags, loading, error } = useSelector((state) => state.tags);
-
+  const userProfile = useSelector((state) => state.profile);
+  console.log(userProfile, "userProfile");
   const dispatch = useDispatch();
   const offcanvasRef = useRef(null);
-
+  const route = all_routes;
   const fileInputRef = useRef(null);
 
   const handleOnPhoneChange = (value) => {
@@ -66,6 +74,77 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const handleShow = () => setShow(true);
   const addNewContent = () => {
     setNewContents([...newContents, newContents.length]);
+  };
+  const sendEmail = async () => {
+        console.log("console log 1")
+    if (!formData.email) {
+      alert("Email is required");
+      return;
+    }
+    console.log("console log 2")
+    const editEmailTemplateSubject = `${userProfile.firstname} - My Digital Business Card`;
+    const editEmailTemplateBody = `<div style="font-family: Arial, sans-serif; color: #333;">
+      <p>Hello,</p>
+      <p>It was nice to meet you. Here are my contact details:</p>
+
+      <ul style="line-height: 1.6;">
+        <li><strong>Email:</strong> ${userProfile.email}</li>
+        <li><strong>Phone:</strong> ${userProfile.phonenumbers[0]}</li>
+        <li><strong>More Information:</strong> <a href="https://contacts-user-web.vercel.app/shareProfile/${userProfile.firstname}${userProfile.serialNumber}">My Digital Business Card →</a></li>
+      </ul>
+
+      <p>Best regards,</p>
+      <p>
+        <strong>${userProfile.firstname} ${userProfile.lastname}</strong><br/>
+        ${userProfile.designation?`${userProfile.designation}<br/>`:""}
+        ${userProfile.company?`${userProfile.company}`:""}
+      </p>
+    </div>
+  `;
+    console.log("console log 3")
+    const headers = [
+      `To: ${formData.email}`,
+      `Subject: ${editEmailTemplateSubject}`,
+      "Content-Type: text/html; charset=utf-8",
+      "",
+      `<p>${editEmailTemplateBody}</p>`,
+    ];
+    console.log("console log 4")
+    const email = headers.join("\r\n");
+
+    const base64EncodedEmail = btoa(
+      new TextEncoder()
+        .encode(email)
+        .reduce((data, byte) => data + String.fromCharCode(byte), "")
+    );
+        console.log("console log 5")
+    try {
+          console.log("console log 6")
+      await gapi.client.gmail.users.messages.send({
+        userId: "me",
+        resource: {
+          raw: base64EncodedEmail,
+        },
+      });
+          console.log("console log 7")
+      // document.getElementById("closeEmailTemplateModal")?.click();
+      dispatch(
+        showToast({ message: "Email Sent Successfully", variant: "success" })
+      );
+      // setTo("");
+      // setSubject("");
+      // setMessage("");
+    } catch (error) {
+      dispatch(
+        showToast({
+          message: !isGoogleSignedIn
+            ? "Please Login to send Mail"
+            : "Error Sending Mail",
+          variant: "danger",
+        })
+      );
+      console.error("Error sending email:", error?.result?.error?.message);
+    }
   };
 
   const handleContact = async () => {
@@ -97,9 +176,14 @@ const LeadOffcanvas = ({ selectedContact }) => {
         await dispatch(addTag(newTags)).unwrap();
       }
       console.log(Object.fromEntries(formDataObj), "formdatabeforegoing");
-      
+
       await dispatch(saveContact(formDataObj)).unwrap();
       document.getElementById("closeContactOffcanvas")?.click();
+
+      if(checkSendMailToContact){
+        sendEmail();
+      }
+
       setIsLoading(false);
     } catch (error) {
       console.error("Error:", error);
@@ -180,8 +264,10 @@ const LeadOffcanvas = ({ selectedContact }) => {
         linkedin: selectedContact.linkedin || "",
         facebook: selectedContact.facebook || "",
         telegram: selectedContact.telegram || "",
+        
       });
     }
+    setCheckSendMailToContact(false)
   }, [selectedContact, dispatch]);
 
   useEffect(() => {
@@ -229,6 +315,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
       }));
     }
   };
+  console.log(isGoogleSignedIn, "isGoogleSignedIn");
 
   return (
     <div
@@ -392,140 +479,163 @@ const LeadOffcanvas = ({ selectedContact }) => {
                 />
               </div>
             </div>
-
-
-
-
-
-
-
-                {showSocialLinks && (
+            {selectedContact.contact_id == null && (
+              <div className="col-md-12">
+                <div className="form-check form-switch">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    checked={checkSendMailToContact}
+                    onChange={() =>
+                      setCheckSendMailToContact(!checkSendMailToContact)
+                    }
+                  />
+                  <div>Send mail to contact</div>
+                </div>
+                {!isGoogleSignedIn && checkSendMailToContact && (
                   <>
-                    <div className="mb-3">
-                      <div className="input-group">
-                        <span className="input-group-text" id="basic-addon1">
-                          <img
-                            src="/assets/img/icons/instagramIcon.png"
-                            alt="Instagram"
-                            style={{ width: 20, height: 20 }}
-                          />
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Instagram"
-                          name="instagram"
-                          value={formData.instagram}
-                          onChange={handleChange}
-                          aria-label="Instagram"
-                          aria-describedby="basic-addon1"
-                        />
-                      </div>
+                    <div className="text-danger mt-2">
+                      *For sending mail Google Account is Required
                     </div>
-
-                    <div className="mb-3">
-                      <div className="input-group">
-                        <span className="input-group-text" id="basic-addon1">
-                          <img
-                            src="/assets/img/icons/twitterIcon.png"
-                            alt="Instagram"
-                            style={{ width: 20, height: 20 }}
-                          />
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Twitter"
-                          name="twitter"
-                          value={formData.twitter}
-                          onChange={handleChange}
-                          aria-label="Twitter"
-                          aria-describedby="basic-addon1"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mb-3">
-                      <div className="input-group">
-                        <span className="input-group-text" id="basic-addon1">
-                          <img
-                            src="/assets/img/icons/linkedinIcon.png"
-                            alt="Instagram"
-                            style={{ width: 20, height: 20 }}
-                          />
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Linkedin"
-                          name="linkedin"
-                          value={formData.linkedin}
-                          onChange={handleChange}
-                          aria-label="Linkedin"
-                          aria-describedby="basic-addon1"
-                        />
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <div className="input-group">
-                        <span className="input-group-text" id="basic-addon1">
-                          <img
-                            src="/assets/img/icons/facebookIcon.png"
-                            alt="Instagram"
-                            style={{ width: 20, height: 20 }}
-                          />
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Facebook"
-                          name="facebook"
-                          value={formData.facebook}
-                          onChange={handleChange}
-                          aria-label="Facebook"
-                          aria-describedby="basic-addon1"
-                        />
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <div className="input-group">
-                        <span className="input-group-text" id="basic-addon1">
-                          <img
-                            src="/assets/img/icons/telegramIcon.png"
-                            alt="Instagram"
-                            style={{ width: 20, height: 20 }}
-                          />
-                        </span>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Telegram"
-                          name="telegram"
-                          value={formData.telegram}
-                          onChange={handleChange}
-                          aria-label="Telegram"
-                          aria-describedby="basic-addon1"
-                        />
-                      </div>
+                    <div className="mt-2">
+                      <Link
+                        to={route.emailSetup}
+                        target="_blank"
+                        // onClick={()=>{
+                        //   document.getElementById("closeMeetingModal")?.click();
+                        //   }}
+                      >
+                        Click here{" "}
+                      </Link>
+                      to connect your Google Account
                     </div>
                   </>
                 )}
-
-
-
-          </div>
-
-
-<div className="text-center my-3">
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary rounded-pill px-4 d-inline-flex align-items-center gap-2 show-more-btn"
-                    onClick={() => setShowSocialLinks(!showSocialLinks)}
-                  >
-                    {showSocialLinks ? "Hide Social Links" : "Show More"}
-                  </button>
+              </div>
+            )}
+            {showSocialLinks && (
+              <>
+                <div className="mb-3">
+                  <div className="input-group">
+                    <span className="input-group-text" id="basic-addon1">
+                      <img
+                        src="/assets/img/icons/instagramIcon.png"
+                        alt="Instagram"
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Instagram"
+                      name="instagram"
+                      value={formData.instagram}
+                      onChange={handleChange}
+                      aria-label="Instagram"
+                      aria-describedby="basic-addon1"
+                    />
+                  </div>
                 </div>
 
+                <div className="mb-3">
+                  <div className="input-group">
+                    <span className="input-group-text" id="basic-addon1">
+                      <img
+                        src="/assets/img/icons/twitterIcon.png"
+                        alt="Instagram"
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Twitter"
+                      name="twitter"
+                      value={formData.twitter}
+                      onChange={handleChange}
+                      aria-label="Twitter"
+                      aria-describedby="basic-addon1"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <div className="input-group">
+                    <span className="input-group-text" id="basic-addon1">
+                      <img
+                        src="/assets/img/icons/linkedinIcon.png"
+                        alt="Instagram"
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Linkedin"
+                      name="linkedin"
+                      value={formData.linkedin}
+                      onChange={handleChange}
+                      aria-label="Linkedin"
+                      aria-describedby="basic-addon1"
+                    />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <div className="input-group">
+                    <span className="input-group-text" id="basic-addon1">
+                      <img
+                        src="/assets/img/icons/facebookIcon.png"
+                        alt="Instagram"
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Facebook"
+                      name="facebook"
+                      value={formData.facebook}
+                      onChange={handleChange}
+                      aria-label="Facebook"
+                      aria-describedby="basic-addon1"
+                    />
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <div className="input-group">
+                    <span className="input-group-text" id="basic-addon1">
+                      <img
+                        src="/assets/img/icons/telegramIcon.png"
+                        alt="Instagram"
+                        style={{ width: 20, height: 20 }}
+                      />
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Telegram"
+                      name="telegram"
+                      value={formData.telegram}
+                      onChange={handleChange}
+                      aria-label="Telegram"
+                      aria-describedby="basic-addon1"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="text-center my-3">
+            <button
+              type="button"
+              className="btn btn-outline-primary rounded-pill px-4 d-inline-flex align-items-center gap-2 show-more-btn"
+              onClick={() => setShowSocialLinks(!showSocialLinks)}
+            >
+              {showSocialLinks ? "Hide Social Links" : "Show More"}
+            </button>
+          </div>
 
           <div className="d-flex align-items-center justify-content-end">
             <button

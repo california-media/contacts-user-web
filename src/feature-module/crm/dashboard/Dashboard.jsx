@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import { Image } from "react-bootstrap";
-import { FaPhoneAlt, FaRegEye, FaTag } from "react-icons/fa";
+import { FaPhoneAlt, FaRegCopy, FaRegEye, FaTag } from "react-icons/fa";
 import { IoMdMail } from "react-icons/io";
 import { TbLocation } from "react-icons/tb";
 import { MdPeople } from "react-icons/md";
@@ -31,7 +31,8 @@ const Dashboard = () => {
   const userProfile = useSelector((state) => state.profile);
   const { tags, loading, error } = useSelector((state) => state.tags);
   console.log("userProfile in dashboardss", userProfile);
-
+  const [copied, setCopied] = useState(false);
+  const profileLink = `https://contacts-user-web.vercel.app/${userProfile.firstname}${userProfile.serialNumber}`;
   const [sline] = useState({
     chart: {
       height: 350,
@@ -123,7 +124,16 @@ const Dashboard = () => {
       setResult(text);
     });
   };
-
+  const whatsappShareLink = `Here is my contact: https://contacts-user-web.vercel.app/${userProfile.firstname}${userProfile.serialNumber}`;
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(profileLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+    }
+  };
   return (
     <>
       <div className="page-wrapper" style={{ backgroundColor: "#fff" }}>
@@ -145,7 +155,7 @@ const Dashboard = () => {
                     alt="Profile Banner"
                     className="profileCoverImg"
                   />
-                  <div style={{ background: "#fff", position: "relative",  }}>
+                  <div style={{ background: "#fff", position: "relative" }}>
                     <div style={{ display: "flex", justifyContent: "center" }}>
                       {!userProfile.profileImageURL ? (
                         <div className="profileCardImg">
@@ -168,13 +178,16 @@ const Dashboard = () => {
                       <p className="text-center text-dark fs-4 text-capitalize mb-0">
                         {userProfile.firstname} {userProfile.lastname}{" "}
                       </p>
-                      {console.log(userProfile.phonenumbers, "userProfilenumber")}
+                      {console.log(
+                        userProfile.phonenumbers,
+                        "userProfilenumber"
+                      )}
                       <p className="text-center text-dark fs-6">
                         <i>{userProfile.designation} </i>
                       </p>
                       {userProfile.phonenumbers.length > 0 ? (
                         <div className="profileCardTextContainer">
-                          <FaPhoneAlt color="#000"/>
+                          <FaPhoneAlt color="#000" />
                           <p className="profileCardText">
                             {userProfile.phonenumbers[0]}
                           </p>
@@ -183,7 +196,7 @@ const Dashboard = () => {
                         ""
                       )}
                       <div className="profileCardTextContainer">
-                        <IoMdMail color="#000"/>
+                        <IoMdMail color="#000" />
                         <p className="profileCardText">{userProfile.email}</p>
                       </div>
 
@@ -499,22 +512,10 @@ const Dashboard = () => {
                 <div className="row mt-5">
                   <div className="col-md-6">
                     <div className="row">
-                      <div className="col-md-6 fitContentHeight">
-                        <Link
-                          // className="dropdown-item p-0 bgWhiteOnLinkHover"
-                          // data-bs-toggle="offcanvas"
-                          // data-bs-target="#groups_offcanvas"
-                          to={route.registrationForm}
-                        >
-                          <div className="dashboardSmallCards">
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
+                      <div className="col-md-6">
+                        <div className="col-md-12 mb-4 fitContentHeight">
+                          <Link to={"#"}>
+                            <div className="dashboardSmallCards">
                               <div>
                                 <p
                                   style={{
@@ -523,35 +524,197 @@ const Dashboard = () => {
                                     color: "#000",
                                   }}
                                 >
-                                  Groups
+                                  Profile Link
                                 </p>
+                                <div className="position-relative">
+                                  <div className="input-group">
+                                    <input
+                                      className="form-control"
+                                      value={profileLink}
+                                      readOnly
+                                    />
+                                    <button
+                                      className="btn btn-primary"
+                                      onClick={handleCopy}
+                                    >
+                                      <FaRegCopy />
+                                    </button>
+                                  </div>
+                                  {copied && (
+                                    <span
+                                      className="ms-2 text-success"
+                                      style={{
+                                        position: "absolute",
+                                        bottom: -30,
+                                        right: 0,
+                                      }}
+                                    >
+                                      Copied!
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="my-3">
+                                  <p>Share via</p>
+                                </div>
+
+                                <div className="d-flex">
+                                  {userProfile?.phonenumbers?.length > 0 && (
+                                    <a
+                                      href={`https://wa.me/?text=${whatsappShareLink}`}
+                                      target="_blank"
+                                      className="icon-wrapper-sm whatsapp no-filter me-3"
+                                    >
+                                      <img
+                                        src="/assets/img/icons/whatsappIcon96.png"
+                                        alt="WhatsApp"
+                                      />
+                                    </a>
+                                  )}
+                                  {userProfile.email && (
+                                    <Link
+                                      to={`mailto:${userProfile.email}`}
+                                      className="icon-wrapper-sm mail me-3"
+                                    >
+                                      <img
+                                        src="/assets/img/icons/mailIcon.png"
+                                        alt="Mail"
+                                      />
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        </div>
+                        <div className="col-md-12 fitContentHeight">
+                          <Link to={route.myScans}>
+                            <div className="dashboardSmallCards">
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <div>
+                                  <p
+                                    style={{
+                                      fontSize: 20,
+                                      marginBottom: 10,
+                                      color: "#000",
+                                    }}
+                                  >
+                                    Scans
+                                  </p>
+                                  <p
+                                    style={{
+                                      fontSize: 26,
+                                      fontWeight: 500,
+                                      color: "#000",
+                                    }}
+                                  >
+                                    50
+                                  </p>
+                                </div>
+                                <div
+                                  style={{
+                                    width: 70,
+                                    height: 70,
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    backgroundColor: "#d9f7e7",
+                                    borderRadius: 22,
+                                  }}
+                                >
+                                  <IoQrCode color="#4ad991" size={30} />
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+                      {/* <div className="col-md-6">
+                        <div className="mb-4 fitContentHeight d-flex h-100 flex-grow-1">
+                          <Link to={"/registration-form"}>
+                            <div className="dashboardSmallCards h-100 w-100">
+                              <div>
                                 <p
                                   style={{
-                                    fontSize: 26,
-                                    fontWeight: 500,
+                                    fontSize: 20,
+                                    marginBottom: 10,
                                     color: "#000",
                                   }}
                                 >
-                                  {tags.length}
+                                  Profile Link
                                 </p>
-                              </div>
-                              <div
-                                style={{
-                                  width: 70,
-                                  height: 70,
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  backgroundColor: "#fef2d6",
-                                  borderRadius: 18,
-                                }}
-                              >
-                                <FaTag color="#fec53d" size={25} />
+                                <div className="position-relative">
+                                  <div className="input-group">
+                                    <input
+                                      className="form-control"
+                                      value={profileLink}
+                                      readOnly
+                                    />
+                                    <button
+                                      className="btn btn-primary"
+                                      onClick={handleCopy}
+                                    >
+                                      <FaRegCopy />
+                                    </button>
+                                  </div>
+                                  {copied && (
+                                    <span
+                                      className="ms-2 text-success"
+                                      style={{
+                                        position: "absolute",
+                                        bottom: -30,
+                                        right: 0,
+                                      }}
+                                    >
+                                      Copied!
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="my-3">
+                                  <p>Share via</p>
+                                </div>
+
+                                <div className="d-flex">
+                                  {userProfile?.phonenumbers?.length > 0 && (
+                                    <a
+                                      href={`https://wa.me/?text=${whatsappShareLink}`}
+                                      target="_blank"
+                                      className="icon-wrapper-sm whatsapp no-filter me-3"
+                                    >
+                                      <img
+                                        src="/assets/img/icons/whatsappIcon96.png"
+                                        alt="WhatsApp"
+                                      />
+                                    </a>
+                                  )}
+                                  {userProfile.email && (
+                                    <Link
+                                      to={`mailto:${userProfile.email}`}
+                                      className="icon-wrapper-sm mail me-3"
+                                    >
+                                      <img
+                                        src="/assets/img/icons/mailIcon.png"
+                                        alt="Mail"
+                                      />
+                                    </Link>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      </div>
+                          </Link>
+                        </div>
+                      </div> */}
+                    </div>
+                    {/* <div className="row mt-3">
+                      
                       <div className="col-md-6 fitContentHeight">
                         <Link to={route.myScans}>
                           <div className="dashboardSmallCards">
@@ -600,109 +763,7 @@ const Dashboard = () => {
                           </div>
                         </Link>
                       </div>
-                    </div>
-                    <div className="row mt-3">
-                      <div className="col-md-6 fitContentHeight">
-                        <Link
-                          className="dropdown-item p-0 bgWhiteOnLinkHover"
-                          data-bs-toggle="offcanvas"
-                          data-bs-target="#groups_offcanvas"
-                        >
-                          <div className="dashboardSmallCards">
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <div>
-                                <p
-                                  style={{
-                                    fontSize: 20,
-                                    marginBottom: 10,
-                                    color: "#000",
-                                  }}
-                                >
-                                  Groups
-                                </p>
-                                <p
-                                  style={{
-                                    fontSize: 26,
-                                    fontWeight: 500,
-                                    color: "#000",
-                                  }}
-                                >
-                                  {tags.length}
-                                </p>
-                              </div>
-                              <div
-                                style={{
-                                  width: 70,
-                                  height: 70,
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  backgroundColor: "#fef2d6",
-                                  borderRadius: 18,
-                                }}
-                              >
-                                <FaTag color="#fec53d" size={25} />
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
-                      <div className="col-md-6 fitContentHeight">
-                        <Link to={route.myScans}>
-                          <div className="dashboardSmallCards">
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <div>
-                                <p
-                                  style={{
-                                    fontSize: 20,
-                                    marginBottom: 10,
-                                    color: "#000",
-                                  }}
-                                >
-                                  Scans
-                                </p>
-                                <p
-                                  style={{
-                                    fontSize: 26,
-                                    fontWeight: 500,
-                                    color: "#000",
-                                  }}
-                                >
-                                  50
-                                </p>
-                              </div>
-                              <div
-                                style={{
-                                  width: 70,
-                                  height: 70,
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  backgroundColor: "#d9f7e7",
-                                  borderRadius: 22,
-                                }}
-                              >
-                                <IoQrCode color="#4ad991" size={30} />
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="col-md-6">
@@ -724,22 +785,6 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            {/* <div
-                style={{
-                  position: "fixed",
-                  width: "100%",
-                  height: "100%",
-                  zIndex: 1,
-                }}
-              >
-                <div style={{ width: "100%", height: 400 }}>
-                  <Camera ref={camera} />
-                </div>
-                <button onClick={() => setImage(camera.current.takePhoto())}>
-                  Take photo
-                </button>
-                <img src={image} alt="Taken photo" />
-              </div> */}
           </div>
         </div>
       </div>

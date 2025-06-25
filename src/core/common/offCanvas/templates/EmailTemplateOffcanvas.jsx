@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { editProfile } from "../../../data/redux/slices/ProfileSlice";
 import DefaultEditor from "react-simple-wysiwyg";
+import "react-quill/dist/quill.snow.css";
+import ReactQuill from "react-quill";
 
 const EmailTemplateOffcanvas = () => {
   const [formData, setFormData] = useState({
@@ -10,9 +12,34 @@ const EmailTemplateOffcanvas = () => {
     emailTemplateSubject: "",
     emailTemplateBody: "",
   });
+  const modules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
+      ["blockquote", "code-block"],
+      ["link", "image"],
+      ["clean"],
+    ],
+  };
 
+  const formats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "bullet",
+    "align",
+    "blockquote",
+    "code-block",
+    "link",
+    "image",
+  ];
   const dispatch = useDispatch();
-
+  const quillRef = useRef(null);
   const handleInputChange = (name, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -52,6 +79,17 @@ const EmailTemplateOffcanvas = () => {
       });
     }
   }, [selectedTemplate]);
+  const insertTag = (tag) => {
+    const editor = quillRef.current?.getEditor(); // get Quill instance
+    if (editor) {
+      const range = editor.getSelection(); // current cursor location
+      if (range) {
+        editor.insertText(range.index, tag);
+        editor.setSelection(range.index + tag.length); // move cursor
+      }
+    }
+  };
+  console.log(formData, "formDataformData");
 
   return (
     <div
@@ -106,10 +144,26 @@ const EmailTemplateOffcanvas = () => {
                 />
               </div>
             </div>
+ <div className="col-12">
+            <select
+              className="form-select"
+              aria-label="Default select example"
+              onChange={(e) => {
+                if (e.target.value) insertTag(e.target.value);
+                e.target.selectedIndex = 0; // reset dropdown
+              }}
+            >
+              <option value="">Insert Tag</option>
+              <option value="{{firstName}}">First Name</option>
+              <option value="{{lastName}}">Last Name</option>
+              <option value="{{designation}}">Designation</option>
+              <option value="{{email}}">Email</option>
+            </select>
+</div>
             <div className="col-12">
               <div className="mb-3">
                 <label className="col-form-label ms-3">Body</label>
-                <DefaultEditor
+                {/* <DefaultEditor
                   name="emailTemplateBody"
                   placeholder="Enter text here"
                   value={formData.emailTemplateBody}
@@ -117,6 +171,18 @@ const EmailTemplateOffcanvas = () => {
                     handleInputChange(e.target.name, e.target.value);
                   }}
                   style={{ minHeight: "300px" }}
+                /> */}
+                <ReactQuill
+                  ref={quillRef}
+                  theme="snow"
+                  value={formData.emailTemplateBody}
+                    onChange={(value) => handleInputChange("emailTemplateBody", value)}
+                  name="emailTemplateBody"
+                  className="form-control my-quill"
+                  placeholder="Enter text here"
+                  modules={modules}
+                  formats={formats}
+                  style={{ height: "300px" }}
                 />
                 {/* <textarea
                       rows={5}

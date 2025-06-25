@@ -1,9 +1,58 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import CollapseHeader from "../../../core/common/collapse-header";
+import api from "../../../core/axios/axiosInstance";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../core/data/redux/slices/ToastSlice";
+import { resetProfile } from "../../../core/data/redux/slices/ProfileSlice";
+import { resetSelectedContact } from "../../../core/data/redux/slices/SelectedContactSlice";
+import { resetSelectedTemplate } from "../../../core/data/redux/slices/SelectedTemplateSlice";
 const route = all_routes;
 const Security = () => {
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisible((prev) => !prev);
+  };
+  const handleChangePassword = async(e) => {
+    e.preventDefault()
+try {
+  const response = await api.post("changePassword", {newPassword:password} )
+console.log(response.data,"response from change password");
+dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
+} catch (error) {
+  dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+}
+
+    
+  };
+  const handleDeleteAccount = async () => {
+    try {
+      const response = await api.delete("deleteUser");
+      console.log(response.data, "response from delete profile");
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+
+      dispatch(resetProfile());
+      dispatch(resetSelectedContact());
+      dispatch(resetSelectedTemplate());
+      navigate(route.login);
+    } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+    }
+  };
   return (
     <div>
       {/* Page Wrapper */}
@@ -11,8 +60,6 @@ const Security = () => {
         <div className="content">
           <div className="row">
             <div className="col-md-12">
-
-
               <div className="row">
                 <div className="col-xl-3 col-lg-12 theiaStickySidebar">
                   {/* Settings Sidebar */}
@@ -24,12 +71,15 @@ const Security = () => {
                           <Link to={route.profile} className="fw-medium">
                             Profile
                           </Link>
-                          <Link to={route.security} className="fw-medium active">
+                          <Link
+                            to={route.security}
+                            className="fw-medium active"
+                          >
                             Security
                           </Link>
                           <Link to={route.emailSetup} className="fw-medium">
-                                                    Connected Mails
-                                                  </Link>
+                            Connected Mails
+                          </Link>
                           <Link to={route.myScans} className="fw-medium">
                             My Scans
                           </Link>
@@ -74,7 +124,9 @@ const Security = () => {
                             <div className="card-body d-flex justify-content-between flex-column">
                               <div className="mb-3">
                                 <div className="d-flex align-items-center justify-content-between mb-1">
-                                  <h6 className="fw-semibold">Delete Account</h6>
+                                  <h6 className="fw-semibold">
+                                    Delete Account
+                                  </h6>
                                 </div>
                                 <p>Note: You will lose all your data</p>
                               </div>
@@ -91,14 +143,12 @@ const Security = () => {
                             </div>
                           </div>
                         </div>
-
                       </div>
                     </div>
                   </div>
                   {/* /Settings Info */}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -119,25 +169,44 @@ const Security = () => {
                   <i className="ti ti-x" />
                 </button>
               </div>
-              <form >
+              <form onSubmit={handleChangePassword}>
                 <div className="modal-body">
-                  <div className="mb-3">
+                  {/* <div className="mb-3">
                     <label className="col-form-label">
                       Current Password <span className="text-danger">*</span>
                     </label>
                     <input type="password" className="form-control" />
-                  </div>
-                  <div className="mb-3">
+                  </div> */}
+                  {/* <div className="mb-3">
                     <label className="col-form-label">
                       New Password <span className="text-danger">*</span>
                     </label>
                     <input type="password" className="form-control" />
-                  </div>
-                  <div className="mb-0">
+                  </div> */}
+                  {/* <div className="mb-0">
                     <label className="col-form-label">
                       Confirm Password <span className="text-danger">*</span>
                     </label>
                     <input type="password" className="form-control" />
+                  </div> */}
+
+                  <div className="mb-3">
+                    <label className="col-form-label">New Password</label>
+                    <div className="pass-group">
+                      <input
+                        type={isPasswordVisible ? "text" : "password"}
+                        className="form-control"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <span
+                        className={`ti toggle-password ${
+                          isPasswordVisible ? "ti-eye" : "ti-eye-off"
+                        }`}
+                        onClick={togglePasswordVisibility}
+                      ></span>
+                    </div>
                   </div>
                 </div>
                 <div className="modal-footer">
@@ -149,7 +218,11 @@ const Security = () => {
                     >
                       Cancel
                     </Link>
-                    <button type="button" data-bs-dismiss="modal" className="btn btn-primary">
+                    <button
+                      type="submit"
+                      data-bs-dismiss="modal"
+                      className="btn btn-primary"
+                    >
                       Save
                     </button>
                   </div>
@@ -160,11 +233,15 @@ const Security = () => {
         </div>
         {/* /Change Password */}
         {/* Delete Account */}
-        <div className="modal custom-modal fade" id="delete_account" role="dialog">
+        <div
+          className="modal custom-modal fade"
+          id="delete_account"
+          role="dialog"
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-body">
-                <form >
+                <form>
                   <div className="text-center">
                     <div className="avatar avatar-xl bg-danger-light rounded-circle mb-3">
                       <i className="ti ti-trash-x fs-36 text-danger" />
@@ -179,7 +256,11 @@ const Security = () => {
                       >
                         Cancel
                       </Link>
-                      <button type="button" data-bs-dismiss="modal" className="btn btn-danger">
+                      <button
+                        type="button"
+                        data-bs-dismiss="modal"
+                        className="btn btn-danger"
+                      >
                         Yes, Delete it
                       </button>
                     </div>
@@ -191,7 +272,11 @@ const Security = () => {
         </div>
         {/* /Delete Account */}
         {/* Delete Account */}
-        <div className="modal custom-modal fade" id="delete_two_factor" role="dialog">
+        <div
+          className="modal custom-modal fade"
+          id="delete_two_factor"
+          role="dialog"
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-body">
@@ -199,8 +284,12 @@ const Security = () => {
                   <div className="avatar avatar-xl bg-danger-light rounded-circle mb-3">
                     <i className="ti ti-trash-x fs-36 text-danger" />
                   </div>
-                  <h4 className="mb-2">Delete Two Factor</h4>
-                  <p className="mb-0">Are you sure you want to remove it.</p>
+                  <h4 className="mb-2">Delete Account</h4>
+                  <p className="mb-0">
+                    {" "}
+                    ⚠️ This action is irreversible. All your data will be
+                    permanently deleted. Are you sure you want to continue?
+                  </p>
                   <div className="d-flex align-items-center justify-content-center mt-4">
                     <Link
                       to="#"
@@ -209,7 +298,12 @@ const Security = () => {
                     >
                       Cancel
                     </Link>
-                    <button type="button" data-bs-dismiss="modal" className="btn btn-danger">
+                    <button
+                      type="button"
+                      data-bs-dismiss="modal"
+                      className="btn btn-danger"
+                      onClick={handleDeleteAccount}
+                    >
                       Yes, Delete it
                     </button>
                   </div>
@@ -220,7 +314,6 @@ const Security = () => {
         </div>
         {/* /Delete Account */}
       </>
-
     </div>
   );
 };

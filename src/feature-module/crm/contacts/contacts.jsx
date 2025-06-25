@@ -237,6 +237,10 @@ console.log(selectedTags,"selectghgj");
     // setSelectedLeadEmployee([]);
     // setSearchEmployeeInFilter("");
   };
+
+
+
+  
   const handleDownload = () => {
     const data = [
       [
@@ -771,6 +775,7 @@ console.log(selectedTags,"selectghgj");
       dispatch(fetchContacts({ filters }));
     }
   };
+
   const columns = [
     {
       title: "",
@@ -986,6 +991,7 @@ console.log(selectedTags,"selectghgj");
           activeGroupEdit?.contactId === record.contact_id;
         const isEditingThisTag =
           isActiveContact && activeGroupEdit?.tagIndex === 0;
+console.log(record,"recorddd")
 
         if (tags.length === 0) {
           return (
@@ -1317,7 +1323,7 @@ console.log(selectedTags,"selectghgj");
           <div className="content">
             <div className="row">
               <div className="col-md-12">
-                <div className="card">
+                <div className="card vh-100">
                   <div className="card-header">
                     {/* Search */}
                     <div className="row align-items-center">

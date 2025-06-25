@@ -41,11 +41,11 @@ const EmailTemplateModal = () => {
     }
   };
   const sendEmail = async () => {
-      const finalEmailBody = editEmailTemplateBody
-    .replace(/{{firstName}}/g, selectedContact.firstname || "")
-    .replace(/{{lastName}}/g, selectedContact.lastname || "")
-    .replace(/{{email}}/g, selectedContact.emailaddresses?.[0] || "")
-    .replace(/{{designation}}/g, selectedContact.designation || "");
+    const finalEmailBody = editEmailTemplateBody
+      .replace(/{{firstName}}/g, selectedContact.firstname || "")
+      .replace(/{{lastName}}/g, selectedContact.lastname || "")
+      .replace(/{{email}}/g, selectedContact.emailaddresses?.[0] || "")
+      .replace(/{{designation}}/g, selectedContact.designation || "");
     if (
       !selectedContact.emailaddresses[0] ||
       !editEmailTemplateSubject ||
@@ -149,7 +149,7 @@ const EmailTemplateModal = () => {
                 options={emailTemplateTitles}
                 onChange={(selectedOption) => {
                   console.log("Selected option:", selectedOption);
-                  
+
                   setEditEmailTemplateBody(
                     userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
                       (template) =>

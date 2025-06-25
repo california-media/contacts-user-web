@@ -209,6 +209,7 @@ const ContactsDetails = () => {
 
   const location = useLocation();
   const { record } = location.state || {};
+console.log(leadInfo,"leadingofn");
 
   useEffect(() => {
     setLeadInfo(selectedContact);
@@ -1457,108 +1458,115 @@ const ContactsDetails = () => {
                       </div>
                     </div>
                     <div className=" px-2 mb-4 d-flex flex-wrap gap-3 justify-content-start">
-                                    {leadInfo?.phonenumbers?.length > 0 && (
-                                      <a
-                                        href={`tel:${leadInfo.phonenumbers[0]}`}
-                                        className="icon-wrapper-sm phone"
-                                      >
-                                        <img
-                                          src="/assets/img/icons/phoneCallIcon.png"
-                                          alt="Phone"
-                                        />
-                                      </a>
-                                    )}
-                                    {leadInfo.email && (
-                                      <a
-                                        href={`mailto:${leadInfo.email}`}
-                                        className="icon-wrapper-sm mail"
-                                      >
-                                        <img src="/assets/img/icons/mailIcon.png" alt="Mail" />
-                                      </a>
-                                    )}
-                                    {leadInfo?.phonenumbers?.length > 0 && (
-                                      <Link
-                                        to={`https://wa.me/${leadInfo?.phonenumbers?.[0]}`}
-                                        target="_blank"
-                                        className="icon-wrapper-sm whatsapp no-filter"
-                                      >
-                                        <img
-                                          src="/assets/img/icons/whatsappIcon96.png"
-                                          alt="WhatsApp"
-                                        />
-                                      </Link>
-                                    )}
-                                    {leadInfo.instagram && (
-                                      <Link
-                                        to={leadInfo.instagram}
-                                        target="_blank"
-                                        className="icon-wrapper-sm instagram no-filter"
-                                      >
-                                        <img
-                                          src="/assets/img/icons/instagramIcon.png"
-                                          alt="Instagram"
-                                        />
-                                      </Link>
-                                    )}
-                                    {leadInfo.twitter && (
-                                      <Link
-                                        to={leadInfo.twitter}
-                                        target="_blank"
-                                        className="icon-wrapper-sm twitter no-filter"
-                                      >
-                                        <img
-                                          src="/assets/img/icons/twitterIcon.png"
-                                          alt="Twitter"
-                                        />
-                                      </Link>
-                                    )}
-                                    {leadInfo.linkedin && (
-                                      <Link
-                                        to={leadInfo.linkedin}
-                                        target="_blank"
-                                        className="icon-wrapper-sm linkedin no-filter"
-                                      >
-                                        <img
-                                          src="/assets/img/icons/linkedinIcon.png"
-                                          alt="LinkedIn"
-                                        />
-                                      </Link>
-                                    )}
-                                    {leadInfo.facebook && (
-                                      <Link
-                                        to={leadInfo.facebook}
-                                        target="_blank"
-                                        className="icon-wrapper-sm facebook no-filter"
-                                      >
-                                        <img
-                                          src="/assets/img/icons/facebookIcon.png"
-                                          alt="Facebook"
-                                        />
-                                      </Link>
-                                    )}
-                                    {leadInfo.telegram && (
-                                      <Link
-                                        to={leadInfo.telegram}
-                                        target="_blank"
-                                        className="icon-wrapper-sm telegram no-filter"
-                                      >
-                                        <img
-                                          src="/assets/img/icons/telegramIcon.png"
-                                          alt="Telegram"
-                                        />
-                                      </Link>
-                                    )}
-                                  </div>
+                      {leadInfo?.phonenumbers?.length > 0 && (
+                        <a
+                          href={`tel:${leadInfo?.phonenumbers[0]}`}
+                          className="icon-wrapper-sm phone"
+                        >
+                          <img
+                            src="/assets/img/icons/phoneCallIcon.png"
+                            alt="Phone"
+                          />
+                        </a>
+                      )}
+                      {leadInfo?.emailaddresses?.length > 0 && (
+                        <Link
+                          data-bs-toggle="modal"
+                          data-bs-target="#show_email_templates"
+                          className="icon-wrapper-sm mail"
+                        >
+                          <img
+                            src="/assets/img/icons/mailIcon.png"
+                            alt="Mail"
+                          />
+                        </Link>
+                      )}
+                      {leadInfo?.phonenumbers?.length > 0 && (
+                        <Link
+                          // to={`https://wa.me/${leadInfo?.phonenumbers?.[0]}`}
+                          // target="_blank"
+                          data-bs-toggle="modal"
+                          data-bs-target="#show_whatsapp_templates"
+                          className="icon-wrapper-sm whatsapp no-filter"
+                        >
+                          <img
+                            src="/assets/img/icons/whatsappIcon96.png"
+                            alt="WhatsApp"
+                          />
+                        </Link>
+                      )}
+                      {leadInfo.instagram && (
+                        <Link
+                          to={leadInfo.instagram}
+                          target="_blank"
+                          className="icon-wrapper-sm instagram no-filter"
+                        >
+                          <img
+                            src="/assets/img/icons/instagramIcon.png"
+                            alt="Instagram"
+                          />
+                        </Link>
+                      )}
+                      {leadInfo.twitter && (
+                        <Link
+                          to={leadInfo.twitter}
+                          target="_blank"
+                          className="icon-wrapper-sm twitter no-filter"
+                        >
+                          <img
+                            src="/assets/img/icons/twitterIcon.png"
+                            alt="Twitter"
+                          />
+                        </Link>
+                      )}
+                      {leadInfo.linkedin && (
+                        <Link
+                          to={leadInfo.linkedin}
+                          target="_blank"
+                          className="icon-wrapper-sm linkedin no-filter"
+                        >
+                          <img
+                            src="/assets/img/icons/linkedinIcon.png"
+                            alt="LinkedIn"
+                          />
+                        </Link>
+                      )}
+                      {leadInfo.facebook && (
+                        <Link
+                          to={leadInfo.facebook}
+                          target="_blank"
+                          className="icon-wrapper-sm facebook no-filter"
+                        >
+                          <img
+                            src="/assets/img/icons/facebookIcon.png"
+                            alt="Facebook"
+                          />
+                        </Link>
+                      )}
+                      {leadInfo.telegram && (
+                        <Link
+                          to={leadInfo.telegram}
+                          target="_blank"
+                          className="icon-wrapper-sm telegram no-filter"
+                        >
+                          <img
+                            src="/assets/img/icons/telegramIcon.png"
+                            alt="Telegram"
+                          />
+                        </Link>
+                      )}
+                    </div>
                     <ul>
                       <div className="row mb-3 d-flex flex-column align-items-center">
-                        <div className="d-flex align-items-center mb-2">
-                          <i class="fa-regular fa-building me-2"></i>
-                          {leadInfo.company && (
+                        {leadInfo.company && (
+                          <div className="d-flex align-items-center mb-2">
+                            <i class="fa-regular fa-building me-2"></i>
+
                             <span className="col-12 fw-semibold text-black">
                               {leadInfo.company}
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         <div className="d-flex align-items-center mb-2">
                           <i class="fa-regular fa-user me-2"></i>
                           <span
@@ -1571,12 +1579,14 @@ const ContactsDetails = () => {
                             {leadInfo.firstname} {leadInfo.lastname}
                           </span>
                         </div>
-                        <div className="d-flex align-items-center mb-2">
-                          <i class="fa-solid fa-briefcase me-2"></i>
-                          <span className="col-12 fst-italic">
-                            {leadInfo.designation}
-                          </span>
-                        </div>
+                        {leadInfo.designation && (
+                          <div className="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-briefcase me-2"></i>
+                            <span className="col-12 fst-italic">
+                              {leadInfo.designation}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       {leadInfo?.phonenumbers?.length > 0 && (
                         <li className="row mb-3">
@@ -1590,37 +1600,6 @@ const ContactsDetails = () => {
                                 key={index}
                               >
                                 <span>{"+" + number}</span>
-                                <div className="d-flex align-items-center">
-                                  <a
-                                    href={`tel:${number}`}
-                                    onClick={() => {}}
-                                    className="action-icon me-3"
-                                    title="Call"
-                                  >
-                                    <i className="ti ti-phone" />
-                                  </a>
-
-                                  {/* <a
-                                    // href={`https://wa.me/${text}`}
-                                    className="action-icon"
-                                    title="WhatsApp"
-                                  >
-                                    <i className="fa-brands fa-whatsapp"></i>
-                                  </a> */}
-                                  <Link
-                                    to="#"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#show_whatsapp_templates"
-                                    className="link-purple fw-medium action-icon"
-                                    // onClick={() => {
-                                    //   dispatch(setSelectedContact(record));
-                                    // }}
-                                    title="WhatsApp"
-                                    // target="_blank"
-                                  >
-                                    <i className="fa-brands fa-whatsapp"></i>
-                                  </Link>
-                                </div>
                               </div>
                             );
                           })}
@@ -1638,7 +1617,7 @@ const ContactsDetails = () => {
                                 key={index}
                               >
                                 <span>{email}</span>
-                                <Link
+                                {/* <Link
                                   to="#"
                                   data-bs-toggle="modal"
                                   data-bs-target="#show_email_templates"
@@ -1646,7 +1625,7 @@ const ContactsDetails = () => {
                                   title="Email"
                                 >
                                   <MdMail />
-                                </Link>
+                                </Link> */}
                               </div>
                             );
                           })}
@@ -2282,7 +2261,7 @@ const ContactsDetails = () => {
                   {/* /Notes */}
                   {/*Add Edit Tasks */}
                   <div className="tab-pane fade active show" id="tasks">
-                    <div className="card">
+                    <div className="card" style={{ minHeight: 200 }}>
                       <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
                         <h4 className="fw-semibold mb-0">Notes</h4>
                         <div className="d-inline-flex align-items-center">
@@ -2319,124 +2298,129 @@ const ContactsDetails = () => {
 
                       <div className="card-body">
                         <div className="notes-activity">
-                          {sortedIncompleteTask
-                            .filter((task) => task.taskIsCompleted === false)
-                            .map((task, taskIndex) => {
-                              return (
-                                <div className="card mb-3" key={taskIndex}>
-                                  <div
-                                    className="card-body"
-                                    onMouseEnter={() =>
-                                      setHoveredTaskIndex(taskIndex)
-                                    }
-                                    onMouseLeave={() =>
-                                      setHoveredTaskIndex(null)
-                                    }
-                                  >
-                                    <div className="d-flex align-items-center justify-content-between pb-2">
-                                      {hoveredTaskIndex === taskIndex && (
-                                        <div
-                                          style={{
-                                            position: "absolute",
-                                            top: 20,
-                                            right: 20,
-                                          }}
+                          {sortedIncompleteTask.length>0 ?<div>
+                            {sortedIncompleteTask
+                              .filter((task) => task.taskIsCompleted === false)
+                              .map((task, taskIndex) => {
+                                return (
+                                  <div className="card mb-3" key={taskIndex}>
+                                    <div
+                                      className="card-body"
+                                      onMouseEnter={() =>
+                                        setHoveredTaskIndex(taskIndex)
+                                      }
+                                      onMouseLeave={() =>
+                                        setHoveredTaskIndex(null)
+                                      }
+                                    >
+                                      <div className="d-flex align-items-center justify-content-between pb-2">
+                                        {hoveredTaskIndex === taskIndex && (
+                                          <div
+                                            style={{
+                                              position: "absolute",
+                                              top: 20,
+                                              right: 20,
+                                            }}
+                                          >
+                                            <Link
+                                              to="#"
+                                              className="styleForDoneBtn me-3"
+                                              onClick={() => {
+                                                handleToggleTaskCompletion(task);
+                                              }}
+                                            >
+                                              <IoMdDoneAll />
+                                            </Link>
+                                            <Link
+                                              to="#"
+                                              className="styleForEditBtn me-3"
+                                              data-bs-toggle="modal"
+                                              data-bs-target="#add_tasks"
+                                              onClick={() => {
+                                                handleTaskEditClick(task);
+                                              }}
+                                            >
+                                              <i className="ti ti-edit text-blue" />
+                                            </Link>
+                                            <Link
+                                              to="#"
+                                              className="styleForDeleteBtn"
+                                              data-bs-toggle="modal"
+                                              data-bs-target={`#delete_${deleteModalText}`}
+                                              onClick={() => {
+                                                setDeleteModalText("note");
+                                                setSelectedTask(task);
+                                              }}
+                                            >
+                                              <i className="ti ti-trash text-danger" />
+                                            </Link>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="col-md-11 mb-3">
+                                        {/* {task.taskType == "Follow Up" ? ( */}
+  
+                                        <p
+                                          className={`badge badge-soft-warning fw-medium me-2`}
                                         >
-                                          <Link
-                                            to="#"
-                                            className="styleForDoneBtn me-3"
-                                            onClick={() => {
-                                              handleToggleTaskCompletion(task);
+                                          {/* <FaCalendarAlt className="me-2" /> */}
+                                          {task.taskTitle}
+                                        </p>
+  
+                                        <p>{task.taskDescription}</p>
+                                      </div>
+                                      <div className="d-flex justify-content-between align-items-center">
+                                        <p className="mb-0">
+                                          ✎{" "}
+                                          <span className="fw-medium text-black ms-2">
+                                            Last Modified on{" "}
+                                          </span>{" "}
+                                          {/* <span>{task.dateCreated} </span> */}
+                                          <span>
+                                            {dayjs(task.updatedAt).format(
+                                              "DD MMM YYYY, hh:mm A"
+                                            )}
+                                          </span>
+                                        </p>
+                                        {/* <p>
+                                          <span className="fw-medium text-black">
+                                            Due date :
+                                          </span>{" "}
+                                          <span
+                                            style={{
+                                              color: dayjs(
+                                                `${
+                                                  task.taskDueDate.split("T")[0]
+                                                }T${task.taskDueTime}`
+                                              ).isBefore(dayjs())
+                                                ? "red"
+                                                : "inherit",
                                             }}
                                           >
-                                            <IoMdDoneAll />
-                                          </Link>
-                                          <Link
-                                            to="#"
-                                            className="styleForEditBtn me-3"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#add_tasks"
-                                            onClick={() => {
-                                              handleTaskEditClick(task);
-                                            }}
-                                          >
-                                            <i className="ti ti-edit text-blue" />
-                                          </Link>
-                                          <Link
-                                            to="#"
-                                            className="styleForDeleteBtn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={() => {
-                                              setDeleteModalText("task");
-                                              setSelectedTask(task);
-                                            }}
-                                          >
-                                            <i className="ti ti-trash text-danger" />
-                                          </Link>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-md-11 mb-3">
-                                      {/* {task.taskType == "Follow Up" ? ( */}
-
-                                      <p
-                                        className={`badge badge-soft-warning fw-medium me-2`}
-                                      >
-                                        {/* <FaCalendarAlt className="me-2" /> */}
-                                        {task.taskTitle}
-                                      </p>
-
-                                      <p>{task.taskDescription}</p>
-                                    </div>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                      <p className="mb-0">
-                                        ✎{" "}
-                                        <span className="fw-medium text-black ms-2">
-                                          Last Modified on{" "}
-                                        </span>{" "}
-                                        {/* <span>{task.dateCreated} </span> */}
-                                        <span>
-                                          {dayjs(task.updatedAt).format(
-                                            "DD MMM YYYY, hh:mm A"
-                                          )}
-                                        </span>
-                                      </p>
-                                      {/* <p>
-                                        <span className="fw-medium text-black">
-                                          Due date :
-                                        </span>{" "}
-                                        <span
-                                          style={{
-                                            color: dayjs(
-                                              `${
-                                                task.taskDueDate.split("T")[0]
-                                              }T${task.taskDueTime}`
-                                            ).isBefore(dayjs())
-                                              ? "red"
-                                              : "inherit",
-                                          }}
-                                        >
-                                          {dayjs(task.taskDueDate).format(
-                                            "DD MMM YYYY"
-                                          )}
-                                          {", "}
-                                          {dayjs(
-                                            task.taskDueTime,
-                                            "HH:mm"
-                                          ).format("hh:mm A")}
-                                        </span>
-                                      </p> */}
+                                            {dayjs(task.taskDueDate).format(
+                                              "DD MMM YYYY"
+                                            )}
+                                            {", "}
+                                            {dayjs(
+                                              task.taskDueTime,
+                                              "HH:mm"
+                                            ).format("hh:mm A")}
+                                          </span>
+                                        </p> */}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                          </div>
+                        :
+                        <div className="d-flex justify-content-center align-items-center h-100">No Notes available</div>  
+                        }
                         </div>
                       </div>
                     </div>
                     {/* for completed task */}
-                    <div className="card">
+                    <div className="card" style={{ minHeight: 200 }}>
                       <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
                         <h4 className="fw-semibold mb-0">Completed Notes</h4>
                         {/* <div className="d-inline-flex align-items-center">
@@ -2453,142 +2437,148 @@ const ContactsDetails = () => {
                       </div>
                       <div className="card-body">
                         <div className="notes-activity">
-                          {sortedCompletedTask
-                            .filter((task) => task.taskIsCompleted === true)
-                            .map((task, taskCompletedIndex) => {
-                              return (
-                                <div
-                                  className="card mb-3"
-                                  key={taskCompletedIndex}
-                                >
+                          {
+                            sortedCompletedTask.length>0?
+                            <div>
+                            {sortedCompletedTask
+                              .filter((task) => task.taskIsCompleted === true)
+                              .map((task, taskCompletedIndex) => {
+                                return (
                                   <div
-                                    className="card-body"
-                                    onMouseEnter={() =>
-                                      setHoveredTaskCompletedIndex(
-                                        taskCompletedIndex
-                                      )
-                                    }
-                                    onMouseLeave={() =>
-                                      setHoveredTaskCompletedIndex(null)
-                                    }
+                                    className="card mb-3"
+                                    key={taskCompletedIndex}
                                   >
-                                    <div className="d-flex align-items-center justify-content-between pb-2">
-                                      {hoveredTaskCompletedIndex ===
-                                        taskCompletedIndex && (
-                                        <div
-                                          style={{
-                                            position: "absolute",
-                                            top: 20,
-                                            right: 20,
-                                          }}
-                                        >
-                                          <Link
-                                            to="#"
-                                            className="styleForNotDoneBtn me-3"
-                                            onClick={() => {
-                                              handleToggleTaskCompletion(task);
+                                    <div
+                                      className="card-body"
+                                      onMouseEnter={() =>
+                                        setHoveredTaskCompletedIndex(
+                                          taskCompletedIndex
+                                        )
+                                      }
+                                      onMouseLeave={() =>
+                                        setHoveredTaskCompletedIndex(null)
+                                      }
+                                    >
+                                      <div className="d-flex align-items-center justify-content-between pb-2">
+                                        {hoveredTaskCompletedIndex ===
+                                          taskCompletedIndex && (
+                                          <div
+                                            style={{
+                                              position: "absolute",
+                                              top: 20,
+                                              right: 20,
                                             }}
                                           >
-                                            <MdOutlineRemoveDone />
-                                          </Link>
-                                          <Link
-                                            to="#"
-                                            className="styleForEditBtn me-3"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#add_tasks"
-                                            onClick={() => {
-                                              handleTaskEditClick(task);
-                                            }}
-                                          >
-                                            <i className="ti ti-edit text-blue" />
-                                          </Link>
-                                          <Link
-                                            to="#"
-                                            className="styleForDeleteBtn"
-                                            data-bs-toggle="modal"
-                                            data-bs-target={`#delete_${deleteModalText}`}
-                                            onClick={() => {
-                                              setDeleteModalText("task");
-                                              setSelectedTask(task);
-                                            }}
-                                          >
-                                            <i className="ti ti-trash text-danger" />
-                                          </Link>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="col-md-11 mb-3">
-                                      {task.taskType == "Follow Up" ? (
-                                        <div className="mb-3">
-                                          <span
-                                            className={`badge badge-soft-warning fw-medium me-2`}
-                                          >
-                                            <FaCalendarAlt className="me-2" />
-                                            {task.taskType}
-                                          </span>
-                                          <span
-                                            className={`badge badge-soft-success fw-medium`}
-                                          >
-                                            <FaCalendarAlt className="me-2" />
-                                            Completed
-                                          </span>
-                                        </div>
-                                      ) : (
-                                        <div className="mb-3">
-                                          <span
-                                            className={`badge badge-soft-info fw-medium me-2`}
-                                          >
-                                            <FaRegBell className="me-2" />
-                                            {task.taskTitle}
-                                          </span>
-                                          <span
-                                            className={`badge badge-soft-success fw-medium`}
-                                          >
-                                            <MdDownloadDone className="me-2" />
-                                            Completed
-                                          </span>
-                                        </div>
-                                      )}
-                                      <p>{task.taskDescription}</p>
-                                    </div>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                      <p className="mb-0">
-                                        ✎{" "}
-                                        <span className="fw-medium text-black ms-2">
-                                          Last Modified on{" "}
-                                        </span>{" "}
-                                        <span>
-                                          {/* {task.taskDueDate}{" "}
-                                          {task.taskDueTime && (
-                                            <span>{task.taskDueTime}</span>
-                                          )} */}
+                                            <Link
+                                              to="#"
+                                              className="styleForNotDoneBtn me-3"
+                                              onClick={() => {
+                                                handleToggleTaskCompletion(task);
+                                              }}
+                                            >
+                                              <MdOutlineRemoveDone />
+                                            </Link>
+                                            <Link
+                                              to="#"
+                                              className="styleForEditBtn me-3"
+                                              data-bs-toggle="modal"
+                                              data-bs-target="#add_tasks"
+                                              onClick={() => {
+                                                handleTaskEditClick(task);
+                                              }}
+                                            >
+                                              <i className="ti ti-edit text-blue" />
+                                            </Link>
+                                            <Link
+                                              to="#"
+                                              className="styleForDeleteBtn"
+                                              data-bs-toggle="modal"
+                                              data-bs-target={`#delete_${deleteModalText}`}
+                                              onClick={() => {
+                                                setDeleteModalText("note");
+                                                setSelectedTask(task);
+                                              }}
+                                            >
+                                              <i className="ti ti-trash text-danger" />
+                                            </Link>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="col-md-11 mb-3">
+                                        {task.taskType == "Follow Up" ? (
+                                          <div className="mb-3">
+                                            <span
+                                              className={`badge badge-soft-warning fw-medium me-2`}
+                                            >
+                                              <FaCalendarAlt className="me-2" />
+                                              {task.taskType}
+                                            </span>
+                                            <span
+                                              className={`badge badge-soft-success fw-medium`}
+                                            >
+                                              <FaCalendarAlt className="me-2" />
+                                              Completed
+                                            </span>
+                                          </div>
+                                        ) : (
+                                          <div className="mb-3">
+                                            <span
+                                              className={`badge badge-soft-info fw-medium me-2`}
+                                            >
+                                              <FaRegBell className="me-2" />
+                                              {task.taskTitle}
+                                            </span>
+                                            <span
+                                              className={`badge badge-soft-success fw-medium`}
+                                            >
+                                              <MdDownloadDone className="me-2" />
+                                              Completed
+                                            </span>
+                                          </div>
+                                        )}
+                                        <p>{task.taskDescription}</p>
+                                      </div>
+                                      <div className="d-flex justify-content-between align-items-center">
+                                        <p className="mb-0">
+                                          ✎{" "}
+                                          <span className="fw-medium text-black ms-2">
+                                            Last Modified on{" "}
+                                          </span>{" "}
                                           <span>
-                                            {dayjs(task.updatedAt).format(
-                                              "DD MMM YYYY, hh:mm A"
-                                            )}
+                                            {/* {task.taskDueDate}{" "}
+                                            {task.taskDueTime && (
+                                              <span>{task.taskDueTime}</span>
+                                            )} */}
+                                            <span>
+                                              {dayjs(task.updatedAt).format(
+                                                "DD MMM YYYY, hh:mm A"
+                                              )}
+                                            </span>
                                           </span>
-                                        </span>
-                                      </p>
-                                      {/* <p>
-                                        <span className="fw-medium text-black">
-                                          Due date :
-                                        </span>{" "}
-                                        <span>
-                                          {dayjs(task.taskDueDate).format(
-                                            "DD MMM YYYY"
-                                          )}
-                                          {", "}
-                                          {dayjs(
-                                            task.taskDueTime,
-                                            "HH:mm"
-                                          ).format("hh:mm A")}
-                                        </span>
-                                      </p> */}
+                                        </p>
+                                        {/* <p>
+                                          <span className="fw-medium text-black">
+                                            Due date :
+                                          </span>{" "}
+                                          <span>
+                                            {dayjs(task.taskDueDate).format(
+                                              "DD MMM YYYY"
+                                            )}
+                                            {", "}
+                                            {dayjs(
+                                              task.taskDueTime,
+                                              "HH:mm"
+                                            ).format("hh:mm A")}
+                                          </span>
+                                        </p> */}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                          </div>:
+                          <div className="d-flex justify-content-center align-items-center h-100">No Notes available</div>
+                          }
                         </div>
                       </div>
                     </div>
@@ -2707,54 +2697,60 @@ const ContactsDetails = () => {
                                       <p>{meeting.meetingDescription}</p>
                                     </div>
 
-                                    {meeting.meetingType == "online" && (
+                                    
+                                    <div className="d-flex justify-content-between">
+                                      <div>
+                                        {meeting.meetingType == "online" && (
                                       <div className="d-flex justify-content-end mb-2">
                                         {" "}
                                         <span className="fw-medium text-black me-1">
                                           Meeting Link :
                                         </span>{" "}
-                                        <span> {meeting.meetingLink}</span>
+                                        <a href={meeting.meetingLink} target="_blank"> {meeting.meetingLink}</a>
                                       </div>
                                     )}
-                                    <div className="d-flex justify-content-between align-items-center">
-                                      <p className="mb-0">
-                                        ✎{" "}
-                                        <span className="fw-medium text-black ms-2">
-                                          Last Modified on
-                                        </span>{" "}
-                                        <span>
-                                          {dayjs(meeting.updatedAt).format(
-                                            "DD MMM YYYY, hh:mm A"
-                                          )}
-                                        </span>
-                                      </p>
-                                      <p>
-                                        <span className="fw-medium text-black">
-                                          Meeting Starts at :
-                                        </span>{" "}
-                                        <span
-                                          style={{
-                                            color: dayjs(
-                                              `${
-                                                meeting.meetingStartDate.split(
-                                                  "T"
-                                                )[0]
-                                              }T${meeting.meetingStartTime}`
-                                            ).isBefore(dayjs())
-                                              ? "red"
-                                              : "inherit",
-                                          }}
-                                        >
-                                          {dayjs(
-                                            meeting.meetingStartDate
-                                          ).format("DD MMM YYYY")}
-                                          {", "}
-                                          {dayjs(
-                                            meeting.meetingStartTime,
-                                            "HH:mm"
-                                          ).format("hh:mm A")}
-                                        </span>
-                                      </p>
+                                      </div>
+                                      <div>
+                                        
+                                        <p className="text-end">
+                                          <span className="fw-medium text-black">
+                                            Meeting Starts at :
+                                          </span>{" "}
+                                          <span
+                                            style={{
+                                              color: dayjs(
+                                                `${
+                                                  meeting.meetingStartDate.split(
+                                                    "T"
+                                                  )[0]
+                                                }T${meeting.meetingStartTime}`
+                                              ).isBefore(dayjs())
+                                                ? "red"
+                                                : "inherit",
+                                            }}
+                                          >
+                                            {dayjs(
+                                              meeting.meetingStartDate
+                                            ).format("DD MMM YYYY")}
+                                            {", "}
+                                            {dayjs(
+                                              meeting.meetingStartTime,
+                                              "HH:mm"
+                                            ).format("hh:mm A")}
+                                          </span>
+                                        </p>
+                                        <p className="mb-0">
+                                          ✎{" "}
+                                          <span className="fw-medium text-black ms-2">
+                                            Last Modified on
+                                          </span>{" "}
+                                          <span>
+                                            {dayjs(meeting.updatedAt).format(
+                                              "DD MMM YYYY, hh:mm A"
+                                            )}
+                                          </span>
+                                        </p>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

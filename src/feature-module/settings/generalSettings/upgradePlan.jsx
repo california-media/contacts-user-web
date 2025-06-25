@@ -53,12 +53,12 @@ const UpgradePlan = () => {
                             <div className="card-body">
                               <div className="text-center border-bottom pb-3 mb-3">
                                 <span>Starter</span>
-                                <h2 className="d-flex align-items-end justify-content-center mt-1">
+                                <h4 className="d-flex align-items-end justify-content-center fw-bold mt-1">
                                   FREE
                                   {/* <span className="fs-14 fw-medium ms-2">
                                     / month
                                   </span> */}
-                                </h2>
+                                </h4>
                                 <span>
                                   Perfect for Individual users trying out
                                   digital Networking
@@ -66,50 +66,50 @@ const UpgradePlan = () => {
                               </div>
                               <div className="d-block">
                                 <div>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     1 Digital Card
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Profile Short URL
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Unlimited QR Scans
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Reminders + Notes + Calendar Integration
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Scan up to 10 business cards/month
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     QR Sharing + Link Sharing
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Email & Whatsapp
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Limited Template Access
@@ -147,68 +147,68 @@ const UpgradePlan = () => {
                             <div className="card-body">
                               <div className="text-center border-bottom pb-3 mb-3">
                                 <span>Pro</span>
-                                <h2 className="d-flex align-items-end justify-content-center mt-1">
+                                <h4 className="d-flex align-items-end justify-content-center fw-bold mt-1">
                                   AED 9.99
                                   <span className="fs-14 fw-medium ms-2">
                                     / month
                                   </span>
-                                </h2>
+                                </h4>
                                 <span>
                                   Best for Professional who Network daily.
                                 </span>
                               </div>
                               <div className="d-block">
                                 <div>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Everything in starter
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     5 Digital Cards
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Unlimited Contacts
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     AI Template Suggestions (Email/WhatsApp)
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Unlimited Scan business cards/month
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Contact Requests & Tagging
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Reminders + Notes + Calendar Integration
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Export CSV/VCF
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Priority support
@@ -228,42 +228,42 @@ const UpgradePlan = () => {
                             <div className="card-body">
                               <div className="text-center border-bottom pb-3 mb-3">
                                 <span>Business</span>
-                                <h2 className="d-flex align-items-end justify-content-center mt-1">
+                                <h4 className="d-flex align-items-end justify-content-center fw-bold mt-1">
                                   AED 49.99
                                   <span className="fs-14 fw-medium ms-2">
                                     / month
                                   </span>
-                                </h2>
+                                </h4>
                                 <span>For Large Teams & Corporates</span>
                               </div>
                               <div className="d-block">
                                 <div>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Everything in Pro
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Advance Integrations ( Zapier, CRM, APP)
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Data Compliance (GDPR / ISO)
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     SLA / UPTIME GUARANTEE
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className="mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Account Manager
@@ -283,53 +283,53 @@ const UpgradePlan = () => {
                             <div className="card-body">
                               <div className="text-center border-bottom pb-3 mb-3">
                                 <span>Enterprise</span>
-                                <h2 className="d-flex align-items-end justify-content-center mt-1">
+                                <h4 className="d-flex align-items-end justify-content-center fw-bold mt-1">
                                   Custom Pricing
-                                </h2>
+                                </h4>
                                 <span>
                                   For Large Teams, Event Organizers & Corporate
                                 </span>
                               </div>
                               <div className="d-block">
                                 <div>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className=" mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     White-Label Solution
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className=" mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Advance Integrations ( Zapier, CRM, APP)
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className=" mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Dedicated Account
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className=" mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     NFC Card Integration & Bulk Orders
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className=" mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Data Compliance (GDPR / ISO)
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className=" mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     SLA / UPTIME GUARANTEE
                                   </p>
-                                  <p className="d-flex align-items-center fs-16 fw-medium text-dark mb-2">
-                                    <span className="bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
+                                  <p className="d-flex fs-14 fw-medium text-dark mb-2">
+                                    <span className=" mt-1 bg-success d-flex align-items-center justify-content-center fs-12 wh-14 me-1 rounded">
                                       <i className="ti ti-check" />
                                     </span>
                                     Dedicated Account Manager
