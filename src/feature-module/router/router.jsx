@@ -19,7 +19,7 @@ const ALLRoutes = () => {
   const dispatch = useDispatch();
   const { toasts } = useSelector((state) => state.toast);
 
-  const { isGoogleSignedIn } = useContext(GoogleAuthContext);
+const userProfile = useSelector((state) =>state.profile)
   const routesWithoutFeature = ["/registration-form"];
   const route = all_routes;
   // Find the current route in either public or auth routes
@@ -45,10 +45,10 @@ const ALLRoutes = () => {
     }
   }, []);
   useEffect(() => {
-    if (isGoogleSignedIn) {
+    if (userProfile.googleConnected) {
       fetchGoogleCalendarEvents(dispatch);
     }
-  }, [isGoogleSignedIn]);
+  }, [userProfile.googleConnected]);
 
   return (
     <>

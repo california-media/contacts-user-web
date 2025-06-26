@@ -604,7 +604,7 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className="col-md-12 fitContentHeight">
-                            <Link to={route.myScans}>
+                            <Link to="/registration-form">
                               <div className="dashboardSmallCards">
                                 <div
                                   style={{

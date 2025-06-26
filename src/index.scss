@@ -967,3 +967,13 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
   flex: 1 1 auto;
   overflow-y: auto;
 }
+
+
+.ant-spin-container{
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+.ant-table-wrapper{height: 100%;}
+.ant-spin-nested-loading{height: 100%;}

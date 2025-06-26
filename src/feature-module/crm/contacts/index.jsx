@@ -209,7 +209,7 @@ const ContactsDetails = () => {
 
   const location = useLocation();
   const { record } = location.state || {};
-console.log(leadInfo,"leadingofn");
+  console.log(leadInfo, "leadingofn");
 
   useEffect(() => {
     setLeadInfo(selectedContact);
@@ -346,7 +346,7 @@ console.log(leadInfo,"leadingofn");
   const [contactedToday, setContactedToday] = useState(false);
   const [quotationQuantities, setQuotationQuantities] = useState([]);
   const [addedQuotationEntries, setAddedQuotationEntries] = useState([]);
-  const { isGoogleSignedIn } = useContext(GoogleAuthContext);
+
   const [columnVisibility, setColumnVisibility] = useState({
     "": true,
     "Call Id": true,
@@ -654,7 +654,7 @@ console.log(leadInfo,"leadingofn");
   };
 
   const handleMeetingSubmit = async () => {
-    if (!isGoogleSignedIn) {
+    if (!userProfile.googleConnected) {
       return dispatch(
         showToast({
           message: "Please connect the Google account first",
@@ -2298,91 +2298,94 @@ console.log(leadInfo,"leadingofn");
 
                       <div className="card-body">
                         <div className="notes-activity">
-                          {sortedIncompleteTask.length>0 ?<div>
-                            {sortedIncompleteTask
-                              .filter((task) => task.taskIsCompleted === false)
-                              .map((task, taskIndex) => {
-                                return (
-                                  <div className="card mb-3" key={taskIndex}>
-                                    <div
-                                      className="card-body"
-                                      onMouseEnter={() =>
-                                        setHoveredTaskIndex(taskIndex)
-                                      }
-                                      onMouseLeave={() =>
-                                        setHoveredTaskIndex(null)
-                                      }
-                                    >
-                                      <div className="d-flex align-items-center justify-content-between pb-2">
-                                        {hoveredTaskIndex === taskIndex && (
-                                          <div
-                                            style={{
-                                              position: "absolute",
-                                              top: 20,
-                                              right: 20,
-                                            }}
+                          {sortedIncompleteTask.length > 0 ? (
+                            <div>
+                              {sortedIncompleteTask
+                                .filter(
+                                  (task) => task.taskIsCompleted === false
+                                )
+                                .map((task, taskIndex) => {
+                                  return (
+                                    <div className="card mb-3" key={taskIndex}>
+                                      <div
+                                        className="card-body"
+                                        onMouseEnter={() =>
+                                          setHoveredTaskIndex(taskIndex)
+                                        }
+                                        onMouseLeave={() =>
+                                          setHoveredTaskIndex(null)
+                                        }
+                                      >
+                                        <div className="d-flex align-items-center justify-content-between pb-2">
+                                          {hoveredTaskIndex === taskIndex && (
+                                            <div
+                                              style={{
+                                                position: "absolute",
+                                                top: 20,
+                                                right: 20,
+                                              }}
+                                            >
+                                              <Link
+                                                to="#"
+                                                className="styleForDoneBtn me-3"
+                                                onClick={() => {
+                                                  handleToggleTaskCompletion(
+                                                    task
+                                                  );
+                                                }}
+                                              >
+                                                <IoMdDoneAll />
+                                              </Link>
+                                              <Link
+                                                to="#"
+                                                className="styleForEditBtn me-3"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#add_tasks"
+                                                onClick={() => {
+                                                  handleTaskEditClick(task);
+                                                }}
+                                              >
+                                                <i className="ti ti-edit text-blue" />
+                                              </Link>
+                                              <Link
+                                                to="#"
+                                                className="styleForDeleteBtn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target={`#delete_${deleteModalText}`}
+                                                onClick={() => {
+                                                  setDeleteModalText("note");
+                                                  setSelectedTask(task);
+                                                }}
+                                              >
+                                                <i className="ti ti-trash text-danger" />
+                                              </Link>
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="col-md-11 mb-3">
+                                          {/* {task.taskType == "Follow Up" ? ( */}
+
+                                          <p
+                                            className={`badge badge-soft-warning fw-medium me-2`}
                                           >
-                                            <Link
-                                              to="#"
-                                              className="styleForDoneBtn me-3"
-                                              onClick={() => {
-                                                handleToggleTaskCompletion(task);
-                                              }}
-                                            >
-                                              <IoMdDoneAll />
-                                            </Link>
-                                            <Link
-                                              to="#"
-                                              className="styleForEditBtn me-3"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#add_tasks"
-                                              onClick={() => {
-                                                handleTaskEditClick(task);
-                                              }}
-                                            >
-                                              <i className="ti ti-edit text-blue" />
-                                            </Link>
-                                            <Link
-                                              to="#"
-                                              className="styleForDeleteBtn"
-                                              data-bs-toggle="modal"
-                                              data-bs-target={`#delete_${deleteModalText}`}
-                                              onClick={() => {
-                                                setDeleteModalText("note");
-                                                setSelectedTask(task);
-                                              }}
-                                            >
-                                              <i className="ti ti-trash text-danger" />
-                                            </Link>
-                                          </div>
-                                        )}
-                                      </div>
-                                      <div className="col-md-11 mb-3">
-                                        {/* {task.taskType == "Follow Up" ? ( */}
-  
-                                        <p
-                                          className={`badge badge-soft-warning fw-medium me-2`}
-                                        >
-                                          {/* <FaCalendarAlt className="me-2" /> */}
-                                          {task.taskTitle}
-                                        </p>
-  
-                                        <p>{task.taskDescription}</p>
-                                      </div>
-                                      <div className="d-flex justify-content-between align-items-center">
-                                        <p className="mb-0">
-                                          ✎{" "}
-                                          <span className="fw-medium text-black ms-2">
-                                            Last Modified on{" "}
-                                          </span>{" "}
-                                          {/* <span>{task.dateCreated} </span> */}
-                                          <span>
-                                            {dayjs(task.updatedAt).format(
-                                              "DD MMM YYYY, hh:mm A"
-                                            )}
-                                          </span>
-                                        </p>
-                                        {/* <p>
+                                            {/* <FaCalendarAlt className="me-2" /> */}
+                                            {task.taskTitle}
+                                          </p>
+
+                                          <p>{task.taskDescription}</p>
+                                        </div>
+                                        <div className="d-flex justify-content-between align-items-center">
+                                          <p className="mb-0">
+                                            ✎{" "}
+                                            
+                                            {/* <span>{task.dateCreated} </span> */}
+                                            <span>
+                                              {dayjs(task.updatedAt).format(
+                                                "DD MMM YYYY, hh:mm A"
+                                              )}
+                                            </span>
+                                          </p>
+                                          {/* <p>
                                           <span className="fw-medium text-black">
                                             Due date :
                                           </span>{" "}
@@ -2407,15 +2410,17 @@ console.log(leadInfo,"leadingofn");
                                             ).format("hh:mm A")}
                                           </span>
                                         </p> */}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        :
-                        <div className="d-flex justify-content-center align-items-center h-100">No Notes available</div>  
-                        }
+                                  );
+                                })}
+                            </div>
+                          ) : (
+                            <div className="d-flex justify-content-center align-items-center h-100">
+                              No Notes available
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2437,126 +2442,125 @@ console.log(leadInfo,"leadingofn");
                       </div>
                       <div className="card-body">
                         <div className="notes-activity">
-                          {
-                            sortedCompletedTask.length>0?
+                          {sortedCompletedTask.length > 0 ? (
                             <div>
-                            {sortedCompletedTask
-                              .filter((task) => task.taskIsCompleted === true)
-                              .map((task, taskCompletedIndex) => {
-                                return (
-                                  <div
-                                    className="card mb-3"
-                                    key={taskCompletedIndex}
-                                  >
+                              {sortedCompletedTask
+                                .filter((task) => task.taskIsCompleted === true)
+                                .map((task, taskCompletedIndex) => {
+                                  return (
                                     <div
-                                      className="card-body"
-                                      onMouseEnter={() =>
-                                        setHoveredTaskCompletedIndex(
-                                          taskCompletedIndex
-                                        )
-                                      }
-                                      onMouseLeave={() =>
-                                        setHoveredTaskCompletedIndex(null)
-                                      }
+                                      className="card mb-3"
+                                      key={taskCompletedIndex}
                                     >
-                                      <div className="d-flex align-items-center justify-content-between pb-2">
-                                        {hoveredTaskCompletedIndex ===
-                                          taskCompletedIndex && (
-                                          <div
-                                            style={{
-                                              position: "absolute",
-                                              top: 20,
-                                              right: 20,
-                                            }}
-                                          >
-                                            <Link
-                                              to="#"
-                                              className="styleForNotDoneBtn me-3"
-                                              onClick={() => {
-                                                handleToggleTaskCompletion(task);
+                                      <div
+                                        className="card-body"
+                                        onMouseEnter={() =>
+                                          setHoveredTaskCompletedIndex(
+                                            taskCompletedIndex
+                                          )
+                                        }
+                                        onMouseLeave={() =>
+                                          setHoveredTaskCompletedIndex(null)
+                                        }
+                                      >
+                                        <div className="d-flex align-items-center justify-content-between pb-2">
+                                          {hoveredTaskCompletedIndex ===
+                                            taskCompletedIndex && (
+                                            <div
+                                              style={{
+                                                position: "absolute",
+                                                top: 20,
+                                                right: 20,
                                               }}
                                             >
-                                              <MdOutlineRemoveDone />
-                                            </Link>
-                                            <Link
-                                              to="#"
-                                              className="styleForEditBtn me-3"
-                                              data-bs-toggle="modal"
-                                              data-bs-target="#add_tasks"
-                                              onClick={() => {
-                                                handleTaskEditClick(task);
-                                              }}
-                                            >
-                                              <i className="ti ti-edit text-blue" />
-                                            </Link>
-                                            <Link
-                                              to="#"
-                                              className="styleForDeleteBtn"
-                                              data-bs-toggle="modal"
-                                              data-bs-target={`#delete_${deleteModalText}`}
-                                              onClick={() => {
-                                                setDeleteModalText("note");
-                                                setSelectedTask(task);
-                                              }}
-                                            >
-                                              <i className="ti ti-trash text-danger" />
-                                            </Link>
-                                          </div>
-                                        )}
-                                      </div>
-                                      <div className="col-md-11 mb-3">
-                                        {task.taskType == "Follow Up" ? (
-                                          <div className="mb-3">
-                                            <span
-                                              className={`badge badge-soft-warning fw-medium me-2`}
-                                            >
-                                              <FaCalendarAlt className="me-2" />
-                                              {task.taskType}
-                                            </span>
-                                            <span
-                                              className={`badge badge-soft-success fw-medium`}
-                                            >
-                                              <FaCalendarAlt className="me-2" />
-                                              Completed
-                                            </span>
-                                          </div>
-                                        ) : (
-                                          <div className="mb-3">
-                                            <span
-                                              className={`badge badge-soft-info fw-medium me-2`}
-                                            >
-                                              <FaRegBell className="me-2" />
-                                              {task.taskTitle}
-                                            </span>
-                                            <span
-                                              className={`badge badge-soft-success fw-medium`}
-                                            >
-                                              <MdDownloadDone className="me-2" />
-                                              Completed
-                                            </span>
-                                          </div>
-                                        )}
-                                        <p>{task.taskDescription}</p>
-                                      </div>
-                                      <div className="d-flex justify-content-between align-items-center">
-                                        <p className="mb-0">
-                                          ✎{" "}
-                                          <span className="fw-medium text-black ms-2">
-                                            Last Modified on{" "}
-                                          </span>{" "}
-                                          <span>
-                                            {/* {task.taskDueDate}{" "}
+                                              <Link
+                                                to="#"
+                                                className="styleForNotDoneBtn me-3"
+                                                onClick={() => {
+                                                  handleToggleTaskCompletion(
+                                                    task
+                                                  );
+                                                }}
+                                              >
+                                                <MdOutlineRemoveDone />
+                                              </Link>
+                                              <Link
+                                                to="#"
+                                                className="styleForEditBtn me-3"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#add_tasks"
+                                                onClick={() => {
+                                                  handleTaskEditClick(task);
+                                                }}
+                                              >
+                                                <i className="ti ti-edit text-blue" />
+                                              </Link>
+                                              <Link
+                                                to="#"
+                                                className="styleForDeleteBtn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target={`#delete_${deleteModalText}`}
+                                                onClick={() => {
+                                                  setDeleteModalText("note");
+                                                  setSelectedTask(task);
+                                                }}
+                                              >
+                                                <i className="ti ti-trash text-danger" />
+                                              </Link>
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="col-md-11 mb-3">
+                                          {task.taskType == "Follow Up" ? (
+                                            <div className="mb-3">
+                                              <span
+                                                className={`badge badge-soft-warning fw-medium me-2`}
+                                              >
+                                                <FaCalendarAlt className="me-2" />
+                                                {task.taskType}
+                                              </span>
+                                              <span
+                                                className={`badge badge-soft-success fw-medium`}
+                                              >
+                                                <FaCalendarAlt className="me-2" />
+                                                Completed
+                                              </span>
+                                            </div>
+                                          ) : (
+                                            <div className="mb-3">
+                                              <span
+                                                className={`badge badge-soft-info fw-medium me-2`}
+                                              >
+                                                <FaRegBell className="me-2" />
+                                                {task.taskTitle}
+                                              </span>
+                                              <span
+                                                className={`badge badge-soft-success fw-medium`}
+                                              >
+                                                <MdDownloadDone className="me-2" />
+                                                Completed
+                                              </span>
+                                            </div>
+                                          )}
+                                          <p>{task.taskDescription}</p>
+                                        </div>
+                                        <div className="d-flex justify-content-between align-items-center">
+                                          <p className="mb-0">
+                                            ✎{" "}
+                                           
+                                            <span>
+                                              {/* {task.taskDueDate}{" "}
                                             {task.taskDueTime && (
                                               <span>{task.taskDueTime}</span>
                                             )} */}
-                                            <span>
-                                              {dayjs(task.updatedAt).format(
-                                                "DD MMM YYYY, hh:mm A"
-                                              )}
+                                              <span>
+                                                {dayjs(task.updatedAt).format(
+                                                  "DD MMM YYYY, hh:mm A"
+                                                )}
+                                              </span>
                                             </span>
-                                          </span>
-                                        </p>
-                                        {/* <p>
+                                          </p>
+                                          {/* <p>
                                           <span className="fw-medium text-black">
                                             Due date :
                                           </span>{" "}
@@ -2571,14 +2575,17 @@ console.log(leadInfo,"leadingofn");
                                             ).format("hh:mm A")}
                                           </span>
                                         </p> */}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
-                          </div>:
-                          <div className="d-flex justify-content-center align-items-center h-100">No Notes available</div>
-                          }
+                                  );
+                                })}
+                            </div>
+                          ) : (
+                            <div className="d-flex justify-content-center align-items-center h-100">
+                              No Notes available
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -2697,53 +2704,63 @@ console.log(leadInfo,"leadingofn");
                                       <p>{meeting.meetingDescription}</p>
                                     </div>
 
-                                    
                                     <div className="d-flex justify-content-between">
                                       <div>
-                                        {meeting.meetingType == "online" && (
-                                      <div className="d-flex justify-content-end mb-2">
-                                        {" "}
-                                        <span className="fw-medium text-black me-1">
-                                          Meeting Link :
-                                        </span>{" "}
-                                        <a href={meeting.meetingLink} target="_blank"> {meeting.meetingLink}</a>
-                                      </div>
-                                    )}
+                                        <div>
+                                          {meeting.meetingType != "online" && (
+                                            <div className="d-flex justify-content-end mb-2">
+                                              {" "}
+                                              <span className="fw-medium text-black me-1">
+                                                Meeting Link :
+                                              </span>{" "}
+                                              <a
+                                                href={meeting.meetingLink}
+                                                target="_blank"
+                                              >
+                                                {" "}
+                                                {meeting.meetingLink}
+                                                https://hagsfdhgasfdasvdna,com
+                                              </a>
+                                            </div>
+                                          )}
+                                        </div>
+                                        <p>
+                                            <span className="fw-medium text-black">
+                                             <i class="fa-solid fa-calendar me-2" ></i>
+                                            </span>{" "}
+                                            <span
+                                              style={{
+                                                color: dayjs(
+                                                  `${
+                                                    meeting.meetingStartDate.split(
+                                                      "T"
+                                                    )[0]
+                                                  }T${meeting.meetingStartTime}`
+                                                ).isBefore(dayjs())
+                                                  ? "red"
+                                                  : "inherit",
+                                              }}
+                                            >
+                                              {dayjs(
+                                                meeting.meetingStartDate
+                                              ).format("DD MMM YYYY")}
+                                              {", "}
+                                              <span style={{background:"#d3d3d3", borderRadius:"5px" , padding:"2px 3px"}}>
+                                                {dayjs(
+                                                  meeting.meetingStartTime,
+                                                  "HH:mm"
+                                                ).format("hh:mm A")}
+                                              </span>
+                                            </span>
+                                          </p>
                                       </div>
                                       <div>
                                         
-                                        <p className="text-end">
-                                          <span className="fw-medium text-black">
-                                            Meeting Starts at :
-                                          </span>{" "}
-                                          <span
-                                            style={{
-                                              color: dayjs(
-                                                `${
-                                                  meeting.meetingStartDate.split(
-                                                    "T"
-                                                  )[0]
-                                                }T${meeting.meetingStartTime}`
-                                              ).isBefore(dayjs())
-                                                ? "red"
-                                                : "inherit",
-                                            }}
-                                          >
-                                            {dayjs(
-                                              meeting.meetingStartDate
-                                            ).format("DD MMM YYYY")}
-                                            {", "}
-                                            {dayjs(
-                                              meeting.meetingStartTime,
-                                              "HH:mm"
-                                            ).format("hh:mm A")}
-                                          </span>
-                                        </p>
                                         <p className="mb-0">
                                           ✎{" "}
-                                          <span className="fw-medium text-black ms-2">
+                                          {/* <span className="fw-medium text-black ms-2">
                                             Last Modified on
-                                          </span>{" "}
+                                          </span>{" "} */}
                                           <span>
                                             {dayjs(meeting.updatedAt).format(
                                               "DD MMM YYYY, hh:mm A"
@@ -4260,7 +4277,7 @@ console.log(leadInfo,"leadingofn");
                         />
                         <div>Generate Meeting Link</div>
                       </div>
-                      {!isGoogleSignedIn && (
+                      {!userProfile.googleConnected && (
                         <>
                           <div className="text-danger mt-2">
                             *Generating meeting links Google Account is Required

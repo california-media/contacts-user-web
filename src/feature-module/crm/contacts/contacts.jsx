@@ -1626,7 +1626,7 @@ console.log(record,"recorddd")
                   </div>
                   <div className="card-body justify-content-center">
                     {/* Filter */}
-                    <div className="d-flex align-items-center justify-content-end flex-wrap row-gap-2 mb-4">
+                    <div className="d-flex align-items-center justify-content-end flex-wrap row-gap-2">
                       {/* <div className="d-flex align-items-center flex-wrap row-gap-2">
 
                         <div className="icon-form">
@@ -1646,7 +1646,7 @@ console.log(record,"recorddd")
                     {/* /Filter */}
                     {/* Contact List */}
 
-                    <div className="table-responsive custom-table">
+                    <div className="table-responsive custom-table h-100">
                       <Table
                         dataSource={filteredData}
                         columns={visibleColumns}

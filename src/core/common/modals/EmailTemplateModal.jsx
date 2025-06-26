@@ -16,7 +16,7 @@ const EmailTemplateModal = () => {
   const userProfile = useSelector((state) => state.profile);
   const selectedContact = useSelector((state) => state.selectedContact);
   const dispatch = useDispatch();
-  const { isGoogleSignedIn } = useContext(GoogleAuthContext);
+  // const { isGoogleSignedIn } = useContext(GoogleAuthContext);
   const quillRef = useRef(null);
 
   useEffect(() => {
@@ -42,6 +42,15 @@ const EmailTemplateModal = () => {
     }
   };
   const handleSendEmail = async () => {
+    if (!userProfile.googleConnected || !userProfile.googleEmail) {
+    dispatch(
+      showToast({
+        message: "Please connect your Google account before sending emails.",
+        variant: "danger",
+      })
+    );
+    return;
+  }
     const finalEmailBody = editEmailTemplateBody
       .replace(/{{firstName}}/g, selectedContact.firstname || "")
       .replace(/{{lastName}}/g, selectedContact.lastname || "")
@@ -57,14 +66,14 @@ const EmailTemplateModal = () => {
     }
 
 const emailData = {
-  from: "waqar.78692@gmail.com",
+  from: `${userProfile.googleEmail}`,
   to: `${selectedContact.emailaddresses[0]}`,
   subject: `${editEmailTemplateSubject}`,
   html: `${finalEmailBody}`
 };
 
 dispatch(sendEmail(emailData));
-
+document.getElementById("closeEmailTemplateModal")?.click();
 
     // const headers = [
     //   `To: ${selectedContact.emailaddresses[0]}`,

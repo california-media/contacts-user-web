@@ -37,7 +37,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const [newTags, setNewTags] = useState([]);
   const [allTags, setAllTags] = useState([]);
   const [checkSendMailToContact, setCheckSendMailToContact] = useState(false);
-  const { isGoogleSignedIn } = useContext(GoogleAuthContext);
+
   console.log(selectedContact, "gfhgfhh");
 
   const [formData, setFormData] = useState({
@@ -137,7 +137,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
     } catch (error) {
       dispatch(
         showToast({
-          message: !isGoogleSignedIn
+          message: !userProfile.googleConnected
             ? "Please Login to send Mail"
             : "Error Sending Mail",
           variant: "danger",
@@ -315,7 +315,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
       }));
     }
   };
-  console.log(isGoogleSignedIn, "isGoogleSignedIn");
+
 
   return (
     <div
@@ -493,7 +493,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
                   />
                   <div>Send mail to contact</div>
                 </div>
-                {!isGoogleSignedIn && checkSendMailToContact && (
+                {!userProfile.googleConnected && checkSendMailToContact && (
                   <>
                     <div className="text-danger mt-2">
                       *For sending mail Google Account is Required

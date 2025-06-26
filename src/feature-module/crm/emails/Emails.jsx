@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { gapi } from "gapi-script";
 import DOMPurify from "dompurify";
 import DefaultEditor from "react-simple-wysiwyg";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 import { GoogleAuthContext } from "../../../core/common/context/GoogleAuthContext";
 
@@ -17,12 +17,12 @@ const Emails = () => {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [filter, setFilter] = useState("INBOX");
   const [showCompose, setShowCompose] = useState(false);
-  const { isGoogleSignedIn, googleSignIn, googleSignOut } = useContext(GoogleAuthContext);
   const [formData, setFormData] = useState({
     to: "",
     subject: "",
     body: "",
   });
+  const userProfile = useSelector((state)=>state.profile)
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -69,10 +69,10 @@ const Emails = () => {
   // };
 
 useEffect(()=>{
-if (isGoogleSignedIn) {
+if (userProfile.googleConnected) {
       fetchMails();
     }
-},[isGoogleSignedIn])
+},[userProfile.googleConnected])
 
   const handleSignoutClick = () => {
     gapi.auth2.getAuthInstance().signOut();

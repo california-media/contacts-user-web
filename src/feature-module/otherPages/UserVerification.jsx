@@ -1,14 +1,59 @@
+// import React, { useEffect, useState } from "react";
+// import { useNavigate, useSearchParams } from "react-router-dom";
+// import axios from "axios";
+// import { components } from "react-select";
+
+// const UserVerification = () => {
+//   const [searchParams] = useSearchParams();
+//   const verificationToken = searchParams.get("verificationToken");
+//   const [message, setMessage] = useState("Verifying...");
+
+// const navigate = useNavigate()
+
+//   useEffect(() => {
+//     const verifyUser = async () => {
+//       try {
+//         if (verificationToken) {
+//           const response = await axios.post(
+//             "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup",
+//             { verifyToken: verificationToken }
+//           );
+//           setMessage(response.data.message || "Verification successful!");
+//           console.log("Signup successful:", response.data.data.token);
+//           localStorage.setItem("token", response.data.data.token);
+//           setTimeout(()=>{
+//             navigate("/registration-form", { replace: true,state: response.data.data });
+//           },10000)
+//         }
+//       } catch (error) {
+//         console.error("Signup failed:", error.response?.data || error.message);
+//         setMessage(
+//           error.response?.data?.message ||
+//             "Verification failed. Please try again."
+//         );
+//       }
+//     };
+
+//     verifyUser();
+//   }, [verificationToken]);
+
+//   return <div className="d-flex justify-content-center vh-100 align-items-center fs-3">{message}</div>;
+// };
+
+// export default UserVerification;
+         
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { components } from "react-select";
 
 const UserVerification = () => {
   const [searchParams] = useSearchParams();
   const verificationToken = searchParams.get("verificationToken");
-  const [message, setMessage] = useState("Verifying...");
+  const [message, setMessage] = useState("We’re setting up your account");
+  const [subMessage, setSubMessage] = useState("This should just take a few moments…");
+  const [loading, setLoading] = useState(true);
 
-const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const verifyUser = async () => {
@@ -18,12 +63,17 @@ const navigate = useNavigate()
             "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup",
             { verifyToken: verificationToken }
           );
-          setMessage(response.data.message || "Verification successful!");
-          console.log("Signup successful:", response.data.data.token);
           localStorage.setItem("token", response.data.data.token);
-          setTimeout(()=>{
-            navigate("/registration-form", { replace: true,state: response.data.data });
-          },2000)
+          setMessage(response.data.message || "Verification successful!");
+          setSubMessage("Redirecting shortly...");
+          setLoading(false);
+
+          setTimeout(() => {
+            navigate("/registration-form", {
+              replace: true,
+              state: response.data.data,
+            });
+          }, 5000);
         }
       } catch (error) {
         console.error("Signup failed:", error.response?.data || error.message);
@@ -31,14 +81,28 @@ const navigate = useNavigate()
           error.response?.data?.message ||
             "Verification failed. Please try again."
         );
+        setSubMessage("");
+        setLoading(false);
       }
     };
 
     verifyUser();
   }, [verificationToken]);
 
-  return <div className="d-flex justify-content-center fs-3">{message}</div>;
+  return (
+    <div className="vh-100 d-flex flex-column justify-content-center align-items-center text-center">
+      {/* <img
+        src="/assets/img/logo.svg"
+        alt="Logo"
+        className=" m-4"
+        style={{ height: "40px", width: "auto" }}
+      /> */}
+
+      {loading && <div className="spinner-border text-primary mb-4" role="status" />}
+      <h5 className="fw-semibold">{message}</h5>
+      {subMessage && <p className="text-muted mb-0">{subMessage}</p>}
+    </div>
+  );
 };
 
 export default UserVerification;
-         

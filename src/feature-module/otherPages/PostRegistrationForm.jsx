@@ -5,7 +5,12 @@ import "./postRegistrationForm.css";
 import { useLocation, useNavigate } from "react-router";
 import api from "../../core/axios/axiosInstance";
 import PhoneInput from "react-phone-input-2";
-
+const stepImages = [
+  process.env.PUBLIC_URL + "/assets/img/postRegistration1.avif",
+  process.env.PUBLIC_URL + "/assets/img/postRegistration2.avif",
+  process.env.PUBLIC_URL + "/assets/img/postRegistration3.avif",
+  process.env.PUBLIC_URL + "/assets/img/postRegistration4.avif",
+];
 const StepWrapper = ({ children }) => (
   <AnimatePresence mode="wait">
     <motion.div
@@ -29,15 +34,24 @@ const Step1 = ({ formData, setFormData, passedData }) => {
       phone: value,
     }));
   };
+
+  const isFirstNameFilled = formData.firstname.trim() !== "";
+  const isEmailFilled = formData.email.trim() !== "";
+  const isPhoneFilled = formData.phone.trim() !== "";
+  const canProceed =
+    isFirstNameFilled &&
+    (passedData?.registeredWith !== "email" ? isEmailFilled : isPhoneFilled);
+
   return (
     <StepWrapper key="step1">
       <>
+       <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
         <h3>Personal Details</h3>
         <div className="d-flex gap-3">
           <input
             className="prf-input"
             type="text"
-            placeholder="First Name"
+            placeholder="First Name *"
             name="firstname"
             value={formData.firstname}
             onChange={(e) =>
@@ -68,13 +82,24 @@ const Step1 = ({ formData, setFormData, passedData }) => {
           }
           required
         />
-        {console.log("Passed Data:", passedData)}
+        <input
+          className="prf-input"
+          type="text"
+          placeholder="Job Title"
+          name="designation"
+          value={formData.designation}
+          onChange={(e) =>
+            setFormData({ ...formData, designation: e.target.value })
+          }
+          required
+        />
+        {console.log(passedData, "passed dtata")}
 
         {passedData?.registeredWith != "email" ? (
           <input
             className="prf-input"
             type="email"
-            placeholder="Email"
+            placeholder="Email *"
             name="email"
             value={formData.email}
             onChange={(e) =>
@@ -85,9 +110,10 @@ const Step1 = ({ formData, setFormData, passedData }) => {
         ) : (
           <div className="mb-4">
             <PhoneInput
-              country={"ae"} // Default country
+              country={"ae"}
               value={formData.phone}
               onChange={handleOnPhoneChange}
+              placeholder="Phone Number *"
               enableSearch
               inputProps={{
                 name: "phone",
@@ -97,27 +123,17 @@ const Step1 = ({ formData, setFormData, passedData }) => {
             />
           </div>
         )}
-        {/* <select
-          className="prf-input"
-          value={formData.gender}
-          onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-          required
-        >
-          <option value="">Select Gender</option>
-          <option>Male</option>
-          <option>Female</option>
-          <option>Other</option>
-        </select> */}
-         <div className="prf-grid">
-          {[
-            "Male",
-            "Female",
-            "Other"
-          ].map((userGender) => (
-            <label key={userGender} className="prf-option-btn">
+        <div className="prf-grid">
+          {["Male", "Female", "Other"].map((userGender) => (
+            <label
+              key={userGender}
+              className={`prf-option-btn${
+                formData.gender === userGender ? " selected" : ""
+              }`}
+            >
               <input
                 type="radio"
-                name="employees"
+                name="gender"
                 value={userGender}
                 onChange={() =>
                   setFormData((prev) => ({ ...prev, gender: userGender }))
@@ -129,7 +145,15 @@ const Step1 = ({ formData, setFormData, passedData }) => {
         </div>
         <div className="prf-actions">
           <div />
-          <button className="prf-next" onClick={nextStep}>
+          <button
+            className="prf-next"
+            onClick={nextStep}
+            disabled={!canProceed}
+            style={{
+              opacity: canProceed ? 1 : 0.5,
+              pointerEvents: canProceed ? "auto" : "none",
+            }}
+          >
             Next
           </button>
         </div>
@@ -144,6 +168,7 @@ const Step2 = ({ formData, setFormData }) => {
   return (
     <StepWrapper key="step2">
       <>
+       <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
         <div className="text-end cursor-pointer" onClick={nextStep}>
           Skip
         </div>
@@ -159,7 +184,12 @@ const Step2 = ({ formData, setFormData }) => {
             "500-999",
             "1000+",
           ].map((size) => (
-            <label key={size} className="prf-option-btn">
+            <label
+              key={size}
+              className={`prf-option-btn${
+                formData.employeeCount === size ? " selected" : ""
+              }`}
+            >
               <input
                 type="radio"
                 name="employees"
@@ -177,7 +207,12 @@ const Step2 = ({ formData, setFormData }) => {
         <div className="prf-grid">
           {["For personal use", "Testing for my company", "Other"].map(
             (goal) => (
-              <label key={goal} className="prf-option-btn">
+              <label
+                key={goal}
+                className={`prf-option-btn${
+                  formData.goals === goal ? " selected" : ""
+                }`}
+              >
                 <input
                   type="radio"
                   name="goal"
@@ -209,10 +244,14 @@ const Step2 = ({ formData, setFormData }) => {
 
 const Step3 = ({ formData, setFormData, navigate }) => {
   const { nextStep, previousStep } = useWizard();
-
+  const handleFinalSubmit = async () => {
+    nextStep();
+    await handleSubmit({ formData });
+  };
   return (
     <StepWrapper key="step3">
       <>
+ <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
         <h3>Select a category that best describes you</h3>
         <div className="prf-grid">
           {[
@@ -227,7 +266,12 @@ const Step3 = ({ formData, setFormData, navigate }) => {
             "Freelancer",
             "Other",
           ].map((category) => (
-            <label key={category} className="prf-option-btn">
+            <label
+              key={category}
+              className={`prf-option-btn${
+                formData.categories === category ? " selected" : ""
+              }`}
+            >
               <input
                 type="radio"
                 name="category"
@@ -252,7 +296,12 @@ const Step3 = ({ formData, setFormData, navigate }) => {
             "Process automation",
             "Something else",
           ].map((item) => (
-            <label key={item} className="prf-option-btn">
+            <label
+              key={item}
+              className={`prf-option-btn${
+                formData.helps.includes(item) ? " selected" : ""
+              }`}
+            >
               <input
                 type="checkbox"
                 name="help"
@@ -279,7 +328,7 @@ const Step3 = ({ formData, setFormData, navigate }) => {
           <div>
             <button
               className="prf-next me-2"
-              onClick={() => handleSubmit({ formData, navigate })}
+              onClick={() => handleFinalSubmit()}
             >
               Finish
             </button>
@@ -290,37 +339,43 @@ const Step3 = ({ formData, setFormData, navigate }) => {
   );
 };
 
-// const Success = () => {
+const Success = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate("/dashboard");
+    }, 1000000);
 
-//   const navigate = useNavigate();
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       navigate("/dashboard");
-//     }, 3000);
+  return (
+    <StepWrapper key="success">
+      <div className="text-center">
+        <h2>🎉 You're All Set!</h2>
+        <div className="d-flex align-items-center justify-content-center">
+          <div class="spinner-border spinner-border-sm" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <div className="ms-3">We are setting your profile</div>
+        </div>
+        {/* <p>
+          Thanks for completing the onboarding. You will be redirected to the
+          dashboard.
+        </p> */}
+      </div>
+    </StepWrapper>
+  );
+};
 
-//     return () => clearTimeout(timer);
-//   }, [navigate]);
-
-//   return (
-//     <StepWrapper key="success">
-//       <>
-//         <h2>🎉 You're All Set!</h2>
-//         <p>
-//           Thanks for completing the onboarding. You will be redirected to the
-//           dashboard.
-//         </p>
-//       </>
-//     </StepWrapper>
-//   );
-// };
-
-const handleSubmit = async ({ formData, navigate }) => {
+const handleSubmit = async ({ formData }) => {
   console.log("Submitting form data:", formData);
 
   try {
     const result = await api.post("/user-info/onboarding-submit", formData);
-    navigate("/dashboard");
+    console.log(result, "result from api");
+
+    // navigate("/dashboard");
     console.log(result.data, " Submission successful");
   } catch (error) {
     console.error("Submission error:", error);
@@ -333,7 +388,10 @@ const PostRegistrationForm = () => {
   const passedData = location.state;
 
   console.log("Received data from previous route:", passedData);
+  const [currentStep, setCurrentStep] = useState(0);
 
+
+  const handleStepChange = (step) => setCurrentStep(step);
   const [formData, setFormData] = useState({
     helps: [],
     goals: "",
@@ -345,25 +403,57 @@ const PostRegistrationForm = () => {
     gender: "",
     email: "",
     phone: "",
+    designation: "",
   });
   console.log("Form Data:", formData);
 
   return (
-    <div className="prf-container">
-      <Wizard>
-        <Step1
-          formData={formData}
-          passedData={passedData}
-          setFormData={setFormData}
+    // <div className="prf-container">
+    //   <Wizard>
+    //     <Step1
+    //       formData={formData}
+    //       passedData={passedData}
+    //       setFormData={setFormData}
+    //     />
+    //     <Step2 formData={formData} setFormData={setFormData} />
+    //     <Step3
+    //       formData={formData}
+    //       setFormData={setFormData}
+    //       navigate={navigate}
+    //     />
+    //     {/* <Success formData={formData} /> */}
+    //   </Wizard>
+    // </div>
+    <div className="prf-flex-container">
+      
+      <div className="prf-left">
+        <div>
+          {/* <img src="/assets/img/logo.svg" /> */}
+
+          <Wizard onStepChange={handleStepChange}>
+            <Step1
+              formData={formData}
+              passedData={passedData}
+              setFormData={setFormData}
+            />
+            <Step2 formData={formData} setFormData={setFormData} />
+            <Step3
+              formData={formData}
+              setFormData={setFormData}
+              navigate={navigate}
+            />
+            <Success />
+          </Wizard>
+        </div>
+      </div>
+  
+      <div className="prf-right">
+        <img
+          src={stepImages[currentStep]}
+          alt={`Step ${currentStep + 1}`}
+          className="prf-step-image"
         />
-        <Step2 formData={formData} setFormData={setFormData} />
-        <Step3
-          formData={formData}
-          setFormData={setFormData}
-          navigate={navigate}
-        />
-        {/* <Success formData={formData} /> */}
-      </Wizard>
+      </div>
     </div>
   );
 };

@@ -25,7 +25,7 @@ const Calendar = () => {
     [weekendsVisible, setweekendsVisible] = useState(true),
     [currentEvents, setscurrentEvents] = useState([]);
   const [defaultEvents, setDefaultEvents] = useState([]);
-  const {isGoogleSignedIn} = useContext(GoogleAuthContext)
+
   const events = useSelector((state)=>state.event.data)
 
   console.log(defaultEvents,"default events");
