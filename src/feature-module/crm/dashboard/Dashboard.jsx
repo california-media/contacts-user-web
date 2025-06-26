@@ -6,7 +6,7 @@ import { IoMdMail } from "react-icons/io";
 import { TbLocation } from "react-icons/tb";
 import { MdPeople } from "react-icons/md";
 import ReactApexChart from "react-apexcharts";
-import { IoQrCode } from "react-icons/io5";
+import { IoCalendar, IoClipboard, IoQrCode } from "react-icons/io5";
 import GroupsOffcanvas from "../../../core/common/offCanvas/groups/GroupsOffcanvas";
 import { all_routes } from "../../router/all_routes";
 import { Link } from "react-router-dom";
@@ -19,6 +19,9 @@ import { fetchTags } from "../../../core/data/redux/slices/TagSlice";
 import { QRCode } from "antd";
 import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndicator";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -96,6 +99,15 @@ const Dashboard = () => {
 
     dispatch(fetchProfile());
   }, []);
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    arrows: true,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    // adaptiveHeight: true,
+  };
 
   useEffect(() => {
     const getQrCodeValue = JSON.stringify({
@@ -306,7 +318,7 @@ const Dashboard = () => {
                               borderRadius: 22,
                             }}
                           >
-                            <MdPeople color="#8280ff" size={35} />
+                            <MdPeople color="#8280ff" size={30} />
                           </div>
                         </div>
                         <div className="d-flex align-items-center mt-2">
@@ -371,7 +383,7 @@ const Dashboard = () => {
                               borderRadius: 18,
                             }}
                           >
-                            <FaTag color="#fec53d" size={25} />
+                            <FaTag color="#fec53d" size={30} />
                           </div>
                         </div>
                         <div className="d-flex align-items-center mt-2">
@@ -428,11 +440,11 @@ const Dashboard = () => {
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",
-                              backgroundColor: "#d9f7e7",
+                              backgroundColor: "rgba(0,0,0,0.1)",
                               borderRadius: 22,
                             }}
                           >
-                            <IoQrCode color="#4ad991" size={30} />
+                            <IoQrCode color="#000" size={30} />
                           </div>
                         </div>
                         <div className="d-flex align-items-center mt-2">
@@ -490,10 +502,13 @@ const Dashboard = () => {
                               justifyContent: "center",
                               alignItems: "center",
                               backgroundColor: "#d9f7e7",
+                              justifyContent:"center",
+                              alignItems:"center",
                               borderRadius: 22,
                             }}
                           >
-                            <IoQrCode color="#4ad991" size={30} />
+                            <IoClipboard color="#4ad991" size={30} />
+                            {/* <i class="fa-solid fa-clipboard" fontSize="300"></i> */}
                           </div>
                         </div>
                         <div className="d-flex align-items-center mt-2">
@@ -510,12 +525,12 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="row mt-5">
-                  <div className="col-md-6">
+                  <div className="col-md-12">
                     <div className="row">
                       <div className="col-md-6">
                         <div className="row">
                           <div className="col-md-12 mb-4 fitContentHeight">
-                            <Link to={"#"}>
+                            <div>
                               <div className="dashboardSmallCards">
                                 <div>
                                   <p
@@ -554,11 +569,11 @@ const Dashboard = () => {
                                       </span>
                                     )}
                                   </div>
-  
+
                                   <div className="my-3">
                                     <p>Share via</p>
                                   </div>
-  
+
                                   <div className="d-flex">
                                     {userProfile?.phonenumbers?.length > 0 && (
                                       <a
@@ -573,20 +588,20 @@ const Dashboard = () => {
                                       </a>
                                     )}
                                     {userProfile.email && (
-                                      <Link
-                                        to={`mailto:${userProfile.email}`}
+                                      <a
+                                        href={`mailto:${userProfile.email}`}
                                         className="icon-wrapper-sm mail me-3"
                                       >
                                         <img
                                           src="/assets/img/icons/mailIcon.png"
                                           alt="Mail"
                                         />
-                                      </Link>
+                                      </a>
                                     )}
                                   </div>
                                 </div>
                               </div>
-                            </Link>
+                            </div>
                           </div>
                           <div className="col-md-12 fitContentHeight">
                             <Link to={route.myScans}>
@@ -607,7 +622,7 @@ const Dashboard = () => {
                                         color: "#000",
                                       }}
                                     >
-                                      Scans
+                                      Meetings
                                     </p>
                                     <p
                                       style={{
@@ -626,11 +641,11 @@ const Dashboard = () => {
                                       display: "flex",
                                       justifyContent: "center",
                                       alignItems: "center",
-                                      backgroundColor: "#d9f7e7",
+                                      backgroundColor: "rgba(34, 73, 170,0.15)",
                                       borderRadius: 22,
                                     }}
                                   >
-                                    <IoQrCode color="#4ad991" size={30} />
+                                    <IoCalendar color="#2249aa" size={30} />
                                   </div>
                                 </div>
                               </div>
@@ -639,86 +654,66 @@ const Dashboard = () => {
                         </div>
                       </div>
                       <div className="col-md-6">
-                        <div className="mb-4 fitContentHeight d-flex h-100 flex-grow-1">
-                          <Link to={"#"} className="w-100">
-                            <div className="dashboardSmallCards h-100 w-100">
-                              {/* <div>
-                                <p
-                                  style={{
-                                    fontSize: 20,
-                                    marginBottom: 10,
-                                    color: "#000",
-                                  }}
-                                >
-                                  Profile Link
-                                </p>
-                                <div className="position-relative">
-                                  <div className="input-group">
-                                    <input
-                                      className="form-control"
-                                      value={profileLink}
-                                      readOnly
-                                    />
-                                    <button
-                                      className="btn btn-primary"
-                                      onClick={handleCopy}
-                                    >
-                                      <FaRegCopy />
-                                    </button>
-                                  </div>
-                                  {copied && (
-                                    <span
-                                      className="ms-2 text-success"
-                                      style={{
-                                        position: "absolute",
-                                        bottom: -30,
-                                        right: 0,
-                                      }}
-                                    >
-                                      Copied!
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div className="my-3">
-                                  <p>Share via</p>
-                                </div>
-
-                                <div className="d-flex">
-                                  {userProfile?.phonenumbers?.length > 0 && (
-                                    <a
-                                      href={`https://wa.me/?text=${whatsappShareLink}`}
-                                      target="_blank"
-                                      className="icon-wrapper-sm whatsapp no-filter me-3"
-                                    >
-                                      <img
-                                        src="/assets/img/icons/whatsappIcon96.png"
-                                        alt="WhatsApp"
-                                      />
-                                    </a>
-                                  )}
-                                  {userProfile.email && (
-                                    <Link
-                                      to={`mailto:${userProfile.email}`}
-                                      className="icon-wrapper-sm mail me-3"
-                                    >
-                                      <img
-                                        src="/assets/img/icons/mailIcon.png"
-                                        alt="Mail"
-                                      />
-                                    </Link>
-                                  )}
-                                </div>
-                              </div> */}
+                        {/* <div className="mb-4 fitContentHeight d-flex h-100 flex-grow-1">
+                          <div to={"#"} className="w-100">
+                            <div className="dashboardSmallCards h-100 w-100">                              
                             </div>
-                          </Link>
+                          </div>
+                        </div> */}
+                        <div
+                          className="mb-4 fitContentHeight d-flex h-100 flex-grow-1"
+                          style={{ minHeight: "300px" }}
+                        >
+                          <div className="w-100 h-100">
+                            <div
+                              className="dashboardSmallCards w-100 h-100"
+                              style={{
+                                overflow: "hidden",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Slider {...settings}>
+                                {/* Image 1 */}
+                                <div style={{ textAlign: "center" }}>
+                                  <img
+                                    src="/assets/img/slider1.png"
+                                    alt="Slide 1"
+                                    style={{
+                                      width: "100%",
+                                      maxHeight: "400px",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Image 2 */}
+                                <div style={{ textAlign: "center" }}>
+                                  <img
+                                    src="/assets/img/slider2.png"
+                                    alt="Slide 2"
+                                    style={{
+                                      width: "100%",
+                                      maxHeight: "400px",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </div>
+
+                                {/* Image 3 */}
+                                <div style={{ textAlign: "center" }}>
+                                  <iframe  width="100%" height="300" src="https://www.youtube.com/embed/6uCYnGMpo7A?si=QfeTbCZ4U1RO0Uot" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loop></iframe>
+                                </div>
+                              </Slider>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-
                   </div>
 
-                  <div className="col-md-6">
+                  {/* <div className="col-md-6">
                     <div className="card">
                       <div className="card-header">
                         <h5 className="card-title">Recently Visited</h5>
@@ -733,7 +728,7 @@ const Dashboard = () => {
                         />
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

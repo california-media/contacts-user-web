@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { GoogleAuthContext } from "../context/GoogleAuthContext";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { sendEmail } from "../../data/redux/slices/EmailSlice";
 
 const EmailTemplateModal = () => {
   const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
@@ -40,7 +41,7 @@ const EmailTemplateModal = () => {
       }
     }
   };
-  const sendEmail = async () => {
+  const handleSendEmail = async () => {
     const finalEmailBody = editEmailTemplateBody
       .replace(/{{firstName}}/g, selectedContact.firstname || "")
       .replace(/{{lastName}}/g, selectedContact.lastname || "")
@@ -55,46 +56,59 @@ const EmailTemplateModal = () => {
       return;
     }
 
-    const headers = [
-      `To: ${selectedContact.emailaddresses[0]}`,
-      `Subject: ${editEmailTemplateSubject}`,
-      "Content-Type: text/html; charset=utf-8",
-      "",
-      `<p>${finalEmailBody}</p>`,
-    ];
+const emailData = {
+  from: "waqar.78692@gmail.com",
+  to: `${selectedContact.emailaddresses[0]}`,
+  subject: `${editEmailTemplateSubject}`,
+  html: `${finalEmailBody}`
+};
 
-    const email = headers.join("\r\n");
+dispatch(sendEmail(emailData));
 
-    const base64EncodedEmail = btoa(
-      new TextEncoder()
-        .encode(email)
-        .reduce((data, byte) => data + String.fromCharCode(byte), "")
-    );
-    try {
-      await gapi.client.gmail.users.messages.send({
-        userId: "me",
-        resource: {
-          raw: base64EncodedEmail,
-        },
-      });
-      document.getElementById("closeEmailTemplateModal")?.click();
-      dispatch(
-        showToast({ message: "Email Sent Successfully", variant: "success" })
-      );
-      // setTo("");
-      // setSubject("");
-      // setMessage("");
-    } catch (error) {
-      dispatch(
-        showToast({
-          message: !isGoogleSignedIn
-            ? "Please Login to send Mail"
-            : "Error Sending Mail",
-          variant: "danger",
-        })
-      );
-      console.error("Error sending email:", error?.result?.error?.message);
-    }
+
+    // const headers = [
+    //   `To: ${selectedContact.emailaddresses[0]}`,
+    //   `Subject: ${editEmailTemplateSubject}`,
+    //   "Content-Type: text/html; charset=utf-8",
+    //   "",
+    //   `<p>${finalEmailBody}</p>`,
+    // ];
+
+    // const email = headers.join("\r\n");
+
+
+
+
+    // const base64EncodedEmail = btoa(
+    //   new TextEncoder()
+    //     .encode(email)
+    //     .reduce((data, byte) => data + String.fromCharCode(byte), "")
+    // );
+    // try {
+    //   await gapi.client.gmail.users.messages.send({
+    //     userId: "me",
+    //     resource: {
+    //       raw: base64EncodedEmail,
+    //     },
+    //   });
+    //   document.getElementById("closeEmailTemplateModal")?.click();
+    //   dispatch(
+    //     showToast({ message: "Email Sent Successfully", variant: "success" })
+    //   );
+    //   // setTo("");
+    //   // setSubject("");
+    //   // setMessage("");
+    // } catch (error) {
+    //   dispatch(
+    //     showToast({
+    //       message: !isGoogleSignedIn
+    //         ? "Please Login to send Mail"
+    //         : "Error Sending Mail",
+    //       variant: "danger",
+    //     })
+    //   );
+    //   console.error("Error sending email:", error?.result?.error?.message);
+    // }
   };
   const modules = {
     toolbar: [
@@ -211,7 +225,7 @@ const EmailTemplateModal = () => {
               </div>
             </div>
             <div className="d-flex justify-content-end">
-              <button className="btn btn-primary" onClick={sendEmail}>
+              <button className="btn btn-primary" onClick={handleSendEmail}>
                 Send Mail
               </button>
             </div>
