@@ -19,7 +19,7 @@ import ALLRoutes from "./feature-module/router/router";
 import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 import { HelmetProvider } from 'react-helmet-async'
 import { PersistGate } from "redux-persist/integration/react";
-import { GoogleAuthProvider } from "./core/common/context/GoogleAuthContext";
+import { EmailAuthProvider } from "./core/common/context/EmailAuthContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -29,12 +29,12 @@ root.render(
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
       <HelmetProvider>
-        <GoogleAuthProvider>
+        <EmailAuthProvider>
         <BrowserRouter basename={base_path}>
           <Loader />
           <ALLRoutes />
         </BrowserRouter>
-        </GoogleAuthProvider>
+        </EmailAuthProvider>
       </HelmetProvider>
     </PersistGate>
   </Provider>

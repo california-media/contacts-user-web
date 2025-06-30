@@ -6,7 +6,11 @@ export const sendEmail = createAsyncThunk(
   "email/sendEmail",
   async (emailData, { rejectWithValue, dispatch }) => {
     try {
-      const response = await api.post("/sendEmail", emailData);
+      console.log(emailData,"email data before going to api");
+      
+      const response = await api.post("/sendEmail/microsoft", emailData);
+      console.log(response.data,"response from send email");
+      
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );

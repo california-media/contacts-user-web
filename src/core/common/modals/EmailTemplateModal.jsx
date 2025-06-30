@@ -4,19 +4,21 @@ import Select from "react-select";
 import { showToast } from "../../data/redux/slices/ToastSlice";
 import DefaultEditor from "react-simple-wysiwyg";
 import { useDispatch, useSelector } from "react-redux";
-import { GoogleAuthContext } from "../context/GoogleAuthContext";
+import { EmailAuthContext } from "../context/EmailAuthContext";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { sendEmail } from "../../data/redux/slices/EmailSlice";
+import { Link } from "react-router-dom";
 
 const EmailTemplateModal = () => {
   const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
   const [editEmailTemplateBody, setEditEmailTemplateBody] = useState("");
   const [editEmailTemplateSubject, setEditEmailTemplateSubject] = useState("");
+  const [emailProvider, setEmailProvider] = useState("");
   const userProfile = useSelector((state) => state.profile);
   const selectedContact = useSelector((state) => state.selectedContact);
   const dispatch = useDispatch();
-  // const { isGoogleSignedIn } = useContext(GoogleAuthContext);
+
   const quillRef = useRef(null);
 
   useEffect(() => {
@@ -32,25 +34,25 @@ const EmailTemplateModal = () => {
     setEmailTemplateTitles(emailTitles);
   }, [userProfile]);
   const insertTag = (tag) => {
-    const editor = quillRef.current?.getEditor(); // get Quill instance
+    const editor = quillRef.current?.getEditor();
     if (editor) {
-      const range = editor.getSelection(); // current cursor location
+      const range = editor.getSelection();
       if (range) {
         editor.insertText(range.index, tag);
-        editor.setSelection(range.index + tag.length); // move cursor
+        editor.setSelection(range.index + tag.length);
       }
     }
   };
   const handleSendEmail = async () => {
     if (!userProfile.googleConnected || !userProfile.googleEmail) {
-    dispatch(
-      showToast({
-        message: "Please connect your Google account before sending emails.",
-        variant: "danger",
-      })
-    );
-    return;
-  }
+      dispatch(
+        showToast({
+          message: "Please connect your Google account before sending emails.",
+          variant: "danger",
+        })
+      );
+      return;
+    }
     const finalEmailBody = editEmailTemplateBody
       .replace(/{{firstName}}/g, selectedContact.firstname || "")
       .replace(/{{lastName}}/g, selectedContact.lastname || "")
@@ -65,59 +67,36 @@ const EmailTemplateModal = () => {
       return;
     }
 
-const emailData = {
-  from: `${userProfile.googleEmail}`,
-  to: `${selectedContact.emailaddresses[0]}`,
-  subject: `${editEmailTemplateSubject}`,
-  html: `${finalEmailBody}`
+ 
+    // const emailData = {
+    //   to: selectedContact.emailaddresses[0],
+    //   subject: editEmailTemplateSubject,
+    //   html: finalEmailBody,
+    //   ...(emailProvider === "google" && {
+    //   fromEmail: userProfile.googleEmail,
+    //   fromGoogleRefreshToken: userProfile.googleRefreshToken,
+    //   }),
+    // };
+
+    const emailData = {
+  to: selectedContact.emailaddresses[0],
+  subject: editEmailTemplateSubject,
+  html: finalEmailBody,
+  ...(emailProvider === "google" && {
+    fromEmail: userProfile.googleEmail,
+    fromGoogleRefreshToken: userProfile.googleRefreshToken
+  }),
+  ...(emailProvider === "microsoft" && {
+    fromEmail: userProfile.microsoftEmail,
+    fromMicrosoftAccessToken: userProfile.microsoftAccessToken
+  })
 };
-
-dispatch(sendEmail(emailData));
-document.getElementById("closeEmailTemplateModal")?.click();
-
-    // const headers = [
-    //   `To: ${selectedContact.emailaddresses[0]}`,
-    //   `Subject: ${editEmailTemplateSubject}`,
-    //   "Content-Type: text/html; charset=utf-8",
-    //   "",
-    //   `<p>${finalEmailBody}</p>`,
-    // ];
-
-    // const email = headers.join("\r\n");
+console.log(userProfile,"userprofilee");
 
 
+    dispatch(sendEmail(emailData));
+    document.getElementById("closeEmailTemplateModal")?.click();
 
-
-    // const base64EncodedEmail = btoa(
-    //   new TextEncoder()
-    //     .encode(email)
-    //     .reduce((data, byte) => data + String.fromCharCode(byte), "")
-    // );
-    // try {
-    //   await gapi.client.gmail.users.messages.send({
-    //     userId: "me",
-    //     resource: {
-    //       raw: base64EncodedEmail,
-    //     },
-    //   });
-    //   document.getElementById("closeEmailTemplateModal")?.click();
-    //   dispatch(
-    //     showToast({ message: "Email Sent Successfully", variant: "success" })
-    //   );
-    //   // setTo("");
-    //   // setSubject("");
-    //   // setMessage("");
-    // } catch (error) {
-    //   dispatch(
-    //     showToast({
-    //       message: !isGoogleSignedIn
-    //         ? "Please Login to send Mail"
-    //         : "Error Sending Mail",
-    //       variant: "danger",
-    //     })
-    //   );
-    //   console.error("Error sending email:", error?.result?.error?.message);
-    // }
   };
   const modules = {
     toolbar: [
@@ -207,7 +186,7 @@ document.getElementById("closeEmailTemplateModal")?.click();
               aria-label="Default select example"
               onChange={(e) => {
                 if (e.target.value) insertTag(e.target.value);
-                e.target.selectedIndex = 0; // reset dropdown
+                e.target.selectedIndex = 0;
               }}
             >
               <option value="">Insert Tag</option>
@@ -234,9 +213,88 @@ document.getElementById("closeEmailTemplateModal")?.click();
               </div>
             </div>
             <div className="d-flex justify-content-end">
-              <button className="btn btn-primary" onClick={handleSendEmail}>
+              {/* <button className="btn btn-primary" onClick={handleSendEmail}>
                 Send Mail
-              </button>
+              </button> */}
+              <div className="btn-group my-1">
+  <button
+  type="button"
+  className="btn btn-primary"
+  onClick={() => handleSendEmail()}
+  disabled={!emailProvider} // optional: disable if no provider
+>
+  Send Mail{emailProvider ? ` (${emailProvider.charAt(0).toUpperCase() + emailProvider.slice(1)})` : ""}
+</button>
+  <button
+    type="button"
+    className="btn btn-primary dropdown-toggle dropdown-toggle-split me-2"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+  >
+    <span className="visually-hidden">Toggle Dropdown</span>
+  </button>
+ <ul className="dropdown-menu">
+  <li>
+    <button className="dropdown-item" onClick={() => setEmailProvider("google")}>
+      Google
+    </button>
+  </li>
+  <li>
+    <button className="dropdown-item" onClick={() => setEmailProvider("microsoft")}>
+      Microsoft
+    </button>
+  </li>
+  <li>
+    <button className="dropdown-item" onClick={() => setEmailProvider("smtp")}>
+      SMTP
+    </button>
+  </li>
+</ul>
+</div>
+
+
+              {/* <div className="btn-group my-1">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSendEmail}
+                >
+                  Send Mail (Google)
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary dropdown-toggle dropdown-toggle-split me-2"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <span className="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link className="dropdown-item" to="#">
+                      Action
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="#">
+                      Another action
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="#">
+                      Something else here
+                    </Link>
+                  </li>
+                  <li>
+                    <hr className="dropdown-divider" />
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="#">
+                      Separated link
+                    </Link>
+                  </li>
+                </ul>
+              </div> */}
             </div>
           </div>
         </div>

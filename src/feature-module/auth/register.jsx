@@ -19,6 +19,8 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [activeTab, setActiveTab] = useState("email");
+  const [otp, setOtp] = useState("");
+const [showOtpInput, setShowOtpInput] = useState(false);
 
   const navigate = useNavigate();
 
@@ -29,51 +31,134 @@ const Register = () => {
     }));
   };
 
-  const handleRegister = async () => {
-    setMessage({ text: "", type: "" });
+  // const handleRegister = async () => {
+  //   setMessage({ text: "", type: "" });
 
-    if (!password) {
-      setMessage({ text: "Password is required", type: "error" });
+  //   if (!password) {
+  //     setMessage({ text: "Password is required", type: "error" });
+  //     return;
+  //   }
+
+  //   if (activeTab === "phone") {
+  //     const isPhone = /^\+[0-9]{10,15}$/.test(phoneNumber);
+  //     if (!isPhone) {
+  //       setMessage({ text: "Invalid phone number", type: "error" });
+  //       return;
+  //     }
+  //   }
+
+  //   if (activeTab === "email") {
+  //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  //     if (!emailRegex.test(email)) {
+  //       setMessage({ text: "Invalid email address", type: "error" });
+  //       return;
+  //     }
+  //   }
+
+  //   try {
+  //     setIsLoading(true);
+  //     const payload = {
+  //       password,
+  //       ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
+  //     };
+  //     console.log(payload, "payloaddd");
+
+  //     if (activeTab === "phone") {
+  //       const res = await api.post("user/signup/phoneNumber", payload);
+  //       setMessage({ text: res.data.message, type: "success" });
+  //     } else {
+  //       console.log(payload,"payloaddd");
+        
+  //       const res = await api.post("user/signup/email", payload);
+  //       setMessage({ text: res.data.message, type: "success" });
+  //     }
+  //   } catch (err) {
+  //     setMessage({
+  //       text: err.response?.data?.message || "Registration failed",
+  //       type: "error",
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
+  const handleRegister = async () => {
+  setMessage({ text: "", type: "" });
+
+  if (!password) {
+    setMessage({ text: "Password is required", type: "error" });
+    return;
+  }
+
+  if (activeTab === "phone") {
+    const isPhone = /^\+[0-9]{10,15}$/.test(phoneNumber);
+    if (!isPhone) {
+      setMessage({ text: "Invalid phone number", type: "error" });
       return;
     }
+  }
+
+  if (activeTab === "email") {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setMessage({ text: "Invalid email address", type: "error" });
+      return;
+    }
+  }
+
+  try {
+    setIsLoading(true);
+    const payload = {
+      password,
+      ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
+    };
 
     if (activeTab === "phone") {
-      const isPhone = /^\+[0-9]{10,15}$/.test(phoneNumber);
-      if (!isPhone) {
-        setMessage({ text: "Invalid phone number", type: "error" });
-        return;
-      }
-    }
-
-    if (activeTab === "email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setMessage({ text: "Invalid email address", type: "error" });
-        return;
-      }
-    }
-
-    try {
-      setIsLoading(true);
-      const payload = {
-        password,
-        ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
-      };
-      console.log(payload, "payloaddd");
-
-      const res = await api.post("user/signup", payload);
-      console.log(res.data, "resdata");
-
+      const res = await api.post("user/signup/phoneNumber", payload);
       setMessage({ text: res.data.message, type: "success" });
-    } catch (err) {
-      setMessage({
-        text: err.response?.data?.message || "Registration failed",
-        type: "error",
-      });
-    } finally {
-      setIsLoading(false);
+
+      // Show OTP input
+      setShowOtpInput(true);
+      // setSignupSuccessData(res.data); // Store any useful info like userId or tempToken
+    } else {
+      const res = await api.post("user/signup/email", payload);
+      setMessage({ text: res.data.message, type: "success" });
     }
-  };
+  } catch (err) {
+    setMessage({
+      text: err.response?.data?.message || "Registration failed",
+      type: "error",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+const handleVerifyOtp = async () => {
+  if (!otp) {
+    setMessage({ text: "Please enter OTP", type: "error" });
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+    const verifyRes = await api.post("user/signup/phoneNumber", {
+      phonenumber: phoneNumber,
+      password,
+      otp,
+    });
+
+    setMessage({ text: verifyRes.data.message, type: "success" });
+    navigate(route.login);
+  } catch (err) {
+    setMessage({
+      text: err.response?.data?.message || "OTP verification failed",
+      type: "error",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="account-content">
@@ -172,7 +257,15 @@ const Register = () => {
                         ></span>
                       </div>
                     </div>
-
+<div className="mb-3">
+  <input
+        type="text"
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+        className="form-control"
+        placeholder="Enter OTP"
+      />
+</div>
                     {message.text && (
                       <p
                         className={`fw-medium ${
@@ -185,7 +278,7 @@ const Register = () => {
                       </p>
                     )}
 
-                    <div className="mb-3">
+                    {! showOtpInput &&<div className="mb-3">
                       <button
                         onClick={handleRegister}
                         type="button"
@@ -202,7 +295,29 @@ const Register = () => {
                           "Sign Up"
                         )}
                       </button>
-                    </div>
+                    </div>}
+                    {showOtpInput && (
+  <div className="mb-3">
+    
+    <button
+      onClick={handleVerifyOtp}
+      type="button"
+      className="btn btn-success w-100 mt-2"
+      disabled={isLoading}
+    >
+      {isLoading ? (
+        <span
+          className="spinner-border spinner-border-sm me-2"
+          role="status"
+          aria-hidden="true"
+        ></span>
+      ) : (
+        "Verify OTP"
+      )}
+    </button>
+  </div>
+)}
+
 
                     <div className="mb-3">
                       <h6>

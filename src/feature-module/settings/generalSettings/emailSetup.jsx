@@ -5,26 +5,37 @@ import CollapseHeader from "../../../core/common/collapse-header";
 import { SlPeople } from "react-icons/sl";
 import { FaTasks } from "react-icons/fa";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
-import { GoogleAuthContext } from "../../../core/common/context/GoogleAuthContext";
+import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
 import { useSelector } from "react-redux";
 const route = all_routes;
 const EmailSetup = () => {
-  const { isGoogleSignedIn, googleSignIn, googleSignOut } = useContext(GoogleAuthContext);
-  const userProfile = useSelector((state)=>state.profile)
- 
-const handleGoogleToggle = () => {
-  if (userProfile.googleConnected) {
-    document.getElementById("open-disconnect-modal").click(); // triggers modal
-  } else {
-    googleSignIn();
-  }
-};
-  const onDisconnect=()=>{
-  
+  const [modalText, setModalText] = useState("");
+  const { isGoogleSignedIn, googleSignIn, googleSignOut, microsoftSignIn, microsoftSignOut } =
+    useContext(EmailAuthContext);
+  const userProfile = useSelector((state) => state.profile);
+
+  const handleGoogleToggle = () => {
+    if (userProfile.googleConnected) {
+      setModalText("Google")
+      document.getElementById("open-disconnect-modal").click();
+    } else {
+      googleSignIn();
+    }
+  };
+  const onGoogleDisconnect = () => {
     googleSignOut();
-  
-  
-  }
+  };
+  const handleMicrosoftToggle = () => {
+    if (userProfile.microsoftConnected) {
+      setModalText("Microsoft")
+      document.getElementById("open-disconnect-modal").click();
+    } else {
+      microsoftSignIn();
+    }
+  };
+  const onMicrosoftDisconnect = () => {
+    microsoftSignOut();
+  };
 
   return (
     <div>
@@ -118,9 +129,11 @@ const handleGoogleToggle = () => {
                                   <div className="connect-btn">
                                     <Link
                                       to="#"
-                                      className="badge border bg-white text-default"
+                                      className="badge badge-soft-success"
                                     >
-                                      Connect
+                                      {userProfile.microsoftConnected
+                                        ? "Connected"
+                                        : "Not Connected"}
                                     </Link>
                                   </div>
                                 </div>
@@ -131,6 +144,8 @@ const handleGoogleToggle = () => {
                                       className="form-check-input"
                                       type="checkbox"
                                       role="switch"
+                                      checked={userProfile.microsoftConnected}
+                                      onChange={handleMicrosoftToggle}
                                       // defaultChecked
                                     />
                                   </div>
@@ -150,48 +165,53 @@ const handleGoogleToggle = () => {
         </div>
       </div>
       <button
-  id="open-disconnect-modal"
-  type="button"
-  data-bs-toggle="modal"
-  data-bs-target="#disconnect_google_modal"
-  className="d-none"
-/>
+        id="open-disconnect-modal"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#disconnect_google_modal"
+        className="d-none"
+      />
       {/* /Page Wrapper */}
-        <div className="modal fade"         id="disconnect_google_modal"
+      <div
+        className="modal fade"
+        id="disconnect_google_modal"
         tabIndex="-1"
-        aria-labelledby="disconnectGoogleLabel" role="dialog">
-            <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-body">
-                  <div className="text-center">
-                    <div className="avatar avatar-xl bg-danger-light rounded-circle mb-3">
-                      <i className="ti ti-trash-x fs-36 text-danger" />
-                    </div>
-                    <h4 className="mb-2 text-capitalize">Remove account?</h4>
-                    <p className="mb-0">
-                      Are you sure you want to disconnect <br /> the Google account
-                    </p>
-                    <div className="d-flex align-items-center justify-content-center mt-4">
-                      <Link
-                        to="#"
-                        className="btn btn-light me-2"
-                        data-bs-dismiss="modal"
-                     
-                      >
-                        Cancel
-                      </Link>
-                      <Link to={"#"}
-                      data-bs-dismiss="modal"
-                      className="btn btn-danger"
-                      onClick={onDisconnect}>
-                        Yes, Delete it
-                      </Link>
-                    </div>
-                  </div>
+        aria-labelledby="disconnectGoogleLabel"
+        role="dialog"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body">
+              <div className="text-center">
+                <div className="avatar avatar-xl bg-danger-light rounded-circle mb-3">
+                  <i className="ti ti-trash-x fs-36 text-danger" />
+                </div>
+                <h4 className="mb-2 text-capitalize">Remove account?</h4>
+                <p className="mb-0">
+                  Are you sure you want to disconnect <br /> the {modalText} account
+                </p>
+                <div className="d-flex align-items-center justify-content-center mt-4">
+                  <Link
+                    to="#"
+                    className="btn btn-light me-2"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancel
+                  </Link>
+                  <Link
+                    to={"#"}
+                    data-bs-dismiss="modal"
+                    className="btn btn-danger"
+                    onClick={()=>{modalText==="Google"?onGoogleDisconnect():onMicrosoftDisconnect()}}
+                  >
+                    Yes, Remove it
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
     </div>
   );
 };

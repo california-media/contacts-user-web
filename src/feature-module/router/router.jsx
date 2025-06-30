@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PrivateRoute from "./PrivateRoute";
 import { Toast } from "react-bootstrap";
 import { hideToast } from "../../core/data/redux/slices/ToastSlice";
-import { GoogleAuthContext } from "../../core/common/context/GoogleAuthContext";
+import { EmailAuthContext } from "../../core/common/context/EmailAuthContext";
 import { fetchGoogleCalendarEvents } from "../../core/common/googleEvents/GoogleEvents";
 const ALLRoutes = () => {
   const location = useLocation();

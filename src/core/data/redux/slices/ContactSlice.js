@@ -42,7 +42,9 @@ export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
     try {
-      const response = await api.post("addEditContact", formData, {
+      console.log(Object.fromEntries(formData),"formdata before going to api");
+      
+      const response = await api.post("/addEditContact", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

@@ -7,7 +7,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import Select from "react-select";
 import { Link } from "react-router-dom";
 import { gapi } from "gapi-script";
-import { GoogleAuthContext } from "../../../core/common/context/GoogleAuthContext";
+import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
 import { useSelector } from "react-redux";
 
 const Calendar = () => {

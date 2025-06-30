@@ -17,7 +17,7 @@ import { saveContact } from "../../../data/redux/slices/ContactSlice";
 import PhoneInput from "react-phone-input-2";
 import { addTag } from "../../../data/redux/slices/TagSlice";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
-import { GoogleAuthContext } from "../../context/GoogleAuthContext";
+import { EmailAuthContext } from "../../context/EmailAuthContext";
 import { all_routes } from "../../../../feature-module/router/all_routes";
 import { gapi } from "gapi-script";
 

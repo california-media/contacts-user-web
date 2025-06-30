@@ -5,7 +5,7 @@ import DOMPurify from "dompurify";
 import DefaultEditor from "react-simple-wysiwyg";
 import { useDispatch, useSelector } from "react-redux";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
-import { GoogleAuthContext } from "../../../core/common/context/GoogleAuthContext";
+import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
 
 // const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 // const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;

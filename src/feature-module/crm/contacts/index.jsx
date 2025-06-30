@@ -98,7 +98,7 @@ import { gapi } from "gapi-script";
 import EmailTemplateModal from "../../../core/common/modals/EmailTemplateModal";
 import WhatsappTemplateModal from "../../../core/common/modals/WhatsappTemplateModal";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
-import { GoogleAuthContext } from "../../../core/common/context/GoogleAuthContext";
+import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
 const route = all_routes;
 const allNotes = [
   {
@@ -538,8 +538,8 @@ const ContactsDetails = () => {
         meetingLocation: selectedMeeting.meetingLocation,
         meetingStartDate: dayjs(selectedMeeting.meetingStartDate),
         meetingStartTime: dayjs(selectedMeeting.meetingStartTime, "HH:mm"),
-        meetingEndDate: dayjs(selectedMeeting.meetingEndDate),
-        meetingEndTime: dayjs(selectedMeeting.meetingEndTime, "HH:mm"),
+        // meetingEndDate: dayjs(selectedMeeting.meetingEndDate),
+        // meetingEndTime: dayjs(selectedMeeting.meetingEndTime, "HH:mm"),
       });
     } else {
       // Reset form for new task
@@ -552,8 +552,8 @@ const ContactsDetails = () => {
         meetingLocation: "",
         meetingStartDate: dayjs(),
         meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
-        meetingEndDate: dayjs(),
-        meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
+        // meetingEndDate: dayjs(),
+        // meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
       });
     }
   }, [selectedMeeting]);
@@ -664,25 +664,25 @@ const ContactsDetails = () => {
     }
 
     const formDataObj = new FormData();
-    let finalMeetLink = "";
+    // let finalMeetLink = "";
 
-    if (checkMeetingLink && meetingFormData.meetingLink === "") {
-      try {
-        console.log("generating link");
+    // if (checkMeetingLink && meetingFormData.meetingLink === "") {
+    //   try {
+    //     console.log("generating link");
 
-        finalMeetLink = await generateGoogleMeetingLink();
-      } catch (err) {
-        console.error("Failed to generate meeting link:", err);
-        return;
-      }
-    }
+    //     finalMeetLink = await generateGoogleMeetingLink();
+    //   } catch (err) {
+    //     console.error("Failed to generate meeting link:", err);
+    //     return;
+    //   }
+    // }
 
     formDataObj.append("contact_id", selectedContact.contact_id);
 
     formDataObj.append("meeting_id", meetingFormData.meeting_id);
     formDataObj.append("meetingType", meetingFormData.meetingType);
     formDataObj.append("meetingLocation", meetingFormData.meetingLocation);
-    formDataObj.append("meetingLink", finalMeetLink);
+    // formDataObj.append("meetingLink", finalMeetLink);
     formDataObj.append(
       "meetingDescription",
       meetingFormData.meetingDescription
@@ -697,14 +697,14 @@ const ContactsDetails = () => {
       "meetingStartTime",
       meetingFormData.meetingStartTime.format("HH:mm")
     );
-    formDataObj.append(
-      "meetingEndDate",
-      meetingFormData.meetingEndDate.format("YYYY-MM-DD")
-    );
-    formDataObj.append(
-      "meetingEndTime",
-      meetingFormData.meetingEndTime.format("HH:mm")
-    );
+    // formDataObj.append(
+    //   "meetingEndDate",
+    //   meetingFormData.meetingEndDate.format("YYYY-MM-DD")
+    // );
+    // formDataObj.append(
+    //   "meetingEndTime",
+    //   meetingFormData.meetingEndTime.format("HH:mm")
+    // );
     console.log(
       "object before going to api:",
       Object.fromEntries(formDataObj.entries())
@@ -2622,8 +2622,8 @@ const ContactsDetails = () => {
                                 meetingLocation: "",
                                 meetingStartDate: dayjs(),
                                 meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
-                                meetingEndDate: dayjs(),
-                                meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
+                                // meetingEndDate: dayjs(),
+                                // meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
                               });
                             }}
                           >
@@ -2707,8 +2707,8 @@ const ContactsDetails = () => {
                                     <div className="d-flex justify-content-between">
                                       <div>
                                         <div>
-                                          {meeting.meetingType != "online" && (
-                                            <div className="d-flex justify-content-end mb-2">
+                                          {meeting.meetingType == "online" && (
+                                            <div className="d-flex mb-2">
                                               {" "}
                                               <span className="fw-medium text-black me-1">
                                                 Meeting Link :
@@ -2719,7 +2719,6 @@ const ContactsDetails = () => {
                                               >
                                                 {" "}
                                                 {meeting.meetingLink}
-                                                https://hagsfdhgasfdasvdna,com
                                               </a>
                                             </div>
                                           )}
@@ -4163,7 +4162,7 @@ const ContactsDetails = () => {
                     </div>
                   </div>
                 </div>
-                <div className="row">
+                {/* <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="col-form-label">End Date</label>
                     <div className="icon-form-end">
@@ -4200,7 +4199,7 @@ const ContactsDetails = () => {
                       />
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="mb-3">
                   <label className="col-form-label">Meeting Type</label>
                   <Select
