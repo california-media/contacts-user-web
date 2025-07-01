@@ -61,6 +61,7 @@ export const EmailAuthProvider = ({ children }) => {
       console.error("Google Sign-In initiation failed", error);
     }
   };
+
   const googleSignOut = async () => {
     try {
       const response = await api.post("disconnect/google");
@@ -78,16 +79,17 @@ export const EmailAuthProvider = ({ children }) => {
   const microsoftSignIn = async () => {
     try {
       const response = await api.post("connect/microsoft");
-      console.log(response.data,"response from microsoft connect");
-      
+      console.log(response.data, "response from microsoft connect");
+
       if (response.data.status === "success" && response.data.url) {
         const width = 500;
         const height = 600;
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
-
+        console.log("console 1");
         const messageHandler = (event) => {
           const data = event.data;
+          console.log("console 2");
           if (data?.status === "success" && data.microsoftConnected) {
             dispatch(
               showToast({
@@ -96,8 +98,10 @@ export const EmailAuthProvider = ({ children }) => {
               })
             );
             dispatch(fetchProfile());
+            console.log("console 3");
             window.removeEventListener("message", messageHandler);
             popup?.close();
+            console.log("console 4");
           }
         };
 
@@ -110,6 +114,7 @@ export const EmailAuthProvider = ({ children }) => {
         );
       }
     } catch (error) {
+      console.log("console 5");
       console.error("Microsoft Sign-In initiation failed", error);
     }
   };
@@ -117,6 +122,38 @@ export const EmailAuthProvider = ({ children }) => {
   const microsoftSignOut = async () => {
     try {
       const response = await api.post("disconnect/microsoft");
+
+      dispatch(fetchProfile());
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
+    } catch (error) {
+      dispatch(
+        showToast({ message: error.response?.data?.message, variant: "danger" })
+      );
+    }
+  };
+
+  const smtpSignIn = async (smtpData) => {
+    try {
+      console.log(smtpData,"smtp data before going to api");
+      
+      const response = await api.post("connect/smtp", smtpData);
+      console.log(response.data,"responseeeee");
+      
+      dispatch(fetchProfile());
+      console.log(response.data, "response from smtp");
+      dispatch(showToast({ message: response.data.message, variant: "success" }));
+    } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+    }
+  };
+
+  const smtpSignOut = async () => {
+    try {
+      const response = await api.post("disconnect/smtp");
 
       dispatch(fetchProfile());
       dispatch(
@@ -138,6 +175,8 @@ export const EmailAuthProvider = ({ children }) => {
         isMicrosoftSignedIn,
         microsoftSignIn,
         microsoftSignOut,
+        smtpSignIn,
+        smtpSignOut,
       }}
     >
       {children}

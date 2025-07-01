@@ -1,52 +1,84 @@
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
-import CollapseHeader from "../../../core/common/collapse-header";
-import { SlPeople } from "react-icons/sl";
-import { FaTasks } from "react-icons/fa";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
 import { useSelector } from "react-redux";
 const route = all_routes;
 const EmailSetup = () => {
   const [modalText, setModalText] = useState("");
-  const { isGoogleSignedIn, googleSignIn, googleSignOut, microsoftSignIn, microsoftSignOut } =
-    useContext(EmailAuthContext);
+  const iconMap = {
+    google: "googleLogo.png",
+    microsoft: "microsoftLogo.png",
+    smtp: "smtpLogo.png",
+  };
+  const {
+    googleSignIn,
+    googleSignOut,
+    microsoftSignIn,
+    microsoftSignOut,
+    smtpSignIn,
+    smtpSignOut,
+  } = useContext(EmailAuthContext);
   const userProfile = useSelector((state) => state.profile);
-
-  const handleGoogleToggle = () => {
-    if (userProfile.googleConnected) {
-      setModalText("Google")
-      document.getElementById("open-disconnect-modal").click();
-    } else {
-      googleSignIn();
-    }
+  const [formData, setFormData] = useState({
+    SMTP_HOST: "",
+    SMTP_PORT: "",
+    SMTP_USER: "",
+    SMTP_PASS: "",
+  });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
   const onGoogleDisconnect = () => {
     googleSignOut();
   };
-  const handleMicrosoftToggle = () => {
-    if (userProfile.microsoftConnected) {
-      setModalText("Microsoft")
-      document.getElementById("open-disconnect-modal").click();
-    } else {
-      microsoftSignIn();
-    }
-  };
   const onMicrosoftDisconnect = () => {
     microsoftSignOut();
+  };
+  const onSmtpDisconnect = () => {
+    smtpSignOut();
+  };
+
+  const toggleHandlers = (account) => {
+    if (account.type === "google") {
+      if (account.isConnected) {
+        setModalText("Google");
+        document.getElementById("open-disconnect-modal").click();
+      } else {
+        googleSignIn();
+      }
+    }
+    if (account.type === "microsoft") {
+      if (account.isConnected) {
+        setModalText("Microsoft");
+        document.getElementById("open-disconnect-modal").click();
+      } else {
+        microsoftSignIn();
+      }
+    }
+    if (account.type === "smtp") {
+      if (account.isConnected) {
+        setModalText("SMTP");
+        document.getElementById("open-disconnect-modal").click();
+      } else {
+        document.getElementById("open-smtp-modal").click();
+      }
+    }
   };
 
   return (
     <div>
-      {/* Page Wrapper */}
       <div className="page-wrapper">
         <div className="content">
           <div className="row">
             <div className="col-md-12">
               <div className="row">
                 <div className="col-xl-3 col-lg-12 theiaStickySidebar">
-                  {/* Settings Sidebar */}
                   <div className="card">
                     <div className="card-body">
                       <div className="settings-sidebar">
@@ -71,93 +103,64 @@ const EmailSetup = () => {
                       </div>
                     </div>
                   </div>
-                  {/* /Settings Sidebar */}
                 </div>
                 <div className="col-xl-9 col-lg-12">
-                  {/* Settings Info */}
                   <div className="card">
                     <div className="card-body">
                       <h4 className="fw-semibold mb-3">Connected Emails</h4>
                       <div className="card mb-3">
                         <div className="row">
-                          <div className="col-md-4 col-sm-6">
-                            <div className="card border mb-3">
-                              <div className="card-body">
-                                <div className="d-flex align-items-center justify-content-between mb-3">
-                                  <ImageWithBasePath
-                                    src="assets/img/icons/googleLogo.png"
-                                    width={50}
-                                    alt="Icon"
-                                  />
-                                  <div className="connect-btn">
-                                    <Link
-                                      to="#"
-                                      className="badge badge-soft-success"
-                                    >
-                                      {userProfile.googleConnected
-                                        ? "Connected"
-                                        : "Not Connected"}
-                                    </Link>
-                                  </div>
-                                </div>
+                          {userProfile?.accounts?.map((account, index) => {
+                            const type = account.type.toLowerCase();
+                            const isConnected = account.isConnected;
 
-                                <div className="d-flex align-items-center justify-content-between">
-                                  <p className="mb-0">Google Account</p>
-                                  <div className="form-check form-switch">
-                                    <input
-                                      className="form-check-input"
-                                      type="checkbox"
-                                      role="switch"
-                                      checked={userProfile.googleConnected}
-                                      onChange={handleGoogleToggle}
-                                    />
+                            return (
+                              <div className="col-md-4 col-sm-6" key={index}>
+                                <div className="card border mb-3">
+                                  <div className="card-body">
+                                    <div className="d-flex align-items-center justify-content-between mb-3">
+                                      <ImageWithBasePath
+                                        src={`assets/img/icons/${iconMap[type]}`}
+                                        width={50}
+                                        alt={`${account.type} Icon`}
+                                      />
+                                      <div className="connect-btn">
+                                        <Link
+                                          to="#"
+                                          className="badge badge-soft-success"
+                                        >
+                                          {isConnected
+                                            ? "Connected"
+                                            : "Not Connected"}
+                                        </Link>
+                                      </div>
+                                    </div>
+
+                                    <div className="d-flex align-items-center justify-content-between">
+                                      <p className="mb-0 text-capitalize">
+                                        {account.type}
+                                      </p>
+                                      <div className="form-check form-switch">
+                                        <input
+                                          className="form-check-input"
+                                          type="checkbox"
+                                          role="switch"
+                                          checked={account.isConnected}
+                                          onChange={() =>
+                                            toggleHandlers(account)
+                                          }
+                                        />
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          </div>
-
-                          <div className="col-md-4 col-sm-6">
-                            <div className="card border mb-3">
-                              <div className="card-body">
-                                <div className="d-flex align-items-center justify-content-between mb-3">
-                                  <ImageWithBasePath
-                                    src="assets/img/icons/microsoftLogo.png"
-                                    width={50}
-                                    alt="Icon"
-                                  />
-                                  <div className="connect-btn">
-                                    <Link
-                                      to="#"
-                                      className="badge badge-soft-success"
-                                    >
-                                      {userProfile.microsoftConnected
-                                        ? "Connected"
-                                        : "Not Connected"}
-                                    </Link>
-                                  </div>
-                                </div>
-                                <div className="d-flex align-items-center justify-content-between">
-                                  <p className="mb-0">Microsoft</p>
-                                  <div className="form-check form-switch">
-                                    <input
-                                      className="form-check-input"
-                                      type="checkbox"
-                                      role="switch"
-                                      checked={userProfile.microsoftConnected}
-                                      onChange={handleMicrosoftToggle}
-                                      // defaultChecked
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
                   </div>
-                  {/* /Settings Info */}
                 </div>
               </div>
             </div>
@@ -171,7 +174,21 @@ const EmailSetup = () => {
         data-bs-target="#disconnect_google_modal"
         className="d-none"
       />
-      {/* /Page Wrapper */}
+      <button
+        id="open-smtp-modal"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#open_smtp_modal"
+        className="d-none"
+      />
+      <button
+        id="disconnect-smtp-modal"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#disconnect_smtp_modal"
+        className="d-none"
+      />
+
       <div
         className="modal fade"
         id="disconnect_google_modal"
@@ -188,7 +205,8 @@ const EmailSetup = () => {
                 </div>
                 <h4 className="mb-2 text-capitalize">Remove account?</h4>
                 <p className="mb-0">
-                  Are you sure you want to disconnect <br /> the {modalText} account
+                  Are you sure you want to disconnect <br /> the {modalText}{" "}
+                  account
                 </p>
                 <div className="d-flex align-items-center justify-content-center mt-4">
                   <Link
@@ -202,9 +220,110 @@ const EmailSetup = () => {
                     to={"#"}
                     data-bs-dismiss="modal"
                     className="btn btn-danger"
-                    onClick={()=>{modalText==="Google"?onGoogleDisconnect():onMicrosoftDisconnect()}}
+                    onClick={() => {
+                      modalText === "Google"
+                        ? onGoogleDisconnect()
+                        : modalText === "Microsoft"
+                        ? onMicrosoftDisconnect()
+                        : onSmtpDisconnect();
+                    }}
                   >
                     Yes, Remove it
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="modal fade"
+        id="open_smtp_modal"
+        tabIndex="-1"
+        aria-labelledby="smtpModalLabel"
+        role="dialog"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-body">
+              <div className="">
+                <h4 className="mb-2 text-capitalize text-center">
+                  Connect SMTP
+                </h4>
+                <div className="col-12">
+                  <div className="mb-3">
+                    <label className="col-form-label">
+                      Host Name <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="SMTP_HOST"
+                      value={formData.SMTP_HOST}
+                      onChange={handleChange}
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="mb-3">
+                    <label className="col-form-label">
+                      Port Number <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="SMTP_PORT"
+                      value={formData.SMTP_PORT}
+                      onChange={handleChange}
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="mb-3">
+                    <label className="col-form-label">
+                      Username <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="SMTP_USER"
+                      value={formData.SMTP_USER}
+                      onChange={handleChange}
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+                <div className="col-12">
+                  <div className="mb-3">
+                    <label className="col-form-label">
+                      Password <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="SMTP_PASS"
+                      value={formData.SMTP_PASS}
+                      onChange={handleChange}
+                      className="form-control"
+                    />
+                  </div>
+                </div>
+                <div className="d-flex align-items-center justify-content-center mt-4">
+                  <Link
+                    to="#"
+                    className="btn btn-light me-2"
+                    data-bs-dismiss="modal"
+                  >
+                    Cancel
+                  </Link>
+                  <Link
+                    to={"#"}
+                    data-bs-dismiss="modal"
+                    className="btn btn-primary"
+                    onClick={() => {
+                      smtpSignIn(formData);
+                    }}
+                  >
+                    Add SMTP
                   </Link>
                 </div>
               </div>

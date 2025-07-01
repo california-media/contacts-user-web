@@ -2,13 +2,10 @@ import { gapi } from "gapi-script";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import { showToast } from "../../data/redux/slices/ToastSlice";
-import DefaultEditor from "react-simple-wysiwyg";
 import { useDispatch, useSelector } from "react-redux";
-import { EmailAuthContext } from "../context/EmailAuthContext";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { sendEmail } from "../../data/redux/slices/EmailSlice";
-import { Link } from "react-router-dom";
 
 const EmailTemplateModal = () => {
   const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
@@ -67,36 +64,23 @@ const EmailTemplateModal = () => {
       return;
     }
 
- 
-    // const emailData = {
-    //   to: selectedContact.emailaddresses[0],
-    //   subject: editEmailTemplateSubject,
-    //   html: finalEmailBody,
-    //   ...(emailProvider === "google" && {
-    //   fromEmail: userProfile.googleEmail,
-    //   fromGoogleRefreshToken: userProfile.googleRefreshToken,
-    //   }),
-    // };
-
     const emailData = {
-  to: selectedContact.emailaddresses[0],
-  subject: editEmailTemplateSubject,
-  html: finalEmailBody,
-  ...(emailProvider === "google" && {
-    fromEmail: userProfile.googleEmail,
-    fromGoogleRefreshToken: userProfile.googleRefreshToken
-  }),
-  ...(emailProvider === "microsoft" && {
-    fromEmail: userProfile.microsoftEmail,
-    fromMicrosoftAccessToken: userProfile.microsoftAccessToken
-  })
-};
-console.log(userProfile,"userprofilee");
-
+      to: selectedContact.emailaddresses[0],
+      subject: editEmailTemplateSubject,
+      html: finalEmailBody,
+      ...(emailProvider === "google" && {
+        fromEmail: userProfile.googleEmail,
+        fromGoogleRefreshToken: userProfile.googleRefreshToken,
+      }),
+      ...(emailProvider === "microsoft" && {
+        fromEmail: userProfile.microsoftEmail,
+        fromMicrosoftAccessToken: userProfile.microsoftAccessToken,
+      }),
+    };
+    console.log(userProfile, "userprofilee");
 
     dispatch(sendEmail(emailData));
     document.getElementById("closeEmailTemplateModal")?.click();
-
   };
   const modules = {
     toolbar: [
@@ -168,7 +152,33 @@ console.log(userProfile,"userprofilee");
                 placeholder="Select a template"
               />
             </div>
+            <div className="col-12">
+              <div className="mb-3">
+                <label className="col-form-label ms-3">From</label>
+                <Select
+                  classNamePrefix="react-select"
+                  options={emailTemplateTitles}
+                  onChange={(selectedOption) => {
+                    console.log("Selected option:", selectedOption);
 
+                    setEditEmailTemplateBody(
+                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
+                        (template) =>
+                          template.emailTemplate_id === selectedOption.value
+                      )?.emailTemplateBody
+                    );
+                    setEditEmailTemplateSubject(
+                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
+                        (template) =>
+                          template.emailTemplate_id === selectedOption.value
+                      )?.emailTemplateSubject
+                    );
+                  }}
+                  placeholder="Select a template"
+                />
+              </div>
+
+            </div>
             <div className="col-12">
               <div className="mb-3">
                 <label className="col-form-label ms-3">Subject</label>
@@ -181,20 +191,23 @@ console.log(userProfile,"userprofilee");
                 />
               </div>
             </div>
-            <select
-              className="form-select"
-              aria-label="Default select example"
-              onChange={(e) => {
-                if (e.target.value) insertTag(e.target.value);
-                e.target.selectedIndex = 0;
-              }}
-            >
-              <option value="">Insert Tag</option>
-              <option value="{{firstName}}">First Name</option>
-              <option value="{{lastName}}">Last Name</option>
-              <option value="{{designation}}">Designation</option>
-              <option value="{{email}}">Email</option>
-            </select>
+            <div className="mb-3">
+              <label className="col-form-label ms-3">Attribute</label>
+              <select
+                className="form-select"
+                aria-label="Default select example"
+                onChange={(e) => {
+                  if (e.target.value) insertTag(e.target.value);
+                  e.target.selectedIndex = 0;
+                }}
+              >
+                <option value="">Insert Tag</option>
+                <option value="{{firstName}}">First Name</option>
+                <option value="{{lastName}}">Last Name</option>
+                <option value="{{designation}}">Designation</option>
+                <option value="{{email}}">Email</option>
+              </select>
+            </div>
             <div className="mb-3">
               <label className="col-form-label col-md-2 ms-3">Body</label>
               <div className="col-md-12">
@@ -217,49 +230,19 @@ console.log(userProfile,"userprofilee");
                 Send Mail
               </button> */}
               <div className="btn-group my-1">
-  <button
-  type="button"
-  className="btn btn-primary"
-  onClick={() => handleSendEmail()}
-  disabled={!emailProvider} // optional: disable if no provider
->
-  Send Mail{emailProvider ? ` (${emailProvider.charAt(0).toUpperCase() + emailProvider.slice(1)})` : ""}
-</button>
-  <button
-    type="button"
-    className="btn btn-primary dropdown-toggle dropdown-toggle-split me-2"
-    data-bs-toggle="dropdown"
-    aria-expanded="false"
-  >
-    <span className="visually-hidden">Toggle Dropdown</span>
-  </button>
- <ul className="dropdown-menu">
-  <li>
-    <button className="dropdown-item" onClick={() => setEmailProvider("google")}>
-      Google
-    </button>
-  </li>
-  <li>
-    <button className="dropdown-item" onClick={() => setEmailProvider("microsoft")}>
-      Microsoft
-    </button>
-  </li>
-  <li>
-    <button className="dropdown-item" onClick={() => setEmailProvider("smtp")}>
-      SMTP
-    </button>
-  </li>
-</ul>
-</div>
-
-
-              {/* <div className="btn-group my-1">
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={handleSendEmail}
+                  onClick={() => handleSendEmail()}
+                  disabled={!emailProvider} // optional: disable if no provider
                 >
-                  Send Mail (Google)
+                  Send Mail
+                  {emailProvider
+                    ? ` (${
+                        emailProvider.charAt(0).toUpperCase() +
+                        emailProvider.slice(1)
+                      })`
+                    : ""}
                 </button>
                 <button
                   type="button"
@@ -271,30 +254,31 @@ console.log(userProfile,"userprofilee");
                 </button>
                 <ul className="dropdown-menu">
                   <li>
-                    <Link className="dropdown-item" to="#">
-                      Action
-                    </Link>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => setEmailProvider("google")}
+                    >
+                      Google
+                    </button>
                   </li>
                   <li>
-                    <Link className="dropdown-item" to="#">
-                      Another action
-                    </Link>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => setEmailProvider("microsoft")}
+                    >
+                      Microsoft
+                    </button>
                   </li>
                   <li>
-                    <Link className="dropdown-item" to="#">
-                      Something else here
-                    </Link>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="#">
-                      Separated link
-                    </Link>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => setEmailProvider("smtp")}
+                    >
+                      SMTP
+                    </button>
                   </li>
                 </ul>
-              </div> */}
+              </div>
             </div>
           </div>
         </div>

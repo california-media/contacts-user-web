@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../router/all_routes";
 import api from "../../core/axios/axiosInstance";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import PhoneInput from "react-phone-input-2";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isgoogleLoading, setIsGoogleLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [canResend, setCanResend] = useState(true);
   const [timer, setTimer] = useState(0);
@@ -92,17 +94,30 @@ const Login = () => {
     console.log("Google Token : ", credentialResponse.credential);
 
     try {
+       setIsGoogleLoading(true);
       const response = await api.post("user/login", {
         googleToken: credentialResponse.credential,
       });
+      console.log(response.data, "response from google");
 
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.data.token);
         setMessage(response.data.message);
-        navigate(route.dashboard);
+        setIsGoogleLoading(false);
+        if (response.data.data.isFirstTime) {
+          navigate("/registration-form", {
+            replace: true,
+            state: response.data.data,
+          });
+        }else{
+          navigate(route.dashboard);
+        }
       }
     } catch (error) {
       setMessage(error?.response?.data?.message || "Google login failed");
+    }
+    finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -154,7 +169,6 @@ const Login = () => {
                     </div>
                     {tab === "email" && (
                       <div className="mb-3">
-                        {/* <label>Email Address</label> */}
                         <div className="position-relative">
                           <span className="input-icon-addon">
                             <i className="ti ti-mail"></i>
@@ -172,15 +186,28 @@ const Login = () => {
                     )}
                     {tab === "phone" && (
                       <div className="mb-3">
-                        {/* <label>Phone Number</label> */}
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          required
-                          placeholder="Enter phone number"
-                        />
+                        <div className="position-relative">
+                          <span className="input-icon-addon">
+                            <i className="ti ti-phone"></i>
+                          </span>
+                          {/* <input
+                            type="text"
+                            className="form-control"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            required
+                            placeholder="Enter phone number"
+                          /> */}
+
+                          <PhoneInput
+                            country={"ae"}
+                            value={phone}
+                            onChange={(value) => setPhone("+" + value)}
+                            enableSearch
+                            inputProps={{ name: "phone" }}
+                            inputStyle={{ background: "#e9f0fd" }}
+                          />
+                        </div>
                       </div>
                     )}
                     <div className="mb-3">
@@ -273,14 +300,33 @@ const Login = () => {
                     <div className="form-set-login or-text mb-3 text-center">
                       <h4>OR</h4>
                     </div>
-                    <div className="d-flex justify-content-center mb-3">
+                    {/* <div className="d-flex justify-content-center mb-3">
                       <GoogleOAuthProvider clientId={clientId}>
                         <GoogleLogin
                           onSuccess={handleGoogleLogin}
                           onError={() => console.log("Google Login Failed")}
                         />
                       </GoogleOAuthProvider>
-                    </div>
+                    </div> */}
+                     <div className="d-flex justify-content-center mb-3">
+      <GoogleOAuthProvider clientId={clientId}>
+        {isgoogleLoading ? (
+          <button className="btn btn-primary" disabled>
+            <span
+              className="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Logging in...
+          </button>
+        ) : (
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => console.log("Google Login Failed")}
+          />
+        )}
+      </GoogleOAuthProvider>
+    </div>
                     <div className="text-center">
                       <p className="fw-medium text-gray">
                         © 2025 - California Media

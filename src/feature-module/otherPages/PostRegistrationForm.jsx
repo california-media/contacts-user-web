@@ -31,22 +31,33 @@ const Step1 = ({ formData, setFormData, passedData }) => {
   const handleOnPhoneChange = (value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      phone: value,
+      phonenumber: value,
     }));
   };
 
   const isFirstNameFilled = formData.firstname.trim() !== "";
   const isEmailFilled = formData.email.trim() !== "";
-  const isPhoneFilled = formData.phone.trim() !== "";
-  const canProceed =
-    isFirstNameFilled &&
-    (passedData?.registeredWith !== "email" ? isEmailFilled : isPhoneFilled);
+  const isPhoneFilled = formData.phonenumber.trim() !== "";
+  // const canProceed =
+  //   isFirstNameFilled &&
+  //   (passedData?.registeredWith !== "email" && passedData.registeredWith!=="google" ? isEmailFilled : isPhoneFilled);
+const canProceed =
+  (
+    passedData?.registeredWith === "google"
+      ? isPhoneFilled
+      : passedData?.registeredWith === "email"
+      ? isPhoneFilled && isFirstNameFilled
+      : passedData?.registeredWith === "phoneNumber"
+      ? isEmailFilled && isFirstNameFilled
+      : false
+  );
 
   return (
     <StepWrapper key="step1">
       <>
        <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
         <h3>Personal Details</h3>
+          {passedData?.registeredWith != "google" && 
         <div className="d-flex gap-3">
           <input
             className="prf-input"
@@ -71,6 +82,7 @@ const Step1 = ({ formData, setFormData, passedData }) => {
             required
           />
         </div>
+        }
         <input
           className="prf-input"
           type="text"
@@ -95,7 +107,7 @@ const Step1 = ({ formData, setFormData, passedData }) => {
         />
         {console.log(passedData, "passed dtata")}
 
-        {passedData?.registeredWith != "email" ? (
+        {passedData?.registeredWith != "email" && passedData?.registeredWith != "google" ? (
           <input
             className="prf-input"
             type="email"
@@ -111,7 +123,7 @@ const Step1 = ({ formData, setFormData, passedData }) => {
           <div className="mb-4">
             <PhoneInput
               country={"ae"}
-              value={formData.phone}
+              value={formData.phonenumber}
               onChange={handleOnPhoneChange}
               placeholder="Phone Number *"
               enableSearch
@@ -344,7 +356,7 @@ const Success = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate("/dashboard");
-    }, 10000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -375,7 +387,6 @@ const handleSubmit = async ({ formData }) => {
     const result = await api.post("/user-info/onboarding-submit", formData);
     console.log(result, "result from api");
 
-    // navigate("/dashboard");
     console.log(result.data, " Submission successful");
   } catch (error) {
     console.error("Submission error:", error);
@@ -402,34 +413,16 @@ const PostRegistrationForm = () => {
     lastname: "",
     gender: "",
     email: "",
-    phone: "",
+    phonenumber: "",
     designation: "",
   });
   console.log("Form Data:", formData);
 
   return (
-    // <div className="prf-container">
-    //   <Wizard>
-    //     <Step1
-    //       formData={formData}
-    //       passedData={passedData}
-    //       setFormData={setFormData}
-    //     />
-    //     <Step2 formData={formData} setFormData={setFormData} />
-    //     <Step3
-    //       formData={formData}
-    //       setFormData={setFormData}
-    //       navigate={navigate}
-    //     />
-    //     {/* <Success formData={formData} /> */}
-    //   </Wizard>
-    // </div>
     <div className="prf-flex-container">
       
       <div className="prf-left">
         <div>
-          {/* <img src="/assets/img/logo.svg" /> */}
-
           <Wizard onStepChange={handleStepChange}>
             <Step1
               formData={formData}

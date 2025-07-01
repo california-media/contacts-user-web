@@ -30,7 +30,7 @@ const UserVerification = () => {
               replace: true,
               state: response.data.data,
             });
-          }, 5000);
+          }, 2000);
         }
       } catch (error) {
         console.error("Signup failed:", error.response?.data || error.message);

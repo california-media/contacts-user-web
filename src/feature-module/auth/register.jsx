@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../router/all_routes";
@@ -20,10 +20,14 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [activeTab, setActiveTab] = useState("email");
-  const [otp, setOtp] = useState("");
+  // const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState(new Array(6).fill(""));
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [resendDisabled, setResendDisabled] = useState(true);
 
   const navigate = useNavigate();
+  const otpInputs = useRef([]);
 
   const togglePasswordVisibility = (field) => {
     setPasswordVisibility((prevState) => ({
@@ -31,60 +35,76 @@ const Register = () => {
       [field]: !prevState[field],
     }));
   };
+  const handleOtpChange = (element, index) => {
+    const value = element.value.replace(/\D/, ""); // Only digits
+    if (!value) return;
 
-  // const handleRegister = async () => {
-  //   setMessage({ text: "", type: "" });
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
 
-  //   if (!password) {
-  //     setMessage({ text: "Password is required", type: "error" });
-  //     return;
-  //   }
+    // Move to next input if available
+    if (index < 5 && otpInputs.current[index + 1]) {
+      otpInputs.current[index + 1].focus();
+    }
+  };
+  useEffect(() => {
+    if (otp.every((digit) => digit !== "")) {
+      handleVerifyOtp(otp.join(""));
+    }
+  }, [otp]);
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      const newOtp = [...otp];
+      if (otp[index]) {
+        newOtp[index] = "";
+        setOtp(newOtp);
+      } else if (index > 0) {
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        otpInputs.current[index - 1].focus();
+      }
+    }
+  };
+  useEffect(() => {
+    let interval;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setResendDisabled(false);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
 
-  //   if (activeTab === "phone") {
-  //     const isPhone = /^\+[0-9]{10,15}$/.test(phoneNumber);
-  //     if (!isPhone) {
-  //       setMessage({ text: "Invalid phone number", type: "error" });
-  //       return;
-  //     }
-  //   }
-
-  //   if (activeTab === "email") {
-  //     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //     if (!emailRegex.test(email)) {
-  //       setMessage({ text: "Invalid email address", type: "error" });
-  //       return;
-  //     }
-  //   }
-
-  //   try {
-  //     setIsLoading(true);
-  //     const payload = {
-  //       password,
-  //       ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
-  //     };
-  //     console.log(payload, "payloaddd");
-
-  //     if (activeTab === "phone") {
-  //       const res = await api.post("user/signup/phoneNumber", payload);
-  //       setMessage({ text: res.data.message, type: "success" });
-  //     } else {
-  //       console.log(payload,"payloaddd");
-
-  //       const res = await api.post("user/signup/email", payload);
-  //       setMessage({ text: res.data.message, type: "success" });
-  //     }
-  //   } catch (err) {
-  //     setMessage({
-  //       text: err.response?.data?.message || "Registration failed",
-  //       type: "error",
-  //     });
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+  const handleResendOtp = async () => {
+    try {
+      // setIsLoading(true);
+      setMessage({ text: "", type: "" });
+      const payload = {
+        password,
+        ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
+      };
+      const res = await api.post(
+        activeTab === "phone" ? "user/signup/phoneNumber" : "user/signup/email",
+        payload
+      );
+      setMessage({ text: "OTP resent successfully", type: "success" });
+      setTimer(60);
+      setResendDisabled(true);
+    } catch (err) {
+      setMessage({
+        text: err.response?.data?.message || "Failed to resend OTP",
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRegister = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     setMessage({ text: "", type: "" });
 
     if (!password) {
@@ -119,13 +139,18 @@ const Register = () => {
         const res = await api.post("user/signup/phoneNumber", payload);
         setMessage({ text: res.data.message, type: "success" });
         console.log(res.data, "responseaaa");
-       
+        setTimer(60);
+        setResendDisabled(true);
+
         // Show OTP input
         setShowOtpInput(true);
         // setSignupSuccessData(res.data); // Store any useful info like userId or tempToken
       } else {
         const res = await api.post("user/signup/email", payload);
         setMessage({ text: res.data.message, type: "success" });
+        setTimer(60);
+        setResendDisabled(true);
+        // Show OTP input
       }
     } catch (err) {
       setMessage({
@@ -136,7 +161,7 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-  const handleVerifyOtp = async () => {
+  const handleVerifyOtp = async (finalOtp) => {
     if (!otp) {
       setMessage({ text: "Please enter OTP", type: "error" });
       return;
@@ -144,18 +169,19 @@ const Register = () => {
 
     try {
       setIsLoading(true);
+
       const response = await api.post("user/signup/phoneNumber", {
         phonenumber: phoneNumber,
         password,
-        otp,
+        otp: finalOtp,
       });
- if (response.data.data.token) {
-          localStorage.setItem("token", response.data.data.token);
-          navigate("/registration-form", {
-            replace: true,
-            state: response.data.data,
-          });
-        }
+      if (response.data.data.token) {
+        localStorage.setItem("token", response.data.data.token);
+        navigate("/registration-form", {
+          replace: true,
+          state: response.data.data,
+        });
+      }
       setMessage({ text: response.data.message, type: "success" });
       // navigate(route.login);
     } catch (err) {
@@ -199,6 +225,7 @@ const Register = () => {
                         onClick={() => {
                           setActiveTab("email");
                           setMessage({ text: "", type: "" });
+                          setShowOtpInput(false);
                         }}
                       >
                         Register with Email
@@ -221,13 +248,18 @@ const Register = () => {
 
                     {activeTab === "email" && (
                       <div className="mb-3">
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="form-control"
-                          placeholder="Enter email"
-                        />
+                        <div className="position-relative">
+                          <span className="input-icon-addon">
+                            <i className="ti ti-mail"></i>
+                          </span>
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="form-control"
+                            placeholder="Enter email"
+                          />
+                        </div>
                       </div>
                     )}
 
@@ -266,14 +298,27 @@ const Register = () => {
                       </div>
                     </div>
                     {showOtpInput && (
-                      <div className="mb-3">
-                        <input
-                          type="text"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          className="form-control"
-                          placeholder="Enter OTP"
-                        />
+                      <div
+                        className="d-flex justify-content-between mb-3"
+                        style={{ gap: "10px" }}
+                      >
+                        {otp.map((digit, index) => (
+                          <input
+                            key={index}
+                            type="text"
+                            maxLength="1"
+                            className="form-control text-center"
+                            style={{
+                              width: "40px",
+                              fontSize: "18px",
+                              fontWeight: "bold",
+                            }}
+                            value={digit}
+                            onChange={(e) => handleOtpChange(e.target, index)}
+                            onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                            ref={(el) => (otpInputs.current[index] = el)}
+                          />
+                        ))}
                       </div>
                     )}
                     {message.text && (
@@ -287,7 +332,16 @@ const Register = () => {
                         {message.text}
                       </p>
                     )}
-
+                    <p>
+                      By signing up, you agree to our{" "}
+                      <Link to="" className="fw-bold">
+                        Terms of Use{" "}
+                      </Link>
+                      and{" "}
+                      <Link to="" className="fw-bold">
+                        Privacy Policy
+                      </Link>
+                    </p>
                     {!showOtpInput && (
                       <div className="mb-3">
                         <button
@@ -328,6 +382,26 @@ const Register = () => {
                         </button>
                       </div>
                     )}
+                    {showOtpInput && (
+                      <div className="mb-3 d-flex align-items-center justify-content-between">
+                        <Link
+                          to=""
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (!resendDisabled) {
+                              handleResendOtp();
+                            }
+                          }}
+                          type="button"
+                          className="text-primary text-decoration-underline fw-bold p-0"
+                          disabled={resendDisabled}
+                        >
+                          {resendDisabled
+                            ? `Resend in ${timer}s`
+                            : "Resend OTP"}
+                        </Link>
+                      </div>
+                    )}
 
                     <div className="mb-3">
                       <h6>
@@ -336,7 +410,7 @@ const Register = () => {
                           to={route.login}
                           className="text-purple link-hover"
                         >
-                          Sign In Instead
+                          Sign In
                         </Link>
                       </h6>
                     </div>
