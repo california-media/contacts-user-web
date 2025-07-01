@@ -344,7 +344,7 @@ const Success = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate("/dashboard");
-    }, 1000000);
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, [navigate]);

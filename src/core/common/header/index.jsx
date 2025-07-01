@@ -14,12 +14,13 @@ import { setPhone } from "../../data/redux/slices/appCommonSlice";
 import { resetSelectedContact } from "../../data/redux/slices/SelectedContactSlice";
 import { resetSelectedTemplate } from "../../data/redux/slices/SelectedTemplateSlice";
 import { resetProfile } from "../../data/redux/slices/ProfileSlice";
+import AvatarInitialStyles from "../nameInitialStyles/AvatarInitialStyles";
 
 const Header = () => {
   const route = all_routes;
   const location = useLocation();
   const dispatch = useDispatch();
- const userProfile = useSelector((state) => state.profile);
+  const userProfile = useSelector((state) => state.profile);
   const mobileSidebar = useSelector((state) => state.common.mobileSidebar);
   const miniSidebar = useSelector((state) => state.common.miniSidebar);
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -52,14 +53,13 @@ const Header = () => {
   const toggleExpandMenu2 = () => {
     dispatch(setExpandMenu(false));
   };
-const handleLogout =()=>{
-  localStorage.removeItem("userId");
-  localStorage.removeItem("token");
-  dispatch(resetProfile());
-  dispatch(resetSelectedContact())
-  dispatch(resetSelectedTemplate())
-
-}
+  const handleLogout = () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("token");
+    dispatch(resetProfile());
+    dispatch(resetSelectedContact());
+    dispatch(resetSelectedTemplate());
+  };
   const [layoutBs, setLayoutBs] = useState(localStorage.getItem("dataTheme"));
   const isLockScreen = location.pathname === "/lock-screen";
 
@@ -471,18 +471,22 @@ const handleLogout =()=>{
             <li className="nav-item dropdown has-arrow main-drop">
               <Link
                 to="#"
-                className="nav-link userset"
+                className={`nav-link userset  ${!userProfile.profileImageURL? "border-0 shadow-none":""}`}
                 data-bs-toggle="dropdown"
               >
-                <span className="user-info">
-                  <span className="user-letter">
-                    <img
-                      src={userProfile.profileImageURL}
-                      alt="Profile"
-                    />
+                {userProfile.profileImageURL ? (
+                  <span className="user-info">
+                    <span className="user-letter">
+                      <img src={userProfile.profileImageURL} alt="Profile" />
+                    </span>
                   </span>
-                  <span className="badge badge-success rounded-pill" />
-                </span>
+                ) : (
+                  <AvatarInitialStyles
+                    name={`${userProfile.firstname} ${userProfile.lastname}`}
+                    divStyles={{fontSize:16, width:50, height:50}}
+                  />
+                )}
+                <span className="badge badge-success rounded-pill" />
               </Link>
               <div className={` dropdown-menu  menu-drop-user `}>
                 <div className="profilename">
@@ -492,7 +496,11 @@ const handleLogout =()=>{
                   <Link className="dropdown-item" to={route.profile}>
                     <i className="ti ti-user-pin" /> My Profile
                   </Link>
-                  <Link className="dropdown-item" onClick={handleLogout} to={route.login}>
+                  <Link
+                    className="dropdown-item"
+                    onClick={handleLogout}
+                    to={route.login}
+                  >
                     <i className="ti ti-lock" /> Logout
                   </Link>
                 </div>

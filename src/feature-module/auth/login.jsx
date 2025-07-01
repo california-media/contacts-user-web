@@ -154,7 +154,7 @@ const Login = () => {
                     </div>
                     {tab === "email" && (
                       <div className="mb-3">
-                        <label>Email Address</label>
+                        {/* <label>Email Address</label> */}
                         <div className="position-relative">
                           <span className="input-icon-addon">
                             <i className="ti ti-mail"></i>
@@ -162,6 +162,7 @@ const Login = () => {
                           <input
                             type="email"
                             className="form-control"
+                            placeholder="Enter Email Address"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
@@ -171,7 +172,7 @@ const Login = () => {
                     )}
                     {tab === "phone" && (
                       <div className="mb-3">
-                        <label>Phone Number</label>
+                        {/* <label>Phone Number</label> */}
                         <input
                           type="text"
                           className="form-control"
@@ -200,15 +201,6 @@ const Login = () => {
                         ></span>
                       </div>
                     </div>
-                    {/* {message.text && (
-                      <p
-                        className={`fw-medium ${
-                          message.type === "success" ? "text-success" : "text-danger"
-                        }`}
-                      >
-                        {message.text}
-                      </p>
-                    )} */}
                     {message && (
                       <div className="fw-medium mb-3">
                         {message?.toLowerCase().includes("verify") ? (
@@ -236,19 +228,6 @@ const Login = () => {
                         )}
                       </div>
                     )}
-                    {/* {message.text && (
-                      <div
-                        className={`fw-medium mb-3 ${
-                          message.type === "success"
-                            ? "text-success"
-                            : message.type === "verify"
-                            ? "text-warning"
-                            : "text-danger"
-                        }`}
-                      >
-                        {message.text}
-                      </div>
-                    )} */}
                     <div className="d-flex justify-content-between align-items-center mb-3">
                       <div className="form-check d-flex align-items-center">
                         <input

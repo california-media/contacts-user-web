@@ -13,6 +13,7 @@ const Register = () => {
     password: false,
     confirmPassword: false,
   });
+
   const [isLoading, setIsLoading] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -20,7 +21,7 @@ const Register = () => {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [activeTab, setActiveTab] = useState("email");
   const [otp, setOtp] = useState("");
-const [showOtpInput, setShowOtpInput] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
 
   const navigate = useNavigate();
 
@@ -68,7 +69,7 @@ const [showOtpInput, setShowOtpInput] = useState(false);
   //       setMessage({ text: res.data.message, type: "success" });
   //     } else {
   //       console.log(payload,"payloaddd");
-        
+
   //       const res = await api.post("user/signup/email", payload);
   //       setMessage({ text: res.data.message, type: "success" });
   //     }
@@ -82,83 +83,90 @@ const [showOtpInput, setShowOtpInput] = useState(false);
   //   }
   // };
 
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    setMessage({ text: "", type: "" });
 
-  const handleRegister = async () => {
-  setMessage({ text: "", type: "" });
-
-  if (!password) {
-    setMessage({ text: "Password is required", type: "error" });
-    return;
-  }
-
-  if (activeTab === "phone") {
-    const isPhone = /^\+[0-9]{10,15}$/.test(phoneNumber);
-    if (!isPhone) {
-      setMessage({ text: "Invalid phone number", type: "error" });
+    if (!password) {
+      setMessage({ text: "Password is required", type: "error" });
       return;
     }
-  }
-
-  if (activeTab === "email") {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setMessage({ text: "Invalid email address", type: "error" });
-      return;
-    }
-  }
-
-  try {
-    setIsLoading(true);
-    const payload = {
-      password,
-      ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
-    };
 
     if (activeTab === "phone") {
-      const res = await api.post("user/signup/phoneNumber", payload);
-      setMessage({ text: res.data.message, type: "success" });
-
-      // Show OTP input
-      setShowOtpInput(true);
-      // setSignupSuccessData(res.data); // Store any useful info like userId or tempToken
-    } else {
-      const res = await api.post("user/signup/email", payload);
-      setMessage({ text: res.data.message, type: "success" });
+      const isPhone = /^\+[0-9]{10,15}$/.test(phoneNumber);
+      if (!isPhone) {
+        setMessage({ text: "Invalid phone number", type: "error" });
+        return;
+      }
     }
-  } catch (err) {
-    setMessage({
-      text: err.response?.data?.message || "Registration failed",
-      type: "error",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-const handleVerifyOtp = async () => {
-  if (!otp) {
-    setMessage({ text: "Please enter OTP", type: "error" });
-    return;
-  }
 
-  try {
-    setIsLoading(true);
-    const verifyRes = await api.post("user/signup/phoneNumber", {
-      phonenumber: phoneNumber,
-      password,
-      otp,
-    });
+    if (activeTab === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setMessage({ text: "Invalid email address", type: "error" });
+        return;
+      }
+    }
 
-    setMessage({ text: verifyRes.data.message, type: "success" });
-    navigate(route.login);
-  } catch (err) {
-    setMessage({
-      text: err.response?.data?.message || "OTP verification failed",
-      type: "error",
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
+    try {
+      setIsLoading(true);
+      const payload = {
+        password,
+        ...(activeTab === "phone" ? { phonenumber: phoneNumber } : { email }),
+      };
+
+      if (activeTab === "phone") {
+        const res = await api.post("user/signup/phoneNumber", payload);
+        setMessage({ text: res.data.message, type: "success" });
+        console.log(res.data, "responseaaa");
+       
+        // Show OTP input
+        setShowOtpInput(true);
+        // setSignupSuccessData(res.data); // Store any useful info like userId or tempToken
+      } else {
+        const res = await api.post("user/signup/email", payload);
+        setMessage({ text: res.data.message, type: "success" });
+      }
+    } catch (err) {
+      setMessage({
+        text: err.response?.data?.message || "Registration failed",
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      setMessage({ text: "Please enter OTP", type: "error" });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await api.post("user/signup/phoneNumber", {
+        phonenumber: phoneNumber,
+        password,
+        otp,
+      });
+ if (response.data.data.token) {
+          localStorage.setItem("token", response.data.data.token);
+          navigate("/registration-form", {
+            replace: true,
+            state: response.data.data,
+          });
+        }
+      setMessage({ text: response.data.message, type: "success" });
+      // navigate(route.login);
+    } catch (err) {
+      setMessage({
+        text: err.response?.data?.message || "OTP verification failed",
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="account-content">
@@ -257,15 +265,17 @@ const handleVerifyOtp = async () => {
                         ></span>
                       </div>
                     </div>
-<div className="mb-3">
-  <input
-        type="text"
-        value={otp}
-        onChange={(e) => setOtp(e.target.value)}
-        className="form-control"
-        placeholder="Enter OTP"
-      />
-</div>
+                    {showOtpInput && (
+                      <div className="mb-3">
+                        <input
+                          type="text"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                          className="form-control"
+                          placeholder="Enter OTP"
+                        />
+                      </div>
+                    )}
                     {message.text && (
                       <p
                         className={`fw-medium ${
@@ -278,46 +288,46 @@ const handleVerifyOtp = async () => {
                       </p>
                     )}
 
-                    {! showOtpInput &&<div className="mb-3">
-                      <button
-                        onClick={handleRegister}
-                        type="button"
-                        className="btn btn-primary w-100"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? (
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                            aria-hidden="true"
-                          ></span>
-                        ) : (
-                          "Sign Up"
-                        )}
-                      </button>
-                    </div>}
+                    {!showOtpInput && (
+                      <div className="mb-3">
+                        <button
+                          onClick={handleRegister}
+                          type="button"
+                          className="btn btn-primary w-100"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                          ) : (
+                            "Sign Up"
+                          )}
+                        </button>
+                      </div>
+                    )}
                     {showOtpInput && (
-  <div className="mb-3">
-    
-    <button
-      onClick={handleVerifyOtp}
-      type="button"
-      className="btn btn-success w-100 mt-2"
-      disabled={isLoading}
-    >
-      {isLoading ? (
-        <span
-          className="spinner-border spinner-border-sm me-2"
-          role="status"
-          aria-hidden="true"
-        ></span>
-      ) : (
-        "Verify OTP"
-      )}
-    </button>
-  </div>
-)}
-
+                      <div className="mb-3">
+                        <button
+                          onClick={handleVerifyOtp}
+                          type="button"
+                          className="btn btn-success w-100 mt-2"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                          ) : (
+                            "Verify OTP"
+                          )}
+                        </button>
+                      </div>
+                    )}
 
                     <div className="mb-3">
                       <h6>
