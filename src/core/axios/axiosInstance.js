@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL:"https://100rjobf76.execute-api.eu-north-1.amazonaws.com/"
-    // baseURL:"http://localhost:3003/"
+    // baseURL:"https://100rjobf76.execute-api.eu-north-1.amazonaws.com/"
+    baseURL:"http://localhost:3003/"
 })
 
 api.interceptors.request.use(

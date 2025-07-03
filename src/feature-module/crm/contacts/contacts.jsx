@@ -464,80 +464,14 @@ const Contacts = () => {
     const contacts = XLSX.utils.sheet_to_json(sheet); 
 console.log(contacts,"bulk contacts parsed");
 
-    // Optional: validate or map contacts here
 
-    // Now send to API
-    await api.post("/save-bulk-contacts",  contacts );
+    const response = await api.post("/save-bulk-contacts",  {contacts} );
+    console.log(response.data,"response from the bulk save");
+    
   };
 
   reader.readAsArrayBuffer(file);
 };
-  // const Step2 = () => {
-  //   const { handleStep, previousStep, nextStep } = useWizard();
-
-  //   return (
-  //     <>
-  //       <h2 className="uploadHeading">Tell us what your files Contains</h2>
-  //       <div className="d-flex justify-content-center">
-  //         <div
-  //           className={`importMenu2 ${
-  //             selectedOption2 === "contacts" ? "selected" : ""
-  //           }`}
-  //           onClick={() => handleRadioSelect2("contacts")}
-  //         >
-  //           <div>
-  //             <div className="importIcons2">
-  //               <ImageWithBasePath
-  //                 src="assets/img/customIcons/userImport.svg"
-  //                 alt="User Import"
-  //               />
-  //             </div>
-  //             <p className="importType2">Contacts</p>
-  //             <p className="text-center">
-  //               My file has information about people
-  //             </p>
-  //           </div>
-  //         </div>
-  //         <div
-  //           className={`importMenu2 ${
-  //             selectedOption2 === "contactsAndAccounts" ? "selected" : ""
-  //           }`}
-  //           onClick={() => handleRadioSelect2("contactsAndAccounts")}
-  //         >
-  //           <div>
-  //             <div className="importIcons2">
-  //               <ImageWithBasePath
-  //                 src="assets/img/customIcons/userImport.svg"
-  //                 alt="User Import"
-  //               />
-  //             </div>
-  //             <p className="importType2">Contacts and Accounts</p>
-  //             <p className="text-center">
-  //               My file has information about people and their companies
-  //             </p>
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       <div className="wizardBtnContainer">
-  //         <button
-  //           className="btn btn-light me-2 previousStep"
-  //           onClick={() => previousStep()}
-  //         >
-  //           Go Back
-  //         </button>
-  //         {selectedOption2 && (
-  //           <button
-  //             className="btn btn-primary nextStep"
-  //             onClick={() => nextStep()}
-  //           >
-  //             Next
-  //           </button>
-  //         )}
-  //       </div>
-  //     </>
-  //   );
-  // };
   const Step3 = () => {
     const { handleStep, previousStep, nextStep } = useWizard();
 

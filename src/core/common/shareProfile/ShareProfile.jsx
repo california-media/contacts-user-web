@@ -108,11 +108,19 @@ console.log();
           : { phonenumber: formData.phone }),
       };
 
-      const response = await axios.post(
-        "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup",
+      if(formData.email!=""| null){
+        const response = await axios.post(
+        "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup/email",
         payload
-      );
+      )
       console.log(response.data, "response.data from register API");
+      }
+      else{
+          const response = await axios.post(
+        "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup/phoneNumber",
+        payload)
+        console.log(response.data, "response.data from register API");
+      }
     }
     console.log(userProfile, "userprofile in share contact");
 
