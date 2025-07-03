@@ -50,9 +50,9 @@ const Profile = () => {
     }));
   };
   const handleOnPhoneChange = (value) => {
-    setChangeSignin((prevFormData) => ({
+    setFormData((prevFormData) => ({
       ...prevFormData,
-      phoneNumber: value,
+      phoneNumbers: value,
     }));
   };
   console.log(formData, "formDataa");
