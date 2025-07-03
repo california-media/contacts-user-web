@@ -152,7 +152,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
 
     const formDataObj = new FormData();
 
-    // formDataObj.append("contact_id", formData.contact_id); 
+    formDataObj.append("contact_id", formData.contact_id); 
     formDataObj.append("contactImage", formData.contactImageURL);
     formDataObj.append("firstname", formData.firstName);
     formDataObj.append("lastname", formData.lastName);

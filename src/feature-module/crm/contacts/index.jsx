@@ -405,7 +405,7 @@ const ContactsDetails = () => {
   const navigate = useNavigate();
   const contentRef = useRef(null);
   const handleDeleteTask = () => {
-    setDeleteModalText("task");
+    setDeleteModalText("note");
     const deleteTaskData = {
       contact_id: selectedContact.contact_id,
       task_id: selectedTask.task_id,
@@ -5563,7 +5563,7 @@ const ContactsDetails = () => {
       <DeleteModal
         text={deleteModalText}
         onDelete={
-          deleteModalText === "task" ? handleDeleteTask : handleDeleteMeeting
+          deleteModalText === "note" ? handleDeleteTask : handleDeleteMeeting
         }
       />
 
