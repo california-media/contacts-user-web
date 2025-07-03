@@ -367,7 +367,7 @@ const Register = () => {
                         <button
                           onClick={handleVerifyOtp}
                           type="button"
-                          className="btn btn-success w-100 mt-2"
+                          className="btn btn-primary w-100 mt-2"
                           disabled={isLoading}
                         >
                           {isLoading ? (

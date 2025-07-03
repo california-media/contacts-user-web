@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import CollapseHeader from "../../../core/common/collapse-header";
 import api from "../../../core/axios/axiosInstance";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 import { resetProfile } from "../../../core/data/redux/slices/ProfileSlice";
 import { resetSelectedContact } from "../../../core/data/redux/slices/SelectedContactSlice";
@@ -15,7 +15,9 @@ const Security = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+ const userProfile = useSelector((state) => state.profile);
+ console.log(userProfile,"userProfile in security");
+ 
   const togglePasswordVisibility = () => {
     setPasswordVisible((prev) => !prev);
   };
@@ -98,7 +100,7 @@ dispatch(
                     <div className="card-body pb-0">
                       <h4 className="fw-semibold mb-3">Security Settings</h4>
                       <div className="row">
-                        <div className="col-lg-4 col-md-6 d-flex">
+                        {!userProfile.signupMethod==="google" &&<div className="col-lg-4 col-md-6 d-flex">
                           <div className="card border shadow-none flex-fill mb-3">
                             <div className="card-body d-flex justify-content-between flex-column">
                               <div className="mb-3">
@@ -118,7 +120,7 @@ dispatch(
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </div>}
                         <div className="col-lg-4 col-md-6 d-flex">
                           <div className="card border shadow-none flex-fill mb-3">
                             <div className="card-body d-flex justify-content-between flex-column">
@@ -312,6 +314,7 @@ dispatch(
             </div>
           </div>
         </div>
+       
         {/* /Delete Account */}
       </>
     </div>

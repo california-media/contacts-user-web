@@ -33,7 +33,7 @@ const UpgradePlan = () => {
                           <Link to={route.myScans} className="fw-medium">
                             My Scans
                           </Link>
-                          <Link to={route.upgradePlan} className="fw-medium">
+                          <Link to={route.upgradePlan} className="fw-medium active">
                             Upgrade Plan
                           </Link>
                         </div>

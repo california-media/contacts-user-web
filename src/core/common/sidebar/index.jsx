@@ -94,7 +94,7 @@ const Sidebar = () => {
             />
           )}
         > */}
-        <div className="sidebar-inner slimscroll d-flex justify-content-between flex-column align-items-center">
+        <div className="sidebar-inner slimscroll d-flex justify-content-md-between flex-column align-items-md-center">
           <div id="sidebar-menu" className="sidebar-menu">
             <ul>
               {SidebarData?.map((mainLabel, index) => (
@@ -475,7 +475,7 @@ const Sidebar = () => {
               ))}
             </ul>
           </div>
-          <Link to={route.profile} className="mb-4"><i class="fa-solid fa-gear fs-4"></i></Link>
+          <div className="text-center"><Link to={route.profile} className="mb-4"><i class="fa-solid fa-gear fs-4"></i></Link></div>
         </div>
         {/* </Scrollbars> */}
       </div>

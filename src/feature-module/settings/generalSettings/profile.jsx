@@ -7,6 +7,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/bootstrap.css";
 import { editProfile } from "../../../core/data/redux/slices/ProfileSlice";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
+import { SlPhone } from "react-icons/sl";
 
 const route = all_routes;
 
@@ -19,7 +20,10 @@ const Profile = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
-
+ const [passwordVisibility, setPasswordVisibility] = useState({
+    password: false,
+    confirmPassword: false,
+  });
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
@@ -33,11 +37,22 @@ const Profile = () => {
     telegram: "",
     designation: "",
   });
-
+  const [changeSignin, setChangeSignin] = useState({
+    email: "",
+    phone: "",
+    phonePassword: "",
+    emailPassword:""
+  });
+ const togglePasswordVisibility = (field) => {
+    setPasswordVisibility((prevState) => ({
+      ...prevState,
+      [field]: !prevState[field],
+    }));
+  };
   const handleOnPhoneChange = (value) => {
-    setFormData((prevFormData) => ({
+    setChangeSignin((prevFormData) => ({
       ...prevFormData,
-      phoneNumbers: value,
+      phoneNumber: value,
     }));
   };
   console.log(formData, "formDataa");
@@ -72,10 +87,10 @@ const Profile = () => {
     data.append("phonenumbers", formData.phoneNumbers);
     // data.append("profileImage", formData.profileImage);
     if (formData.profileImage === null) {
-  data.append("profileImage", null);
-} else if (formData.profileImage instanceof File) {
-  data.append("profileImage", formData.profileImage);
-}
+      data.append("profileImage", null);
+    } else if (formData.profileImage instanceof File) {
+      data.append("profileImage", formData.profileImage);
+    }
     // if (formData.profileImage instanceof File) {
     //   data.append("profileImage", formData.profileImage);
     // }
@@ -94,6 +109,13 @@ const Profile = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleChangeSignin = (e) => {
+    const { name, value } = e.target;
+    setChangeSignin((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleChangeSignInMethod = () => {
+    document.getElementById("open-change-signin-method-modal").click();
   };
 
   return (
@@ -168,8 +190,11 @@ const Profile = () => {
                                 ? ""
                                 : "2px dashed #E8E8E8",
                             }}
-                          >{console.log(formData.profileImage,"formData.profileImage")
-                          }
+                          >
+                            {console.log(
+                              formData.profileImage,
+                              "formData.profileImage"
+                            )}
                             {formData.profileImage && (
                               <Link
                                 style={{
@@ -193,7 +218,7 @@ const Profile = () => {
                             {!formData.profileImage ? (
                               <AvatarInitialStyles
                                 name={`${formData.firstname} ${formData.lastname}`}
-                                divStyles={{width: 80, height: 80}}
+                                divStyles={{ width: 80, height: 80 }}
                               />
                             ) : (
                               <img
@@ -282,15 +307,23 @@ const Profile = () => {
 
                           <div className="col-md-4">
                             <div className="mb-3">
-                              <label className="form-label">
-                                Phone Number{" "}
-                                <span className="text-danger">*</span>
-                              </label>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <label className="form-label">
+                                  Phone Number{" "}
+                                  <span className="text-danger">*</span>
+                                </label>
+                                {userProfile.signupMethod === "phoneNumber" && (
+                                  <p className="mb-0">Change signin method</p>
+                                )}
+                              </div>
                               <PhoneInput
                                 country={"ae"} // Default country
                                 value={formData.phoneNumbers}
                                 onChange={handleOnPhoneChange}
                                 enableSearch
+                                disabled={
+                                  userProfile.signupMethod === "phoneNumber"
+                                }
                                 inputProps={{
                                   name: "phone",
                                   required: true,
@@ -302,13 +335,28 @@ const Profile = () => {
 
                           <div className="col-md-4">
                             <div className="mb-3">
-                              <label className="form-label">
-                                Email <span className="text-danger">*</span>
-                              </label>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <label className="form-label">
+                                  Email <span className="text-danger">*</span>
+                                </label>
+                                {(userProfile.signupMethod === "google" ||
+                                  userProfile.signupMethod === "email") && (
+                                  <Link
+                                    className="mb-0 text-primary"
+                                    onClick={handleChangeSignInMethod}
+                                  >
+                                    Change signin method
+                                  </Link>
+                                )}
+                              </div>
                               <input
                                 type="text"
                                 name="email"
                                 value={formData.email}
+                                disabled={
+                                  userProfile.signupMethod === "google" ||
+                                  userProfile.signupMethod === "email"
+                                }
                                 onChange={handleChange}
                                 className="form-control"
                               />
@@ -438,6 +486,8 @@ const Profile = () => {
                                   type="text"
                                   className="form-control"
                                   placeholder="Telegram"
+                                  value={formData.telegram}
+                                  onChange={handleChange}
                                   name="telegram"
                                   aria-label="Telegram"
                                   aria-describedby="basic-addon1"
@@ -478,6 +528,143 @@ const Profile = () => {
                 </div>
               </div>
               {/* /Settings Info */}
+              <button
+                id="open-change-signin-method-modal"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#open_change_signin_method_modal"
+                className="d-none"
+              />
+              <div
+                className="modal fade"
+                id="open_change_signin_method_modal"
+                tabIndex="-1"
+                aria-labelledby="change-signin-method"
+                role="dialog"
+              >
+                <div className="modal-dialog modal-dialog-centered">
+                  <div className="modal-content">
+                    <div className="modal-body">
+                      <div className="">
+                        <h4 className="mb-2 text-capitalize text-center">
+                          Change Signin Method
+                        </h4>
+                        <ul
+                          className="nav nav-tabs nav-tabs-bottom mb-3"
+                          role="tablist"
+                        >
+                          <li className="nav-item" role="presentation">
+                            <Link
+                              to="#"
+                              data-bs-toggle="tab"
+                              data-bs-target="#email"
+                              className="nav-link active"
+                            >
+                              <i className="ti ti-mail me-2"></i>
+                              Email
+                            </Link>
+                          </li>
+                          <li className="nav-item" role="presentation">
+                            <Link
+                              to="#"
+                              data-bs-toggle="tab"
+                              data-bs-target="#phone"
+                              className="nav-link"
+                            >
+                              <SlPhone className="me-2" />
+                              Phone
+                            </Link>
+                          </li>
+                        </ul>
+                        <div className="tab-content pt-0">
+                        <div className="tab-pane fade active show" id="email">
+                          <div className="mb-3">
+                             <div className="position-relative">
+                          <span className="input-icon-addon">
+                            <i className="ti ti-mail"></i>
+                          </span>
+                            <input
+                              type="text"
+                              name="email"
+                              value={changeSignin.email}
+                              onChange={handleChangeSignin}
+                              className="form-control"
+                            />
+                          </div>
+                          </div>
+                          <div className="mb-3">
+                            <label className="form-label">Password </label>
+                           <div className="pass-group">
+                        <input
+                          type={
+                            passwordVisibility.password ? "text" : "password"
+                          }
+                          className="pass-input form-control"
+                          value={changeSignin.emailPassword}
+                          onChange={handleChangeSignin}
+                        />
+                        <span
+                          className={`ti toggle-passwords ${
+                            passwordVisibility.password
+                              ? "ti-eye"
+                              : "ti-eye-off"
+                          }`}
+                          onClick={() => togglePasswordVisibility("password")}
+                        ></span>
+                      </div>
+                          </div>
+                        </div>
+                        <div className="tab-pane fade" id="phone">
+                          <div className="mb-3">
+                            
+                           <PhoneInput
+                                country={"ae"}
+                                value={changeSignin.phone}
+                                onChange={handleOnPhoneChange}
+                                enableSearch
+                                disabled={
+                                  userProfile.signupMethod === "phoneNumber"
+                                }
+                                inputProps={{
+                                  name: "phone",
+                                  required: true,
+                                  autoFocus: true,
+                                }}
+                              />
+                          </div>
+                          <div className="mb-3">
+                            <label className="form-label">Password </label>
+                            <input
+                              type="text"
+                              name="password"
+                              value={changeSignin.phonePassword}
+                              onChange={handleChangeSignin}
+                              className="form-control"
+                            />
+                          </div>
+                        </div>
+                        </div>
+                        <div className="d-flex align-items-center justify-content-center mt-4">
+                          <Link
+                            to="#"
+                            className="btn btn-light me-2"
+                            data-bs-dismiss="modal"
+                          >
+                            Cancel
+                          </Link>
+                          <Link
+                            to={"#"}
+                            data-bs-dismiss="modal"
+                            className="btn btn-primary"
+                          >
+                            Send
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

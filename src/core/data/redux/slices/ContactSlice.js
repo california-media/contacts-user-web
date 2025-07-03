@@ -137,11 +137,18 @@ const contactSlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {
-    // setPage: (state, action) => {
-    //   state.page = action.payload;
-    // },
+reducers: {
+  resetContacts: (state) => {
+    state.contacts = [];
+    state.page = 1;
+    state.limit = 20;
+    state.totalPages = 0;
+    state.totalContacts = 0;
+    state.loading = false;
+    state.error = null;
   },
+},
+
   extraReducers: (builder) => {
     builder.addCase(fetchContacts.pending, (state) => {
       state.loading = true;
@@ -182,3 +189,4 @@ const contactSlice = createSlice({
 // Export actions and reducer
 // export const { setPage } = contactSlice.actions;
 export default contactSlice.reducer;
+export const {resetContacts} = contactSlice.actions

@@ -3,6 +3,7 @@ import api from "../../../axios/axiosInstance";
 
 export const myScans = createAsyncThunk("myScans/getScans", async () => {
   const response = await api.get("/scan/get_data");
+  console.log(response.data,"response from scan api");
   
   return response.data;
 });

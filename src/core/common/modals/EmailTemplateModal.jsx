@@ -17,6 +17,7 @@ const EmailTemplateModal = () => {
   const dispatch = useDispatch();
 
   const quillRef = useRef(null);
+  console.log(userProfile, "userProfile in email modal");
 
   useEffect(() => {
     const emailTitles =
@@ -41,15 +42,17 @@ const EmailTemplateModal = () => {
     }
   };
   const handleSendEmail = async () => {
-    if (!userProfile.googleConnected || !userProfile.googleEmail) {
-      dispatch(
-        showToast({
-          message: "Please connect your Google account before sending emails.",
-          variant: "danger",
-        })
-      );
-      return;
-    }
+    // if (!userProfile.googleConnected || !userProfile.googleEmail) {
+    //   dispatch(
+    //     showToast({
+    //       message: "Please connect your Google account before sending emails.",
+    //       variant: "danger",
+    //     })
+    //   );
+    //   return;
+    // }
+
+
     const finalEmailBody = editEmailTemplateBody
       .replace(/{{firstName}}/g, selectedContact.firstname || "")
       .replace(/{{lastName}}/g, selectedContact.lastname || "")
@@ -63,21 +66,47 @@ const EmailTemplateModal = () => {
       alert("Please fill all fields");
       return;
     }
+    const selectedAccount = userProfile.accounts.find(
+      (acc) => acc.type === emailProvider && acc.isConnected
+    );
+    // const emailData = {
+    //   to: selectedContact.emailaddresses[0],
+    //   subject: editEmailTemplateSubject,
+    //   html: finalEmailBody,
+    //   ...(emailProvider === "google" && {
+    //     fromEmail: userProfile.googleEmail,
+    //     fromGoogleRefreshToken: userProfile.googleRefreshToken,
+    //   }),
+    //   ...(emailProvider === "microsoft" && {
+    //     fromEmail: userProfile.microsoftEmail,
+    //     fromMicrosoftAccessToken: userProfile.microsoftAccessToken,
+    //   }),
+    // };
+console.log(selectedContact.emailaddresses[0],"selectedContact.emailaddresses[0]");
 
     const emailData = {
-      to: selectedContact.emailaddresses[0],
-      subject: editEmailTemplateSubject,
-      html: finalEmailBody,
-      ...(emailProvider === "google" && {
-        fromEmail: userProfile.googleEmail,
-        fromGoogleRefreshToken: userProfile.googleRefreshToken,
-      }),
-      ...(emailProvider === "microsoft" && {
-        fromEmail: userProfile.microsoftEmail,
-        fromMicrosoftAccessToken: userProfile.microsoftAccessToken,
-      }),
-    };
+  to: selectedContact.emailaddresses[0],
+  subject: editEmailTemplateSubject,
+  html: finalEmailBody,
+  emailProvider,
+  ...(emailProvider === "google" && selectedAccount && {
+    fromEmail: selectedAccount.email,
+    fromGoogleRefreshToken: selectedAccount.googleRefreshToken,
+  }),
+  ...(emailProvider === "microsoft" && selectedAccount && {
+    fromEmail: selectedAccount.email,
+    fromMicrosoftAccessToken: selectedAccount.microsoftAccessToken,
+  }),
+  ...(emailProvider === "smtp" && selectedAccount && {
+    // fromEmail: selectedAccount.smtpUser,
+    // smtpHost: selectedAccount.smtpHost,
+    // smtpPort: selectedAccount.smtpPort,
+    // smtpPass: selectedAccount.smtpPass,
+    // smtpSecure: selectedAccount.smtpSecure,
+  }),
+};
     console.log(userProfile, "userprofilee");
+console.log(emailData,"emaildata");
 
     dispatch(sendEmail(emailData));
     document.getElementById("closeEmailTemplateModal")?.click();
@@ -108,6 +137,14 @@ const EmailTemplateModal = () => {
     "link",
     "image",
   ];
+  const connectedMails = userProfile?.accounts
+    ?.filter((account) => account.isConnected)
+    ?.map((account) => ({
+      label: `${account.type.charAt(0).toUpperCase() + account.type.slice(1)} (${account.email})`,
+      value: account.type,
+    }));
+console.log(emailProvider,"emailProvider");
+
   return (
     <div
       className="modal custom-modal fade modal-padding"
@@ -157,27 +194,15 @@ const EmailTemplateModal = () => {
                 <label className="col-form-label ms-3">From</label>
                 <Select
                   classNamePrefix="react-select"
-                  options={emailTemplateTitles}
+                  options={connectedMails}
                   onChange={(selectedOption) => {
-                    console.log("Selected option:", selectedOption);
-
-                    setEditEmailTemplateBody(
-                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
-                        (template) =>
-                          template.emailTemplate_id === selectedOption.value
-                      )?.emailTemplateBody
-                    );
-                    setEditEmailTemplateSubject(
-                      userProfile?.templates?.emailTemplates?.emailTemplatesData.find(
-                        (template) =>
-                          template.emailTemplate_id === selectedOption.value
-                      )?.emailTemplateSubject
-                    );
+                    console.log(selectedOption,"selected mail");
+                    
+                    setEmailProvider(selectedOption?.value);
                   }}
-                  placeholder="Select a template"
+                  placeholder="Select Email Account"
                 />
               </div>
-
             </div>
             <div className="col-12">
               <div className="mb-3">
@@ -192,7 +217,7 @@ const EmailTemplateModal = () => {
               </div>
             </div>
             <div className="mb-3">
-              <label className="col-form-label ms-3">Attribute</label>
+              <label className="col-form-label ms-3">Insert Tags</label>
               <select
                 className="form-select"
                 aria-label="Default select example"
@@ -226,10 +251,10 @@ const EmailTemplateModal = () => {
               </div>
             </div>
             <div className="d-flex justify-content-end">
-              {/* <button className="btn btn-primary" onClick={handleSendEmail}>
+              <button className="btn btn-primary" onClick={handleSendEmail}>
                 Send Mail
-              </button> */}
-              <div className="btn-group my-1">
+              </button>
+              {/* <div className="btn-group my-1">
                 <button
                   type="button"
                   className="btn btn-primary"
@@ -278,7 +303,7 @@ const EmailTemplateModal = () => {
                     </button>
                   </li>
                 </ul>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

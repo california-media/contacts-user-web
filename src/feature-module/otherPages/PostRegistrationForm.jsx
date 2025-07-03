@@ -5,6 +5,7 @@ import "./postRegistrationForm.css";
 import { useLocation, useNavigate } from "react-router";
 import api from "../../core/axios/axiosInstance";
 import PhoneInput from "react-phone-input-2";
+import LoadingIndicator from "../../core/common/loadingIndicator/LoadingIndicator";
 const stepImages = [
   process.env.PUBLIC_URL + "/assets/img/postRegistration1.avif",
   process.env.PUBLIC_URL + "/assets/img/postRegistration2.avif",
@@ -26,7 +27,7 @@ const StepWrapper = ({ children }) => (
   </AnimatePresence>
 );
 
-const Step1 = ({ formData, setFormData, passedData }) => {
+const Step1 = ({ formData, setFormData, passedData,setMessage,message, setIsLoading, isLoading}) => {
   const { nextStep } = useWizard();
   const handleOnPhoneChange = (value) => {
     setFormData((prevFormData) => ({
@@ -38,9 +39,6 @@ const Step1 = ({ formData, setFormData, passedData }) => {
   const isFirstNameFilled = formData.firstname.trim() !== "";
   const isEmailFilled = formData.email.trim() !== "";
   const isPhoneFilled = formData.phonenumber.trim() !== "";
-  // const canProceed =
-  //   isFirstNameFilled &&
-  //   (passedData?.registeredWith !== "email" && passedData.registeredWith!=="google" ? isEmailFilled : isPhoneFilled);
 const canProceed =
   (
     passedData?.registeredWith === "google"
@@ -155,18 +153,38 @@ const canProceed =
             </label>
           ))}
         </div>
+        <p className="text-danger">{message}</p>
         <div className="prf-actions">
           <div />
           <button
             className="prf-next"
-            onClick={nextStep}
-            disabled={!canProceed}
+            onClick={async () => {
+              setIsLoading(true)
+    try {
+      const payload ={
+         "phonenumber":formData.phonenumber,
+         "email":formData.email,
+      }
+      console.log(payload,"payload checking duplicate");
+      
+      const response = await api.post("/check-duplicate-user",payload);
+      nextStep()
+setIsLoading(false)
+    } catch (error) {
+      setIsLoading(false)
+      setMessage(error.response.data.message)
+      console.error("Network Error:", error);
+    }
+  }}
+            disabled={!canProceed || isLoading}
             style={{
               opacity: canProceed ? 1 : 0.5,
               pointerEvents: canProceed ? "auto" : "none",
             }}
           >
-            Next
+            {isLoading?
+            <LoadingIndicator/>
+            :"Next"}
           </button>
         </div>
       </>
@@ -400,7 +418,8 @@ const PostRegistrationForm = () => {
 
   console.log("Received data from previous route:", passedData);
   const [currentStep, setCurrentStep] = useState(0);
-
+const [message,setMessage] = useState("")
+const [isLoading,setIsLoading] = useState(false)
 
   const handleStepChange = (step) => setCurrentStep(step);
   const [formData, setFormData] = useState({
@@ -428,6 +447,10 @@ const PostRegistrationForm = () => {
               formData={formData}
               passedData={passedData}
               setFormData={setFormData}
+              setMessage={setMessage}
+              message={message}
+              isLoading={isLoading}
+              setIsLoading={setIsLoading}
             />
             <Step2 formData={formData} setFormData={setFormData} />
             <Step3

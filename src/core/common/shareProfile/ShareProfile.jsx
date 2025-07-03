@@ -55,7 +55,7 @@ const ShareProfile = () => {
     fetchProfile();
   }, [serialNumber]);
 
-  console.log("userProfile", userProfile);
+  console.log("userProfile in shareprofile", userProfile);
   const handleSaveContact = () => {
     if (!userProfile.firstname && !userProfile.lastname) return;
 
@@ -113,15 +113,18 @@ END:VCARD
       );
       console.log(response.data, "response.data from register API");
     }
+    console.log(userProfile, "userprofile in share contact");
 
     const formDataToSend = {
       // "ScannerID" : "6855292146730e89660d6c12",
-      UserID: userProfile._id,
+      UserID: userProfile.id,
       firstname: formData.firstname,
       lastname: formData.lastname,
       email: formData.email,
       phonenumber: formData.phone,
     };
+    console.log(formDataToSend, "formDataToSend");
+
     const response = await axios.post(
       "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/scan",
       formDataToSend
@@ -191,7 +194,7 @@ END:VCARD
                   )}
                   {userProfile.email && (
                     <div className="profileCardTextContainer">
-                      <IoMdMail color="#000"/>
+                      <IoMdMail color="#000" />
                       <p className="profileCardText">{userProfile.email}</p>
                     </div>
                   )}
@@ -213,9 +216,9 @@ END:VCARD
                 {userProfile?.phonenumbers?.length > 0 && (
                   <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Phone Number</Tooltip>
-                      }
+                    overlay={
+                      <Tooltip id="tooltip-bottom">Phone Number</Tooltip>
+                    }
                   >
                     <a
                       href={`tel:${userProfile.phonenumbers[0]}`}
@@ -229,136 +232,121 @@ END:VCARD
                   </OverlayTrigger>
                 )}
                 {userProfile.email && (
-                   <OverlayTrigger
+                  <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Email</Tooltip>
-                      }
+                    overlay={<Tooltip id="tooltip-bottom">Email</Tooltip>}
                   >
-                  <a
-                    href={`mailto:${userProfile.email}`}
-                    className="icon-wrapper mail"
-                  >
-                    <img src="/assets/img/icons/mailIcon.png" alt="Mail" />
-                  </a>
+                    <a
+                      href={`mailto:${userProfile.email}`}
+                      className="icon-wrapper mail"
+                    >
+                      <img src="/assets/img/icons/mailIcon.png" alt="Mail" />
+                    </a>
                   </OverlayTrigger>
                 )}
                 {userProfile?.phonenumbers?.length > 0 && (
-                   <OverlayTrigger
+                  <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Whatsapp</Tooltip>
-                      }
+                    overlay={<Tooltip id="tooltip-bottom">Whatsapp</Tooltip>}
                   >
-                  <a
-                    href={`https://wa.me/${userProfile?.phonenumbers?.[0]}`}
-                    target="_blank"
-                    className="icon-wrapper whatsapp no-filter"
-                  >
-                    <img
-                      src="/assets/img/icons/whatsappIcon96.png"
-                      alt="WhatsApp"
-                    />
-                  </a>
+                    <a
+                      href={`https://wa.me/${userProfile?.phonenumbers?.[0]}`}
+                      target="_blank"
+                      className="icon-wrapper whatsapp no-filter"
+                    >
+                      <img
+                        src="/assets/img/icons/whatsappIcon96.png"
+                        alt="WhatsApp"
+                      />
+                    </a>
                   </OverlayTrigger>
                 )}
                 {userProfile.instagram && (
-                   <OverlayTrigger
+                  <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Instagram</Tooltip>
-                      }
+                    overlay={<Tooltip id="tooltip-bottom">Instagram</Tooltip>}
                   >
-                  <a
-                    href={userProfile.instagram}
-                    target="_blank"
-                    className="icon-wrapper instagram no-filter"
-                  >
-                    <img
-                      src="/assets/img/icons/instagramIcon.png"
-                      alt="Instagram"
-                    />
-                  </a>
+                    <a
+                      href={userProfile.instagram}
+                      target="_blank"
+                      className="icon-wrapper instagram no-filter"
+                    >
+                      <img
+                        src="/assets/img/icons/instagramIcon.png"
+                        alt="Instagram"
+                      />
+                    </a>
                   </OverlayTrigger>
                 )}
                 {userProfile.twitter && (
-                   <OverlayTrigger
+                  <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Twitter</Tooltip>
-                      }
+                    overlay={<Tooltip id="tooltip-bottom">Twitter</Tooltip>}
                   >
-                  <a
-                    href={userProfile.twitter}
-                    target="_blank"
-                    className="icon-wrapper twitter no-filter"
-                  >
-                    <img
-                      src="/assets/img/icons/twitterIcon.png"
-                      alt="Twitter"
-                    />
-                  </a>
+                    <a
+                      href={userProfile.twitter}
+                      target="_blank"
+                      className="icon-wrapper twitter no-filter"
+                    >
+                      <img
+                        src="/assets/img/icons/twitterIcon.png"
+                        alt="Twitter"
+                      />
+                    </a>
                   </OverlayTrigger>
                 )}
                 {userProfile.linkedin && (
-                   <OverlayTrigger
+                  <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Linkedin</Tooltip>
-                      }
+                    overlay={<Tooltip id="tooltip-bottom">Linkedin</Tooltip>}
                   >
-                  <a
-                    href={userProfile.linkedin}
-                    target="_blank"
-                    className="icon-wrapper linkedin no-filter"
-                  >
-                    <img
-                      src="/assets/img/icons/linkedinIcon.png"
-                      alt="LinkedIn"
-                    />
-                  </a>
+                    <a
+                      href={userProfile.linkedin}
+                      target="_blank"
+                      className="icon-wrapper linkedin no-filter"
+                    >
+                      <img
+                        src="/assets/img/icons/linkedinIcon.png"
+                        alt="LinkedIn"
+                      />
+                    </a>
                   </OverlayTrigger>
                 )}
                 {userProfile.facebook && (
-                   <OverlayTrigger
+                  <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Facebook</Tooltip>
-                      }
+                    overlay={<Tooltip id="tooltip-bottom">Facebook</Tooltip>}
                   >
-                  <a
-                    href={userProfile.facebook}
-                    target="_blank"
-                    className="icon-wrapper facebook no-filter"
-                  >
-                    <img
-                      src="/assets/img/icons/facebookIcon.png"
-                      alt="Facebook"
-                    />
-                  </a>
+                    <a
+                      href={userProfile.facebook}
+                      target="_blank"
+                      className="icon-wrapper facebook no-filter"
+                    >
+                      <img
+                        src="/assets/img/icons/facebookIcon.png"
+                        alt="Facebook"
+                      />
+                    </a>
                   </OverlayTrigger>
                 )}
                 {userProfile.telegram && (
-                   <OverlayTrigger
+                  <OverlayTrigger
                     placement="bottom"
-                      overlay={
-                        <Tooltip id="tooltip-bottom">Telegram</Tooltip>
-                      }
+                    overlay={<Tooltip id="tooltip-bottom">Telegram</Tooltip>}
                   >
-                  <a
-                    href={userProfile.telegram}
-                    target="_blank"
-                    className="icon-wrapper telegram no-filter"
-                  >
-                    <img
-                      src="/assets/img/icons/telegramIcon.png"
-                      alt="Telegram"
-                    />
-                  </a>
+                    <a
+                      href={userProfile.telegram}
+                      target="_blank"
+                      className="icon-wrapper telegram no-filter"
+                    >
+                      <img
+                        src="/assets/img/icons/telegramIcon.png"
+                        alt="Telegram"
+                      />
+                    </a>
                   </OverlayTrigger>
                 )}
               </div>
-
             </div>
             <div className="d-flex justify-content-between mt-5">
               <Link

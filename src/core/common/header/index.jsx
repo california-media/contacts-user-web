@@ -15,6 +15,7 @@ import { resetSelectedContact } from "../../data/redux/slices/SelectedContactSli
 import { resetSelectedTemplate } from "../../data/redux/slices/SelectedTemplateSlice";
 import { resetProfile } from "../../data/redux/slices/ProfileSlice";
 import AvatarInitialStyles from "../nameInitialStyles/AvatarInitialStyles";
+import { resetContacts } from "../../data/redux/slices/ContactSlice";
 
 const Header = () => {
   const route = all_routes;
@@ -59,6 +60,7 @@ const Header = () => {
     dispatch(resetProfile());
     dispatch(resetSelectedContact());
     dispatch(resetSelectedTemplate());
+    dispatch(resetContacts());
   };
   const [layoutBs, setLayoutBs] = useState(localStorage.getItem("dataTheme"));
   const isLockScreen = location.pathname === "/lock-screen";
@@ -84,7 +86,7 @@ const Header = () => {
         {/* Logo */}
         <div className="header-left active">
           {/* <div className="header-left active" onMouseEnter={toggleExpandMenu} onMouseLeave={toggleExpandMenu2}> */}
-          <Link to={route.leads} className="logo logo-normal">
+          <Link to={route.dashboard} className="logo logo-normal">
             {/* {layoutBs === "dark" ? (
               <>
                 <ImageWithBasePath
@@ -109,6 +111,27 @@ const Header = () => {
           {/* <Link id="toggle_btn" to="#" onClick={toggleMiniSidebar}>
             <i className="ti ti-arrow-bar-to-left" />
           </Link> */}
+          <div className="mobile-user-menu">
+          <Link
+            to="#"
+            className="nav-link dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i className="fa fa-ellipsis-v" />
+          </Link>
+          <div className={` dropdown-menu `}>
+            <Link className="dropdown-item" to={route.dashboard}>
+              <i className="ti ti-layout-2" /> Dashboard
+            </Link>
+            <Link className="dropdown-item" to={route.profile}>
+              <i className="ti ti-user-pin" /> My Profile
+            </Link>
+            <Link className="dropdown-item"  onClick={handleLogout} to={route.login}>
+              <i className="ti ti-lock" /> Logout
+            </Link>
+          </div>
+        </div>
         </div>
         {/* /Logo */}
         <Link
@@ -117,10 +140,10 @@ const Header = () => {
           to="#sidebar"
           onClick={toggleMobileSidebar}
         >
-          <span className="bar-icon">
+          <span className="bar-icon mt-0">
             <span />
             <span />
-            <span />
+            <span className="mb-0" />
           </span>
         </Link>
         <div className="header-user">
@@ -510,7 +533,7 @@ const Header = () => {
           </ul>
         </div>
         {/* Mobile Menu */}
-        <div className="dropdown mobile-user-menu">
+        {/* <div className="dropdown mobile-user-menu">
           <Link
             to="#"
             className="nav-link dropdown-toggle"
@@ -520,17 +543,17 @@ const Header = () => {
             <i className="fa fa-ellipsis-v" />
           </Link>
           <div className={` dropdown-menu `}>
-            <Link className="dropdown-item" to={route.leads}>
+            <Link className="dropdown-item" to={route.dashboard}>
               <i className="ti ti-layout-2" /> Dashboard
             </Link>
-            <Link className="dropdown-item" to={route.leads}>
+            <Link className="dropdown-item" to={route.profile}>
               <i className="ti ti-user-pin" /> My Profile
             </Link>
-            <Link className="dropdown-item" to={route.leads}>
+            <Link className="dropdown-item"  onClick={handleLogout} to={route.login}>
               <i className="ti ti-lock" /> Logout
             </Link>
           </div>
-        </div>
+        </div> */}
         {/* /Mobile Menu */}
       </div>
     </>

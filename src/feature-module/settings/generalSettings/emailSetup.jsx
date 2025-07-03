@@ -90,7 +90,7 @@ const EmailSetup = () => {
                           <Link to={route.security} className="fw-medium">
                             Security
                           </Link>
-                          <Link to={route.emailSetup} className="fw-medium">
+                          <Link to={route.emailSetup} className="fw-medium active">
                             Connected Mails
                           </Link>
                           <Link to={route.myScans} className="fw-medium">

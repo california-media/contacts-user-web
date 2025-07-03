@@ -70,6 +70,7 @@ const Login = () => {
         tab === "email"
           ? { email, password }
           : { phonenumber: phone, password };
+console.log(payload,"payloadddd");
 
       const response = await api.post("user/login", payload);
 
@@ -94,7 +95,7 @@ const Login = () => {
     console.log("Google Token : ", credentialResponse.credential);
 
     try {
-       setIsGoogleLoading(true);
+      setIsGoogleLoading(true);
       const response = await api.post("user/login", {
         googleToken: credentialResponse.credential,
       });
@@ -109,14 +110,13 @@ const Login = () => {
             replace: true,
             state: response.data.data,
           });
-        }else{
+        } else {
           navigate(route.dashboard);
         }
       }
     } catch (error) {
       setMessage(error?.response?.data?.message || "Google login failed");
-    }
-    finally {
+    } finally {
       setIsGoogleLoading(false);
     }
   };
@@ -308,25 +308,25 @@ const Login = () => {
                         />
                       </GoogleOAuthProvider>
                     </div> */}
-                     <div className="d-flex justify-content-center mb-3">
-      <GoogleOAuthProvider clientId={clientId}>
-        {isgoogleLoading ? (
-          <button className="btn btn-primary" disabled>
-            <span
-              className="spinner-border spinner-border-sm me-2"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            Logging in...
-          </button>
-        ) : (
-          <GoogleLogin
-            onSuccess={handleGoogleLogin}
-            onError={() => console.log("Google Login Failed")}
-          />
-        )}
-      </GoogleOAuthProvider>
-    </div>
+                    <div className="d-flex justify-content-center mb-3">
+                      <GoogleOAuthProvider clientId={clientId}>
+                        {isgoogleLoading ? (
+                          <button className="btn btn-primary" disabled>
+                            <span
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                              aria-hidden="true"
+                            ></span>
+                            Logging in...
+                          </button>
+                        ) : (
+                          <GoogleLogin
+                            onSuccess={handleGoogleLogin}
+                            onError={() => console.log("Google Login Failed")}
+                          />
+                        )}
+                      </GoogleOAuthProvider>
+                    </div>
                     <div className="text-center">
                       <p className="fw-medium text-gray">
                         © 2025 - California Media

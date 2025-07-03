@@ -198,12 +198,14 @@ const Contacts = () => {
 
   const saveCellTags = async () => {
     const formDataObj = new FormData();
-console.log(selectedTags,"selectghgj");
+    console.log(selectedTags, "selectghgj");
 
     formDataObj.append("contact_id", selectedContact.contact_id);
     formDataObj.append(
       "tags",
-      JSON.stringify(selectedTags.map((tag) =>({ tag:tag.value,emoji:tag.emoji})))
+      JSON.stringify(
+        selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
+      )
     );
 
     console.log(
@@ -212,7 +214,7 @@ console.log(selectedTags,"selectghgj");
 
     try {
       if (newTags.length > 0) {
-        await dispatch(addTag( newTags)).unwrap();
+        await dispatch(addTag(newTags)).unwrap();
       }
       await dispatch(saveContact(formDataObj)).unwrap();
     } catch (error) {
@@ -238,9 +240,6 @@ console.log(selectedTags,"selectghgj");
     // setSearchEmployeeInFilter("");
   };
 
-
-
-  
   const handleDownload = () => {
     const data = [
       [
@@ -991,7 +990,7 @@ console.log(selectedTags,"selectghgj");
           activeGroupEdit?.contactId === record.contact_id;
         const isEditingThisTag =
           isActiveContact && activeGroupEdit?.tagIndex === 0;
-console.log(record,"recorddd")
+        console.log(record, "recorddd");
 
         if (tags.length === 0) {
           return (
@@ -1328,10 +1327,10 @@ console.log(record,"recorddd")
                     {/* Search */}
                     <div className="row align-items-center">
                       <div className="col-sm-12">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="page-header mb-0">
+                        <div className="d-flex justify-content-between align-items-center flex-wrap">
+                          <div className="page-header mb-md-0">
                             <div className="row align-items-center">
-                              <h4 className="page-title mb-0 ms-5">
+                              <h4 className="page-title mb-0 ms-0 ms-md-5">
                                 Contacts
                                 <span className="count-title">
                                   {totalContacts}
@@ -1340,8 +1339,8 @@ console.log(record,"recorddd")
                             </div>
                           </div>
 
-                          <div className="d-flex">
-                            <div className="icon-form mb-3  me-2 mb-sm-0">
+                          <div className="d-flex flex-wrap gap-3">
+                            <div className="icon-form mb-md-0">
                               <span className="form-icon">
                                 <i className="ti ti-search" />
                               </span>
@@ -1354,7 +1353,7 @@ console.log(record,"recorddd")
                                 }
                               />
                             </div>
-                            <div className="form-sorts dropdown me-2">
+                            <div className="form-sorts dropdown">
                               <Link
                                 to="#"
                                 data-bs-toggle="dropdown"
@@ -1493,7 +1492,7 @@ console.log(record,"recorddd")
                                 </div>
                               </div>
                             </div>
-                            <div className="dropdown me-2">
+                            <div className="dropdown">
                               <Link
                                 to="#"
                                 className="btn bg-soft-purple text-purple"
@@ -1548,8 +1547,8 @@ console.log(record,"recorddd")
                               </div>
                             </div>
 
-                            <div className="d-flex">
-                              <div className="dropdown me-2">
+                            {/* <div className="d-flex gap-3"> */}
+                              <div className="dropdown">
                                 <Link
                                   to="#"
                                   className="dropdown-toggle"
@@ -1595,7 +1594,7 @@ console.log(record,"recorddd")
                               </div>
                               <Link
                                 to="#"
-                                className="btn btn-primary me-2"
+                                className="btn btn-primary"
                                 data-bs-toggle="offcanvas"
                                 data-bs-target="#contact_offcanvas"
                                 onClick={() => {
@@ -1614,7 +1613,7 @@ console.log(record,"recorddd")
                                   <i className="ti ti-grid-dots" />
                                 </Link>
                               </div> */}
-                            </div>
+                            {/* </div> */}
                           </div>
                         </div>
                       </div>

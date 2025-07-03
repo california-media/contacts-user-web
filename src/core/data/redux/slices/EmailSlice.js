@@ -8,7 +8,7 @@ export const sendEmail = createAsyncThunk(
     try {
       console.log(emailData,"email data before going to api");
       
-      const response = await api.post("/sendEmail/microsoft", emailData);
+      const response = await api.post("/sendEmail", emailData);
       console.log(response.data,"response from send email");
       
       dispatch(

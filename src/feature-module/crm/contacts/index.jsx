@@ -654,14 +654,14 @@ const ContactsDetails = () => {
   };
 
   const handleMeetingSubmit = async () => {
-    if (!userProfile.googleConnected) {
-      return dispatch(
-        showToast({
-          message: "Please connect the Google account first",
-          variant: "danger",
-        })
-      );
-    }
+    // if (!userProfile.googleConnected) {
+    //   return dispatch(
+    //     showToast({
+    //       message: "Please connect the Google account first",
+    //       variant: "danger",
+    //     })
+    //   );
+    // }
 
     const formDataObj = new FormData();
     // let finalMeetLink = "";
@@ -4276,7 +4276,7 @@ const ContactsDetails = () => {
                         />
                         <div>Generate Meeting Link</div>
                       </div>
-                      {!userProfile.googleConnected && (
+                      {!userProfile.accounts?.some(acc => acc.type === "google" && acc.isConnected) &&(
                         <>
                           <div className="text-danger mt-2">
                             *Generating meeting links Google Account is Required
