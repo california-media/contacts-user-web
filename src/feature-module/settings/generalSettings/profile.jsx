@@ -317,7 +317,7 @@ const Profile = () => {
                                 )} */}
                               </div>
                               <PhoneInput
-                                country={"ae"} // Default country
+                                country={"ae"}
                                 value={formData.phoneNumbers}
                                 onChange={handleOnPhoneChange}
                                 enableSearch

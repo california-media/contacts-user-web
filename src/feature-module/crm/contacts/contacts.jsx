@@ -461,7 +461,7 @@ const Contacts = () => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
-    const contacts = XLSX.utils.sheet_to_json(sheet); // converts rows to array of objects
+    const contacts = XLSX.utils.sheet_to_json(sheet); 
 console.log(contacts,"bulk contacts parsed");
 
     // Optional: validate or map contacts here
