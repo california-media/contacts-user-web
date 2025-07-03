@@ -37,7 +37,23 @@ export const fetchContacts = createAsyncThunk(
     }
   }
 );
-
+export const saveBulkContacts = createAsyncThunk("contacts/saveBulkContacts", async(bulkData,{rejectWithValue,dispatch})=>{
+  try {
+     const response = await api.post("/save-bulk-contacts", bulkData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
+  } catch (error) {
+     dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+      return rejectWithValue(error.response.data);
+  }
+})
 export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
@@ -183,6 +199,9 @@ reducers: {
       );
       state.totalContacts -= 1;
     });
+    builder.addCase(saveBulkContacts.fulfilled,(state,action)=>{
+      state.contacts=action.payload;
+    })
   },
 });
 
