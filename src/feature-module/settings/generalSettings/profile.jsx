@@ -312,18 +312,15 @@ const Profile = () => {
                                   Phone Number{" "}
                                   <span className="text-danger">*</span>
                                 </label>
-                                {userProfile.signupMethod === "phoneNumber" && (
+                                {/* {userProfile.signupMethod === "phoneNumber" && (
                                   <p className="mb-0">Change signin method</p>
-                                )}
+                                )} */}
                               </div>
                               <PhoneInput
                                 country={"ae"} // Default country
                                 value={formData.phoneNumbers}
                                 onChange={handleOnPhoneChange}
                                 enableSearch
-                                disabled={
-                                  userProfile.signupMethod === "phoneNumber"
-                                }
                                 inputProps={{
                                   name: "phone",
                                   required: true,
@@ -339,7 +336,7 @@ const Profile = () => {
                                 <label className="form-label">
                                   Email <span className="text-danger">*</span>
                                 </label>
-                                {(userProfile.signupMethod === "google" ||
+                                {/* {(userProfile.signupMethod === "google" ||
                                   userProfile.signupMethod === "email") && (
                                   <Link
                                     className="mb-0 text-primary"
@@ -347,15 +344,14 @@ const Profile = () => {
                                   >
                                     Change signin method
                                   </Link>
-                                )}
+                                )} */}
                               </div>
                               <input
                                 type="text"
                                 name="email"
                                 value={formData.email}
                                 disabled={
-                                  userProfile.signupMethod === "google" ||
-                                  userProfile.signupMethod === "email"
+                                  userProfile.signupMethod === "google"
                                 }
                                 onChange={handleChange}
                                 className="form-control"

@@ -98,6 +98,7 @@ END:VCARD
   }, []);
   const handleExchangeSubmit = async (e) => {
     e.preventDefault();
+console.log();
 
     if (isChecked) {
       const payload = {

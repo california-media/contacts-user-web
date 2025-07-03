@@ -100,7 +100,7 @@ dispatch(
                     <div className="card-body pb-0">
                       <h4 className="fw-semibold mb-3">Security Settings</h4>
                       <div className="row">
-                        {!userProfile.signupMethod==="google" &&<div className="col-lg-4 col-md-6 d-flex">
+                        {userProfile.signupMethod!=="google" &&<div className="col-lg-4 col-md-6 d-flex">
                           <div className="card border shadow-none flex-fill mb-3">
                             <div className="card-body d-flex justify-content-between flex-column">
                               <div className="mb-3">

@@ -133,9 +133,11 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                                 {allScans
                                   .filter((scan) => scan.iScanned === true)
                                   .map((scan) => {
-                                    const phone = `+${scan.phonenumbers[0]}`;
+                                    const phone = `+${scan?.phonenumbers[0]}`;
+                                    
                                     const phoneNumber =
-                                      parsePhoneNumberFromString(phone);
+                                    parsePhoneNumberFromString(phone);
+                                    console.log(scan,"gfasjgdaj");
                                     const country =
                                       phoneNumber?.country?.toLowerCase();
                                     return (
