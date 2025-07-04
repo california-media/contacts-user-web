@@ -475,7 +475,7 @@ const Sidebar = () => {
               ))}
             </ul>
           </div>
-          <div className="text-center"><Link to={route.profile} className="mb-4"><i class="fa-solid fa-gear fs-4"></i></Link></div>
+          <div className="text-center mb-4"><Link to={route.profile} className="mb-4"><i class="fa-solid fa-gear fs-4"></i></Link></div>
         </div>
         {/* </Scrollbars> */}
       </div>

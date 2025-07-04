@@ -245,109 +245,57 @@ const Contacts = () => {
   const handleDownload = () => {
     const data = [
       [
-        "Status",
-        "Tags",
-        "Address",
-        "City",
-        "State",
-        "Zip code",
-        "Country",
-        "Source",
-        "Medium",
-        "Keyword",
-        "Facebook (Username)",
-        "Twitter (Username)",
-        "LinkedIn (Username)",
-        "Account name",
-        "Account address",
-        "Account city",
-        "Account state",
-        "Account country",
-        "Account zip code",
-        "Account phone",
-        "Account industry type",
-        "Account business type",
-        "Account number of employees",
-        "Account website",
+        "firstname",
+        "lastname",
+        "company",
+        "designation",
+        "emailaddresses",
+        "phonenumbers",
+        "instagram",
+        "twitter",
+        "linkedin",
+        "facebook",
+        "telegram"
       ],
       [
-        "New",
-        "Tag1;Tag2;Tag3",
-        "1552 camp st",
-        "San Diego",
-        "CA",
-        "90241",
-        "USA",
-        "Organic Search",
-        "Blog",
-        "B2B Success",
-        "jane-sampleton",
-        "janesampleton",
-        "jane-sampleton-0b0039109",
-        "Xyli (sample)",
-        "160-6802 Aliquet Rd.",
-        "New Haven",
-        "Connecticut",
-        "United States",
-        "68089",
-        "-3059",
-        "Insurance",
-        "Competitor",
-        "51-200",
-        "xyli.io",
-      ],
+  "John",
+  "Doe",
+  "TechCorp",
+  "Software Engineer",
+  "john.doe@example.com",
+  "1234567890",
+  "https://instagram.com/johndoe",
+  "https://twitter.com/johndoe",
+  "https://linkedin.com/in/johndoe",
+  "https://facebook.com/johndoe",
+  "https://t.me/johndoe"
+],
       [
-        "Qualified",
-        "Tag4;Tag5;Tag6",
-        "53 N. Stonybrook Ave.",
-        "Fairmont",
-        "WV",
-        "26554",
-        "USA",
-        "Web",
-        "Blog",
-        "Tech",
-        "mark-samples",
-        "marksamples",
-        "mark-samples-24",
-        "Zeno (sample)",
-        "93 Queen Street",
-        "Lafayette",
-        "Indiana",
-        "United States",
-        "47905",
-        "-3060",
-        "Banking",
-        "Analyst",
-        "201-500",
-        "zeno.com",
-      ],
+  "Jane",
+  "Smith",
+  "DesignHub",
+  "Product Designer",
+  "jane.smith@example.com",
+  "9876543210",
+  "https://instagram.com/janesmith",
+  "https://twitter.com/janesmith",
+  "https://linkedin.com/in/janesmith",
+  "https://facebook.com/janesmith",
+  "https://t.me/janesmith"
+],
       [
-        "Won",
-        "Tag7;Tag8;Tag9",
-        "9343 Circle St.",
-        "Twin Falls",
-        "ID",
-        "83301",
-        "USA",
-        "Referral",
-        "Blog",
-        "B2C",
-        "jane-doe",
-        "janedoe",
-        "jane-doe-j10",
-        "Monx (sample)",
-        "277 Bayport St.",
-        "Levittown",
-        "New York",
-        "United States",
-        "11756",
-        "-3061",
-        "Consulting",
-        "Partner",
-        "501-1000",
-        "monx.inc",
-      ],
+  "Alice",
+  "Johnson",
+  "FinTech Ltd",
+  "Data Analyst",
+  "alice.johnson@example.com",
+  "1122334455",
+  "https://instagram.com/alicejohnson",
+  "https://twitter.com/alicejohnson",
+  "https://linkedin.com/in/alicejohnson",
+  "https://facebook.com/alicejohnson",
+  "https://t.me/alicejohnson"
+]
     ];
 
     // Convert data to CSV format
@@ -496,11 +444,11 @@ const Contacts = () => {
                       <i className="ti ti-file-broken" /> Upload File
                       <input type="file" className="input-img" onChange={handleFileChange} />
                     </label>
-                    <p>Only Excel or CSV file</p>
+                    <p>Only Excel file</p>
                   </div>
                 </div>
                 <p className="supportedFormat">
-                  (Supported formats .csv,.xlsx; max file size 5 MB)
+                  (Supported formats .xlsx; max file size 5 MB)
                 </p>
                 <p className="text-muted">
                   Download a{" "}
@@ -1213,7 +1161,8 @@ const Contacts = () => {
     const filteredColumns = columns.filter(
       (col) =>
         columnVisibility[col.title] && // Check if the column is visible
-        col.title !== "Action" // Exclude the Action column from export
+        col.title !== "Action" &&// Exclude the Action column from export
+        col.title !=="Groups"
     );
 
     // Create headers and data based on filtered columns
@@ -1249,7 +1198,7 @@ const Contacts = () => {
 
     // Filter out the columns that are hidden (same as for PDF export)
     const filteredColumns = columns.filter(
-      (col) => columnVisibility[col.title] && col.title !== "Action"
+      (col) => columnVisibility[col.title] && col.title !== "Action" && col.title !=="Groups"
     );
 
     // Prepare worksheet data (only include visible columns)
@@ -1526,7 +1475,7 @@ const Contacts = () => {
                                         className="dropdown-item"
                                         onClick={() => setImportModal(true)}
                                       >
-                                        <i className="ti ti-file-type-pdf text-danger me-1" />
+                                        <i class="fa-solid fa-file-arrow-up me-2 text-primary"></i>
                                         Import
                                       </button>
                                     </li>
@@ -1536,7 +1485,7 @@ const Contacts = () => {
                                         className="dropdown-item"
                                         onClick={exportPDF}
                                       >
-                                        <i className="ti ti-file-type-pdf text-danger me-1" />
+                                        <i className="ti ti-file-type-pdf text-danger me-2" />
                                         Export as PDF
                                       </Link>
                                     </li>
@@ -1546,7 +1495,7 @@ const Contacts = () => {
                                         className="dropdown-item"
                                         onClick={exportExcel}
                                       >
-                                        <i className="ti ti-file-type-xls text-green me-1" />
+                                        <i className="ti ti-file-type-xls text-green me-2" />
                                         Export as Excel{" "}
                                       </Link>
                                     </li>

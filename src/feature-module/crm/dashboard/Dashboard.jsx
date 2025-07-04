@@ -612,7 +612,7 @@ const Dashboard = () => {
                               </div>
                             </div>
                             <div className="col-md-12 fitContentHeight">
-                              <Link to="/registration-form">
+                              <Link to="/calendar">
                                 <div className="dashboardSmallCards">
                                   <div
                                     style={{
@@ -630,7 +630,7 @@ const Dashboard = () => {
                                           color: "#000",
                                         }}
                                       >
-                                        Meetings
+                                        Calendar
                                       </p>
                                       <p
                                         style={{
@@ -639,7 +639,7 @@ const Dashboard = () => {
                                           color: "#000",
                                         }}
                                       >
-                                        50
+                                        {/* {userProfile.} */}
                                       </p>
                                     </div>
                                     <div

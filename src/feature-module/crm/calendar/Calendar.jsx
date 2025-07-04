@@ -5,10 +5,12 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 import Select from "react-select";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { gapi } from "gapi-script";
 import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { profileEvents } from "../../../core/data/redux/slices/EventSlice";
+import { setSelectedContact } from "../../../core/data/redux/slices/SelectedContactSlice";
 
 const Calendar = () => {
   const [startDate, setDate] = useState(new Date()),
@@ -26,15 +28,36 @@ const Calendar = () => {
     [currentEvents, setscurrentEvents] = useState([]);
   const [defaultEvents, setDefaultEvents] = useState([]);
 
-  const events = useSelector((state)=>state.event.data)
-
-  console.log(defaultEvents,"default events");
-  
+  const events = useSelector((state)=>state.event)
+  const navigate = useNavigate();
+  console.log(defaultEvents,"events slice in calendar");
+  const dispatch = useDispatch()
 
 useEffect(()=>{
-setDefaultEvents(events)
-},[events])
 
+
+  setDefaultEvents(events)
+
+},[events])
+useEffect(()=>{
+   dispatch(profileEvents())
+},[])
+function getColor(color) {
+  // Map your color hex to a class, or return a default
+  // Example: if you use only a few colors, map them:
+  switch (color) {
+    case "#2196F3":
+      return "info";
+    case "#4CAF50":
+      return "success";
+    case "#9C27B0":
+      return "purple";
+    case "#FF9800":
+      return "warning";
+    default:
+      return "primary";
+  }
+}
   // const defaultEvents = [
   //   {
   //     title: "Event Name 4",
@@ -148,7 +171,30 @@ setDefaultEvents(events)
   ];
 
   const defaultValue = options1[0];
-
+// const calendarEvents = events.map((event) => ({
+//   title: event.title,
+//   start: event.start, // already in ISO format
+//   end: event.end || event.start, // fallback if no end
+//   className: "bg-primary", // or dynamic className based on event.type or color
+// }));
+const calendarEvents = events.map((event) => ({
+  title: event.title,
+  start: event.start,
+  end: event.end || event.start,
+  className: event.type === "meeting" ? "bg-primary" : "bg-secondary",
+  id: event.event_id,
+  extendedProps: {
+    event_id: event.event_id,
+    contact_id: event.contact_id,
+    type: event.type,
+    contact_name: event.contact_name,
+    location: event.location,
+    meetingType: event.meetingType,
+    link: event.link,
+    startTime: event.startTime,
+    endTime: event.endTime,
+  },
+}));
   return (
     <>
       <div className="page-wrapper">
@@ -214,14 +260,30 @@ setDefaultEvents(events)
                     editable={true}
                     height={"70vh"}
                     selectable={true}
-                    events={defaultEvents}
+                    events={calendarEvents}
                     selectMirror={true}
                     dayMaxEvents={true}
                     weekends={weekendsVisible}
                     // initialEvents={defaultEvents}
                     select={handleDateSelect}
                     // eventClick={(clickInfo) => handleEventClick(clickInfo)}
-                    eventClick={(eventInfo) => console.log("clicked",eventInfo)}
+                   eventClick={(eventInfo) => {
+  const event = eventInfo.event;
+  const props = event.extendedProps;
+  
+// navigate("/contacts-details", { state: { tab: "meeting" } });
+  // console.log("Clicked event:", {
+  //   title: event.title,
+  //   type: props.type,
+  //   eventId: props.event_id,
+  //   contactId: props.contact_id,
+  //   contactName: props.contact_name,
+  //   location: props.location,
+  //   meetingType: props.meetingType,
+  //   link: props.link,
+  //   timeRange: `${props.startTime} - ${props.endTime}`,
+  // });
+}}
                   />
                 </div>
               </div>

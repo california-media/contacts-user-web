@@ -5,8 +5,21 @@ import { all_routes } from "../router/all_routes";
 import api from "../../core/axios/axiosInstance";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import PhoneInput from "react-phone-input-2";
+import Slider from "react-slick";
 
 const Login = () => {
+  const sliderSettings = {
+    dots: false,
+    infinite: true,
+    autoplay: true,
+    autoplaySpeed: 2000,
+    arrows: false,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    fade: true,
+  };
+
   const navigate = useNavigate();
   const route = all_routes;
 
@@ -70,7 +83,7 @@ const Login = () => {
         tab === "email"
           ? { email, password }
           : { phonenumber: phone, password };
-console.log(payload,"payloadddd");
+      console.log(payload, "payloadddd");
 
       const response = await api.post("user/login", payload);
 
@@ -340,6 +353,91 @@ console.log(payload,"payloadddd");
         </div>
       </div>
     </div>
+    // <div className="position-relative">
+    //   <div
+    //     className="mb-4 text-start"
+    //     style={{ position: "absolute", top: "50px", left: "100px", width:"100px", height:"100px" }}
+    //   >
+    //     <img src="/assets/img/contactsLogo.svg" alt="Logo" height="40" />
+    //   </div>
+    //   <div className="d-flex vh-100">
+    //     <div className="col-md-6 d-flex flex-column justify-content-center align-items-center px-5 bg-white">
+    //       <div
+    //         className="w-100 position-relative"
+    //         style={{ maxWidth: "400px" }}
+    //       >
+    //         <h6 className="text-muted">
+    //           Get started - it's free. No credit card needed.
+    //         </h6>
+    //         <h2 className="fw-bold mb-4">Sign Up to Connect</h2>
+
+    //         <form>
+    //           <div className="custom-floating-label">
+    //             <input type="email" id="email" name="email" required />
+    //             <label htmlFor="email">E-mail</label>
+    //           </div>
+
+    //           <div className="custom-floating-label">
+    //             <input type="password" id="password" name="password" required />
+    //             <label htmlFor="password">Password</label>
+    //           </div>
+
+    //           <button className="btn btn-primary w-100 mb-3">Sign Up</button>
+
+    //           <div className="text-center my-3 position-relative divider-line">
+    //             <span className="bg-transparent px-2">or</span>
+    //           </div>
+
+    //           <button className="btn btn-outline-light border w-100 d-flex align-items-center justify-content-center gap-2">
+    //             <img
+    //               src="https://developers.google.com/identity/images/g-logo.png"
+    //               alt="Google"
+    //               style={{ height: 20 }}
+    //             />
+    //             Continue with Google
+    //           </button>
+
+    //           <div className="text-center mt-4">
+    //             <small>
+    //               Have an account? <a href="/login">Sign in</a>
+    //             </small>
+    //           </div>
+    //         </form>
+
+    //         <p className="text-muted mt-4 small text-center">
+    //           By joining, you agree to our <a href="#">Terms of Use</a> and{" "}
+    //           <a href="#">Privacy Policy</a>
+    //         </p>
+    //       </div>
+    //     </div>
+
+    //     <div className="col-md-6 p-0 overflow-hidden">
+    //       <Slider {...sliderSettings}>
+    //         <div>
+    //           <img
+    //             src="/assets/img/postRegistration1.avif"
+    //             alt="Slide 1"
+    //             className="img-fluid vh-100 w-100 object-fit-cover"
+    //           />
+    //         </div>
+    //         <div>
+    //           <img
+    //             src="/assets/img/postRegistration2.avif"
+    //             alt="Slide 2"
+    //             className="img-fluid vh-100 w-100 object-fit-cover"
+    //           />
+    //         </div>
+    //         <div>
+    //           <img
+    //             src="/assets/img/postRegistration3.avif"
+    //             alt="Slide 3"
+    //             className="img-fluid vh-100 w-100 object-fit-cover"
+    //           />
+    //         </div>
+    //       </Slider>
+    //     </div>
+    //   </div>
+    // </div>
   );
 };
 

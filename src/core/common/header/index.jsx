@@ -170,7 +170,7 @@ const Header = () => {
             {/* Nav List */}
             <li className="nav-item nav-list">
               <ul className="nav">
-                <li className="dark-mode-list">
+                {/* <li className="dark-mode-list">
                   <Link
                     to="#"
                     className={`dark-mode-toggle ${layoutBs ? "" : "active"}`}
@@ -191,7 +191,7 @@ const Header = () => {
                       onClick={LayoutDark}
                     ></i>
                   </Link>
-                </li>
+                </li> */}
                 {/* <li className="nav-item dropdown">
                   <Link
                     to="#"
@@ -386,7 +386,7 @@ const Header = () => {
             </li> */}
             {/* /Email */}
             {/* Notifications */}
-            <li className="nav-item dropdown nav-item-box">
+            {/* <li className="nav-item dropdown nav-item-box">
               <Link to="#" className="nav-link" data-bs-toggle="dropdown">
                 <i className="ti ti-bell" />
                 <span className="badge rounded-pill">13</span>
@@ -488,30 +488,21 @@ const Header = () => {
                   </Link>
                 </div>
               </div>
-            </li>
+            </li> */}
             {/* /Notifications */}
             {/* Profile Dropdown */}
-            <li className="nav-item dropdown has-arrow main-drop">
+            <li className="nav-item has-arrow main-drop border-1">
               <Link
-                to="#"
-                className={`nav-link userset  ${!userProfile.profileImageURL? "border-0 shadow-none":""}`}
-                data-bs-toggle="dropdown"
+                 to=""
+                className={`nav-link userset me-2`}
+                 data-bs-toggle="modal"
+  data-bs-target="#logoutModal"
+                // data-bs-toggle="dropdown"
               >
-                {userProfile.profileImageURL ? (
-                  <span className="user-info">
-                    <span className="user-letter">
-                      <img src={userProfile.profileImageURL} alt="Profile" />
-                    </span>
-                  </span>
-                ) : (
-                  <AvatarInitialStyles
-                    name={`${userProfile.firstname} ${userProfile.lastname}`}
-                    divStyles={{fontSize:16, width:50, height:50}}
-                  />
-                )}
-                <span className="badge badge-success rounded-pill" />
+               
+                <i class="fa-solid fa-right-from-bracket"></i>
               </Link>
-              <div className={` dropdown-menu  menu-drop-user `}>
+              {/* <div className={` dropdown-menu  menu-drop-user `}>
                 <div className="profilename">
                   <Link className="dropdown-item" to={route.dashboard}>
                     <i className="ti ti-layout-2" /> Dashboard
@@ -527,7 +518,45 @@ const Header = () => {
                     <i className="ti ti-lock" /> Logout
                   </Link>
                 </div>
-              </div>
+              </div> */}
+            </li>
+            <li className="nav-item dropdown has-arrow main-drop">
+              <Link
+                to={route.profile}
+                className={`nav-link userset  ${!userProfile.profileImageURL? "border-0 shadow-none":""}`}
+                // data-bs-toggle="dropdown"
+              >
+                {userProfile.profileImageURL ? (
+                  <span className="user-info">
+                    <span className="user-letter">
+                      <img src={userProfile.profileImageURL} alt="Profile" style={{objectFit:"cover", height:"100%"}} />
+                    </span>
+                  </span>
+                ) : (
+                  <AvatarInitialStyles
+                    name={`${userProfile.firstname} ${userProfile.lastname}`}
+                    divStyles={{fontSize:16, width:50, height:50}}
+                  />
+                )}
+                <span className="badge badge-success rounded-pill" />
+              </Link>
+              {/* <div className={` dropdown-menu  menu-drop-user `}>
+                <div className="profilename">
+                  <Link className="dropdown-item" to={route.dashboard}>
+                    <i className="ti ti-layout-2" /> Dashboard
+                  </Link>
+                  <Link className="dropdown-item" to={route.profile}>
+                    <i className="ti ti-user-pin" /> My Profile
+                  </Link>
+                  <Link
+                    className="dropdown-item"
+                    onClick={handleLogout}
+                    to={route.login}
+                  >
+                    <i className="ti ti-lock" /> Logout
+                  </Link>
+                </div>
+              </div> */}
             </li>
             {/* /Profile Dropdown */}
           </ul>
@@ -556,6 +585,48 @@ const Header = () => {
         </div> */}
         {/* /Mobile Menu */}
       </div>
+  <div
+         className="modal fade"
+         id="logoutModal"
+         tabIndex="-1"
+         aria-labelledby="logout"
+         role="dialog"
+       >
+         <div className="modal-dialog modal-dialog-centered">
+           <div className="modal-content">
+             <div className="modal-body">
+               <div className="text-center">
+                 <div className="avatar avatar-xl bg-danger-light rounded-circle mb-3">
+                   <i className="fa-solid fa-right-from-bracket fs-36 text-danger" />
+                 </div>
+                 <h4 className="mb-2 text-capitalize">Logout?</h4>
+                 <p className="mb-0">
+                   Are you sure you want to logout the account?
+                 </p>
+                 <div className="d-flex align-items-center justify-content-center mt-4">
+                   <Link
+                     to="#"
+                     className="btn btn-light me-2"
+                     data-bs-dismiss="modal"
+                   >
+                     Cancel
+                   </Link>
+                   <Link
+                     to={"#"}
+                     data-bs-dismiss="modal"
+                     className="btn btn-danger"
+                     onClick={() => {
+                    handleLogout()
+                     }}
+                   >
+                     Yes, Logout
+                   </Link>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
     </>
   );
 };

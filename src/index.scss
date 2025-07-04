@@ -982,3 +982,45 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
 .shadow-none {
   box-shadow: none !important;
 }
+
+
+.divider-line {
+  border-top: 1px solid #ccc;
+  text-align: center;
+  line-height: 0;
+  margin: 20px 0;
+}
+
+.divider-line span {
+  background: #fff;
+  padding: 0 10px;
+}
+
+.object-fit-cover {
+  object-fit: cover;
+  height: 100%;
+}
+.custom-floating-label {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.custom-floating-label input {
+  width: 100%;
+  padding: 1rem 1rem 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  background: white;
+  font-size: 1rem;
+}
+
+.custom-floating-label label {
+  position: absolute;
+  top: -0.6rem;
+  left: 1rem;
+  background: white;
+  padding: 0 0.25rem;
+  font-size: 0.85rem;
+  color: #666;
+  pointer-events: none;
+}

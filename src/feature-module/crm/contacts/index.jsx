@@ -26,6 +26,8 @@ import CreatableSelect from "react-select/creatable";
 import { FcUpload } from "react-icons/fc";
 import { useDropzone } from "react-dropzone";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
+
+
 import {
   FaCloudDownloadAlt,
   FaCalendarAlt,
@@ -214,7 +216,21 @@ const ContactsDetails = () => {
   useEffect(() => {
     setLeadInfo(selectedContact);
   }, [selectedContact]);
-
+// useEffect(() => {
+//     const tabToShow = location.state?.tab;
+//     console.log(tabToShow,"tabtoshow2");
+    
+//     if (tabToShow) {
+//       console.log(tabToShow,"tabtoshow");
+      
+//       const tabTrigger = document.querySelector(`a[href="#${tabToShow}"]`);
+//       if (tabTrigger) {
+//         console.log("shownnn");
+        
+//         new bootstrap.Tab(tabTrigger).show();
+//       }
+//     }
+//   }, [location.state]);
   const [addcomment, setAddComment] = useState(false);
   const [activeEditorIndex, setActiveEditorIndex] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -680,7 +696,7 @@ const ContactsDetails = () => {
     formDataObj.append("contact_id", selectedContact.contact_id);
 
     formDataObj.append("meeting_id", meetingFormData.meeting_id);
-    formDataObj.append("meetingType", meetingFormData.meetingType);
+    formDataObj.append("meetingType", meetingFormData.meetingType===""?"offline":meetingFormData.meetingType);
     formDataObj.append("meetingLocation", meetingFormData.meetingLocation);
     // formDataObj.append("meetingLink", finalMeetLink);
     formDataObj.append(

@@ -323,7 +323,7 @@ const EmailSetup = () => {
                       smtpSignIn(formData);
                     }}
                   >
-                    Add SMTP
+                   Save Info
                   </Link>
                 </div>
               </div>

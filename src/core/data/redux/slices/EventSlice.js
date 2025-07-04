@@ -6,6 +6,7 @@ export const profileEvents = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.post("/getProfileEvent");
+console.log(response.data,"response from profile events");
 
       return response.data.data;
     } catch (error) {
@@ -16,10 +17,11 @@ export const profileEvents = createAsyncThunk(
 
 export const eventSlice = createSlice({
   name: "events",
-  initialState: {
-    data: [],
-    loading: false,
-  },
+  // initialState: {
+  //   data: [],
+  //   loading: false,
+  // },
+  initialState:[],
   reducers: {
      mergeGoogleEvents: (state, action) => {
         
@@ -32,15 +34,13 @@ export const eventSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(profileEvents.pending, (state, action) => {
-      state.loading = true;
+      
     })
     .addCase(profileEvents.fulfilled,(state,action)=>{
-        state.loading = false;
-        state.data = action.payload
+        
+      return action.payload
     })
-    .addCase(profileEvents.rejected, (state, action) =>
-        state.loading = false
-    );
+    .addCase(profileEvents.rejected, (state, action) =>{});
   },
 });
 export const { mergeGoogleEvents,clearGoogleEvents } = eventSlice.actions;
