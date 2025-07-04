@@ -20,15 +20,12 @@ const MyScans = () => {
     dispatch(myScans());
   }, []);
 
+  const handleSaveContact = async (contact) => {
+    console.log(contact, "contact to be saved");
 
-const handleSaveContact =async(contact)=>{
+    const formData = new FormData();
 
-console.log(contact,"contact to be saved");
-
-const formData = new FormData();
-
-
-// formData.append("contact_id", formData.contact_id);
+    // formData.append("contact_id", formData.contact_id);
     formData.append("contactImage", contact.profileImageURL);
     formData.append("firstname", contact.firstname);
     formData.append("lastname", contact.lastname);
@@ -42,11 +39,10 @@ const formData = new FormData();
     formData.append("facebook", contact.facebook);
     formData.append("telegram", contact.telegram);
 
-console.log(Object.fromEntries(formData),"before saving the contact");
+    console.log(Object.fromEntries(formData), "before saving the contact");
 
-
-    dispatch(saveContact(formData))
-}
+    dispatch(saveContact(formData));
+  };
 
   return (
     <div>
@@ -127,17 +123,17 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                               <h4 className="fw-semibold">My Scans</h4>
                               <div></div>
                             </div>
-                            {allScans
-                                  .filter((scan) => scan.iScanned === true).length>0?<div className="row mt-5 px-5">
-                             
+                            {allScans.filter((scan) => scan.iScanned === true)
+                              .length > 0 ? (
+                              <div className="row mt-5 px-5">
                                 {allScans
                                   .filter((scan) => scan.iScanned === true)
                                   .map((scan) => {
                                     const phone = `+${scan?.phonenumbers[0]}`;
-                                    
+
                                     const phoneNumber =
-                                    parsePhoneNumberFromString(phone);
-                                    console.log(scan,"gfasjgdaj");
+                                      parsePhoneNumberFromString(phone);
+                                    console.log(scan, "gfasjgdaj");
                                     const country =
                                       phoneNumber?.country?.toLowerCase();
                                     return (
@@ -167,14 +163,17 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                                               <div className="d-flex align-items-center">
                                                 {" "}
                                                 <span className="text-capitalize">
-                                                  {scan.firstname} {scan.lastname}
+                                                  {scan.firstname}{" "}
+                                                  {scan.lastname}
                                                 </span>
                                               </div>
                                             </h5>
                                             <h6 className="text-lowercase">
                                               <div className="d-flex align-items-center">
                                                 <i class="fa-regular fa-envelope me-2"></i>
-                                                <a href={`mailto:${scan.email}`}>
+                                                <a
+                                                  href={`mailto:${scan.email}`}
+                                                >
                                                   {" "}
                                                   {scan.email}
                                                 </a>
@@ -186,7 +185,7 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                                              <a href={`tel:+${scan.phonenumbers[0]}`}>+ {scan.phonenumbers[0]}</a>
                                             </div>
                                           </h6> */}
-  
+
                                             <h6 className="text-lowercase">
                                               <div className="d-flex align-items-center">
                                                 {country && (
@@ -209,10 +208,15 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                                       </div>
                                     );
                                   })}
-                              
-                            </div>:
-                            <div className="fw-bold d-flex justify-content-center align-items-center" style={{height:100}}>No Scans</div>
-                            }
+                              </div>
+                            ) : (
+                              <div
+                                className="fw-bold d-flex justify-content-center align-items-center"
+                                style={{ height: 100 }}
+                              >
+                                No Scans
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="tab-pane " id="scannedMe">
@@ -221,26 +225,27 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                               <h4 className="fw-semibold">Scanned Me</h4>
                               <div className="d-inline-flex align-items-center"></div>
                             </div>
-                            {allScans
-                                  .filter((scan) => scan.iScanned === false).length>0?<div className="row mt-5">
-                              {allScans
-                                .filter((scan) => scan.iScanned === false)
-                                .map((scan) => {
-                                  console.log(scan,"scansfhds");
-                                  
-                                  const phone = `+${scan.phonenumbers[0]}`;
-                                  const phoneNumber =
-                                    parsePhoneNumberFromString(phone);
-                                  const country =
-                                    phoneNumber?.country?.toLowerCase();
-                                  return (
-                                    <div
-                                      className="col-md-3 mb-3"
-                                      key={scan.id}
-                                    >
-                                      <div className="card">
-                                        <div className="card-body overflow-x-auto no-scrollbar">
-                                          {/* {scan.profileImageURL ? (
+                            {allScans.filter((scan) => scan.iScanned === false)
+                              .length > 0 ? (
+                              <div className="row mt-5">
+                                {allScans
+                                  .filter((scan) => scan.iScanned === false)
+                                  .map((scan) => {
+                                    console.log(scan, "scansfhds");
+
+                                    const phone = `+${scan.phonenumbers[0]}`;
+                                    const phoneNumber =
+                                      parsePhoneNumberFromString(phone);
+                                    const country =
+                                      phoneNumber?.country?.toLowerCase();
+                                    return (
+                                      <div
+                                        className="col-md-3 mb-3"
+                                        key={scan.id}
+                                      >
+                                        <div className="card">
+                                          <div className="card-body overflow-x-auto no-scrollbar">
+                                            {/* {scan.profileImageURL ? (
                                           <AvatarInitialStyles
                                             name={`${scan.firstname} ${scan.lastname}`}
                                           />
@@ -256,52 +261,60 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                                             }}
                                           />
                                         )} */}
-                                          <h5 className="fw-bold d-flex justify-content-between align-items-center">
-                                            <div className="d-flex align-items-center">
-                                              <span className="text-capitalize">
-                                                {scan.firstname} {scan.lastname}
-                                              </span>
-                                            </div>
-                                            <button className="btn btn-sm btn-primary d-inline" onClick={()=>{handleSaveContact(scan)}}>
-                                      <i class="fa-solid fa-floppy-disk me-2 text-light"></i>{" "}
-                                     Save
-                                    </button>
-                                          </h5>
-                                          <h6 className="text-lowercase">
-                                            <div className="d-flex align-items-center">
-                                              <i class="fa-regular fa-envelope me-2"></i>
-                                              <a href={`mailto:${scan.email}`}>
-                                                {" "}
-                                                {scan.email}
-                                              </a>
-                                            </div>
-                                          </h6>
-                                          {scan.phonenumbers.length>0 &&<h6 className="text-lowercase">
-                                            <div className="d-flex align-items-center">
-                                              {country && (
-                                                <img
-                                                  src={`https://flagcdn.com/24x18/${country}.png`}
-                                                  width={15}
-                                                  className="me-1"
-                                                  alt={country}
-                                                />
-                                              )}
-                                              <a
-                                                href={`tel:+${scan.phonenumbers[0]}`}
+                                            <h5 className="fw-bold d-flex justify-content-between align-items-center">
+                                              <div className="d-flex align-items-center">
+                                                <span className="text-capitalize">
+                                                  {scan.firstname}{" "}
+                                                  {scan.lastname}
+                                                </span>
+                                              </div>
+                                              {/* <button
+                                                className="btn btn-sm btn-primary d-inline"
+                                                onClick={() => {
+                                                  handleSaveContact(scan);
+                                                }}
                                               >
-                                                +{scan.phonenumbers[0]}
-                                              </a>
-                                            </div>
-                                          </h6>}
-                                           
+                                                <i class="fa-solid fa-floppy-disk me-2 text-light"></i>{" "}
+                                                Save
+                                              </button> */}
+                                            </h5>
+                                            <h6 className="text-lowercase">
+                                              <div className="d-flex align-items-center">
+                                                <i class="fa-regular fa-envelope me-2"></i>
+                                                <a
+                                                  href={`mailto:${scan.email}`}
+                                                >
+                                                  {" "}
+                                                  {scan.email}
+                                                </a>
+                                              </div>
+                                            </h6>
+                                            {scan.phonenumbers.length > 0 && (
+                                              <h6 className="text-lowercase">
+                                                <div className="d-flex align-items-center">
+                                                  {country && (
+                                                    <img
+                                                      src={`https://flagcdn.com/24x18/${country}.png`}
+                                                      width={15}
+                                                      className="me-1"
+                                                      alt={country}
+                                                    />
+                                                  )}
+                                                  <a
+                                                    href={`tel:+${scan.phonenumbers[0]}`}
+                                                  >
+                                                    +{scan.phonenumbers[0]}
+                                                  </a>
+                                                </div>
+                                              </h6>
+                                            )}
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  })}
 
-                              
-                              {/* {allScans
+                                {/* {allScans
                                 .filter((scan) => scan.iScanned === true)
                                 .map((scan) => (
                                   <div className="col-md-4 mb-3" key={scan.id}>
@@ -325,9 +338,15 @@ console.log(Object.fromEntries(formData),"before saving the contact");
                                     </div>
                                   </div>
                                 ))} */}
-                            </div>:
-                            <div className="fw-bold d-flex justify-content-center align-items-center" style={{height:100}}>No Scans</div>
-                            }
+                              </div>
+                            ) : (
+                              <div
+                                className="fw-bold d-flex justify-content-center align-items-center"
+                                style={{ height: 100 }}
+                              >
+                                No Scans
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

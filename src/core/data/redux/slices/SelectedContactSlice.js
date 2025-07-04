@@ -18,7 +18,9 @@ const selectedContactSlice = createSlice({
     meetings:[]
   },
   reducers: {
-    setSelectedContact: (state, action) => {      
+    setSelectedContact: (state, action) => {   
+      console.log(action.payload,"Selected contact");
+         
       return { ...state, ...action.payload };
     },
     resetSelectedContact: () => ({

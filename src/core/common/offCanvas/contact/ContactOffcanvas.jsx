@@ -151,6 +151,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
     setIsLoading(true);
 
     const formDataObj = new FormData();
+console.log(formData.email,"emaillsdfsd");
 
     formDataObj.append("contact_id", formData.contact_id); 
     formDataObj.append("contactImage", formData.contactImageURL);
@@ -479,7 +480,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
                 />
               </div>
             </div>
-            {selectedContact.contact_id == null && (
+            {/* {selectedContact.contact_id == null && (
               <div className="col-md-12">
                 <div className="form-check form-switch">
                   <input
@@ -513,7 +514,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
                   </>
                 )}
               </div>
-            )}
+            )} */}
             {showSocialLinks && (
               <>
                 <div className="mb-3">

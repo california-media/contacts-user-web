@@ -37,36 +37,40 @@ export const fetchContacts = createAsyncThunk(
     }
   }
 );
-export const saveBulkContacts = createAsyncThunk("contacts/saveBulkContacts", async(bulkData,{rejectWithValue,dispatch})=>{
-  try {
-     const response = await api.post("/save-bulk-contacts", bulkData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+export const saveBulkContacts = createAsyncThunk(
+  "contacts/saveBulkContacts",
+  async (bulkData, { rejectWithValue, dispatch }) => {
+    console.log(bulkData,"bulk data just before going to api");
+    
+    try {
+      const response = await api.post("/save-bulk-contacts", {contacts:bulkData});
+      console.log(response.data,"response from bulk contacts");
+      
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
-  } catch (error) {
-     dispatch(
+      return response.data
+    } catch (error) {
+      dispatch(
         showToast({ message: error.response.data.message, variant: "danger" })
       );
       return rejectWithValue(error.response.data);
+    }
   }
-})
+);
 export const saveContact = createAsyncThunk(
   "contacts/saveContact",
   async (formData, { rejectWithValue, dispatch }) => {
     try {
-      console.log(Object.fromEntries(formData),"formdata before going to api");
-      
+      console.log(Object.fromEntries(formData), "formdata before going to api");
+
       const response = await api.post("/addEditContact", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       console.log("Response from saveContact:", response.data);
-      
+
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
@@ -153,17 +157,17 @@ const contactSlice = createSlice({
     loading: false,
     error: null,
   },
-reducers: {
-  resetContacts: (state) => {
-    state.contacts = [];
-    state.page = 1;
-    state.limit = 20;
-    state.totalPages = 0;
-    state.totalContacts = 0;
-    state.loading = false;
-    state.error = null;
+  reducers: {
+    resetContacts: (state) => {
+      state.contacts = [];
+      state.page = 1;
+      state.limit = 20;
+      state.totalPages = 0;
+      state.totalContacts = 0;
+      state.loading = false;
+      state.error = null;
+    },
   },
-},
 
   extraReducers: (builder) => {
     builder.addCase(fetchContacts.pending, (state) => {
@@ -199,13 +203,24 @@ reducers: {
       );
       state.totalContacts -= 1;
     });
-    builder.addCase(saveBulkContacts.fulfilled,(state,action)=>{
-      state.contacts=action.payload;
-    })
+    builder.addCase(saveBulkContacts.fulfilled, (state, action) => {
+      // state.contacts=action.payload;
+      action.payload.data.forEach((newContact) => {
+        const index = state.contacts.findIndex(
+          (c) => c.contact_id === newContact.contact_id
+        );
+        if (index !== -1) {
+          state.contacts[index] = newContact;
+        } else {
+          state.contacts.push(newContact);
+          state.totalContacts += 1;
+        }
+      });
+    });
   },
 });
 
 // Export actions and reducer
 // export const { setPage } = contactSlice.actions;
 export default contactSlice.reducer;
-export const {resetContacts} = contactSlice.actions
+export const { resetContacts } = contactSlice.actions;

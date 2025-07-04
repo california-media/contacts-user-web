@@ -49,6 +49,7 @@ import api from "../../../core/axios/axiosInstance";
 import {
   deleteContact,
   fetchContacts,
+  saveBulkContacts,
   saveContact,
 } from "../../../core/data/redux/slices/ContactSlice";
 import { useSelector } from "react-redux";
@@ -462,12 +463,12 @@ const Contacts = () => {
     const sheet = workbook.Sheets[sheetName];
 
     const contacts = XLSX.utils.sheet_to_json(sheet); 
-console.log(contacts,"bulk contacts parsed");
 
 
-    const response = await api.post("/save-bulk-contacts",  {contacts} );
-    console.log(response.data,"response from the bulk save");
-    
+ const response = await dispatch(saveBulkContacts(contacts)).unwrap()
+    if(response.status=="success"){
+      setImportModal(false)
+    }
   };
 
   reader.readAsArrayBuffer(file);

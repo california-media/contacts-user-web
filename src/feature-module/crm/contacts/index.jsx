@@ -4264,7 +4264,7 @@ const ContactsDetails = () => {
                 {meetingFormData?.meetingType === "online" &&
                   meetingFormData?.meetingLink == "" && (
                     <div>
-                      <div className="form-check form-switch">
+                      {/* <div className="form-check form-switch">
                         <input
                           className="form-check-input"
                           type="checkbox"
@@ -4275,7 +4275,7 @@ const ContactsDetails = () => {
                           }
                         />
                         <div>Generate Meeting Link</div>
-                      </div>
+                      </div> */}
                       {!userProfile.accounts?.some(acc => acc.type === "google" && acc.isConnected) &&(
                         <>
                           <div className="text-danger mt-2">
