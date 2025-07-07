@@ -4822,7 +4822,7 @@ console.log(meetingFormData,"jghjgjhgjg");
       {/* /Create Call Log */}
 
       {/* Add File */}
-      {/* <div
+      <div
         className="modal custom-modal fade custom-modal-two modal-padding"
         id="new_file"
         role="dialog"
@@ -4884,10 +4884,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Add File */}
       {/* Connect Account */}
-      {/* <div className="modal custom-modal fade" id="create_email" role="dialog">
+      <div className="modal custom-modal fade" id="create_email" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -4971,10 +4971,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Connect Account */}
       {/* Success Contact */}
-      {/* <div className="modal custom-modal fade" id="success_mail" role="dialog">
+      <div className="modal custom-modal fade" id="success_mail" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header border-0 m-0 justify-content-end">
@@ -5005,13 +5005,13 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Success Contact */}
       {/* Add Tag */}
 
       {/* /Add Tag */}
       {/* Add Contact */}
-      {/* <div className="modal custom-modal fade" id="add_contact" role="dialog">
+      <div className="modal custom-modal fade" id="add_contact" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5056,10 +5056,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Add Contact */}
       {/* Add Owner */}
-      {/* <div className="modal custom-modal fade" id="owner" role="dialog">
+      <div className="modal custom-modal fade" id="owner" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5186,10 +5186,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Add Owner */}
       {/* Deal Status */}
-      {/* <div className="modal custom-modal fade" id="deal_status" role="dialog">
+      <div className="modal custom-modal fade" id="deal_status" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5245,10 +5245,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Deal Status */}
       {/* Add New Pipeline */}
-      {/* <div
+      <div
         className="offcanvas offcanvas-end offcanvas-large"
         tabIndex={-1}
         id="offcanvas_pipeline"
@@ -5424,10 +5424,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </form>
         </div>
-      </div> */}
+      </div>
       {/* /Add New Pipeline */}
       {/* Add New Stage */}
-      {/* <div className="modal custom-modal fade" id="add_stage" role="dialog">
+      <div className="modal custom-modal fade" id="add_stage" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5466,10 +5466,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Add New Stage */}
       {/* Create Pipeline */}
-      {/* <div
+      <div
         className="modal custom-modal fade"
         id="create_pipeline"
         role="dialog"
@@ -5508,10 +5508,10 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Create Pipeline*/}
       {/* Edit Stage */}
-      {/* <div className="modal custom-modal fade" id="edit_stage" role="dialog">
+      <div className="modal custom-modal fade" id="edit_stage" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5554,7 +5554,7 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
         </div>
-      </div> */}
+      </div>
       {/* /Edit Stage */}
       {/* Delete Stage */}
       <Modal show={openModal} onHide={() => setOpenModal(false)}>
