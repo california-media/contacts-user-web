@@ -11,6 +11,11 @@ import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext"
 import { useDispatch, useSelector } from "react-redux";
 import { profileEvents } from "../../../core/data/redux/slices/EventSlice";
 import { setSelectedContact } from "../../../core/data/redux/slices/SelectedContactSlice";
+import api from "../../../core/axios/axiosInstance";
+import dayjs from "dayjs";
+import { DatePicker, TimePicker } from "antd";
+import { all_routes } from "../../router/all_routes";
+import { saveContact } from "../../../core/data/redux/slices/ContactSlice";
 
 const Calendar = () => {
   const [startDate, setDate] = useState(new Date()),
@@ -24,40 +29,132 @@ const Calendar = () => {
     [event_title, setevent_title] = useState(""),
     [category_color, setcategory_color] = useState(""),
     [calenderevent, setcalenderevent] = useState(""),
+    [allContacts, setAllContacts] = useState([]),
     [weekendsVisible, setweekendsVisible] = useState(true),
     [currentEvents, setscurrentEvents] = useState([]);
   const [defaultEvents, setDefaultEvents] = useState([]);
-
-  const events = useSelector((state)=>state.event)
+  const userProfile = useSelector((state) => state.profile);
+  const events = useSelector((state) => state.event);
   const navigate = useNavigate();
-  console.log(defaultEvents,"events slice in calendar");
-  const dispatch = useDispatch()
+  console.log(defaultEvents, "events slice in calendar");
+  const dispatch = useDispatch();
+  const [meetingFormData, setMeetingFormData] = useState({
+    meeting_id: "",
+    meetingDescription: "",
+    meetingType: "",
+    meetingLink: "",
+    meetingTitle:"",
+    meetingLocation: "",
+    meetingStartDate: dayjs(),
+    meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
+  });
+  const route = all_routes;
+  useEffect(() => {
+    setDefaultEvents(events);
+  }, [events]);
+  useEffect(() => {
+    dispatch(profileEvents());
+  }, []);
 
-useEffect(()=>{
 
+const meetingType = [
+  { value: "online", label: "Online" },
+  { value: "offline", label: "Offline" },
+];
+useEffect(async()=>{
+try {
+  const response = await api.get("/getAllContact")
+  // console.log(response.data,"response from all contacts fetched");
+  
+  setAllContacts(response.data.data)
 
-  setDefaultEvents(events)
-
-},[events])
-useEffect(()=>{
-   dispatch(profileEvents())
-},[])
-function getColor(color) {
-  // Map your color hex to a class, or return a default
-  // Example: if you use only a few colors, map them:
-  switch (color) {
-    case "#2196F3":
-      return "info";
-    case "#4CAF50":
-      return "success";
-    case "#9C27B0":
-      return "purple";
-    case "#FF9800":
-      return "warning";
-    default:
-      return "primary";
-  }
+} catch (error) {
+  console.log(error.response.data.data);
+  
 }
+
+},[])
+ const handleMeetingSubmit = async () => {
+    // if (!userProfile.googleConnected) {
+    //   return dispatch(
+    //     showToast({
+    //       message: "Please connect the Google account first",
+    //       variant: "danger",
+    //     })
+    //   );
+    // }
+
+    const formDataObj = new FormData();
+    // let finalMeetLink = "";
+
+    // if (checkMeetingLink && meetingFormData.meetingLink === "") {
+    //   try {
+    //     console.log("generating link");
+
+    //     finalMeetLink = await generateGoogleMeetingLink();
+    //   } catch (err) {
+    //     console.error("Failed to generate meeting link:", err);
+    //     return;
+    //   }
+    // }
+console.log(meetingFormData,"jghjgjhgjg");
+
+    // formDataObj.append("contact_id", selectedContact.contact_id);
+
+    formDataObj.append("meeting_id", meetingFormData.meeting_id);
+    formDataObj.append("meetingType", meetingFormData.meetingType===""?"offline":meetingFormData.meetingType);
+    formDataObj.append("meetingLocation", meetingFormData.meetingLocation);
+    formDataObj.append(
+      "meetingDescription",
+      meetingFormData.meetingDescription
+    );
+    formDataObj.append("meetingTitle", meetingFormData.meetingTitle);
+
+    formDataObj.append(
+      "meetingStartDate",
+      meetingFormData.meetingStartDate.format("YYYY-MM-DD")
+    );
+    formDataObj.append(
+      "meetingStartTime",
+      meetingFormData.meetingStartTime.format("HH:mm")
+    );
+
+    console.log(
+      "object before going to api:",
+      Object.fromEntries(formDataObj.entries())
+    );
+
+    dispatch(saveContact(formDataObj));
+
+    setMeetingFormData({
+      meeting_id: "",
+      meetingDescription: "",
+      meetingTitle: "",
+      meetingType: "",
+      meetingStartDate: dayjs(),
+      meetingStartTime: dayjs("00:00", "HH:mm"),
+      meetingEndDate: dayjs(),
+      meetingEndTime: dayjs("00:00", "HH:mm"),
+    });
+  };
+
+
+  function getColor(color) {
+    // Map your color hex to a class, or return a default
+    // Example: if you use only a few colors, map them:
+    switch (color) {
+      case "#2196F3":
+        return "info";
+      case "#4CAF50":
+        return "success";
+      case "#9C27B0":
+        return "purple";
+      case "#FF9800":
+        return "warning";
+      default:
+        return "primary";
+    }
+  }
   // const defaultEvents = [
   //   {
   //     title: "Event Name 4",
@@ -117,6 +214,12 @@ function getColor(color) {
   //     fetchGoogleCalendarEvents();
   //   }
   // }, [isGoogleSignedIn]);
+  const handleMeetingInputChange = (name, value) => {
+    setMeetingFormData({
+      ...meetingFormData,
+      [name]: value,
+    });
+  };
 
   useEffect(() => {
     let elements = Array.from(
@@ -171,30 +274,30 @@ function getColor(color) {
   ];
 
   const defaultValue = options1[0];
-// const calendarEvents = events.map((event) => ({
-//   title: event.title,
-//   start: event.start, // already in ISO format
-//   end: event.end || event.start, // fallback if no end
-//   className: "bg-primary", // or dynamic className based on event.type or color
-// }));
-const calendarEvents = events.map((event) => ({
-  title: event.title,
-  start: event.start,
-  end: event.end || event.start,
-  className: event.type === "meeting" ? "bg-primary" : "bg-secondary",
-  id: event.event_id,
-  extendedProps: {
-    event_id: event.event_id,
-    contact_id: event.contact_id,
-    type: event.type,
-    contact_name: event.contact_name,
-    location: event.location,
-    meetingType: event.meetingType,
-    link: event.link,
-    startTime: event.startTime,
-    endTime: event.endTime,
-  },
-}));
+  // const calendarEvents = events.map((event) => ({
+  //   title: event.title,
+  //   start: event.start, // already in ISO format
+  //   end: event.end || event.start, // fallback if no end
+  //   className: "bg-primary", // or dynamic className based on event.type or color
+  // }));
+  const calendarEvents = events.map((event) => ({
+    title: event.title,
+    start: event.start,
+    end: event.end || event.start,
+    className: event.type === "meeting" ? "bg-primary" : "bg-secondary",
+    id: event.event_id,
+    extendedProps: {
+      event_id: event.event_id,
+      contact_id: event.contact_id,
+      type: event.type,
+      contact_name: event.contact_name,
+      location: event.location,
+      meetingType: event.meetingType,
+      link: event.link,
+      startTime: event.startTime,
+      endTime: event.endTime,
+    },
+  }));
   return (
     <>
       <div className="page-wrapper">
@@ -209,7 +312,7 @@ const calendarEvents = events.map((event) => ({
                   to="#"
                   className="btn btn-primary"
                   data-bs-toggle="modal"
-                  data-bs-target="#add_event"
+                  data-bs-target="#add_meeting"
                 >
                   Create Event
                 </Link>
@@ -267,23 +370,36 @@ const calendarEvents = events.map((event) => ({
                     // initialEvents={defaultEvents}
                     select={handleDateSelect}
                     // eventClick={(clickInfo) => handleEventClick(clickInfo)}
-                   eventClick={(eventInfo) => {
-  const event = eventInfo.event;
-  const props = event.extendedProps;
-  
-// navigate("/contacts-details", { state: { tab: "meeting" } });
-  // console.log("Clicked event:", {
-  //   title: event.title,
-  //   type: props.type,
-  //   eventId: props.event_id,
-  //   contactId: props.contact_id,
-  //   contactName: props.contact_name,
-  //   location: props.location,
-  //   meetingType: props.meetingType,
-  //   link: props.link,
-  //   timeRange: `${props.startTime} - ${props.endTime}`,
-  // });
-}}
+                    eventClick={async (eventInfo) => {
+                      const event = eventInfo.event;
+                      const props = event.extendedProps;
+                      try {
+                        console.log(props.contact_id, "props.contact_id");
+
+                        const response = await api.post("/getContactById", {
+                          contact_id: props.contact_id,
+                        });
+                        console.log(
+                          response.data,
+                          "response from fetch single contact"
+                        );
+                        dispatch(setSelectedContact(response.data.data));
+                      } catch (error) {}
+                      navigate("/contacts-details", {
+                        state: { tab: "meeting" },
+                      });
+                      console.log("Clicked event:", {
+                        title: event.title,
+                        type: props.type,
+                        eventId: props.event_id,
+                        contactId: props.contact_id,
+                        contactName: props.contact_name,
+                        location: props.location,
+                        meetingType: props.meetingType,
+                        link: props.link,
+                        timeRange: `${props.startTime} - ${props.endTime}`,
+                      });
+                    }}
                   />
                 </div>
               </div>
@@ -331,6 +447,236 @@ const calendarEvents = events.map((event) => ({
         </div>
       </div>
       {/* /Add Event Modal */}
+      <div
+        className="modal custom-modal fade modal-padding"
+        id="add_meeting"
+        role="dialog"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">
+               Add New Meeting
+              </h5>
+              <button
+                type="button"
+                className="btn-close position-static"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <form>
+                <div className="mb-3">
+                  <label className="col-form-label">
+                    Title <span className="text-danger"> *</span>
+                  </label>
+                  <input
+                    className="form-control"
+                    name="meetingTitle"
+                    value={meetingFormData.meetingTitle}
+                    onChange={(e) => {
+                      handleMeetingInputChange(e.target.name, e.target.value);
+                    }}
+                    type="text"
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="col-form-label">
+                    Description <span className="text-danger"> *</span>
+                  </label>
+                  <textarea
+                    className="form-control"
+                    rows={4}
+                    name="meetingDescription"
+                    value={meetingFormData.meetingDescription}
+                    onChange={(e) =>
+                      handleMeetingInputChange(e.target.name, e.target.value)
+                    }
+                  />
+                </div>
+
+
+<Select
+                    value={""}
+                    className="select2"
+                    options={allContacts}
+                    name="allContacts"
+                    onChange={(option) =>
+                      handleMeetingInputChange("meetingType", option.value)
+                    }
+                    placeholder="Choose"
+                    classNamePrefix="react-select"
+                  />
+
+
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <label className="col-form-label">Start Date</label>
+                    <div className="icon-form-end">
+                      <span className="form-icon">
+                        <i className="ti ti-calendar-event" />
+                      </span>
+                      <DatePicker
+                        className="form-control datetimepicker deals-details"
+                        value={meetingFormData.meetingStartDate}
+                        name="meetingStartDate"
+                        onChange={(date) => {
+                          handleMeetingInputChange("meetingStartDate", date);
+                        }}
+                        format="DD-MM-YYYY"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6 mb-3">
+                    <label className="col-form-label">Start Time </label>
+                    <div className="icon-form">
+                      <span className="form-icon">
+                        <i className="ti ti-clock-hour-10" />
+                      </span>
+                      <TimePicker
+                        placeholder="Select Time"
+                        className="form-control datetimepicker-time"
+                        name="meetingStartTime"
+                        onChange={(time) =>
+                          handleMeetingInputChange("meetingStartTime", time)
+                        }
+                        value={meetingFormData.meetingStartTime}
+                        defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
+                        format="hh:mm A"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label className="col-form-label">Meeting Type</label>
+                  <Select
+                    value={
+                      meetingFormData?.meetingType
+                        ? meetingType.find(
+                            (option) =>
+                              option.value === meetingFormData?.meetingType
+                          )
+                        : null
+                    }
+                    className="select2"
+                    options={meetingType}
+                    name="meetingType"
+                    onChange={(option) =>
+                      handleMeetingInputChange("meetingType", option.value)
+                    }
+                    placeholder="Choose"
+                    classNamePrefix="react-select"
+                  />
+                </div>
+
+                {meetingFormData?.meetingType === "offline" && (
+                  <div className="mb-3">
+                    <label className="col-form-label">Location</label>
+                    <input
+                      className="form-control"
+                      name="meetingLocation"
+                      onChange={(e) => {
+                        handleMeetingInputChange(e.target.name, e.target.value);
+                      }}
+                      value={meetingFormData.meetingLocation}
+                      type="text"
+                    />
+                  </div>
+                )}
+
+                {meetingFormData?.meetingType === "online" &&
+                meetingFormData?.meetingLink !== "" ? (
+                  <>
+                    <div className="mb-3">
+                      <label className="col-form-label">Meeting Link</label>
+                      <input
+                        className="form-control"
+                        disabled
+                        name="meetingLink"
+                        value={meetingFormData.meetingLink}
+                        onChange={(e) => {
+                          handleMeetingInputChange(
+                            e.target.name,
+                            e.target.value
+                          );
+                        }}
+                        type="text"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  ""
+                )}
+
+                {meetingFormData?.meetingType === "online" &&
+                  meetingFormData?.meetingLink == "" && (
+                    <div>
+                      {/* <div className="form-check form-switch">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          role="switch"
+                          checked={checkMeetingLink}
+                          onChange={() =>
+                            setCheckMeetingLink(!checkMeetingLink)
+                          }
+                        />
+                        <div>Generate Meeting Link</div>
+                      </div> */}
+                      {!userProfile.accounts?.some(
+                        (acc) => acc.type === "google" && acc.isConnected
+                      ) && (
+                        <>
+                          <div className="text-danger mt-2">
+                            *Generating meeting links Google Account is Required
+                          </div>
+                          <div className="mt-2">
+                            <Link
+                              to={route.emailSetup}
+                              target="_blank"
+                              // onClick={()=>{
+                              //   document.getElementById("closeMeetingModal")?.click();
+                              //   }}
+                            >
+                              Click here{" "}
+                            </Link>
+                            to connect your Google Account
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                <div className="col-lg-12 text-end modal-btn mt-4">
+                  <Link
+                    to="#"
+                    className="btn btn-light"
+                    data-bs-dismiss="modal"
+                    id="closeMeetingModal"
+                  >
+                    Cancel
+                  </Link>
+                  <button
+                    className="btn btn-primary"
+                    data-bs-dismiss="modal"
+                    type="button"
+                    onClick={() => {
+                      handleMeetingSubmit();
+                    }}
+                  >
+                    Save changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
       {/* Add Event Modal */}
       <div className="modal custom-modal fade none-border" id="my_event">
         <div className="modal-dialog modal-dialog-centered">

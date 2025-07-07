@@ -282,6 +282,9 @@ const Step3 = ({ formData, setFormData, navigate }) => {
     <StepWrapper key="step3">
       <>
  <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
+ <div className="text-end cursor-pointer" onClick={() => handleFinalSubmit()}>
+          Skip
+        </div>
         <h3>Select a category that best describes you</h3>
         <div className="prf-grid">
           {[

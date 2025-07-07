@@ -711,7 +711,7 @@ const Contacts = () => {
       width: 300,
       fixed: "left",
       onCell: () => ({
-        className: "hoverable-cell", // Adding a class for the cell
+        className: "hoverable-cell",
       }),
 
       render: (text, record) => {
@@ -1154,70 +1154,151 @@ const Contacts = () => {
     );
   };
 
-  const exportPDF = () => {
-    const doc = new jsPDF();
+  // const exportPDF = () => {
+  //   const doc = new jsPDF();
 
-    // Filter columns based on column visibility
-    const filteredColumns = columns.filter(
-      (col) =>
-        columnVisibility[col.title] && // Check if the column is visible
-        col.title !== "Action" &&// Exclude the Action column from export
-        col.title !=="Groups"
-    );
+  //   // Filter columns based on column visibility
+  //   const filteredColumns = columns.filter(
+  //     (col) =>
+  //       columnVisibility[col.title] && // Check if the column is visible
+  //       col.title !== "Action" &&// Exclude the Action column from export
+  //       col.title !=="Groups"
+  //   );
 
-    // Create headers and data based on filtered columns
-    const headers = filteredColumns.map((col) => col.title);
-    const data = filteredData.map((row) =>
-      filteredColumns.map((col) => row[col.dataIndex] || "")
-    );
+  //   // Create headers and data based on filtered columns
+  //   const headers = filteredColumns.map((col) => col.title);
+  //   const data = filteredData.map((row) =>
+  //     filteredColumns.map((col) => row[col.dataIndex] || "")
+  //   );
 
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const titleText = "Contacts";
-    const titleWidth = doc.getTextWidth(titleText);
-    const titleX = (pageWidth - titleWidth) / 2;
+  //   const pageWidth = doc.internal.pageSize.getWidth();
+  //   const titleText = "Contacts";
+  //   const titleWidth = doc.getTextWidth(titleText);
+  //   const titleX = (pageWidth - titleWidth) / 2;
 
-    doc.setFontSize(15);
-    doc.text(titleText, titleX, 20);
+  //   doc.setFontSize(15);
+  //   doc.text(titleText, titleX, 20);
 
-    doc.setFontSize(10);
-    doc.text(`Exported on: ${currentDate} at ${currentTime}`, 15, 35);
+  //   doc.setFontSize(10);
+  //   doc.text(`Exported on: ${currentDate} at ${currentTime}`, 15, 35);
 
-    // Generate the table with the headers and data
-    autoTable(doc, {
-      startY: 40,
-      head: [headers],
-      body: data,
-    });
+  //   // Generate the table with the headers and data
+  //   autoTable(doc, {
+  //     startY: 40,
+  //     head: [headers],
+  //     body: data,
+  //   });
 
-    // Save the PDF
-    doc.save("Contacts.pdf");
-  };
+  //   // Save the PDF
+  //   doc.save("Contacts.pdf");
+  // };
+const exportPDF = () => {
+  const doc = new jsPDF();
 
-  const exportExcel = () => {
-    const wb = utils.book_new();
+  // Filter columns, exclude "Action" and "Groups"
+  const filteredColumns = columns.filter(
+    (col) =>
+      columnVisibility[col.title] &&
+      col.title !== "Action" &&
+      col.title !== "Groups"
+  );
 
-    // Filter out the columns that are hidden (same as for PDF export)
-    const filteredColumns = columns.filter(
-      (col) => columnVisibility[col.title] && col.title !== "Action" && col.title !=="Groups"
-    );
+  // Rename the 'First Name' column to 'Name' (optional)
+  const headers = filteredColumns.map((col) =>
+    col.dataIndex === "firstname" ? "Name" : col.title
+  );
 
-    // Prepare worksheet data (only include visible columns)
-    const wsData = [
-      filteredColumns.map((col) => col.title), // Column headers
-      ...filteredData.map((row) =>
-        filteredColumns.map((col) => row[col.dataIndex] || "")
-      ),
-    ];
+  // Prepare the data with custom logic for fullname
+  const data = filteredData.map((row) =>
+    filteredColumns.map((col) => {
+      if (col.dataIndex === "firstname") {
+        return `${row.firstname || ""} ${row.lastname || ""}`.trim(); // combine names
+      }
+      return row[col.dataIndex] || "";
+    })
+  );
 
-    // Convert array of arrays to a sheet
-    const ws = utils.aoa_to_sheet(wsData);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const titleText = "Contacts";
+  const titleWidth = doc.getTextWidth(titleText);
+  const titleX = (pageWidth - titleWidth) / 2;
 
-    // Append the worksheet to the workbook
-    utils.book_append_sheet(wb, ws, "Calls");
+  doc.setFontSize(15);
+  doc.text(titleText, titleX, 20);
 
-    // Save the Excel file
-    writeFile(wb, "Contacts.xlsx");
-  };
+  doc.setFontSize(10);
+  doc.text(`Exported on: ${currentDate} at ${currentTime}`, 15, 35);
+
+  autoTable(doc, {
+    startY: 40,
+    head: [headers],
+    body: data,
+  });
+
+  doc.save("Contacts.pdf");
+};
+
+const exportExcel = () => {
+  const wb = utils.book_new();
+
+  // Filter out hidden or excluded columns
+  const filteredColumns = columns.filter(
+    (col) =>
+      columnVisibility[col.title] &&
+      col.title !== "Action" &&
+      col.title !== "Groups"
+  );
+
+  // Headers: rename "First Name" column title to "Name" if needed
+  const headers = filteredColumns.map((col) =>
+    col.dataIndex === "firstname" ? "Name" : col.title
+  );
+
+  // Data rows: merge first + last name in the "firstname" column
+  const dataRows = filteredData.map((row) =>
+    filteredColumns.map((col) => {
+      if (col.dataIndex === "firstname") {
+        return `${row.firstname || ""} ${row.lastname || ""}`.trim();
+      }
+      return row[col.dataIndex] || "";
+    })
+  );
+
+  // Combine headers and rows
+  const wsData = [headers, ...dataRows];
+
+  // Convert to sheet and write
+  const ws = utils.aoa_to_sheet(wsData);
+  utils.book_append_sheet(wb, ws, "Calls");
+  writeFile(wb, "Contacts.xlsx");
+};
+
+
+  // const exportExcel = () => {
+  //   const wb = utils.book_new();
+
+  //   // Filter out the columns that are hidden (same as for PDF export)
+  //   const filteredColumns = columns.filter(
+  //     (col) => columnVisibility[col.title] && col.title !== "Action" && col.title !=="Groups"
+  //   );
+
+  //   // Prepare worksheet data (only include visible columns)
+  //   const wsData = [
+  //     filteredColumns.map((col) => col.title), // Column headers
+  //     ...filteredData.map((row) =>
+  //       filteredColumns.map((col) => row[col.dataIndex] || "")
+  //     ),
+  //   ];
+
+  //   // Convert array of arrays to a sheet
+  //   const ws = utils.aoa_to_sheet(wsData);
+
+  //   // Append the worksheet to the workbook
+  //   utils.book_append_sheet(wb, ws, "Calls");
+
+  //   // Save the Excel file
+  //   writeFile(wb, "Contacts.xlsx");
+  // };
 
   // Filter columns based on checkbox state
   const visibleColumns = columns.filter(

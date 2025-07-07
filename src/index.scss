@@ -1024,3 +1024,15 @@ div.sidebar-themesettings .input-themeselect input[type="radio"]:checked~label .
   color: #666;
   pointer-events: none;
 }
+
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  box-shadow: 0 0 0px 1000px white inset !important;
+  background-color: white !important;
+  transition: background-color 9999s ease-in-out 0s;
+  color: #000 !important;
+}

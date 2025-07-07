@@ -322,8 +322,8 @@ const Sidebar = () => {
                           key={title.label}
                           onClick={(e) => {
                             if (hasSingleSubmenu) {
-                              e.stopPropagation(); // Prevents dropdown from interfering
-                              navigate(submenuLink); // <== React Router navigation
+                              e.stopPropagation();
+                              navigate(submenuLink);
                             }
                           }}
                           style={{
@@ -405,7 +405,7 @@ const Sidebar = () => {
                                       }}
                                     >
                                       <p
-                                        className="sideMenuHeading"
+                                        className="sideMenuHeading text-white"
                                         style={{
                                           borderBottom: `${
                                             title.submenuItems?.length > 1

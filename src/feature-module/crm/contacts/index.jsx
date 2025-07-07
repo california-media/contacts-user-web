@@ -26,6 +26,7 @@ import CreatableSelect from "react-select/creatable";
 import { FcUpload } from "react-icons/fc";
 import { useDropzone } from "react-dropzone";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 
 import {
@@ -202,6 +203,7 @@ export const initialSettings = {
 
 const ContactsDetails = () => {
   const data = leadsData;
+  const navigate = useNavigate();
 
   const [leadInfo, setLeadInfo] = useState({});
 
@@ -216,21 +218,27 @@ const ContactsDetails = () => {
   useEffect(() => {
     setLeadInfo(selectedContact);
   }, [selectedContact]);
-// useEffect(() => {
-//     const tabToShow = location.state?.tab;
-//     console.log(tabToShow,"tabtoshow2");
-    
-//     if (tabToShow) {
-//       console.log(tabToShow,"tabtoshow");
-      
-//       const tabTrigger = document.querySelector(`a[href="#${tabToShow}"]`);
-//       if (tabTrigger) {
-//         console.log("shownnn");
-        
-//         new bootstrap.Tab(tabTrigger).show();
-//       }
-//     }
-//   }, [location.state]);
+const bootstrap = window.bootstrap;
+
+useEffect(() => {
+  const handleTabShown = (event) => {
+    const tabId = event.target.getAttribute("href")?.replace("#", "");
+    if (tabId) {
+      navigate("/contacts-details", { state: { tab: tabId }, replace: true });
+    }
+  };
+
+  const tabLinks = document.querySelectorAll('[data-bs-toggle="tab"]');
+  tabLinks.forEach((tab) => {
+    tab.addEventListener("shown.bs.tab", handleTabShown);
+  });
+
+  return () => {
+    tabLinks.forEach((tab) => {
+      tab.removeEventListener("shown.bs.tab", handleTabShown);
+    });
+  };
+}, [navigate]);
   const [addcomment, setAddComment] = useState(false);
   const [activeEditorIndex, setActiveEditorIndex] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -268,7 +276,6 @@ const ContactsDetails = () => {
       setEditingIndex(index);
     }
   };
-
   const togglecomment = () => {
     setAddComment((prevState) => !prevState);
   };
@@ -398,6 +405,7 @@ const ContactsDetails = () => {
     meetingDescription: "",
     meetingType: "",
     meetingLink: "",
+    meetingTitle:"",
     meetingLocation: "",
     meetingStartDate: dayjs(),
     meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
@@ -418,7 +426,6 @@ const ContactsDetails = () => {
       [name]: value,
     }));
   };
-  const navigate = useNavigate();
   const contentRef = useRef(null);
   const handleDeleteTask = () => {
     setDeleteModalText("note");
@@ -668,7 +675,8 @@ const ContactsDetails = () => {
       dueTime: dayjs("00:00", "HH:mm"),
     });
   };
-
+{console.log(meetingFormData,"meeting form data")
+}
   const handleMeetingSubmit = async () => {
     // if (!userProfile.googleConnected) {
     //   return dispatch(
@@ -692,6 +700,7 @@ const ContactsDetails = () => {
     //     return;
     //   }
     // }
+console.log(meetingFormData,"jghjgjhgjg");
 
     formDataObj.append("contact_id", selectedContact.contact_id);
 
@@ -1718,10 +1727,11 @@ const ContactsDetails = () => {
                       </li>
                       <li className="nav-item" role="presentation">
                         <Link
-                          to="#"
+                          to="#meeting"
                           data-bs-toggle="tab"
                           data-bs-target="#meeting"
                           className="nav-link"
+                          
                         >
                           <SlPeople className="me-2" />
                           Meeting
@@ -2635,6 +2645,7 @@ const ContactsDetails = () => {
                                 meetingDescription: "",
                                 meetingType: "",
                                 meetingLink: "",
+                                meetingTitle:"",
                                 meetingLocation: "",
                                 meetingStartDate: dayjs(),
                                 meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
@@ -4342,7 +4353,7 @@ const ContactsDetails = () => {
       {/* /Add Edit Meeting */}
 
       {/* Add Edit Quotation Address */}
-      <div
+      {/* <div
         className="modal custom-modal fade modal-padding"
         id="add_quotationAddress"
         role="dialog"
@@ -4564,10 +4575,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Add Edit Quotation Address */}
       {/* Add Quotation Item */}
-      <div
+      {/* <div
         className="modal custom-modal fade modal-padding"
         id="add_quotationItem"
         role="dialog"
@@ -4696,10 +4707,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Add Quotation Item */}
       {/* Create Call Log */}
-      <div
+      {/* <div
         className="modal custom-modal fade modal-padding"
         id="create_call"
         role="dialog"
@@ -4807,11 +4818,11 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Create Call Log */}
 
       {/* Add File */}
-      <div
+      {/* <div
         className="modal custom-modal fade custom-modal-two modal-padding"
         id="new_file"
         role="dialog"
@@ -4873,10 +4884,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Add File */}
       {/* Connect Account */}
-      <div className="modal custom-modal fade" id="create_email" role="dialog">
+      {/* <div className="modal custom-modal fade" id="create_email" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -4960,10 +4971,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Connect Account */}
       {/* Success Contact */}
-      <div className="modal custom-modal fade" id="success_mail" role="dialog">
+      {/* <div className="modal custom-modal fade" id="success_mail" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header border-0 m-0 justify-content-end">
@@ -4994,13 +5005,13 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Success Contact */}
       {/* Add Tag */}
 
       {/* /Add Tag */}
       {/* Add Contact */}
-      <div className="modal custom-modal fade" id="add_contact" role="dialog">
+      {/* <div className="modal custom-modal fade" id="add_contact" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5045,10 +5056,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Add Contact */}
       {/* Add Owner */}
-      <div className="modal custom-modal fade" id="owner" role="dialog">
+      {/* <div className="modal custom-modal fade" id="owner" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5175,10 +5186,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Add Owner */}
       {/* Deal Status */}
-      <div className="modal custom-modal fade" id="deal_status" role="dialog">
+      {/* <div className="modal custom-modal fade" id="deal_status" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5234,10 +5245,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Deal Status */}
       {/* Add New Pipeline */}
-      <div
+      {/* <div
         className="offcanvas offcanvas-end offcanvas-large"
         tabIndex={-1}
         id="offcanvas_pipeline"
@@ -5413,10 +5424,10 @@ const ContactsDetails = () => {
             </div>
           </form>
         </div>
-      </div>
+      </div> */}
       {/* /Add New Pipeline */}
       {/* Add New Stage */}
-      <div className="modal custom-modal fade" id="add_stage" role="dialog">
+      {/* <div className="modal custom-modal fade" id="add_stage" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5455,10 +5466,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Add New Stage */}
       {/* Create Pipeline */}
-      <div
+      {/* <div
         className="modal custom-modal fade"
         id="create_pipeline"
         role="dialog"
@@ -5497,10 +5508,10 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Create Pipeline*/}
       {/* Edit Stage */}
-      <div className="modal custom-modal fade" id="edit_stage" role="dialog">
+      {/* <div className="modal custom-modal fade" id="edit_stage" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
@@ -5543,7 +5554,7 @@ const ContactsDetails = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* /Edit Stage */}
       {/* Delete Stage */}
       <Modal show={openModal} onHide={() => setOpenModal(false)}>

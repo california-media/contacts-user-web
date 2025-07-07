@@ -29,7 +29,7 @@ const Feature = () => {
         <Header />
         <Sidebar/>
         <Outlet />
-        <ThemeSettings/>
+        {/* <ThemeSettings/> */}
       </div>
       <div className="sidebar-overlay"></div>
       <div
