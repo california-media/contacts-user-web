@@ -1036,3 +1036,29 @@ input:-webkit-autofill:active {
   transition: background-color 9999s ease-in-out 0s;
   color: #000 !important;
 }
+.custom-floating-label input:focus,
+.custom-floating-label .form-control:focus {
+  border: 1px solid #2249aa !important;
+  box-shadow: none;
+  outline: none;
+}
+.custom-floating-label input:focus + label {
+  color: #2249aa !important;
+}
+
+
+.custom-floating-label input {
+  line-height: 1.5;
+  padding: 12px 12px 12px 20px;
+  height: 50px;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.dropdown-menu {
+  z-index: 1050 !important; /* higher than table rows */
+  position: absolute;
+}
+.table-responsive, .ant-table-body, .table {
+  overflow: visible !important;
+}

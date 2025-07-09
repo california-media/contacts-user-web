@@ -79,6 +79,7 @@ const Contacts = () => {
   const [openModal, setOpenModal] = useState(false);
   const [openModal2, setOpenModal2] = useState(false);
   const [openModal3, setOpenModal3] = useState(false);
+  const [selectedContactIds,setSelectedContactIds] = useState([])
   const [removedTags, setRemovedTags] = useState([]);
   const [show, setShow] = useState(false);
   const [show2, setShow2] = useState(false);
@@ -102,6 +103,8 @@ const Contacts = () => {
   const [statusLead, setStatusLead] = useState({});
   const [deleteModalText, setDeleteModalText] = useState("");
   const [searchEmployeeInFilter, setSearchEmployeeInFilter] = useState("");
+  const [bulkActions, setBulkActions] = useState(false);
+
   const [selectedOption, setSelectedOption] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
   // const [selectedContact, setSelectedContact] = useState(null);
@@ -160,9 +163,18 @@ const Contacts = () => {
     setActiveCell({ rowKey, columnKey });
   };
 
-  const handleDeleteContact = () => {
-    dispatch(deleteContact(selectedContact.contact_id));
-  };
+ const handleDeleteContact = async () => {
+  try {
+    await dispatch(deleteContact(selectedContactIds)).unwrap();
+
+
+    setSelectedContactIds([]);
+    setBulkActions(false);
+  } catch (error) {
+    console.error("Failed to delete contacts:", error);
+
+  }
+};
   const handleClose = () => {
     setActiveCell(null);
   };
@@ -172,6 +184,15 @@ const Contacts = () => {
       ...selectedTags,
       { value: inputValue, label: `🏷️ ${inputValue}`, emoji: "🏷️" },
     ]);
+  };
+  const handleRowSelectionChange = (selectedRowKeys, selectedRows) => {
+    console.log(selectedRowKeys, selectedRows, "selected rows key keys");
+setSelectedContactIds(selectedRowKeys)
+    if (selectedRowKeys.length > 0) {
+      setBulkActions(true);
+    } else {
+      setBulkActions(false);
+    }
   };
   useEffect(() => {
     const tagsArrayOfObject = tags.map((tag) => {
@@ -255,47 +276,47 @@ const Contacts = () => {
         "twitter",
         "linkedin",
         "facebook",
-        "telegram"
+        "telegram",
       ],
       [
-  "John",
-  "Doe",
-  "TechCorp",
-  "Software Engineer",
-  "john.doe@example.com",
-  "1234567890",
-  "https://instagram.com/johndoe",
-  "https://twitter.com/johndoe",
-  "https://linkedin.com/in/johndoe",
-  "https://facebook.com/johndoe",
-  "https://t.me/johndoe"
-],
+        "John",
+        "Doe",
+        "TechCorp",
+        "Software Engineer",
+        "john.doe@example.com",
+        "1234567890",
+        "https://instagram.com/johndoe",
+        "https://twitter.com/johndoe",
+        "https://linkedin.com/in/johndoe",
+        "https://facebook.com/johndoe",
+        "https://t.me/johndoe",
+      ],
       [
-  "Jane",
-  "Smith",
-  "DesignHub",
-  "Product Designer",
-  "jane.smith@example.com",
-  "9876543210",
-  "https://instagram.com/janesmith",
-  "https://twitter.com/janesmith",
-  "https://linkedin.com/in/janesmith",
-  "https://facebook.com/janesmith",
-  "https://t.me/janesmith"
-],
+        "Jane",
+        "Smith",
+        "DesignHub",
+        "Product Designer",
+        "jane.smith@example.com",
+        "9876543210",
+        "https://instagram.com/janesmith",
+        "https://twitter.com/janesmith",
+        "https://linkedin.com/in/janesmith",
+        "https://facebook.com/janesmith",
+        "https://t.me/janesmith",
+      ],
       [
-  "Alice",
-  "Johnson",
-  "FinTech Ltd",
-  "Data Analyst",
-  "alice.johnson@example.com",
-  "1122334455",
-  "https://instagram.com/alicejohnson",
-  "https://twitter.com/alicejohnson",
-  "https://linkedin.com/in/alicejohnson",
-  "https://facebook.com/alicejohnson",
-  "https://t.me/alicejohnson"
-]
+        "Alice",
+        "Johnson",
+        "FinTech Ltd",
+        "Data Analyst",
+        "alice.johnson@example.com",
+        "1122334455",
+        "https://instagram.com/alicejohnson",
+        "https://twitter.com/alicejohnson",
+        "https://linkedin.com/in/alicejohnson",
+        "https://facebook.com/alicejohnson",
+        "https://t.me/alicejohnson",
+      ],
     ];
 
     // Convert data to CSV format
@@ -397,30 +418,29 @@ const Contacts = () => {
     );
   };
   const handleFileChange = async (e) => {
-  const file = e.target.files[0];
+    const file = e.target.files[0];
 
-  if (!file) return;
+    if (!file) return;
 
-  const reader = new FileReader();
+    const reader = new FileReader();
 
-  reader.onload = async (event) => {
-    const data = new Uint8Array(event.target.result);
-    const workbook = XLSX.read(data, { type: "array" });
+    reader.onload = async (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
 
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
 
-    const contacts = XLSX.utils.sheet_to_json(sheet); 
+      const contacts = XLSX.utils.sheet_to_json(sheet);
 
+      const response = await dispatch(saveBulkContacts(contacts)).unwrap();
+      if (response.status == "success") {
+        setImportModal(false);
+      }
+    };
 
- const response = await dispatch(saveBulkContacts(contacts)).unwrap()
-    if(response.status=="success"){
-      setImportModal(false)
-    }
+    reader.readAsArrayBuffer(file);
   };
-
-  reader.readAsArrayBuffer(file);
-};
   const Step3 = () => {
     const { handleStep, previousStep, nextStep } = useWizard();
 
@@ -442,7 +462,11 @@ const Contacts = () => {
                   <div className="profile-upload-content">
                     <label className="profile-upload-btn">
                       <i className="ti ti-file-broken" /> Upload File
-                      <input type="file" className="input-img" onChange={handleFileChange} />
+                      <input
+                        type="file"
+                        className="input-img"
+                        onChange={handleFileChange}
+                      />
                     </label>
                     <p>Only Excel file</p>
                   </div>
@@ -709,6 +733,7 @@ const Contacts = () => {
       dataIndex: "firstname",
       key: "firstname",
       width: 300,
+    
       fixed: "left",
       onCell: () => ({
         className: "hoverable-cell",
@@ -716,7 +741,7 @@ const Contacts = () => {
 
       render: (text, record) => {
         return (
-          <div className="cell-content justify-content-between">
+          <div className="cell-content justify-content-between" >
             {/* Lead name */}
 
             <Link
@@ -796,6 +821,7 @@ const Contacts = () => {
                   data-bs-target={`#delete_${deleteModalText}`}
                   onClick={() => {
                     setDeleteModalText("contact");
+                    setSelectedContactIds([record.contact_id])
                   }}
                 >
                   <i className="ti ti-trash text-danger"></i> Delete
@@ -1153,6 +1179,7 @@ const Contacts = () => {
           : [...prevStatus, tag] // Add status if checked
     );
   };
+  console.log(selectedContactGroup, "tags selected");
 
   // const exportPDF = () => {
   //   const doc = new jsPDF();
@@ -1192,87 +1219,86 @@ const Contacts = () => {
   //   // Save the PDF
   //   doc.save("Contacts.pdf");
   // };
-const exportPDF = () => {
-  const doc = new jsPDF();
+  const exportPDF = () => {
+    const doc = new jsPDF();
 
-  // Filter columns, exclude "Action" and "Groups"
-  const filteredColumns = columns.filter(
-    (col) =>
-      columnVisibility[col.title] &&
-      col.title !== "Action" &&
-      col.title !== "Groups"
-  );
+    // Filter columns, exclude "Action" and "Groups"
+    const filteredColumns = columns.filter(
+      (col) =>
+        columnVisibility[col.title] &&
+        col.title !== "Action" &&
+        col.title !== "Groups"
+    );
 
-  // Rename the 'First Name' column to 'Name' (optional)
-  const headers = filteredColumns.map((col) =>
-    col.dataIndex === "firstname" ? "Name" : col.title
-  );
+    // Rename the 'First Name' column to 'Name' (optional)
+    const headers = filteredColumns.map((col) =>
+      col.dataIndex === "firstname" ? "Name" : col.title
+    );
 
-  // Prepare the data with custom logic for fullname
-  const data = filteredData.map((row) =>
-    filteredColumns.map((col) => {
-      if (col.dataIndex === "firstname") {
-        return `${row.firstname || ""} ${row.lastname || ""}`.trim(); // combine names
-      }
-      return row[col.dataIndex] || "";
-    })
-  );
+    // Prepare the data with custom logic for fullname
+    const data = filteredData.map((row) =>
+      filteredColumns.map((col) => {
+        if (col.dataIndex === "firstname") {
+          return `${row.firstname || ""} ${row.lastname || ""}`.trim(); // combine names
+        }
+        return row[col.dataIndex] || "";
+      })
+    );
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const titleText = "Contacts";
-  const titleWidth = doc.getTextWidth(titleText);
-  const titleX = (pageWidth - titleWidth) / 2;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const titleText = "Contacts";
+    const titleWidth = doc.getTextWidth(titleText);
+    const titleX = (pageWidth - titleWidth) / 2;
 
-  doc.setFontSize(15);
-  doc.text(titleText, titleX, 20);
+    doc.setFontSize(15);
+    doc.text(titleText, titleX, 20);
 
-  doc.setFontSize(10);
-  doc.text(`Exported on: ${currentDate} at ${currentTime}`, 15, 35);
+    doc.setFontSize(10);
+    doc.text(`Exported on: ${currentDate} at ${currentTime}`, 15, 35);
 
-  autoTable(doc, {
-    startY: 40,
-    head: [headers],
-    body: data,
-  });
+    autoTable(doc, {
+      startY: 40,
+      head: [headers],
+      body: data,
+    });
 
-  doc.save("Contacts.pdf");
-};
+    doc.save("Contacts.pdf");
+  };
 
-const exportExcel = () => {
-  const wb = utils.book_new();
+  const exportExcel = () => {
+    const wb = utils.book_new();
 
-  // Filter out hidden or excluded columns
-  const filteredColumns = columns.filter(
-    (col) =>
-      columnVisibility[col.title] &&
-      col.title !== "Action" &&
-      col.title !== "Groups"
-  );
+    // Filter out hidden or excluded columns
+    const filteredColumns = columns.filter(
+      (col) =>
+        columnVisibility[col.title] &&
+        col.title !== "Action" &&
+        col.title !== "Groups"
+    );
 
-  // Headers: rename "First Name" column title to "Name" if needed
-  const headers = filteredColumns.map((col) =>
-    col.dataIndex === "firstname" ? "Name" : col.title
-  );
+    // Headers: rename "First Name" column title to "Name" if needed
+    const headers = filteredColumns.map((col) =>
+      col.dataIndex === "firstname" ? "Name" : col.title
+    );
 
-  // Data rows: merge first + last name in the "firstname" column
-  const dataRows = filteredData.map((row) =>
-    filteredColumns.map((col) => {
-      if (col.dataIndex === "firstname") {
-        return `${row.firstname || ""} ${row.lastname || ""}`.trim();
-      }
-      return row[col.dataIndex] || "";
-    })
-  );
+    // Data rows: merge first + last name in the "firstname" column
+    const dataRows = filteredData.map((row) =>
+      filteredColumns.map((col) => {
+        if (col.dataIndex === "firstname") {
+          return `${row.firstname || ""} ${row.lastname || ""}`.trim();
+        }
+        return row[col.dataIndex] || "";
+      })
+    );
 
-  // Combine headers and rows
-  const wsData = [headers, ...dataRows];
+    // Combine headers and rows
+    const wsData = [headers, ...dataRows];
 
-  // Convert to sheet and write
-  const ws = utils.aoa_to_sheet(wsData);
-  utils.book_append_sheet(wb, ws, "Calls");
-  writeFile(wb, "Contacts.xlsx");
-};
-
+    // Convert to sheet and write
+    const ws = utils.aoa_to_sheet(wsData);
+    utils.book_append_sheet(wb, ws, "Calls");
+    writeFile(wb, "Contacts.xlsx");
+  };
 
   // const exportExcel = () => {
   //   const wb = utils.book_new();
@@ -1330,72 +1356,87 @@ const exportExcel = () => {
                             </div>
                           </div>
 
-                          <div className="d-flex flex-wrap gap-3">
-                            <div className="icon-form mb-md-0">
-                              <span className="form-icon">
-                                <i className="ti ti-search" />
-                              </span>
-                              <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Search Contacts"
-                                onChange={(text) =>
-                                  setSearchQuery(text.target.value)
-                                }
-                              />
-                            </div>
-                            <div className="form-sorts dropdown">
+                          {bulkActions ? (
+                            <div>
                               <Link
+                                className="btn btn-danger"
                                 to="#"
-                                data-bs-toggle="dropdown"
-                                data-bs-auto-close="outside"
+                                data-bs-toggle="modal"
+                                data-bs-target={`#delete_${deleteModalText}`}
+                                onClick={() => {
+                                  setDeleteModalText("contacts");
+                                }}
                               >
-                                <i className="ti ti-filter-share" />
-                                Filter
+                                <i className="ti ti-trash"></i> Delete
                               </Link>
-                              <div className="filter-dropdown-menu dropdown-menu  dropdown-menu-md-end p-3">
-                                <div className="filter-set-view">
-                                  <div className="filter-set-head">
-                                    <h4>
-                                      <i className="ti ti-filter-share" />
-                                      Filter
-                                    </h4>
-                                  </div>
-                                  <div
-                                    className="accordion"
-                                    id="accordionExample"
-                                  >
-                                    <div className="filter-set-content">
-                                      <div className="filter-set-content-head">
-                                        <Link
-                                          to="#"
-                                          className="collapsed"
-                                          data-bs-toggle="collapse"
-                                          data-bs-target="#Status"
-                                          aria-expanded="false"
-                                          aria-controls="Status"
+                            </div>
+                          ) : (
+                            <div className="d-flex flex-wrap gap-3">
+                              <div className="icon-form mb-md-0">
+                                <span className="form-icon">
+                                  <i className="ti ti-search" />
+                                </span>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="Search Contacts"
+                                  onChange={(text) =>
+                                    setSearchQuery(text.target.value)
+                                  }
+                                />
+                              </div>
+                              <div className="form-sorts dropdown">
+                                <Link
+                                  to="#"
+                                  data-bs-toggle="dropdown"
+                                  data-bs-auto-close="outside"
+                                >
+                                  <i className="ti ti-filter-share" />
+                                  Filter
+                                </Link>
+                                <div className="filter-dropdown-menu dropdown-menu  dropdown-menu-md-end p-3">
+                                  <div className="filter-set-view">
+                                    <div className="filter-set-head">
+                                      <h4>
+                                        <i className="ti ti-filter-share" />
+                                        Filter
+                                      </h4>
+                                    </div>
+                                    <div
+                                      className="accordion"
+                                      id="accordionExample"
+                                    >
+                                      <div className="filter-set-content">
+                                        <div className="filter-set-content-head">
+                                          <Link
+                                            to="#"
+                                            className="collapsed"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#Status"
+                                            aria-expanded="false"
+                                            aria-controls="Status"
+                                          >
+                                            Groups ({tags.length})
+                                          </Link>
+                                        </div>
+                                        <div
+                                          className="filter-set-contents accordion-collapse collapse"
+                                          id="Status"
+                                          data-bs-parent="#accordionExample"
                                         >
-                                          Groups ({tags.length})
-                                        </Link>
-                                      </div>
-                                      <div
-                                        className="filter-set-contents accordion-collapse collapse"
-                                        id="Status"
-                                        data-bs-parent="#accordionExample"
-                                      >
-                                        <div className="filter-content-list">
-                                          <ul>
-                                            {tags.map((tag, index) => {
-                                              console.log(
-                                                tag,
-                                                "tagkjdgfhdsgfjh"
-                                              );
+                                          <div className="filter-content-list">
+                                            <ul>
+                                              {tags.map((tag, index) => {
+                                                console.log(
+                                                  tag,
+                                                  "tagkjdgfhdsgfjh"
+                                                );
 
-                                              return (
-                                                <li key={index}>
-                                                  <div className="filter-checks">
-                                                    <label className="checkboxs">
-                                                      {/* <input
+                                                return (
+                                                  <li key={index}>
+                                                    <div className="filter-checks">
+                                                      <label className="checkboxs">
+                                                        {/* <input
                                                           type="checkbox"
                                                           checked={selectedLeadStatus.includes(
                                                             leadStatus.value.toLowerCase()
@@ -1406,139 +1447,139 @@ const exportExcel = () => {
                                                             )
                                                           } // Call filterLeadStatus on change
                                                         /> */}
-                                                      <input
-                                                        type="checkbox"
-                                                        checked={selectedContactGroup.includes(
-                                                          tag.tag.toLowerCase()
-                                                        )} // Check if status is selected
-                                                        onChange={() =>
-                                                          filterContactGroup(
+                                                        <input
+                                                          type="checkbox"
+                                                          checked={selectedContactGroup.includes(
                                                             tag.tag.toLowerCase()
-                                                          )
-                                                        } // Call filterLeadStatus on change
-                                                      />
-                                                      <span className="checkmarks" />
-                                                      {tag.tag}
-                                                    </label>
-                                                  </div>
-                                                </li>
-                                              );
-                                            })}
-                                          </ul>
+                                                          )} // Check if status is selected
+                                                          onChange={() =>
+                                                            filterContactGroup(
+                                                              tag.tag.toLowerCase()
+                                                            )
+                                                          } // Call filterLeadStatus on change
+                                                        />
+                                                        <span className="checkmarks" />
+                                                        {tag.tag}
+                                                      </label>
+                                                    </div>
+                                                  </li>
+                                                );
+                                              })}
+                                            </ul>
+                                          </div>
                                         </div>
-                                      </div>
-                                      <div className="filter-set-content-head mt-2">
-                                        <Link
-                                          to="#"
-                                          className="collapsed"
-                                          data-bs-toggle="collapse"
-                                          data-bs-target="#Favourite"
-                                          aria-expanded="false"
-                                          aria-controls="Favourite"
+                                        <div className="filter-set-content-head mt-2">
+                                          <Link
+                                            to="#"
+                                            className="collapsed"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#Favourite"
+                                            aria-expanded="false"
+                                            aria-controls="Favourite"
+                                          >
+                                            Favourite
+                                          </Link>
+                                        </div>
+                                        <div
+                                          className="filter-set-contents accordion-collapse collapse"
+                                          id="Favourite"
+                                          data-bs-parent="#accordionExample"
                                         >
-                                          Favourite
-                                        </Link>
-                                      </div>
-                                      <div
-                                        className="filter-set-contents accordion-collapse collapse"
-                                        id="Favourite"
-                                        data-bs-parent="#accordionExample"
-                                      >
-                                        <div className="filter-content-list">
-                                          <ul className="mb-0">
-                                            <li>
-                                              <div className="filter-checks">
-                                                <label className="checkboxs">
-                                                  <input
-                                                    type="checkbox"
-                                                    checked={showFavourites}
-                                                    onChange={
-                                                      handleFavouriteToggle
-                                                    }
-                                                  />
-                                                  <span className="checkmarks" />
-                                                  Show Favourite
-                                                </label>
-                                              </div>
-                                            </li>
-                                          </ul>
+                                          <div className="filter-content-list">
+                                            <ul className="mb-0">
+                                              <li>
+                                                <div className="filter-checks">
+                                                  <label className="checkboxs">
+                                                    <input
+                                                      type="checkbox"
+                                                      checked={showFavourites}
+                                                      onChange={
+                                                        handleFavouriteToggle
+                                                      }
+                                                    />
+                                                    <span className="checkmarks" />
+                                                    Show Favourite
+                                                  </label>
+                                                </div>
+                                              </li>
+                                            </ul>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  <div className="filter-reset-btns">
-                                    <div className="row">
-                                      <div className="col-6"></div>
-                                      <div className="col-6">
-                                        <Link
-                                          to="#"
-                                          className="btn btn-primary"
-                                          onClick={resetFilters}
-                                        >
-                                          Reset
-                                        </Link>
+                                    <div className="filter-reset-btns">
+                                      <div className="row">
+                                        <div className="col-6"></div>
+                                        <div className="col-6">
+                                          <Link
+                                            to="#"
+                                            className="btn btn-primary"
+                                            onClick={resetFilters}
+                                          >
+                                            Reset
+                                          </Link>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="dropdown">
-                              <Link
-                                to="#"
-                                className="btn bg-soft-purple text-purple"
-                                data-bs-toggle="dropdown"
-                                data-bs-auto-close="outside"
-                              >
-                                <i className="ti ti-columns-3 me-2" />
-                                Manage Columns
-                              </Link>
-                              <div className="dropdown-menu  dropdown-menu-md-end dropdown-md p-3">
-                                <h4 className="mb-2 fw-semibold">
-                                  Manage columns
-                                </h4>
-                                <div className="border-top pt-3">
-                                  {columns.map((column, index) => {
-                                    if (
-                                      column.title === "Action" ||
-                                      column.title === ""
-                                    ) {
-                                      return;
-                                    }
-                                    return (
-                                      <div
-                                        className="d-flex align-items-center justify-content-between mb-3"
-                                        key={index}
-                                      >
-                                        <p className="mb-0 d-flex align-items-center">
-                                          <i className="ti ti-grip-vertical me-2" />
-                                          {column.title}
-                                        </p>
-                                        <div className="status-toggle">
-                                          <input
-                                            type="checkbox"
-                                            id={column.title}
-                                            className="check"
-                                            defaultChecked={true}
-                                            onClick={() =>
-                                              handleToggleColumnVisibility(
-                                                column.title
-                                              )
-                                            }
-                                          />
-                                          <label
-                                            htmlFor={column.title}
-                                            className="checktoggle"
-                                          />
+                              <div className="dropdown">
+                                <Link
+                                  to="#"
+                                  className="btn bg-soft-purple text-purple"
+                                  data-bs-toggle="dropdown"
+                                  data-bs-auto-close="outside"
+                                >
+                                  <i className="ti ti-columns-3 me-2" />
+                                  Manage Columns
+                                </Link>
+                                <div className="dropdown-menu  dropdown-menu-md-end dropdown-md p-3">
+                                  <h4 className="mb-2 fw-semibold">
+                                    Manage columns
+                                  </h4>
+                                  <div className="border-top pt-3">
+                                    {columns.map((column, index) => {
+                                      if (
+                                        column.title === "Action" ||
+                                        column.title === ""
+                                      ) {
+                                        return;
+                                      }
+                                      return (
+                                        <div
+                                          className="d-flex align-items-center justify-content-between mb-3"
+                                          key={index}
+                                        >
+                                          <p className="mb-0 d-flex align-items-center">
+                                            <i className="ti ti-grip-vertical me-2" />
+                                            {column.title}
+                                          </p>
+                                          <div className="status-toggle">
+                                            <input
+                                              type="checkbox"
+                                              id={column.title}
+                                              className="check"
+                                              defaultChecked={true}
+                                              onClick={() =>
+                                                handleToggleColumnVisibility(
+                                                  column.title
+                                                )
+                                              }
+                                            />
+                                            <label
+                                              htmlFor={column.title}
+                                              className="checktoggle"
+                                            />
+                                          </div>
                                         </div>
-                                      </div>
-                                    );
-                                  })}
+                                      );
+                                    })}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            {/* <div className="d-flex gap-3"> */}
+                              {/* <div className="d-flex gap-3"> */}
                               <div className="dropdown">
                                 <Link
                                   to="#"
@@ -1604,8 +1645,9 @@ const exportExcel = () => {
                                   <i className="ti ti-grid-dots" />
                                 </Link>
                               </div> */}
-                            {/* </div> */}
-                          </div>
+                              {/* </div> */}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="col-sm-8">
@@ -1640,9 +1682,11 @@ const exportExcel = () => {
                       <Table
                         dataSource={filteredData}
                         columns={visibleColumns}
-                        rowKey={(record) => record.key}
+                        // rowKey={(record) => record.key}
+                        rowKey={(record) => record.contact_id}
                         loading={isLoading}
                         totalCount={totalContacts}
+                        onRowSelectionChange={handleRowSelectionChange}
                         onPageChange={
                           showFavourites
                             ? handleFavouritePageChange

@@ -33,17 +33,18 @@ const Calendar = () => {
     [weekendsVisible, setweekendsVisible] = useState(true),
     [currentEvents, setscurrentEvents] = useState([]);
   const [defaultEvents, setDefaultEvents] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
   const userProfile = useSelector((state) => state.profile);
   const events = useSelector((state) => state.event);
   const navigate = useNavigate();
-  console.log(defaultEvents, "events slice in calendar");
+  console.log(selectedOption, "selectedOption");
   const dispatch = useDispatch();
   const [meetingFormData, setMeetingFormData] = useState({
     meeting_id: "",
     meetingDescription: "",
     meetingType: "",
     meetingLink: "",
-    meetingTitle:"",
+    meetingTitle: "",
     meetingLocation: "",
     meetingStartDate: dayjs(),
     meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
@@ -56,53 +57,50 @@ const Calendar = () => {
     dispatch(profileEvents());
   }, []);
 
+  const meetingType = [
+    { value: "online", label: "Online" },
+    { value: "offline", label: "Offline" },
+  ];
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        const response = await api.get("/getAllContact");
+        console.log(response.data, "response from all contacts fetched");
 
-const meetingType = [
-  { value: "online", label: "Online" },
-  { value: "offline", label: "Offline" },
-];
-useEffect(async()=>{
-try {
-  const response = await api.get("/getAllContact")
-  // console.log(response.data,"response from all contacts fetched");
-  
-  setAllContacts(response.data.data)
+        const transformed = response.data.data.map((contact) => {
+          const name = `${contact.firstname || ""} ${
+            contact.lastname || ""
+          }`.trim();
+          const email = contact.emailaddresses?.[0] || "";
+          return {
+            value: contact.contact_id,
+            label: email ? `${name} (${email})` : name,
+          };
+        });
 
-} catch (error) {
-  console.log(error.response.data.data);
-  
-}
+        setAllContacts(transformed);
+      } catch (error) {
+        console.log(error.response?.data?.data || "Error fetching contacts");
+      }
+    };
 
-},[])
- const handleMeetingSubmit = async () => {
-    // if (!userProfile.googleConnected) {
-    //   return dispatch(
-    //     showToast({
-    //       message: "Please connect the Google account first",
-    //       variant: "danger",
-    //     })
-    //   );
-    // }
+    fetchContact();
+  }, []);
 
+  const handleMeetingSubmit = async () => {
     const formDataObj = new FormData();
-    // let finalMeetLink = "";
 
-    // if (checkMeetingLink && meetingFormData.meetingLink === "") {
-    //   try {
-    //     console.log("generating link");
+    console.log(meetingFormData, "jghjgjhgjg");
 
-    //     finalMeetLink = await generateGoogleMeetingLink();
-    //   } catch (err) {
-    //     console.error("Failed to generate meeting link:", err);
-    //     return;
-    //   }
-    // }
-console.log(meetingFormData,"jghjgjhgjg");
-
-    // formDataObj.append("contact_id", selectedContact.contact_id);
+    formDataObj.append("contact_id", selectedOption.value);
 
     formDataObj.append("meeting_id", meetingFormData.meeting_id);
-    formDataObj.append("meetingType", meetingFormData.meetingType===""?"offline":meetingFormData.meetingType);
+    formDataObj.append(
+      "meetingType",
+      meetingFormData.meetingType === ""
+        ? "offline"
+        : meetingFormData.meetingType
+    );
     formDataObj.append("meetingLocation", meetingFormData.meetingLocation);
     formDataObj.append(
       "meetingDescription",
@@ -138,10 +136,7 @@ console.log(meetingFormData,"jghjgjhgjg");
     });
   };
 
-
   function getColor(color) {
-    // Map your color hex to a class, or return a default
-    // Example: if you use only a few colors, map them:
     switch (color) {
       case "#2196F3":
         return "info";
@@ -220,7 +215,10 @@ console.log(meetingFormData,"jghjgjhgjg");
       [name]: value,
     });
   };
-
+  const handleChange = (option) => {
+    console.log("Selected Contact:", option);
+    setSelectedOption(option);
+  };
   useEffect(() => {
     let elements = Array.from(
       document.getElementsByClassName("react-datepicker-wrapper")
@@ -274,12 +272,7 @@ console.log(meetingFormData,"jghjgjhgjg");
   ];
 
   const defaultValue = options1[0];
-  // const calendarEvents = events.map((event) => ({
-  //   title: event.title,
-  //   start: event.start, // already in ISO format
-  //   end: event.end || event.start, // fallback if no end
-  //   className: "bg-primary", // or dynamic className based on event.type or color
-  // }));
+
   const calendarEvents = events.map((event) => ({
     title: event.title,
     start: event.start,
@@ -320,35 +313,6 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
           </div>
           <div className="row">
-            {/* <div className="col-12">
-              <h4 className="card-title">Drag &amp; Drop Event</h4>
-              <div id="calendar-events" className="mb-3">
-                <div className="calendar-events" data-class="bg-info">
-                  <i className="fas fa-circle text-info" /> My Event One
-                </div>
-                <div className="calendar-events" data-class="bg-success">
-                  <i className="fas fa-circle text-success" /> My Event Two
-                </div>
-                <div className="calendar-events" data-class="bg-danger">
-                  <i className="fas fa-circle text-danger" /> My Event Three
-                </div>
-                <div className="calendar-events" data-class="bg-warning">
-                  <i className="fas fa-circle text-warning" /> My Event Four
-                </div>
-              </div>
-              <div className="checkbox  mb-3">
-                <input id="drop-remove" className="me-1" type="checkbox" />
-                <label htmlFor="drop-remove">Remove after drop</label>
-              </div>
-              <Link
-                to="#"
-                data-bs-toggle="modal"
-                data-bs-target="#add_new_event"
-                className="btn mb-3 btn-primary btn-block w-100"
-              >
-                <i className="fas fa-plus" /> Add Category
-              </Link>
-            </div> */}
             <div className="col-12">
               <div className="card bg-white">
                 <div className="card-body">
@@ -455,9 +419,7 @@ console.log(meetingFormData,"jghjgjhgjg");
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title">
-               Add New Meeting
-              </h5>
+              <h5 className="modal-title">Add New Meeting</h5>
               <button
                 type="button"
                 className="btn-close position-static"
@@ -499,19 +461,26 @@ console.log(meetingFormData,"jghjgjhgjg");
                   />
                 </div>
 
-
-<Select
-                    value={""}
+                <div className="mb-3">
+                  <label className="col-form-label">
+                    Select Contact <span className="text-danger"> *</span>
+                  </label>
+                  <Select
+                    value={selectedOption}
                     className="select2"
                     options={allContacts}
                     name="allContacts"
-                    onChange={(option) =>
-                      handleMeetingInputChange("meetingType", option.value)
-                    }
+                    onChange={handleChange}
                     placeholder="Choose"
                     classNamePrefix="react-select"
+                    styles={{
+                      menuPortal: (base) => ({
+                        ...base,
+                        zIndex: 9999,
+                      }),
+                    }}
                   />
-
+                </div>
 
                 <div className="row">
                   <div className="col-md-6 mb-3">
@@ -616,18 +585,6 @@ console.log(meetingFormData,"jghjgjhgjg");
                 {meetingFormData?.meetingType === "online" &&
                   meetingFormData?.meetingLink == "" && (
                     <div>
-                      {/* <div className="form-check form-switch">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          role="switch"
-                          checked={checkMeetingLink}
-                          onChange={() =>
-                            setCheckMeetingLink(!checkMeetingLink)
-                          }
-                        />
-                        <div>Generate Meeting Link</div>
-                      </div> */}
                       {!userProfile.accounts?.some(
                         (acc) => acc.type === "google" && acc.isConnected
                       ) && (

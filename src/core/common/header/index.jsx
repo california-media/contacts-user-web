@@ -106,7 +106,7 @@ const Header = () => {
             />
           </Link>
           <Link to={route.dashboard} className="logo-small">
-            <ImageWithBasePath src="assets/img/logo-small.png" alt="Logo" />
+            <ImageWithBasePath src="assets/img/favicon.png" alt="Logo" />
           </Link>
           {/* <Link id="toggle_btn" to="#" onClick={toggleMiniSidebar}>
             <i className="ti ti-arrow-bar-to-left" />

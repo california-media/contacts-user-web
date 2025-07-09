@@ -217,7 +217,7 @@ console.log(emailProvider,"emailProvider");
               </div>
             </div>
             <div className="mb-3">
-              <label className="col-form-label ms-3">Insert Tags</label>
+              <label className="col-form-label ms-3">Attributes</label>
               <select
                 className="form-select"
                 aria-label="Default select example"
@@ -226,7 +226,7 @@ console.log(emailProvider,"emailProvider");
                   e.target.selectedIndex = 0;
                 }}
               >
-                <option value="">Insert Tag</option>
+                <option value="">Insert Field</option>
                 <option value="{{firstName}}">First Name</option>
                 <option value="{{lastName}}">Last Name</option>
                 <option value="{{designation}}">Designation</option>

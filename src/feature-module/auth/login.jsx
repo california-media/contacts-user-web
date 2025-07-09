@@ -6,6 +6,11 @@ import api from "../../core/axios/axiosInstance";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import PhoneInput from "react-phone-input-2";
 import Slider from "react-slick";
+import { Player } from "@lottiefiles/react-lottie-player";
+
+import loginAnimation1 from "../../style/animations/loginAnimation1.json";
+import loginAnimation2 from "../../style/animations/loginAnimation2.json";
+import loginAnimation3 from "../../style/animations/loginAnimation3.json";
 
 const Login = () => {
   const sliderSettings = {
@@ -136,433 +141,372 @@ const Login = () => {
 
   return (
     <>
-      {/* <div className="account-content">
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-md-12">
-              <div className="d-flex flex-wrap w-100 vh-100 overflow-hidden account-bg-01">
-                <div className="d-flex align-items-center justify-content-center flex-wrap vh-100 w-100 overflow-auto p-4 bg-backdrop">
-                  <form className="flex-fill" onSubmit={handleLogin}>
-                    <div className="mx-auto mw-450">
-                      <div className="text-center mb-4">
-                        <ImageWithBasePath
-                          src="assets/img/logo.svg"
-                          className="img-fluid"
-                          alt="Logo"
-                        />
-                      </div>
-                      <div className="d-flex justify-content-center gap-3 mb-3">
-                        <button
-                          type="button"
-                          className={`btn ${
-                            tab === "email"
-                              ? "btn-primary"
-                              : "btn-outline-primary"
-                          }`}
-                          onClick={() => {
+      <div className="container-fluid position-relative">
+        <div className="row p-0">
+          <div className="col-md-6 px-5 bg-white">
+            <div className="mt-5">
+              <img
+                src="/assets/img/contactsLogoTransparent.png"
+                alt="Logo"
+                height="40"
+                width="150"
+              />
+            </div>
+            <div className="d-flex flex-column justify-content-center align-items-center vh-100">
+              <div
+                className="w-100 position-relative"
+                style={{ maxWidth: "460px" }}
+              >
+                <h6 style={{ color: "grey", fontWeight: 400 }}>
+                  One powerful app to grow your network and manage every
+                  contact.
+                </h6>
+                <h2 className="fw-bold mb-4">Sign in to your account</h2>
+
+                <form onSubmit={handleLogin}>
+                  {/* <div className="d-flex justify-content-end gap-3 mb-4">
+                    <button
+                      type="button"
+                      className={`btn ${tab === "email" ? "" : ""}
+                          `}
+                      style={
+                        tab === "email"
+                          ? { backgroundColor: "#4f7df5", color: "#fff" }
+                          : { border: "1px solid #4f7df5" }
+                      }
+                      onClick={() => {
+                        setTab("email");
+                        setPhone("");
+                      }}
+                    >
+                      Email
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`btn ${tab === "phone" ? "" : ""}`}
+                      style={
+                        tab === "phone"
+                          ? { backgroundColor: "#4f7df5", color: "#fff" }
+                          : { border: "1px solid #4f7df5" }
+                      }
+                      onClick={() => {
+                        setTab("phone");
+                        setEmail("");
+                      }}
+                    >
+                      Phone
+                    </button>
+                  </div> */}
+                  {/* <div className="d-flex justify-content-end mb-4">
+                    <label
+                      style={{
+                        position: "relative",
+                        display: "inline-block",
+                        width: "100px",
+                        height: "40px",
+                        backgroundColor: "#ccc",
+                        borderRadius: "34px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={tab === "email"}
+                        onChange={(e) => {
+                          if (e.target.checked) {
                             setTab("email");
                             setPhone("");
-                          }}
-                        >
-                          Login with Email
-                        </button>
-                        <button
-                          type="button"
-                          className={`btn ${
-                            tab === "phone"
-                              ? "btn-primary"
-                              : "btn-outline-primary"
-                          }`}
-                          onClick={() => {
+                          } else {
                             setTab("phone");
                             setEmail("");
-                          }}
-                        >
-                          Login with Phone
-                        </button>
-                      </div>
-                      {tab === "email" && (
-                        <div className="mb-3">
-                          <div className="position-relative">
-                            <span className="input-icon-addon">
-                              <i className="ti ti-mail"></i>
-                            </span>
-                            <input
-                              type="email"
-                              className="form-control"
-                              placeholder="Enter Email Address"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              required
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {tab === "phone" && (
-                        <div className="mb-3">
-                          <div className="position-relative">
-                            <span className="input-icon-addon">
-                              <i className="ti ti-phone"></i>
-                            </span>
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={phone}
-                              onChange={(e) => setPhone(e.target.value)}
-                              required
-                              placeholder="Enter phone number"
-                            />
-
-                            <PhoneInput
-                              country={"ae"}
-                              value={phone}
-                              onChange={(value) => setPhone("+" + value)}
-                              enableSearch
-                              inputProps={{ name: "phone" }}
-                              inputStyle={{ background: "#e9f0fd" }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                      <div className="mb-3">
-                        <label>Password</label>
-                        <div className="pass-group">
-                          <input
-                            type={isPasswordVisible ? "text" : "password"}
-                            className="form-control"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                          />
-                          <span
-                            className={`ti toggle-password ${
-                              isPasswordVisible ? "ti-eye" : "ti-eye-off"
-                            }`}
-                            onClick={togglePasswordVisibility}
-                          ></span>
-                        </div>
-                      </div>
-                      {message && (
-                        <div className="fw-medium mb-3">
-                          {message?.toLowerCase().includes("verify") ? (
-                            canResend ? (
-                              <>
-                                {message}{" "}
-                                <span
-                                  onClick={handleResendOTP}
-                                  style={{
-                                    cursor: "pointer",
-                                    color: "#1c3c8c",
-                                  }}
-                                  className="p-0 fw-bold text-decoration-none"
-                                >
-                                  Resend Link
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                {message}{" "}
-                                <span className="text-muted">
-                                  Resend in {timer}s
-                                </span>
-                              </>
-                            )
-                          ) : (
-                            message
-                          )}
-                        </div>
-                      )}
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <div className="form-check d-flex align-items-center">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="rememberMe"
-                            defaultChecked
-                          />
-                          <label
-                            className="form-check-label ms-2"
-                            htmlFor="rememberMe"
-                          >
-                            Remember Me
-                          </label>
-                        </div>
-                        <Link
-                          to={route.leads}
-                          className="text-primary fw-medium link-hover"
-                        >
-                          Forgot Password?
-                        </Link>
-                      </div>
-                      <div className="mb-3">
-                        <button className="btn btn-primary w-100" type="submit">
-                          {isLoading ? (
-                            <span className="spinner-border spinner-border-sm me-2"></span>
-                          ) : (
-                            "Sign In"
-                          )}
-                        </button>
-                      </div>
-                      <div className="mb-3 text-center">
-                        <h6>
-                          New on our platform?
-                          <Link
-                            to={route.register}
-                            className="text-purple ms-1 link-hover"
-                          >
-                            Create an account
-                          </Link>
-                        </h6>
-                      </div>
-                      <div className="form-set-login or-text mb-3 text-center">
-                        <h4>OR</h4>
-                      </div>
-                      <div className="d-flex justify-content-center mb-3">
-                        <GoogleOAuthProvider clientId={clientId}>
-                          <GoogleLogin
-                            onSuccess={handleGoogleLogin}
-                            onError={() => console.log("Google Login Failed")}
-                          />
-                        </GoogleOAuthProvider>
-                      </div>
-                      <div className="d-flex justify-content-center mb-3">
-                        <GoogleOAuthProvider clientId={clientId}>
-                          {isgoogleLoading ? (
-                            <button className="btn btn-primary" disabled>
-                              <span
-                                className="spinner-border spinner-border-sm me-2"
-                                role="status"
-                                aria-hidden="true"
-                              ></span>
-                              Logging in...
-                            </button>
-                          ) : (
-                            <GoogleLogin
-                              onSuccess={handleGoogleLogin}
-                              onError={() => console.log("Google Login Failed")}
-                            />
-                          )}
-                        </GoogleOAuthProvider>
-                      </div>
-                      <div className="text-center">
-                        <p className="fw-medium text-gray">
-                          © 2025 - California Media
-                        </p>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      <div className="position-relative">
-        <div
-          className="mb-4 text-start"
-          style={{
-            position: "absolute",
-            top: "50px",
-            left: "100px",
-            // width: "100px",
-            // height: "100px",
-          }}
-        >
-          <img src="/assets/img/contactsLogoTransparent.png" alt="Logo" height="40" width="150"/>
-        </div>
-        <div className="d-flex vh-100">
-          <div className="col-md-6 d-flex flex-column justify-content-center align-items-center px-5 bg-white">
-            <div
-              className="w-100 position-relative"
-              style={{ maxWidth: "460px" }}
-            >
-              <h6 className="text-muted">
-                One powerful app to grow your network and manage every contact.
-              </h6>
-              <h2 className="fw-bold mb-4">Sign in to your account</h2>
-
-              <form onSubmit={handleLogin}>
-                <div className="d-flex justify-content-center gap-3 mb-4">
-                  <button
-                    type="button"
-                    className={`btn ${
-                      tab === "email" ? "btn-primary" : "btn-outline-primary"
-                    }`}
-                    onClick={() => {
-                      setTab("email");
-                      setPhone("");
-                    }}
-                  >
-                    Login with Email
-                  </button>
-                  <button
-                    type="button"
-                    className={`btn ${
-                      tab === "phone" ? "btn-primary" : "btn-outline-primary"
-                    }`}
-                    onClick={() => {
-                      setTab("phone");
-                      setEmail("");
-                    }}
-                  >
-                    Login with Phone
-                  </button>
-                </div>
-
-                {tab === "email" && (
-                  <div className="custom-floating-label">
-                    <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      name="email"
-                              onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                    <label htmlFor="email">E-mail</label>
-                  </div>
-                )}
-                {tab === "phone" && (
-                  // <div className="custom-floating-label">
-                  //   <input type="email" id="email" name="email" required />
-                  //   <label htmlFor="email">Phone Number</label>
-                  // </div>
-                  <div className="mb-4">
-                    <PhoneInput
-                      country={"ae"}
-                      value={phone}
-                      onChange={(value) => setPhone("+" + value)}
-                      enableSearch
-                      inputProps={{ name: "phone" }}
-                      inputStyle={{ background: "#fff" }}
-                    />
-                  </div>
-                )}
-
-                <div className="pass-group">
-                  <div className="custom-floating-label">
-                    <input
-                      type={isPasswordVisible ? "text" : "password"}
-                      id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      style={{ background: "#fff" }}
-                      required
-                    />
-                    <label htmlFor="password">Password</label>
-                  </div>
-                  <span
-                    className={`ti toggle-password ${
-                      isPasswordVisible ? "ti-eye" : "ti-eye-off"
-                    }`}
-                    onClick={togglePasswordVisibility}
-                  ></span>
-                </div>
-                {message && (
-                  <div className="fw-medium mb-3">
-                    {message?.toLowerCase().includes("verify") ? (
-                      canResend ? (
-                        <>
-                          {message}{" "}
-                          <span
-                            onClick={handleResendOTP}
-                            style={{
-                              cursor: "pointer",
-                              color: "#1c3c8c",
-                            }}
-                            className="p-0 fw-bold text-decoration-none"
-                          >
-                            Resend Link
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          {message}{" "}
-                          <span className="text-muted">Resend in {timer}s</span>
-                        </>
-                      )
-                    ) : (
-                      message
-                    )}
-                  </div>
-                )}
-                <button className="btn btn-primary w-100 mb-4" type="submit">
-                          {isLoading ? (
-                            <span className="spinner-border spinner-border-sm me-2"></span>
-                          ) : (
-                            "Sign In"
-                          )}
-                        </button>
-
-                <div className="text-center my-3 position-relative divider-line">
-                  <span className="bg-white px-2">or</span>
-                </div>
-
-                {/* <button className="btn btn-outline-light border w-100 d-flex align-items-center justify-content-center gap-2">
-                  <img
-                    src="https://developers.google.com/identity/images/g-logo.png"
-                    alt="Google"
-                    style={{ height: 20 }}
-                  />
-                  Continue with Google
-                </button> */}
-                <div className="d-flex justify-content-center mb-3 mt-4">
-                  <GoogleOAuthProvider clientId={clientId}>
-                    {isgoogleLoading ? (
-                      <button className="btn btn-primary" disabled>
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          role="status"
-                          aria-hidden="true"
-                        ></span>
-                        Logging in...
-                      </button>
-                    ) : (
-                      <GoogleLogin
-                        onSuccess={handleGoogleLogin}
-                        onError={() => console.log("Google Login Failed")}
+                          }
+                        }}
+                        style={{ opacity: 0, width: 0, height: 0 }}
                       />
-                    )}
-                  </GoogleOAuthProvider>
-                </div>
-              </form>
-              <div className="text-center mt-4">
-                <small>
-                  Don't have an account? <Link to="/register">Sign Up</Link>
-                </small>
-              </div>
 
-              {/* <p className="text-muted mt-4 small text-center">
-                By joining, you agree to our <a href="#">Terms of Use</a> and{" "}
-                <a href="#">Privacy Policy</a>
-              </p> */}
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          left: tab === "email" ? "16px" : "auto",
+                          right: tab === "email" ? "auto" : "16px",
+                          fontSize: "13px",
+                          fontWeight: "bold",
+                          color: "#000",
+                          zIndex: 2,
+                          transition: "0.3s",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        {tab === "email" ? "Email" : "Phone"}
+                      </span>
+
+                      <span
+                        style={{
+                          position: "absolute",
+                          height: "32px",
+                          width: "32px",
+                          top: "4px",
+                          left: tab === "email" ? "60px" : "7px",
+                          backgroundColor: "#4f7df5",
+                          borderRadius: "50%",
+                          transition: "0.3s",
+                          zIndex: 1,
+                        }}
+                      ></span>
+                    </label>
+                  </div> */}
+
+<div className="d-flex justify-content-end mb-4">
+  <div
+    style={{
+      display: "flex",
+      width: "200px",
+      borderRadius: "30px",
+      backgroundColor: "#e0e0e0",
+      position: "relative",
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={tab === "email"}
+      onChange={(e) => {
+        if (e.target.checked) {
+          setTab("email");
+          setPhone("");
+        } else {
+          setTab("phone");
+          setEmail("");
+        }
+      }}
+      style={{ opacity: 0, width: 0, height: 0 }}
+    />
+
+    {/* Background slider */}
+    <div
+      style={{
+        position: "absolute",
+        top: "2px",
+        bottom: "2px",
+        left: tab === "email" ? "2px" : "98px",
+        width: "100px",
+        borderRadius: "28px",
+        backgroundColor: "#4f7df5",
+        transition: "left 0.3s ease",
+        zIndex: 1,
+      }}
+    ></div>
+
+    {/* Email tab */}
+    <div
+      style={{
+        flex: 1,
+        zIndex: 2,
+        textAlign: "center",
+        padding: "8px 0",
+        fontWeight: "bold",
+        color: tab === "email" ? "#fff" : "#000",
+        cursor: "pointer",
+        borderRadius: "30px",
+      }}
+      onClick={() => {
+        setTab("email");
+        setPhone("");
+      }}
+    >
+      Email
+    </div>
+
+    {/* Phone tab */}
+    <div
+      style={{
+        flex: 1,
+        zIndex: 2,
+        textAlign: "center",
+        padding: "8px 0",
+        fontWeight: "bold",
+        color: tab === "phone" ? "#fff" : "#000",
+        cursor: "pointer",
+        borderRadius: "30px",
+      }}
+      onClick={() => {
+        setTab("phone");
+        setEmail("");
+      }}
+    >
+      Phone
+    </div>
+  </div>
+</div>
+
+
+                  {tab === "email" && (
+                    <div className="custom-floating-label">
+                      <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        placeholder="john.doe@example.com"
+                        name="email"
+                        onChange={(e) => setEmail(e.target.value)}
+                        style={{ fontSize: 14 }}
+                        required
+                      />
+                      <label htmlFor="email">E-mail</label>
+                    </div>
+                  )}
+                  {tab === "phone" && (
+                    <div className="mb-4">
+                      <PhoneInput
+                        country={"ae"}
+                        value={phone}
+                        onChange={(value) => setPhone("+" + value)}
+                        enableSearch
+                        inputProps={{ name: "phone" }}
+                        inputStyle={{ background: "#fff", fontSize: 14 }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="pass-group">
+                    <div className="custom-floating-label">
+                      <input
+                        type={isPasswordVisible ? "text" : "password"}
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="*********"
+                        style={{ fontSize: 14 }}
+                        required
+                      />
+                      <label htmlFor="password">Password</label>
+                    </div>
+                    <span
+                      className={`ti toggle-password ${
+                        isPasswordVisible ? "ti-eye" : "ti-eye-off"
+                      }`}
+                      onClick={togglePasswordVisibility}
+                    ></span>
+                  </div>
+                  {message && (
+                    <div className="fw-medium mb-3">
+                      {message?.toLowerCase().includes("verify") ? (
+                        canResend ? (
+                          <>
+                            {message}{" "}
+                            <span
+                              onClick={handleResendOTP}
+                              style={{
+                                cursor: "pointer",
+                                color: "#1c3c8c",
+                              }}
+                              className="p-0 fw-bold text-decoration-none"
+                            >
+                              Resend Link
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            {message}{" "}
+                            <span className="text-muted">
+                              Resend in {timer}s
+                            </span>
+                          </>
+                        )
+                      ) : (
+                        message
+                      )}
+                    </div>
+                  )}
+                  <button
+                    className="btn w-100 mb-4"
+                    style={{ backgroundColor: "#4f7df5", color: "#fff" }}
+                    type="submit"
+                  >
+                    {isLoading ? (
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </button>
+
+                  <div className="text-center my-3 position-relative divider-line">
+                    <span className="bg-white px-2">or</span>
+                  </div>
+
+                  {/* <button className="btn btn-outline-light border w-100 d-flex align-items-center justify-content-center gap-2">
+                        <img
+                          src="https://developers.google.com/identity/images/g-logo.png"
+                          alt="Google"
+                          style={{ height: 20 }}
+                        />
+                        Continue with Google
+                      </button> */}
+                  <div className="d-flex justify-content-center mb-3 mt-4">
+                    <GoogleOAuthProvider clientId={clientId}>
+                      {isgoogleLoading ? (
+                        <button className="btn btn-primary" disabled>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          Logging in...
+                        </button>
+                      ) : (
+                        <GoogleLogin
+                          onSuccess={handleGoogleLogin}
+                          onError={() => console.log("Google Login Failed")}
+                        />
+                      )}
+                    </GoogleOAuthProvider>
+                  </div>
+                </form>
+                <div className="text-center mt-4">
+                  <small>
+                    New to Contacts Managment?{" "}
+                    <Link to="/register">Create a free account</Link>
+                  </small>
+                </div>
+
+                {/* <p className="text-muted mt-4 small text-center">
+                      By joining, you agree to our <a href="#">Terms of Use</a> and{" "}
+                      <a href="#">Privacy Policy</a>
+                    </p> */}
+              </div>
             </div>
           </div>
 
           <div className="col-md-6 p-0 overflow-hidden">
+
+
+
             <Slider {...sliderSettings}>
               <div>
-                <img
-                  src="/assets/img/postRegistration1.avif"
-                  alt="Slide 1"
-                  className="img-fluid vh-100 w-100 object-fit-cover"
-                />
+                <Player
+              autoplay
+              loop
+              src={loginAnimation1}
+            />
               </div>
               <div>
-                <img
-                  src="/assets/img/postRegistration2.avif"
-                  alt="Slide 2"
-                  className="img-fluid vh-100 w-100 object-fit-cover"
-                />
+               <Player
+              autoplay
+              loop
+              src={loginAnimation2}
+            />
               </div>
               <div>
-                <img
-                  src="/assets/img/postRegistration3.avif"
-                  alt="Slide 3"
-                  className="img-fluid vh-100 w-100 object-fit-cover"
-                />
+               <Player
+              autoplay
+              loop
+              src={loginAnimation3}
+            />
               </div>
             </Slider>
+            
           </div>
         </div>
       </div>

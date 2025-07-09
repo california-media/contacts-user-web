@@ -12,9 +12,9 @@ const DeleteModal = ({text, onCancel,onDelete }) => {
                 <div className="avatar avatar-xl bg-danger-light rounded-circle mb-3">
                   <i className="ti ti-trash-x fs-36 text-danger" />
                 </div>
-                <h4 className="mb-2 text-capitalize">Remove {text}?</h4>
+                <h4 className="mb-2 text-capitalize">Delete {text}?</h4>
                 <p className="mb-0">
-                  Are you sure you want to remove <br /> the {text} you selected.
+                  Are you sure you want to delete <br /> the {text} you selected.
                 </p>
                 <div className="d-flex align-items-center justify-content-center mt-4">
                   <Link

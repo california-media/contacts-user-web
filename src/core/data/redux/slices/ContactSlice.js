@@ -16,6 +16,18 @@ export const fetchContacts = createAsyncThunk(
     const search = filters.search;
     const tag = filters.tag;
     try {
+      console.log(
+        id,
+        page,
+        limit,
+        search,
+        tag,
+        isFavourite,
+        favouriteContactsPage,
+        favouriteContactsLimit,
+        favouriteContactsSearch,
+        "tags before going for filter"
+      );
       const response = await api.post("/getContact", {
         id,
         page,
@@ -27,6 +39,7 @@ export const fetchContacts = createAsyncThunk(
         favouriteContactsLimit,
         favouriteContactsSearch,
       });
+      console.log(response.data, "response from get contact");
 
       return {
         data: response.data.data,
@@ -40,16 +53,18 @@ export const fetchContacts = createAsyncThunk(
 export const saveBulkContacts = createAsyncThunk(
   "contacts/saveBulkContacts",
   async (bulkData, { rejectWithValue, dispatch }) => {
-    console.log(bulkData,"bulk data just before going to api");
-    
+    console.log(bulkData, "bulk data just before going to api");
+
     try {
-      const response = await api.post("/save-bulk-contacts", {contacts:bulkData});
-      console.log(response.data,"response from bulk contacts");
-      
+      const response = await api.post("/save-bulk-contacts", {
+        contacts: bulkData,
+      });
+      console.log(response.data, "response from bulk contacts");
+
       dispatch(
-        showToast({ message: response.data.message, variant: "success" })
+        showToast({ message: response.data.message, variant: "success",delay:"10000" })
       );
-      return response.data
+      return response.data;
     } catch (error) {
       dispatch(
         showToast({ message: error.response.data.message, variant: "danger" })
@@ -89,6 +104,8 @@ export const deleteContact = createAsyncThunk(
   "contacts/deleteContact",
   async (contactId, { rejectWithValue, dispatch }) => {
     try {
+      console.log(contactId,"contact idd");
+      
       const response = await api.delete("/deleteContact", {
         data: { contact_id: contactId },
       });
@@ -197,12 +214,21 @@ const contactSlice = createSlice({
       }
     });
 
+    // builder.addCase(deleteContact.fulfilled, (state, action) => {
+    //   state.contacts = state.contacts.filter(
+    //     (c) => c.contact_id !== action.payload
+    //   );
+    //   state.totalContacts -= 1;
+    // });
     builder.addCase(deleteContact.fulfilled, (state, action) => {
-      state.contacts = state.contacts.filter(
-        (c) => c.contact_id !== action.payload
-      );
-      state.totalContacts -= 1;
-    });
+  const deletedIds = action.payload; // now an array
+
+  state.contacts = state.contacts.filter(
+    (c) => !deletedIds.includes(c.contact_id)
+  );
+
+  state.totalContacts -= deletedIds.length;
+});
     builder.addCase(saveBulkContacts.fulfilled, (state, action) => {
       // state.contacts=action.payload;
       action.payload.data.forEach((newContact) => {

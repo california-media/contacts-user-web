@@ -1,35 +1,3 @@
-// import { createSlice, nanoid } from "@reduxjs/toolkit";
-
-// const toastSlice = createSlice({
-//   name: "toast",
-//   initialState: {
-//     toasts: [],
-//   },
-//   reducers: {
-//     showToast: {
-//       reducer: (state, action) => {
-//         state.toasts.push(action.payload);
-//       },
-//       prepare: ({ message, variant = "primary" }) => {
-//         return {
-//           payload: {
-//             id: nanoid(),
-//             message,
-//             variant,
-//           },
-//         };
-//       },
-//     },
-//     hideToast: (state, action) => {
-//       state.toasts = state.toasts.filter((toast) => toast.id !== action.payload);
-//     },
-//   },
-// });
-
-// export const { showToast, hideToast } = toastSlice.actions;
-// export default toastSlice.reducer;
-
-
 import { createSlice, nanoid } from "@reduxjs/toolkit";
 
 const toastSlice = createSlice({

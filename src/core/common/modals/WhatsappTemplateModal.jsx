@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
 
@@ -8,6 +8,8 @@ const WhatsappTemplateModal = () => {
   const [whatsppTemplateTitles, setWhatsppTemplateTitles] = useState([]);
   const selectedContact = useSelector((state) => state.selectedContact);
   const userProfile = useSelector((state) => state.profile);
+
+  const textareaRef = useRef(null)
   useEffect(() => {
     const whatsappTitles =
       userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.map(
@@ -21,6 +23,24 @@ const WhatsappTemplateModal = () => {
     setWhatsppTemplateTitles(whatsappTitles);
   }, [userProfile]);
   const dispatch = useDispatch();
+const insertTag = (tag) => {
+  const textarea = textareaRef.current;
+  if (!textarea) return;
+
+  const startPos = textarea.selectionStart;
+  const endPos = textarea.selectionEnd;
+  const text = editWhatsappTemplateMessage;
+
+  const newText =
+    text.substring(0, startPos) + tag + text.substring(endPos);
+
+  setEditWhatsappTemplateMessage(newText);
+
+  // Set cursor position immediately (may not work perfectly without delay)
+  textarea.selectionStart = textarea.selectionEnd = startPos + tag.length;
+  textarea.focus();
+};
+
   return (
     <div
       className="modal custom-modal fade modal-padding"
@@ -42,33 +62,7 @@ const WhatsappTemplateModal = () => {
             </button>
           </div>
 
-          <div className="d-flex align-items-center justify-content-end">
-            {/* <div className="icon-form me-2 mb-sm-0">
-                  <span className="form-icon">
-                    <i className="ti ti-search" />
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search Template"
-                    onChange={() => {}}
-                  />
-                </div> */}
-
-            {/* <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    if (selectedContact?.phonenumbers?.length > 0) {
-                      const url = `https://wa.me/${selectedContact.phonenumbers[0]}`;
-                      window.open(url, "_blank");
-                    } else {
-                      alert("Phone number not available");
-                    }
-                  }}
-                >
-                  Go directly to WhatsApp
-                </button> */}
-          </div>
+          
           <div className="modal-body">
             <div className="mb-3">
               <Select
@@ -85,11 +79,28 @@ const WhatsappTemplateModal = () => {
                 placeholder="Select a template"
               />
             </div>
-
+<div className="mb-3">
+              <label className="col-form-label ms-3">Attributes</label>
+              <select
+                className="form-select"
+                aria-label="Default select example"
+                onChange={(e) => {
+                  if (e.target.value) insertTag(e.target.value);
+                  e.target.selectedIndex = 0;
+                }}
+              >
+                <option value="">Insert Field</option>
+                <option value="{{firstName}}">First Name</option>
+                <option value="{{lastName}}">Last Name</option>
+                <option value="{{designation}}">Designation</option>
+                <option value="{{email}}">Email</option>
+              </select>
+            </div>
             <div className="mb-3">
               <label className="col-form-label col-md-2">Message</label>
               <div className="col-md-12">
                 <textarea
+                ref={textareaRef}
                   rows={5}
                   cols={5}
                   className="form-control"
