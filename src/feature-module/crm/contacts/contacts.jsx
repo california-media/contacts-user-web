@@ -1,34 +1,34 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Table from "../../../core/common/dataTable/index";
-import Select from "react-select";
-import DateRangePicker from "react-bootstrap-daterangepicker";
+// import Select from "react-select";
+// import DateRangePicker from "react-bootstrap-daterangepicker";
 import "bootstrap-daterangepicker/daterangepicker.css";
-import { MdDoubleArrow } from "react-icons/md";
+// import { MdDoubleArrow } from "react-icons/md";
 import "./contacts.css";
 import "antd/dist/reset.css";
-import {
-  countryoptions1,
-  languageOptions,
-  optiondeals,
-  optionindustry,
-  options,
-  optionschoose,
-  optionsource,
-  leadStatus,
-  optionssymbol,
-  owner as companyEmployee,
-} from "../../../core/common/selectoption/selectoption";
+// import {
+//   countryoptions1,
+//   languageOptions,
+//   optiondeals,
+//   optionindustry,
+//   options,
+//   optionschoose,
+//   optionsource,
+//   leadStatus,
+//   optionssymbol,
+//   owner as companyEmployee,
+// } from "../../../core/common/selectoption/selectoption";
 import { leadsData } from "../../../core/data/json/leads";
 import { MdMail } from "react-icons/md";
 import { Modal } from "react-bootstrap";
-import { TableData } from "../../../core/data/interface";
+// import { TableData } from "../../../core/data/interface";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
-import CollapseHeader from "../../../core/common/collapse-header";
-import { SelectWithImage2 } from "../../../core/common/selectWithImage2";
+// import CollapseHeader from "../../../core/common/collapse-header";
+// import { SelectWithImage2 } from "../../../core/common/selectWithImage2";
 import { all_routes } from "../../router/all_routes";
-import { TagsInput } from "react-tag-input-component";
-import Offcanvas from "react-bootstrap/Offcanvas";
+// import { TagsInput } from "react-tag-input-component";
+// import Offcanvas from "react-bootstrap/Offcanvas";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -42,7 +42,7 @@ import { useAppDispatch, useAppSelector } from "../../../core/data/redux/hooks";
 
 import { setPhone } from "../../../core/data/redux/slices/appCommonSlice";
 import EditCell from "../../../core/common/editCell/EditCell";
-import { message, Pagination } from "antd";
+// import { message, Pagination } from "antd";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
 import api from "../../../core/axios/axiosInstance";
@@ -59,32 +59,32 @@ import {
   setSelectedContactSlice,
 } from "../../../core/data/redux/slices/SelectedContactSlice";
 import { addTag, fetchTags } from "../../../core/data/redux/slices/TagSlice";
-import { IoMdPricetag } from "react-icons/io";
-import DefaultEditor from "react-simple-wysiwyg";
-import { gapi } from "gapi-script";
+// import { IoMdPricetag } from "react-icons/io";
+// import DefaultEditor from "react-simple-wysiwyg";
+// import { gapi } from "gapi-script";
 import CreatableSelect from "react-select/creatable";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 import EmailTemplateModal from "../../../core/common/modals/EmailTemplateModal";
 import WhatsappTemplateModal from "../../../core/common/modals/WhatsappTemplateModal";
 import useDebounce from "../../../core/common/customHooks/useDebounce";
-import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndicator";
+// import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndicator";
 
 const Contacts = () => {
   const route = all_routes;
-  const [adduser, setAdduser] = useState(false);
-  const [addcompany, setAddCompany] = useState(false);
-  const [modalTitle, setModalTitle] = useState("Add New Contact");
-  const data = leadsData;
-  const [owner, setOwner] = useState(["Collab"]);
+  // const [adduser, setAdduser] = useState(false);
+  // const [addcompany, setAddCompany] = useState(false);
+  // const [modalTitle, setModalTitle] = useState("Add New Contact");
+  // const data = leadsData;
+  // const [owner, setOwner] = useState(["Collab"]);
   const [openModal, setOpenModal] = useState(false);
   const [openModal2, setOpenModal2] = useState(false);
-  const [openModal3, setOpenModal3] = useState(false);
-  const [selectedContactIds,setSelectedContactIds] = useState([])
+  // const [openModal3, setOpenModal3] = useState(false);
+  const [selectedContactIds, setSelectedContactIds] = useState([]);
   const [removedTags, setRemovedTags] = useState([]);
-  const [show, setShow] = useState(false);
-  const [show2, setShow2] = useState(false);
+  // const [show, setShow] = useState(false);
+  // const [show2, setShow2] = useState(false);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [show3, setShow3] = useState(false);
+  // const [show3, setShow3] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [allTags, setAllTags] = useState([]);
   const [selectedContactGroup, setSelectedContactGroup] = useState([]);
@@ -95,14 +95,16 @@ const Contacts = () => {
   const [groupHoveredIndex, setGroupHoveredIndex] = useState(null);
 
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [allContacts, setAllContacts] = useState([]);
-  const [stars, setStars] = useState({});
+  console.log(allContacts,"allcontacts in contact");
+  
+  // const [stars, setStars] = useState({});
   const [newContents, setNewContents] = useState([0]);
   const [previousTags, setPreviousTags] = useState([]);
   const [statusLead, setStatusLead] = useState({});
   const [deleteModalText, setDeleteModalText] = useState("");
-  const [searchEmployeeInFilter, setSearchEmployeeInFilter] = useState("");
+  // const [searchEmployeeInFilter, setSearchEmployeeInFilter] = useState("");
   const [bulkActions, setBulkActions] = useState(false);
 
   const [selectedOption, setSelectedOption] = useState("");
@@ -111,13 +113,13 @@ const Contacts = () => {
   const [page, setPage] = useState(1);
   const [favouritePage, setFavouritePage] = useState(1);
   const [newTags, setNewTags] = useState([]);
-  const [limit, setLimit] = useState();
+  const [limit, setLimit] = useState(50);
   const [favouriteLimit, setFavouriteLimit] = useState();
   const selectedContact = useSelector((state) => state.selectedContact);
   const { tags } = useSelector((state) => state.tags);
   console.log(tags, "tagsssdsfsd");
 
-  const [activeRecordKey, setActiveRecordKey] = useState(null);
+  // const [activeRecordKey, setActiveRecordKey] = useState(null);
   const [activeCell, setActiveCell] = useState(null);
 
   const [importModal, setImportModal] = useState(false);
@@ -142,7 +144,15 @@ const Contacts = () => {
     setFavouritePage(newFavouritePage);
     setFavouriteLimit(newFavouritePageSize);
   };
-
+  const tableRef = useRef();
+  const location = useLocation();
+  useEffect(() => {
+    const incoming = location.state?.preselectedTags;
+    if (Array.isArray(incoming) && incoming.length > 0) {
+      // ✅ Replace all existing selections with the incoming one(s)
+      setSelectedContactGroup(incoming.map((t) => t.toLowerCase()));
+    }
+  }, [location.state?.preselectedTags]);
   const [selectedDateRange, setSelectedDateRange] = useState({
     startDate: new Date().toDateString(),
     endDate: new Date().toDateString(),
@@ -153,9 +163,9 @@ const Contacts = () => {
   const handleRadioSelect = (option) => {
     setSelectedOption(option); // Update the selected option
   };
-  const handleRadioSelect2 = (option) => {
-    setSelectedOption2(option); // Update the selected option
-  };
+  // const handleRadioSelect2 = (option) => {
+  //   setSelectedOption2(option); // Update the selected option
+  // };
 
   const handleEditClick = (rowKey, columnKey, record) => {
     dispatch(setSelectedContact(record));
@@ -163,18 +173,16 @@ const Contacts = () => {
     setActiveCell({ rowKey, columnKey });
   };
 
- const handleDeleteContact = async () => {
-  try {
-    await dispatch(deleteContact(selectedContactIds)).unwrap();
+  const handleDeleteContact = async () => {
+    try {
+      await dispatch(deleteContact(selectedContactIds)).unwrap();
 
-
-    setSelectedContactIds([]);
-    setBulkActions(false);
-  } catch (error) {
-    console.error("Failed to delete contacts:", error);
-
-  }
-};
+      setSelectedContactIds([]);
+      setBulkActions(false);
+    } catch (error) {
+      console.error("Failed to delete contacts:", error);
+    }
+  };
   const handleClose = () => {
     setActiveCell(null);
   };
@@ -187,7 +195,7 @@ const Contacts = () => {
   };
   const handleRowSelectionChange = (selectedRowKeys, selectedRows) => {
     console.log(selectedRowKeys, selectedRows, "selected rows key keys");
-setSelectedContactIds(selectedRowKeys)
+    setSelectedContactIds(selectedRowKeys);
     if (selectedRowKeys.length > 0) {
       setBulkActions(true);
     } else {
@@ -211,7 +219,7 @@ setSelectedContactIds(selectedRowKeys)
     setSelectedTags(tags);
     console.log(tags, "handle user tags");
 
-    const tagsForApi = tags.map((tag) => tag.value);
+    // const tagsForApi = tags.map((tag) => tag.value);
 
     const removedTagsFilter = previousTags
       .filter((prevTag) => !tags.some((tag) => tag.value === prevTag.value))
@@ -344,9 +352,10 @@ setSelectedContactIds(selectedRowKeys)
         <p className="uploadSubHeading">
           Contacts (or 'leads') are people you engage with
         </p>
-        <div className="d-flex justify-content-center">
+        
+        <div className="d-md-flex justify-content-center">
           <div
-            className={`importMenu ${
+            className={`importMenu  ${
               selectedOption === "csvExcel" ? "selected" : ""
             }`}
             onClick={() => handleRadioSelect("csvExcel")}
@@ -361,56 +370,238 @@ setSelectedContactIds(selectedRowKeys)
           </div>
           <div
             className={`importMenu ${
-              selectedOption === "hubSpot" ? "selected" : ""
+              selectedOption === "google" ? "selected" : ""
             }`}
-            onClick={() => handleRadioSelect("hubSpot")}
+            onClick={() => handleRadioSelect("google")}
           >
             <div className="importIcons">
               <ImageWithBasePath
-                src="assets/img/customIcons/hubspotLogo.png"
-                alt="Hubspot Logo"
+                src="assets/img/icons/googleLogo.png"
+                alt="google Logo"
               />
             </div>
-            <p className="importType">HubSpot</p>
+            <p className="importType">Google Contacts</p>
           </div>
         </div>
-        <div className="d-flex justify-content-center mt-3">
-          <div
-            className={`importMenu ${
-              selectedOption === "pipedrive" ? "selected" : ""
-            }`}
-            onClick={() => handleRadioSelect("pipedrive")}
-          >
-            <div className="importIcons">
-              <ImageWithBasePath
-                src="assets/img/customIcons/pipedriveLogo.png"
-                alt="Pipedrive Logo"
-              />
-            </div>
-            <p className="importType">Pipedrive</p>
-          </div>
+        <div className="d-md-flex justify-content-center mt-md-3">
           <div
             className={`importMenu ${
               selectedOption === "zoho" ? "selected" : ""
             }`}
             onClick={() => handleRadioSelect("zoho")}
           >
-            <div className="importIcons">
+            <div
+              style={{
+                height: 40,
+                marginRight: 15,
+                justifyContent: "center",
+                display: "flex",
+              }}
+            >
               <ImageWithBasePath
-                src="assets/img/customIcons/excelLogo.png"
+                src="assets/img/customIcons/zohoLogo.png"
                 alt="Zoho Logo"
               />
             </div>
             <p className="importType">Zoho</p>
+          </div>
+          <div
+            className={`importMenu ${
+              selectedOption === "hubspot" ? "selected" : ""
+            }`}
+            onClick={() => handleRadioSelect("hubspot")}
+          >
+            <div className="importIcons">
+              <ImageWithBasePath
+                src="assets/img/icons/hubspotLogo.jpg"
+                alt="Hubspot Logo"
+              />
+            </div>
+            <p className="importType">Hubspot</p>
           </div>
         </div>
         <div className="wizardBtnContainer">
           {selectedOption && (
             <button
               className="nextStep btn btn-primary"
-              onClick={() => nextStep()}
+              onClick={async () => {
+                if (selectedOption === "google") {
+                  try {
+                    const response = await api.get("/fetch-google-contacts");
+                    console.log(
+                      response.data,
+                      "response from google fetch contacts"
+                    );
+
+                    if (
+                      response.data.status === "success" &&
+                      response.data.url
+                    ) {
+                      const width = 500;
+                      const height = 600;
+                      const left =
+                        window.screenX + (window.outerWidth - width) / 2;
+                      const top =
+                        window.screenY + (window.outerHeight - height) / 2;
+
+                      const messageHandler = (event) => {
+                        console.log(event, "mhasgjasvfsa");
+
+                        console.log("origin:", event.origin);
+                        console.log("data:", event.data);
+
+                        const data = event.data;
+                        if (data?.status === "success") {
+                          setImportModal(false);
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 2000);
+                          dispatch(
+                            showToast({
+                              message: "Contacts fetched successfully",
+                              variant: "success",
+                            })
+                          );
+
+                          window.removeEventListener("message", messageHandler);
+                          popup?.close();
+                        }
+                      };
+                      window.addEventListener("message", messageHandler);
+
+                      const popup = window.open(
+                        response.data.url,
+                        "_blank",
+                        `width=${width},height=${height},left=${left},top=${top}`
+                      );
+                      if (!popup) {
+                        console.error("Popup blocked");
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Google Sign-In initiation failed", error);
+                  }
+                }
+                if (selectedOption === "zoho") {
+                  try {
+                    const response = await api.get("/fetch-zoho-contacts");
+                    console.log(
+                      response.data,
+                      "response from zoho fetch contacts"
+                    );
+
+                    if (
+                      response.data.status === "success" &&
+                      response.data.url
+                    ) {
+                      const width = 500;
+                      const height = 600;
+                      const left =
+                        window.screenX + (window.outerWidth - width) / 2;
+                      const top =
+                        window.screenY + (window.outerHeight - height) / 2;
+
+                      const messageHandler = (event) => {
+                        console.log(event, "mhasgjasvfsa");
+
+                        console.log("origin:", event.origin);
+                        console.log("data:", event.data);
+
+                        const data = event.data;
+                        if (data?.status === "success") {
+                          setImportModal(false);
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 2000);
+                          dispatch(
+                            showToast({
+                              message: "Contacts fetched successfully",
+                              variant: "success",
+                            })
+                          );
+
+                          window.removeEventListener("message", messageHandler);
+                          popup?.close();
+                        }
+                      };
+                      window.addEventListener("message", messageHandler);
+
+                      const popup = window.open(
+                        response.data.url,
+                        "_blank",
+                        `width=${width},height=${height},left=${left},top=${top}`
+                      );
+                      if (!popup) {
+                        console.error("Popup blocked");
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Zoho Sign-In initiation failed", error);
+                  }
+                }
+                if (selectedOption === "hubspot") {
+                  try {
+                    const response = await api.get("/fetch-hubspot-contacts");
+                    console.log(
+                      response.data,
+                      "response from hubspot fetch contacts"
+                    );
+
+                    if (
+                      response.data.status === "success" &&
+                      response.data.url
+                    ) {
+                      const width = 500;
+                      const height = 600;
+                      const left =
+                        window.screenX + (window.outerWidth - width) / 2;
+                      const top =
+                        window.screenY + (window.outerHeight - height) / 2;
+
+                      const messageHandler = (event) => {
+                        console.log(event, "mhasgjasvfsa");
+
+                        console.log("origin:", event.origin);
+                        console.log("data:", event.data);
+
+                        const data = event.data;
+                        if (data?.status === "success") {
+                          setImportModal(false);
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 2000);
+                          dispatch(
+                            showToast({
+                              message: "Contacts fetched successfully",
+                              variant: "success",
+                            })
+                          );
+
+                          window.removeEventListener("message", messageHandler);
+                          popup?.close();
+                        }
+                      };
+                      window.addEventListener("message", messageHandler);
+
+                      const popup = window.open(
+                        response.data.url,
+                        "_blank",
+                        `width=${width},height=${height},left=${left},top=${top}`
+                      );
+                      if (!popup) {
+                        console.error("Popup blocked");
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Hubspot Sign-In initiation failed", error);
+                  }
+                }
+                if (selectedOption !== "google") {
+                  nextStep();
+                }
+              }}
             >
-              Next
+              Import
             </button>
           )}
         </div>
@@ -434,6 +625,8 @@ setSelectedContactIds(selectedRowKeys)
       const contacts = XLSX.utils.sheet_to_json(sheet);
 
       const response = await dispatch(saveBulkContacts(contacts)).unwrap();
+      console.log(response, "response from thejsdbmsdb");
+
       if (response.status == "success") {
         setImportModal(false);
       }
@@ -518,7 +711,7 @@ setSelectedContactIds(selectedRowKeys)
     // Add the updated contact fields to the FormData object
     formDataObj.append("contact_id", updatedContact.contact_id);
     formDataObj.append("emailaddresses", updatedContact.emailaddresses);
-    formDataObj.append("phonenumbers", updatedContact.phonenumbers);
+    formDataObj.append("phonenumber", updatedContact.phonenumbers);
 
     // Dispatch saveContact with the updated form data
     dispatch(saveContact(formDataObj));
@@ -546,16 +739,16 @@ setSelectedContactIds(selectedRowKeys)
     // Owner: true,
     Action: true,
   });
-  const navigate = useNavigate();
-  const handleShow = () => setShow(true);
-  const handleClose2 = () => setShow(false);
-  const handleShow2 = () => setShow(true);
-  const handleClose3 = () => setShow(false);
-  const handleShow3 = () => setShow(true);
-  const togglePopup = (isEditing) => {
-    setModalTitle(isEditing ? "Update Contact" : "Add New Contact");
-    setAdduser(!adduser);
-  };
+  // const navigate = useNavigate();
+  // const handleShow = () => setShow(true);
+  // const handleClose2 = () => setShow(false);
+  // const handleShow2 = () => setShow(true);
+  // const handleClose3 = () => setShow(false);
+  // const handleShow3 = () => setShow(true);
+  // const togglePopup = (isEditing) => {
+  //   setModalTitle(isEditing ? "Update Contact" : "Add New Contact");
+  //   setAdduser(!adduser);
+  // };
 
   const handleStarToggle = (index, record) => {
     const formDataObj = new FormData();
@@ -574,9 +767,9 @@ setSelectedContactIds(selectedRowKeys)
     }));
   };
   // Seach Employee in filter
-  const filteredEmployees = companyEmployee.filter((employee) =>
-    employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
-  );
+  // const filteredEmployees = companyEmployee.filter((employee) =>
+  //   employee.value.toLowerCase().includes(searchEmployeeInFilter.toLowerCase())
+  // );
 
   useEffect(() => {
     setAllContacts(contacts);
@@ -593,6 +786,7 @@ setSelectedContactIds(selectedRowKeys)
       dispatch(fetchContacts({ filters }));
     }
   }, [favouritePage, favouriteLimit]);
+
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const filters = {
@@ -602,6 +796,7 @@ setSelectedContactIds(selectedRowKeys)
       search: debouncedContactSearchQuery,
       tag: selectedContactGroup,
     };
+    console.log(filters, "filters for the pagination");
 
     dispatch(fetchContacts({ filters }));
   }, [
@@ -612,46 +807,6 @@ setSelectedContactIds(selectedRowKeys)
     selectedContactGroup,
   ]);
 
-  // const sendEmail = async () => {
-  //   if (
-  //     !selectedContact.emailaddresses[0] ||
-  //     !editEmailTemplateSubject ||
-  //     !editEmailTemplateBody
-  //   ) {
-  //     alert("Please fill all fields");
-  //     return;
-  //   }
-
-  //   const headers = [
-  //     `To: ${selectedContact.emailaddresses[0]}`,
-  //     `Subject: ${editEmailTemplateSubject}`,
-  //     "Content-Type: text/html; charset=utf-8",
-  //     "",
-  //     `<p>${editEmailTemplateBody}</p>`,
-  //   ];
-
-  //   const email = headers.join("\r\n");
-
-  //   const base64EncodedEmail = btoa(
-  //     new TextEncoder()
-  //       .encode(email)
-  //       .reduce((data, byte) => data + String.fromCharCode(byte), "")
-  //   );
-  //   try {
-  //     await gapi.client.gmail.users.messages.send({
-  //       userId: "me",
-  //       resource: {
-  //         raw: base64EncodedEmail,
-  //       },
-  //     });
-  //     dispatch(showToast({message:"Email Sent Successfully", variant:"success"}))
-  //     // setTo("");
-  //     // setSubject("");
-  //     // setMessage("");
-  //   } catch (error) {
-  //     console.error("Error sending email:", error);
-  //   }
-  // };
 
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
@@ -715,7 +870,7 @@ setSelectedContactIds(selectedRowKeys)
       width: 40,
       render: (_, record, index) => (
         <div
-          className="set-star rating-select"
+          className="set-star rating-select d-flex justify-content-center align-items-center"
           onClick={() => handleStarToggle(index, record)}
           style={{ cursor: "pointer" }}
         >
@@ -732,16 +887,16 @@ setSelectedContactIds(selectedRowKeys)
       title: "Name",
       dataIndex: "firstname",
       key: "firstname",
-      width: 300,
-    
-      fixed: "left",
+      width: 150,
+
+      // fixed: "left",
       onCell: () => ({
         className: "hoverable-cell",
       }),
 
       render: (text, record) => {
         return (
-          <div className="cell-content justify-content-between" >
+          <div className="cell-content justify-content-between">
             {/* Lead name */}
 
             <Link
@@ -755,7 +910,7 @@ setSelectedContactIds(selectedRowKeys)
             </Link>
 
             {/* Icons that will be shown on hover */}
-            <div className="icons">
+            <div className="icons ms-3">
               <div className="action-icons d-flex justify-content-center">
                 <a
                   //  href={`tel:${text}`}
@@ -821,7 +976,7 @@ setSelectedContactIds(selectedRowKeys)
                   data-bs-target={`#delete_${deleteModalText}`}
                   onClick={() => {
                     setDeleteModalText("contact");
-                    setSelectedContactIds([record.contact_id])
+                    setSelectedContactIds([record.contact_id]);
                   }}
                 >
                   <i className="ti ti-trash text-danger"></i> Delete
@@ -920,12 +1075,12 @@ setSelectedContactIds(selectedRowKeys)
     {
       title: "Groups",
       dataIndex: "tags",
+      width: 235,
       render: (tags, record) => {
         const isActiveContact =
           activeGroupEdit?.contactId === record.contact_id;
         const isEditingThisTag =
           isActiveContact && activeGroupEdit?.tagIndex === 0;
-        console.log(record, "recorddd");
 
         if (tags.length === 0) {
           return (
@@ -957,7 +1112,7 @@ setSelectedContactIds(selectedRowKeys)
                     border: "1px solid #ccc",
                     padding: "10px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                    minWidth: "250px",
+                    width: "228px",
                     marginTop: "5px",
                   }}
                 >
@@ -1003,7 +1158,8 @@ setSelectedContactIds(selectedRowKeys)
         }
 
         return (
-          <div className="d-inline-block position-relative">
+
+          <div className="d-flex overflow-auto">
             {tags.map((tag, index) => {
               const isHovered = groupHoveredIndex === index;
               const isEditingThisTag =
@@ -1012,11 +1168,12 @@ setSelectedContactIds(selectedRowKeys)
               return (
                 <div
                   key={index}
-                  className="py-1 px-2 d-inline-block me-2 position-relative"
+                  className="py-1 px-2 d-flex flex-wrap me-2"
                   style={{
                     background: "#dff0ff",
                     borderRadius: 5,
                     cursor: "pointer",
+                    marginBottom: "5px",
                   }}
                   onMouseEnter={() => setGroupHoveredIndex(index)}
                   onMouseLeave={() => setGroupHoveredIndex(null)}
@@ -1034,7 +1191,7 @@ setSelectedContactIds(selectedRowKeys)
                     }
                   }}
                 >
-                  <div className="d-flex align-items-center">
+                  <div className="d-flex align-items-centerflex-wrap">
                     {/* <img
                       src="/assets/img/icons/tagIcon.svg"
                       className="me-1"
@@ -1056,8 +1213,7 @@ setSelectedContactIds(selectedRowKeys)
                         border: "1px solid #ccc",
                         padding: "10px",
                         boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                        minWidth: "250px",
-                        marginTop: "5px",
+                        width: "228px",
                       }}
                     >
                       <div className="mb-3">
@@ -1336,10 +1492,10 @@ setSelectedContactIds(selectedRowKeys)
       <>
         {/* Page Wrapper */}
         <div className="page-wrapper">
-          <div className="content">
-            <div className="row">
+          <div className="content mb-0">
+            <div className="row p-md-4 p-0 h-100 pt_0">
               <div className="col-md-12">
-                <div className="card vh-100">
+                <div className="card h-100 mb-0">
                   <div className="card-header">
                     {/* Search */}
                     <div className="row align-items-center">
@@ -1347,7 +1503,7 @@ setSelectedContactIds(selectedRowKeys)
                         <div className="d-flex justify-content-between align-items-center flex-wrap">
                           <div className="page-header mb-md-0">
                             <div className="row align-items-center">
-                              <h4 className="page-title mb-0 ms-0 ms-md-5">
+                              <h4 className="page-title mb-0">
                                 Contacts
                                 <span className="count-title">
                                   {totalContacts}
@@ -1427,36 +1583,20 @@ setSelectedContactIds(selectedRowKeys)
                                           <div className="filter-content-list">
                                             <ul>
                                               {tags.map((tag, index) => {
-                                                console.log(
-                                                  tag,
-                                                  "tagkjdgfhdsgfjh"
-                                                );
-
                                                 return (
                                                   <li key={index}>
                                                     <div className="filter-checks">
                                                       <label className="checkboxs">
-                                                        {/* <input
-                                                          type="checkbox"
-                                                          checked={selectedLeadStatus.includes(
-                                                            leadStatus.value.toLowerCase()
-                                                          )} // Check if status is selected
-                                                          onChange={() =>
-                                                            filterLeadStatus(
-                                                              leadStatus.value.toLowerCase()
-                                                            )
-                                                          } // Call filterLeadStatus on change
-                                                        /> */}
                                                         <input
                                                           type="checkbox"
                                                           checked={selectedContactGroup.includes(
                                                             tag.tag.toLowerCase()
-                                                          )} // Check if status is selected
+                                                          )}
                                                           onChange={() =>
                                                             filterContactGroup(
                                                               tag.tag.toLowerCase()
                                                             )
-                                                          } // Call filterLeadStatus on change
+                                                          }
                                                         />
                                                         <span className="checkmarks" />
                                                         {tag.tag}
@@ -1530,9 +1670,12 @@ setSelectedContactIds(selectedRowKeys)
                                   className="btn bg-soft-purple text-purple"
                                   data-bs-toggle="dropdown"
                                   data-bs-auto-close="outside"
+                                  onClick={() => {
+                                    console.log("clickeddeded");
+                                  }}
                                 >
                                   <i className="ti ti-columns-3 me-2" />
-                                  Manage Columns
+                                  Views
                                 </Link>
                                 <div className="dropdown-menu  dropdown-menu-md-end dropdown-md p-3">
                                   <h4 className="mb-2 fw-semibold">
@@ -1587,8 +1730,16 @@ setSelectedContactIds(selectedRowKeys)
                                   data-bs-toggle="dropdown"
                                 >
                                   <i className="ti ti-package-export me-2" />
-                                  Import / Export
+
+                                  <span className="d-inline d-md-none">
+                                    Sync
+                                  </span>
+
+                                  <span className="d-none d-md-inline">
+                                    Import/Export
+                                  </span>
                                 </Link>
+
                                 <div className="dropdown-menu  dropdown-menu-end">
                                   <ul className="mb-0">
                                     <li>
@@ -1635,7 +1786,7 @@ setSelectedContactIds(selectedRowKeys)
                                 }}
                               >
                                 <i className="ti ti-square-rounded-plus me-2" />
-                                Add Contact
+                                Add
                               </Link>
                               {/* <div className="view-icons">
                                 <Link to={route.leads} className="active">
@@ -1656,7 +1807,7 @@ setSelectedContactIds(selectedRowKeys)
                     </div>
                     {/* /Search */}
                   </div>
-                  <div className="card-body justify-content-center">
+                  <div className="card-body pb-0 justify-content-center">
                     {/* Filter */}
                     <div className="d-flex align-items-center justify-content-end flex-wrap row-gap-2">
                       {/* <div className="d-flex align-items-center flex-wrap row-gap-2">
@@ -1678,13 +1829,19 @@ setSelectedContactIds(selectedRowKeys)
                     {/* /Filter */}
                     {/* Contact List */}
 
-                    <div className="table-responsive custom-table h-100">
+                    <div
+                      className="table-responsive custom-table "
+                      // style={{ overflowY: "hidden", overflowX: "hidden" }}
+                      ref={tableRef}
+                    >
                       <Table
                         dataSource={filteredData}
                         columns={visibleColumns}
                         // rowKey={(record) => record.key}
                         rowKey={(record) => record.contact_id}
-                        loading={isLoading}
+                        // loading={loading}
+                        isLoading={loading}
+                        // scrollX={false}
                         totalCount={totalContacts}
                         onRowSelectionChange={handleRowSelectionChange}
                         onPageChange={

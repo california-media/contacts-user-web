@@ -27,7 +27,15 @@ const StepWrapper = ({ children }) => (
   </AnimatePresence>
 );
 
-const Step1 = ({ formData, setFormData, passedData,setMessage,message, setIsLoading, isLoading}) => {
+const Step1 = ({
+  formData,
+  setFormData,
+  passedData,
+  setMessage,
+  message,
+  setIsLoading,
+  isLoading,
+}) => {
   const { nextStep } = useWizard();
   const handleOnPhoneChange = (value) => {
     setFormData((prevFormData) => ({
@@ -39,48 +47,57 @@ const Step1 = ({ formData, setFormData, passedData,setMessage,message, setIsLoad
   const isFirstNameFilled = formData.firstname.trim() !== "";
   const isEmailFilled = formData.email.trim() !== "";
   const isPhoneFilled = formData.phonenumber.trim() !== "";
-const canProceed =
-  (
-    passedData?.registeredWith === "google"
-      ? isPhoneFilled
-      : passedData?.registeredWith === "email"
-      ? isPhoneFilled && isFirstNameFilled
-      : passedData?.registeredWith === "phoneNumber"
-      ? isEmailFilled && isFirstNameFilled
-      : false
-  );
+
+  // Determine which fields to show and canProceed logic
+  const isGoogleLinkedinEmail =
+    passedData?.data?.registeredWith === "google" ||
+    passedData?.data?.registeredWith === "linkedin" ||
+    passedData?.registeredWith === "email";
+  const isPhoneNumber = passedData?.registeredWith === "phoneNumber";
+
+  const canProceed = isGoogleLinkedinEmail
+    ? isPhoneFilled
+    : isPhoneNumber
+    ? isEmailFilled
+    : false;
+console.log(isGoogleLinkedinEmail,"isGoogleLinkedinEmail");
+console.log(formData.firstname.trim() !== "","first name filled");
+console.log(canProceed,"can proceed");
 
   return (
     <StepWrapper key="step1">
       <>
-       <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
-        <h3>Personal Details</h3>
-          {passedData?.registeredWith != "google" && 
-        <div className="d-flex gap-3">
-          <input
-            className="prf-input"
-            type="text"
-            placeholder="First Name *"
-            name="firstname"
-            value={formData.firstname}
-            onChange={(e) =>
-              setFormData({ ...formData, firstname: e.target.value })
-            }
-            required
-          />
-          <input
-            className="prf-input"
-            type="text"
-            placeholder="Last Name"
-            name="lastname"
-            value={formData.lastname}
-            onChange={(e) =>
-              setFormData({ ...formData, lastname: e.target.value })
-            }
-            required
-          />
+        <div className="mb-5">
+          <img src="/assets/img/contactsLogoTransparent.png" width="120" />
         </div>
-        }
+        <h3>Personal Details</h3>
+        {/* Show name fields unless registeredWith is google */}
+        {passedData?.registeredWith != "google" && (
+          <div className="d-flex gap-3">
+            <input
+              className="prf-input"
+              type="text"
+              placeholder="First Name *"
+              name="firstname"
+              value={formData.firstname}
+              onChange={(e) =>
+                setFormData({ ...formData, firstname: e.target.value })
+              }
+              required
+            />
+            <input
+              className="prf-input"
+              type="text"
+              placeholder="Last Name"
+              name="lastname"
+              value={formData.lastname}
+              onChange={(e) =>
+                setFormData({ ...formData, lastname: e.target.value })
+              }
+              required
+            />
+          </div>
+        )}
         <input
           className="prf-input"
           type="text"
@@ -105,19 +122,8 @@ const canProceed =
         />
         {console.log(passedData, "passed dtata")}
 
-        {passedData?.registeredWith != "email" && passedData?.registeredWith != "google" ? (
-          <input
-            className="prf-input"
-            type="email"
-            placeholder="Email *"
-            name="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            required
-          />
-        ) : (
+        {/* Field rendering logic based on registration method */}
+        {isGoogleLinkedinEmail ? (
           <div className="mb-4">
             <PhoneInput
               country={"ae"}
@@ -132,7 +138,19 @@ const canProceed =
               }}
             />
           </div>
-        )}
+        ) : isPhoneNumber ? (
+          <input
+            className="prf-input"
+            type="email"
+            placeholder="Email *"
+            name="email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+            required
+          />
+        ) : null}
         <div className="prf-grid">
           {["Male", "Female", "Other"].map((userGender) => (
             <label
@@ -159,32 +177,35 @@ const canProceed =
           <button
             className="prf-next"
             onClick={async () => {
-              setIsLoading(true)
-    try {
-      const payload ={
-         "phonenumber":formData.phonenumber,
-         "email":formData.email,
-      }
-      console.log(payload,"payload checking duplicate");
-      
-      const response = await api.post("/check-duplicate-user",payload);
-      nextStep()
-setIsLoading(false)
-    } catch (error) {
-      setIsLoading(false)
-      setMessage(error.response.data.message)
-      console.error("Network Error:", error);
-    }
-  }}
-            disabled={!canProceed || isLoading}
+              setIsLoading(true);
+              try {
+                const payload = {
+                  phonenumber: formData.phonenumber,
+                  email: formData.email,
+                };
+                console.log(payload, "payload checking duplicate");
+
+                const response = await api.post(
+                  "/check-duplicate-user",
+                  payload
+                );
+                console.log(response.data,"response from checking duplicate user");
+                
+                nextStep();
+                setIsLoading(false);
+              } catch (error) {
+                setIsLoading(false);
+                setMessage(error.response.data.message);
+                console.error("Network Error:", error);
+              }
+            }}
+            disabled={!canProceed}
             style={{
               opacity: canProceed ? 1 : 0.5,
               pointerEvents: canProceed ? "auto" : "none",
             }}
           >
-            {isLoading?
-            <LoadingIndicator/>
-            :"Next"}
+            {isLoading ? <LoadingIndicator /> : "Next"}
           </button>
         </div>
       </>
@@ -198,7 +219,9 @@ const Step2 = ({ formData, setFormData }) => {
   return (
     <StepWrapper key="step2">
       <>
-       <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
+        <div className="mb-5">
+          <img src="/assets/img/contactsLogoTransparent.png" width="120" />
+        </div>
         <div className="text-end cursor-pointer" onClick={nextStep}>
           Skip
         </div>
@@ -281,8 +304,13 @@ const Step3 = ({ formData, setFormData, navigate }) => {
   return (
     <StepWrapper key="step3">
       <>
- <div className="mb-5"><img src="/assets/img/logo.svg" /></div>
- <div className="text-end cursor-pointer" onClick={() => handleFinalSubmit()}>
+        <div className="mb-5">
+          <img src="/assets/img/contactsLogoTransparent.png" width="120" />
+        </div>
+        <div
+          className="text-end cursor-pointer"
+          onClick={() => handleFinalSubmit()}
+        >
           Skip
         </div>
         <h3>Select a category that best describes you</h3>
@@ -405,7 +433,8 @@ const handleSubmit = async ({ formData }) => {
   console.log("Submitting form data:", formData);
 
   try {
-    const result = await api.post("/user-info/onboarding-submit", formData);
+    const payload = { ...formData,apiType:"web"};
+    const result = await api.post("/user-info/onboarding-submit", payload);
     console.log(result, "result from api");
 
     console.log(result.data, " Submission successful");
@@ -421,8 +450,8 @@ const PostRegistrationForm = () => {
 
   console.log("Received data from previous route:", passedData);
   const [currentStep, setCurrentStep] = useState(0);
-const [message,setMessage] = useState("")
-const [isLoading,setIsLoading] = useState(false)
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleStepChange = (step) => setCurrentStep(step);
   const [formData, setFormData] = useState({
@@ -442,7 +471,6 @@ const [isLoading,setIsLoading] = useState(false)
 
   return (
     <div className="prf-flex-container">
-      
       <div className="prf-left">
         <div>
           <Wizard onStepChange={handleStepChange}>
@@ -465,7 +493,7 @@ const [isLoading,setIsLoading] = useState(false)
           </Wizard>
         </div>
       </div>
-  
+
       <div className="prf-right">
         <img
           src={stepImages[currentStep]}

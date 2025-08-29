@@ -3,9 +3,11 @@ import appCommonReducer from "./slices/appCommonSlice";
 import commonSlice from "./commonSlice";
 import profileReducer from "./slices/ProfileSlice";
 import tagReducer from "./slices/TagSlice"
+import referralReducer from "./slices/ReferralSlice"
 import contactReducer from "./slices/ContactSlice"
 import selectedContactReducer from "./slices/SelectedContactSlice"
 import selectedTemplateReducer from "./slices/SelectedTemplateSlice"
+import activityReducer from "./slices/ActivitySlice"
 import myScansReducer from "./slices/MyScansSlice"
 import toastReducer from "./slices/ToastSlice"
 import eventReducer from "./slices/EventSlice"
@@ -16,7 +18,7 @@ import storageSession from 'redux-persist/lib/storage/session'
 const persistConfig = {
   key: "root",
   storage: storageSession,
-  whitelist: ["getUser","tags","contacts","selectedContact","setSelectedTemplate","event","myScans","email"],
+  whitelist: ["getUser","tags","contacts","selectedContact","setSelectedTemplate","event","myScans","email","activity","referral"],
 };
 const combinedReducer = combineReducers({
   common: commonSlice,       
@@ -27,9 +29,11 @@ const combinedReducer = combineReducers({
   selectedTemplate:selectedTemplateReducer,
   selectedContact: selectedContactReducer,
   toast:toastReducer,
+  referral: referralReducer,
   event:eventReducer,
   myScans:myScansReducer,
   email:emailReducer,
+  activity:activityReducer
 });
 
 const rootReducer = (state,action) => {

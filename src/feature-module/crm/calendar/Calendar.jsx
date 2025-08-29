@@ -5,7 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 import Select from "react-select";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { gapi } from "gapi-script";
 import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +16,8 @@ import dayjs from "dayjs";
 import { DatePicker, TimePicker } from "antd";
 import { all_routes } from "../../router/all_routes";
 import { saveContact } from "../../../core/data/redux/slices/ContactSlice";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import "./calendar.css";
 
 const Calendar = () => {
   const [startDate, setDate] = useState(new Date()),
@@ -34,10 +36,13 @@ const Calendar = () => {
     [currentEvents, setscurrentEvents] = useState([]);
   const [defaultEvents, setDefaultEvents] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
+  const today = dayjs();
+  const [selectedDate, setSelectedDate] = useState(today.format("YYYY-MM-DD"));
+
   const userProfile = useSelector((state) => state.profile);
   const events = useSelector((state) => state.event);
   const navigate = useNavigate();
-  console.log(selectedOption, "selectedOption");
+  console.log(events, "evendeeets");
   const dispatch = useDispatch();
   const [meetingFormData, setMeetingFormData] = useState({
     meeting_id: "",
@@ -49,6 +54,9 @@ const Calendar = () => {
     meetingStartDate: dayjs(),
     meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
   });
+  const location = useLocation();
+  const isCalendar = location.pathname.includes("calendar");
+  dayjs.extend(customParseFormat);
   const route = all_routes;
   useEffect(() => {
     setDefaultEvents(events);
@@ -122,7 +130,15 @@ const Calendar = () => {
       Object.fromEntries(formDataObj.entries())
     );
 
-    dispatch(saveContact(formDataObj));
+    try {
+  await dispatch(saveContact(formDataObj)).unwrap();
+   dispatch(profileEvents());
+  console.log("Contact saved and events updated");
+} catch (error) {
+  console.error("Error while saving contact or updating events:", error);
+
+}
+
 
     setMeetingFormData({
       meeting_id: "",
@@ -136,79 +152,6 @@ const Calendar = () => {
     });
   };
 
-  function getColor(color) {
-    switch (color) {
-      case "#2196F3":
-        return "info";
-      case "#4CAF50":
-        return "success";
-      case "#9C27B0":
-        return "purple";
-      case "#FF9800":
-        return "warning";
-      default:
-        return "primary";
-    }
-  }
-  // const defaultEvents = [
-  //   {
-  //     title: "Event Name 4",
-  //     start: Date.now() + 148000000,
-  //     className: "bg-purple",
-  //   },
-  //   {
-  //     title: "Test Event 1",
-  //     start: Date.now(),
-  //     end: Date.now(),
-  //     className: "bg-success",
-  //   },
-  //   {
-  //     title: "Test Event 2",
-  //     start: Date.now() + 168000000,
-  //     className: "bg-info",
-  //   },
-  //   {
-  //     title: "Test Event 3",
-  //     start: Date.now() + 338000000,
-  //     className: "bg-primary",
-  //   },
-  // ];
-  // const now = new Date();
-  // const oneYearLater = new Date();
-  // oneYearLater.setFullYear(now.getFullYear() + 1);
-  // const fetchGoogleCalendarEvents = async () => {
-  //   try {
-  //     const response = await gapi.client.calendar.events.list({
-  //       calendarId: "primary",
-  //       timeMin: new Date().toISOString(),
-  //       showDeleted: false,
-  //       singleEvents: true,
-  //       timeMax: oneYearLater.toISOString(),
-  //       maxResults: 100,
-  //       orderBy: "startTime",
-  //     });
-  //     console.log("All events from the google :", response.result.items);
-
-  //     const events = response.result.items.map((event) => ({
-  //       title: event.summary || "Untitled",
-  //       start: event.start?.dateTime || event.start?.date,
-  //       end: event.end?.dateTime || event.end?.date,
-  //       className: "bg-primary",
-  //       googleEvent: true,
-  //     }));
-
-  //     setDefaultEvents(events);
-  //   } catch (error) {
-  //     console.error("Failed to fetch events from Google Calendar", error);
-  //   }
-  // };
-  // console.log(defaultEvents, "default events");
-
-  // useEffect(() => {
-  //   if (isGoogleSignedIn) {
-  //     fetchGoogleCalendarEvents();
-  //   }
-  // }, [isGoogleSignedIn]);
   const handleMeetingInputChange = (name, value) => {
     setMeetingFormData({
       ...meetingFormData,
@@ -226,79 +169,39 @@ const Calendar = () => {
     elements.map((element) => element.classList.add("width-100"));
   }, []);
 
-  const addEvent = () => {
-    setshowEvents(true);
-  };
-  const categoryHandler = () => {
-    setshowCategory(true);
-  };
+  const [currentMonth, setCurrentMonth] = useState(dayjs());
 
-  const handleClose = () => {
-    setisnewevent(false);
-    setiseditdelete(false);
-    setshow(false);
-    setshowCategory(false);
-    setshowEvents(false);
-    setshowmodel(false);
-  };
-
-  const handleEventClick = (clickInfo) => {
-    setiseditdelete(false);
-    setevent_title(clickInfo.event.title);
-    setcalenderevent(clickInfo.event);
+  const getCalendarGrid = () => {
+    const startOfMonth = currentMonth.startOf("month");
+    const endOfMonth = currentMonth.endOf("month");
+    const startDay = startOfMonth.startOf("week");
+    const endDay = endOfMonth.endOf("week");
+    const days = [];
+    let day = startDay;
+    while (day.isBefore(endDay) || day.isSame(endDay, "day")) {
+      days.push(day);
+      day = day.add(1, "day");
+    }
+    return days;
   };
 
-  const handleDateSelect = (selectInfo) => {
-    setisnewevent(true);
-    setaddneweventobj(selectInfo);
-  };
+  const eventsByDate = events.reduce((acc, event) => {
+    const date = dayjs(event.start).format("YYYY-MM-DD");
+    if (!acc[date]) acc[date] = [];
+    acc[date].push(event);
+    return acc;
+  }, {});
+  const days = getCalendarGrid();
 
-  const onupdateModalClose = () => {
-    setiseditdelete(false);
-    setevent_title("");
-  };
 
-  const handleClick = () => {
-    setshow(true);
-  };
-
-  const options1 = [
-    { value: "Success", label: "Success" },
-    { value: "Danger", label: "Danger" },
-    { value: "Info", label: "Info" },
-    { value: "Primary", label: "Primary" },
-    { value: "Warning", label: "Warning" },
-    { value: "Inverse", label: "Inverse" },
-  ];
-
-  const defaultValue = options1[0];
-
-  const calendarEvents = events.map((event) => ({
-    title: event.title,
-    start: event.start,
-    end: event.end || event.start,
-    className: event.type === "meeting" ? "bg-primary" : "bg-secondary",
-    id: event.event_id,
-    extendedProps: {
-      event_id: event.event_id,
-      contact_id: event.contact_id,
-      type: event.type,
-      contact_name: event.contact_name,
-      location: event.location,
-      meetingType: event.meetingType,
-      link: event.link,
-      startTime: event.startTime,
-      endTime: event.endTime,
-    },
-  }));
   return (
     <>
-      <div className="page-wrapper">
+      <div className={isCalendar ? "page-wrapper" : ""}>
         <div className="content">
           <div className="page-header">
             <div className="row align-items-center w-100">
               <div className="col-lg-10 col-sm-12">
-                <h3 className="page-title">Calendar</h3>
+                <h3 className="page-title">{isCalendar ? "Calendar" : ""}</h3>
               </div>
               <div className="col-lg-2 col-sm-12 d-flex justify-content-end p-0">
                 <Link
@@ -313,104 +216,141 @@ const Calendar = () => {
             </div>
           </div>
           <div className="row">
-            <div className="col-12">
-              <div className="card bg-white">
-                <div className="card-body">
-                  <FullCalendar
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                    headerToolbar={{
-                      left: "prev,next today",
-                      center: "title",
-                      right: "dayGridMonth,timeGridWeek,timeGridDay",
-                    }}
-                    initialView="dayGridMonth"
-                    editable={true}
-                    height={"70vh"}
-                    selectable={true}
-                    events={calendarEvents}
-                    selectMirror={true}
-                    dayMaxEvents={true}
-                    weekends={weekendsVisible}
-                    // initialEvents={defaultEvents}
-                    select={handleDateSelect}
-                    // eventClick={(clickInfo) => handleEventClick(clickInfo)}
-                    eventClick={async (eventInfo) => {
-                      const event = eventInfo.event;
-                      const props = event.extendedProps;
-                      try {
-                        console.log(props.contact_id, "props.contact_id");
+            <div className="col-6">
+              {selectedDate && (
+                <div className="selected-events mt-6">
+                  <h5 className="text-lg font-semibold mb-3 text-gray-700">
+                    Events on {dayjs(selectedDate).format("DD MMM YYYY")}
+                  </h5>
 
-                        const response = await api.post("/getContactById", {
-                          contact_id: props.contact_id,
-                        });
-                        console.log(
-                          response.data,
-                          "response from fetch single contact"
-                        );
-                        dispatch(setSelectedContact(response.data.data));
-                      } catch (error) {}
-                      navigate("/contacts-details", {
-                        state: { tab: "meeting" },
-                      });
-                      console.log("Clicked event:", {
-                        title: event.title,
-                        type: props.type,
-                        eventId: props.event_id,
-                        contactId: props.contact_id,
-                        contactName: props.contact_name,
-                        location: props.location,
-                        meetingType: props.meetingType,
-                        link: props.link,
-                        timeRange: `${props.startTime} - ${props.endTime}`,
-                      });
-                    }}
-                  />
+                  {eventsByDate[selectedDate]?.length > 0 ? (
+                    <div>
+                      {eventsByDate[selectedDate].map((event) => (
+                        // <div
+                        //   key={event.event_id}
+                        //   className="dashboardSmallCards px-3 py-2 mb-2"
+                        // >
+                        //   <div className="d-flex justify-content-between items-center">
+                        //     <h6 className="font-bold text-blue-600">{event.title}</h6>
+                        //     <p className="text-sm text-gray-600">
+                        //       🕒 {dayjs(event.start).format("hh:mm A")}
+                        //     </p>
+                        //   </div>
+                        //   {event.description && (
+                        //     <p className="mt-2 text-gray-700">{event.description}</p>
+                        //   )}
+                        // </div>
+                        <div
+                          key={event.event_id}
+                          className="dashboardSmallCards px-3 py-2 mb-2"
+                        >
+                          <p className="text-sm text-gray-600 whitespace-nowrap">
+                            🕒{" "}
+                            {dayjs(event.startTime, "HH:mm").format("hh:mm A")}
+                          </p>
+                          <div className="d-flex justify-content-between items-center">
+                            <h6 className="font-bold text-blue-600 truncate max-w-[200px]">
+                              {event.title}
+                            </h6>
+                          </div>
+
+                          {/* {event.description && (
+                            <p className="mt-2 text-gray-700 line-clamp-2">
+                              {event.description}
+                            </p>
+                          )} */}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 italic">No events</p>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="col-6">
+              <div className="custom-calendar-wrapper mb-4">
+                <div className="calendar-header">
+                  <div
+                    onClick={() =>
+                      setCurrentMonth(currentMonth.subtract(1, "month"))
+                    }
+                    className="calendar-nav"
+                  >
+                    {"<"}
+                  </div>
+                  <span>{currentMonth.format("MMMM YYYY")}</span>
+                  <div
+                    onClick={() =>
+                      setCurrentMonth(currentMonth.add(1, "month"))
+                    }
+                    className="calendar-nav"
+                  >
+                    {">"}
+                  </div>
+                </div>
+                <div className="calendar-grid">
+                  {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
+                    <div className="calendar-cell calendar-cell-header" key={d}>
+                      {d}
+                    </div>
+                  ))}
+                  {/* {days.map((day, idx) => {
+                    const isCurrentMonth = day.month() === currentMonth.month();
+                    const isToday = day.isSame(today, "day");
+                    const dayEvents =
+                      eventsByDate[day.format("YYYY-MM-DD")] || [];
+                    return (
+                      <div
+                        key={idx}
+                        className={`calendar-cell${
+                          isCurrentMonth ? "" : " calendar-cell-outside"
+                        }${isToday ? " calendar-cell-today" : ""}`}
+                      >
+                        <div className="calendar-date">{day.date()}</div>
+                        {dayEvents.length > 0 && (
+                          <div
+                            className={`calendar-event-indicator`}
+                            style={{
+                              backgroundColor: isToday ? "white" : "",
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })} */}
+                  {days.map((day, idx) => {
+                    const isCurrentMonth = day.month() === currentMonth.month();
+                    const isToday = day.isSame(today, "day");
+                    const dayEvents =
+                      eventsByDate[day.format("YYYY-MM-DD")] || [];
+
+                    return (
+                      <div
+                        key={idx}
+                        className={`calendar-cell${
+                          isCurrentMonth ? "" : " calendar-cell-outside"
+                        }${isToday ? " calendar-cell-today" : ""}`}
+                        onClick={() =>
+                          setSelectedDate(day.format("YYYY-MM-DD"))
+                        } // 👈 set clicked date
+                      >
+                        <div className="calendar-date">{day.date()}</div>
+                        {dayEvents.length > 0 && (
+                          <div
+                            className={`calendar-event-indicator`}
+                            style={{ backgroundColor: isToday ? "white" : "" }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      {/* Add Event Modal */}
-      <div id="add_event" className="modal custom-modal fade" role="dialog">
-        <div className="modal-dialog modal-dialog-centered" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Add Event</h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">x</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="form-group">
-                  <label>
-                    Event Name <span className="text-danger">*</span>
-                  </label>
-                  <input className="form-control" type="text" />
-                </div>
-                <div className="form-group">
-                  <label>
-                    Event Date <span className="text-danger">*</span>
-                  </label>
-                  <div className="cal-icon">
-                    <input className="form-control " type="text" />
-                  </div>
-                </div>
-                <div className="submit-section">
-                  <button className="btn btn-primary submit-btn">Submit</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* /Add Event Modal */}
       <div
         className="modal custom-modal fade modal-padding"
         id="add_meeting"
@@ -634,92 +574,6 @@ const Calendar = () => {
           </div>
         </div>
       </div>
-      {/* Add Event Modal */}
-      <div className="modal custom-modal fade none-border" id="my_event">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h4 className="modal-title">Add Event</h4>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-hidden="true"
-              ></button>
-            </div>
-            <div className="modal-body" />
-            <div className="modal-footer justify-content-center">
-              <button
-                type="button"
-                className="btn btn-success save-event submit-btn"
-              >
-                Create event
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger delete-event submit-btn"
-                data-dismiss="modal"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* /Add Event Modal */}
-      {/* Add Category Modal */}
-      <div className="modal custom-modal fade" id="add_new_event">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h4 className="modal-title">Add Category</h4>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-hidden="true"
-              >
-                <span aria-hidden="true">x</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="form-group">
-                  <label className="col-form-label">Category Name</label>
-                  <input
-                    className="form-control form-white"
-                    placeholder="Enter name"
-                    type="text"
-                    name="category-name"
-                  />
-                </div>
-                <div className="form-group mb-0  mt-3">
-                  <label className="col-form-label">
-                    Choose Category Color
-                  </label>
-                  <Select
-                    className="form-white"
-                    defaultValue={defaultValue}
-                    options={options1}
-                    placeholder="Success"
-                    classNamePrefix="react-select"
-                  />
-                </div>
-                <div className="submit-section">
-                  <button
-                    type="button"
-                    className="btn btn-primary save-category submit-btn"
-                    data-dismiss="modal"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* /Add Category Modal */}
     </>
   );
 };

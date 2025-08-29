@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import CollapseHeader from "../../../core/common/collapse-header";
 import { SlPeople } from "react-icons/sl";
@@ -14,8 +14,12 @@ const route = all_routes;
 const MyScans = () => {
   const dispatch = useDispatch();
   const allScans = useSelector((state) => state.myScans);
+  const location = useLocation();
   console.log(allScans, "allScans");
-
+  const [activeTab, setActiveTab] = useState(() =>
+    window.location.hash === "#myScans" ? "myScans" : "scannedMe"
+  );
+  
   useEffect(() => {
     dispatch(myScans());
   }, []);
@@ -43,7 +47,25 @@ const MyScans = () => {
 
     dispatch(saveContact(formData));
   };
+  function activateScanTab(hash) {
+    console.log("Activating tab via React state:", hash);
+    if (hash === "myScans" || hash === "scannedMe") {
+      setActiveTab(hash);
+    }
+  }
+  useEffect(() => {
+    const run = () => {
+      const hash = window.location.hash.replace("#", "");
+      console.log("Current hash:", hash);
+      if (hash === "myScans" || hash === "scannedMe") {
+        activateScanTab(hash);
+      }
+    };
 
+    run();
+    window.addEventListener("hashchange", run);
+    return () => window.removeEventListener("hashchange", run);
+  }, [location]);
   return (
     <div>
       {/* Page Wrapper */}
@@ -66,9 +88,9 @@ const MyScans = () => {
                             Security
                           </Link>
                           <Link to={route.emailSetup} className="fw-medium">
-                            Connected Mails
+                            Sync and Integration
                           </Link>
-                          <Link to={route.myScans} className="fw-medium active">
+                          <Link to={route.scans} className="fw-medium active">
                             My Scans
                           </Link>
                           <Link to={route.upgradePlan} className="fw-medium">
@@ -93,10 +115,21 @@ const MyScans = () => {
                           >
                             <li className="nav-item" role="presentation">
                               <Link
-                                to="#"
+                                to="#myScans"
                                 data-bs-toggle="tab"
                                 data-bs-target="#myScans"
-                                className="nav-link active"
+                                // className="nav-link active"
+                                // onClick={() => {
+                                //   window.location.hash = "myScans";
+                                //   activateScanTab("myScans");
+                                // }}
+                                className={`nav-link${
+                                  activeTab === "myScans" ? " active" : ""
+                                }`}
+                                onClick={() => {
+                                  window.location.hash = "myScans";
+                                  activateScanTab("myScans");
+                                }}
                               >
                                 <FaTasks className="me-2" />
                                 My Scans
@@ -104,10 +137,21 @@ const MyScans = () => {
                             </li>
                             <li className="nav-item" role="presentation">
                               <Link
-                                to="#"
+                                to="#scannedMe"
                                 data-bs-toggle="tab"
                                 data-bs-target="#scannedMe"
-                                className="nav-link"
+                                // className="nav-link"
+                                // onClick={() => {
+                                //   window.location.hash = "scannedMe";
+                                //   activateScanTab("scannedMe");
+                                // }}
+                                className={`nav-link${
+                                  activeTab === "scannedMe" ? " active" : ""
+                                }`}
+                                onClick={() => {
+                                  window.location.hash = "scannedMe";
+                                  activateScanTab("scannedMe");
+                                }}
                               >
                                 <SlPeople className="me-2" />
                                 Scanned Me
@@ -117,7 +161,12 @@ const MyScans = () => {
                         </div>
                       </div>
                       <div className="tab-content pt-0">
-                        <div className="tab-pane fade show active" id="myScans">
+                        <div
+                          className={`tab-pane fade${
+                            activeTab === "myScans" ? " show active" : ""
+                          }`}
+                          id="myScans"
+                        >
                           <div className="card">
                             <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
                               <h4 className="fw-semibold">My Scans</h4>
@@ -125,7 +174,7 @@ const MyScans = () => {
                             </div>
                             {allScans.filter((scan) => scan.iScanned === true)
                               .length > 0 ? (
-                              <div className="row mt-5 px-5">
+                              <div className="row mt-5 px-2">
                                 {allScans
                                   .filter((scan) => scan.iScanned === true)
                                   .map((scan) => {
@@ -133,16 +182,16 @@ const MyScans = () => {
 
                                     const phoneNumber =
                                       parsePhoneNumberFromString(phone);
-                                    console.log(scan, "gfasjgdaj");
+                           
                                     const country =
                                       phoneNumber?.country?.toLowerCase();
                                     return (
                                       <div
-                                        className="col-md-3 mb-3"
+                                        className="col-md-4 mb-2"
                                         key={scan.id}
                                       >
-                                        <div className="card">
-                                          <div className="card-body">
+                                        <div className="card mb-0 pb-0 ">
+                                          <div className="card-body overflow-x-auto no-scrollbar " style={{padding: "0.5rem 1rem"}}>
                                             {/* {scan.profileImageURL ? (
                                             <AvatarInitialStyles
                                               name={`${scan.firstname} ${scan.lastname}`}
@@ -162,14 +211,20 @@ const MyScans = () => {
                                             <h5 className="fw-bold">
                                               <div className="d-flex align-items-center">
                                                 {" "}
-                                                <span className="text-capitalize">
+                                                <span
+                                                  className="text-capitalize"
+                                                  style={{ fontSize: 14 }}
+                                                >
                                                   {scan.firstname}{" "}
                                                   {scan.lastname}
                                                 </span>
                                               </div>
                                             </h5>
                                             <h6 className="text-lowercase">
-                                              <div className="d-flex align-items-center">
+                                              <div
+                                                className="d-flex align-items-center"
+                                                style={{ fontSize: 12 }}
+                                              >
                                                 <i class="fa-regular fa-envelope me-2"></i>
                                                 <a
                                                   href={`mailto:${scan.email}`}
@@ -187,7 +242,10 @@ const MyScans = () => {
                                           </h6> */}
 
                                             <h6 className="text-lowercase">
-                                              <div className="d-flex align-items-center">
+                                              <div
+                                                className="d-flex align-items-center"
+                                                style={{ fontSize: 12 }}
+                                              >
                                                 {country && (
                                                   <img
                                                     src={`https://flagcdn.com/24x18/${country}.png`}
@@ -219,7 +277,12 @@ const MyScans = () => {
                             )}
                           </div>
                         </div>
-                        <div className="tab-pane " id="scannedMe">
+                        <div
+                          className={`tab-pane fade${
+                            activeTab === "scannedMe" ? " show active" : ""
+                          }`}
+                          id="scannedMe"
+                        >
                           <div className="card">
                             <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
                               <h4 className="fw-semibold">Scanned Me</h4>
@@ -227,7 +290,7 @@ const MyScans = () => {
                             </div>
                             {allScans.filter((scan) => scan.iScanned === false)
                               .length > 0 ? (
-                              <div className="row mt-5">
+                              <div className="row mt-5 px-2">
                                 {allScans
                                   .filter((scan) => scan.iScanned === false)
                                   .map((scan) => {
@@ -240,11 +303,11 @@ const MyScans = () => {
                                       phoneNumber?.country?.toLowerCase();
                                     return (
                                       <div
-                                        className="col-md-3 mb-3"
+                                        className="col-md-4 mb-2"
                                         key={scan.id}
                                       >
-                                        <div className="card">
-                                          <div className="card-body overflow-x-auto no-scrollbar">
+                                        <div className="card mb-0 pb-0">
+                                          <div className="card-body overflow-x-auto no-scrollbar" style={{padding: "0.5rem 1rem"}}>
                                             {/* {scan.profileImageURL ? (
                                           <AvatarInitialStyles
                                             name={`${scan.firstname} ${scan.lastname}`}
@@ -263,7 +326,10 @@ const MyScans = () => {
                                         )} */}
                                             <h5 className="fw-bold d-flex justify-content-between align-items-center">
                                               <div className="d-flex align-items-center">
-                                                <span className="text-capitalize">
+                                                <span
+                                                  className="text-capitalize"
+                                                  style={{ fontSize: 14 }}
+                                                >
                                                   {scan.firstname}{" "}
                                                   {scan.lastname}
                                                 </span>
@@ -279,7 +345,10 @@ const MyScans = () => {
                                               </button> */}
                                             </h5>
                                             <h6 className="text-lowercase">
-                                              <div className="d-flex align-items-center">
+                                              <div
+                                                className="d-flex align-items-center"
+                                                style={{ fontSize: 12 }}
+                                              >
                                                 <i class="fa-regular fa-envelope me-2"></i>
                                                 <a
                                                   href={`mailto:${scan.email}`}
@@ -290,8 +359,11 @@ const MyScans = () => {
                                               </div>
                                             </h6>
                                             {scan.phonenumbers.length > 0 && (
-                                              <h6 className="text-lowercase">
-                                                <div className="d-flex align-items-center">
+                                              <h6 className="text-lowercase mb-0">
+                                                <div
+                                                  className="d-flex align-items-center"
+                                                  style={{ fontSize: 12 }}
+                                                >
                                                   {country && (
                                                     <img
                                                       src={`https://flagcdn.com/24x18/${country}.png`}

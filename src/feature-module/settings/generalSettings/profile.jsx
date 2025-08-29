@@ -20,7 +20,7 @@ const Profile = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
- const [passwordVisibility, setPasswordVisibility] = useState({
+  const [passwordVisibility, setPasswordVisibility] = useState({
     password: false,
     confirmPassword: false,
   });
@@ -41,9 +41,9 @@ const Profile = () => {
     email: "",
     phone: "",
     phonePassword: "",
-    emailPassword:""
+    emailPassword: "",
   });
- const togglePasswordVisibility = (field) => {
+  const togglePasswordVisibility = (field) => {
     setPasswordVisibility((prevState) => ({
       ...prevState,
       [field]: !prevState[field],
@@ -84,7 +84,7 @@ const Profile = () => {
     data.append("firstname", formData.firstname);
     data.append("lastname", formData.lastname);
     data.append("email", formData.email);
-    data.append("phonenumbers", formData.phoneNumbers);
+    data.append("phonenumber", formData.phoneNumbers);
     // data.append("profileImage", formData.profileImage);
     if (formData.profileImage === null) {
       data.append("profileImage", null);
@@ -137,9 +137,12 @@ const Profile = () => {
                           Security
                         </Link>
                         <Link to={route.emailSetup} className="fw-medium">
-                          Connected Mails
+                          Sync and Integration
                         </Link>
-                        <Link to={route.myScans} className="fw-medium">
+                        <Link
+                          to={`${route.scans}#myScans`}
+                          className="fw-medium"
+                        >
                           My Scans
                         </Link>
                         <Link to={route.upgradePlan} className="fw-medium">
@@ -327,6 +330,37 @@ const Profile = () => {
                                   autoFocus: true,
                                 }}
                               />
+                              
+                              {/* <PhoneInput
+  country={"ae"}
+  value={formData.phoneNumbers}
+  onChange={handleOnPhoneChange}
+  enableSearch
+  inputProps={{
+    name: "phone",
+    required: true,
+    autoFocus: true,
+  }}
+  inputStyle={{
+    height: "40px",
+    border: "1px solid #1890ff", // ✅ border color
+    borderRadius: "6px",
+    width: "100%",
+    paddingLeft: "48px",
+    fontSize: "14px",
+    boxShadow: "0px 4px 4px 0px rgba(219, 219, 219, 0.25)", // ✅ box shadow
+    outline: "none",
+  }}
+  buttonStyle={{
+    border: "none",
+    backgroundColor: "transparent",
+  }}
+  containerStyle={{
+    width: "100%",
+  }}
+/> */}
+
+
                             </div>
                           </div>
 
@@ -350,9 +384,7 @@ const Profile = () => {
                                 type="text"
                                 name="email"
                                 value={formData.email}
-                                disabled={
-                                  userProfile.signupMethod === "google"
-                                }
+                                disabled={userProfile.signupMethod === "google"}
                                 onChange={handleChange}
                                 className="form-control"
                               />
@@ -573,47 +605,50 @@ const Profile = () => {
                           </li>
                         </ul>
                         <div className="tab-content pt-0">
-                        <div className="tab-pane fade active show" id="email">
-                          <div className="mb-3">
-                             <div className="position-relative">
-                          <span className="input-icon-addon">
-                            <i className="ti ti-mail"></i>
-                          </span>
-                            <input
-                              type="text"
-                              name="email"
-                              value={changeSignin.email}
-                              onChange={handleChangeSignin}
-                              className="form-control"
-                            />
+                          <div className="tab-pane fade active show" id="email">
+                            <div className="mb-3">
+                              <div className="position-relative">
+                                <span className="input-icon-addon">
+                                  <i className="ti ti-mail"></i>
+                                </span>
+                                <input
+                                  type="text"
+                                  name="email"
+                                  value={changeSignin.email}
+                                  onChange={handleChangeSignin}
+                                  className="form-control"
+                                />
+                              </div>
+                            </div>
+                            <div className="mb-3">
+                              <label className="form-label">Password </label>
+                              <div className="pass-group">
+                                <input
+                                  type={
+                                    passwordVisibility.password
+                                      ? "text"
+                                      : "password"
+                                  }
+                                  className="pass-input form-control"
+                                  value={changeSignin.emailPassword}
+                                  onChange={handleChangeSignin}
+                                />
+                                <span
+                                  className={`ti toggle-passwords ${
+                                    passwordVisibility.password
+                                      ? "ti-eye"
+                                      : "ti-eye-off"
+                                  }`}
+                                  onClick={() =>
+                                    togglePasswordVisibility("password")
+                                  }
+                                ></span>
+                              </div>
+                            </div>
                           </div>
-                          </div>
-                          <div className="mb-3">
-                            <label className="form-label">Password </label>
-                           <div className="pass-group">
-                        <input
-                          type={
-                            passwordVisibility.password ? "text" : "password"
-                          }
-                          className="pass-input form-control"
-                          value={changeSignin.emailPassword}
-                          onChange={handleChangeSignin}
-                        />
-                        <span
-                          className={`ti toggle-passwords ${
-                            passwordVisibility.password
-                              ? "ti-eye"
-                              : "ti-eye-off"
-                          }`}
-                          onClick={() => togglePasswordVisibility("password")}
-                        ></span>
-                      </div>
-                          </div>
-                        </div>
-                        <div className="tab-pane fade" id="phone">
-                          <div className="mb-3">
-                            
-                           <PhoneInput
+                          <div className="tab-pane fade" id="phone">
+                            <div className="mb-3">
+                              <PhoneInput
                                 country={"ae"}
                                 value={changeSignin.phone}
                                 onChange={handleOnPhoneChange}
@@ -627,18 +662,18 @@ const Profile = () => {
                                   autoFocus: true,
                                 }}
                               />
+                            </div>
+                            <div className="mb-3">
+                              <label className="form-label">Password </label>
+                              <input
+                                type="text"
+                                name="password"
+                                value={changeSignin.phonePassword}
+                                onChange={handleChangeSignin}
+                                className="form-control"
+                              />
+                            </div>
                           </div>
-                          <div className="mb-3">
-                            <label className="form-label">Password </label>
-                            <input
-                              type="text"
-                              name="password"
-                              value={changeSignin.phonePassword}
-                              onChange={handleChangeSignin}
-                              className="form-control"
-                            />
-                          </div>
-                        </div>
                         </div>
                         <div className="d-flex align-items-center justify-content-center mt-4">
                           <Link

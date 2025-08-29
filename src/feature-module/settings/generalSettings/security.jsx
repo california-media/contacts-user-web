@@ -15,27 +15,27 @@ const Security = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
- const userProfile = useSelector((state) => state.profile);
- console.log(userProfile,"userProfile in security");
- 
+  const userProfile = useSelector((state) => state.profile);
+  console.log(userProfile, "userProfile in security");
+
   const togglePasswordVisibility = () => {
     setPasswordVisible((prev) => !prev);
   };
-  const handleChangePassword = async(e) => {
-    e.preventDefault()
-try {
-  const response = await api.post("changePassword", {newPassword:password} )
-console.log(response.data,"response from change password");
-dispatch(
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post("changePassword", {
+        newPassword: password,
+      });
+      console.log(response.data, "response from change password");
+      dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
-} catch (error) {
-  dispatch(
+    } catch (error) {
+      dispatch(
         showToast({ message: error.response.data.message, variant: "danger" })
       );
-}
-
-    
+    }
   };
   const handleDeleteAccount = async () => {
     try {
@@ -80,9 +80,12 @@ dispatch(
                             Security
                           </Link>
                           <Link to={route.emailSetup} className="fw-medium">
-                            Connected Mails
+                            Sync and Integration
                           </Link>
-                          <Link to={route.myScans} className="fw-medium">
+                          <Link
+                            to={`${route.scans}#myScans`}
+                            className="fw-medium"
+                          >
                             My Scans
                           </Link>
                           <Link to={route.upgradePlan} className="fw-medium">
@@ -100,27 +103,29 @@ dispatch(
                     <div className="card-body pb-0">
                       <h4 className="fw-semibold mb-3">Security Settings</h4>
                       <div className="row">
-                        {userProfile.signupMethod!=="google" &&<div className="col-lg-4 col-md-6 d-flex">
-                          <div className="card border shadow-none flex-fill mb-3">
-                            <div className="card-body d-flex justify-content-between flex-column">
-                              <div className="mb-3">
-                                <div className="d-flex align-items-center justify-content-between mb-1">
-                                  <h6 className="fw-semibold">Password</h6>
+                        {userProfile.signupMethod !== "google" && (
+                          <div className="col-lg-4 col-md-6 d-flex">
+                            <div className="card border shadow-none flex-fill mb-3">
+                              <div className="card-body d-flex justify-content-between flex-column">
+                                <div className="mb-3">
+                                  <div className="d-flex align-items-center justify-content-between mb-1">
+                                    <h6 className="fw-semibold">Password</h6>
+                                  </div>
                                 </div>
-                              </div>
-                              <div>
-                                <Link
-                                  to="#"
-                                  className="btn btn-light"
-                                  data-bs-toggle="modal"
-                                  data-bs-target="#change_password"
-                                >
-                                  Change Password
-                                </Link>
+                                <div>
+                                  <Link
+                                    to="#"
+                                    className="btn btn-light"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#change_password"
+                                  >
+                                    Change Password
+                                  </Link>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>}
+                        )}
                         <div className="col-lg-4 col-md-6 d-flex">
                           <div className="card border shadow-none flex-fill mb-3">
                             <div className="card-body d-flex justify-content-between flex-column">
@@ -314,7 +319,7 @@ dispatch(
             </div>
           </div>
         </div>
-       
+
         {/* /Delete Account */}
       </>
     </div>

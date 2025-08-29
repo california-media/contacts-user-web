@@ -90,7 +90,7 @@ const LeadOffcanvas = ({ selectedContact }) => {
       <ul style="line-height: 1.6;">
         <li><strong>Email:</strong> ${userProfile.email}</li>
         <li><strong>Phone:</strong> ${userProfile.phonenumbers[0]}</li>
-        <li><strong>More Information:</strong> <a href="https://contacts-user-web.vercel.app/shareProfile/${userProfile.firstname}${userProfile.serialNumber}">My Digital Business Card →</a></li>
+        <li><strong>More Information:</strong> <a href="https://app.contacts.management/shareProfile/${userProfile.firstname}${userProfile.serialNumber}">My Digital Business Card →</a></li>
       </ul>
 
       <p>Best regards,</p>
@@ -166,7 +166,7 @@ console.log(formData.email,"emaillsdfsd");
         selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
       )
     );
-    formDataObj.append("phonenumbers", formData.phone);
+    formDataObj.append("phonenumber", formData.phone);
     formDataObj.append("instagram", formData.instagram);
     formDataObj.append("twitter", formData.twitter);
     formDataObj.append("linkedin", formData.linkedin);

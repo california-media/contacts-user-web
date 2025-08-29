@@ -49,7 +49,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: calc(100% - 80px);
+  max-width: calc(100% - 110px);
 }
 .hoverable-cell:hover .customer-name {
   white-space: nowrap;
@@ -69,7 +69,7 @@
   color: darkgreen;
 }
 .action-icons{
-    background-color: #fafafa;
+    background-color: transparent;
 }
 
 .popup input.form-control{

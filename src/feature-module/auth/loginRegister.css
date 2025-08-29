@@ -1,0 +1,19 @@
+.login-slider {
+  height: 100vh; /* Full height column */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-slider .slick-slider,
+.login-slider .slick-list,
+.login-slider .slick-track,
+.login-slider .slick-slide > div {
+  height: 100%;
+}
+
+.lottie-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

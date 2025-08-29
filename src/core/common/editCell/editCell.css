@@ -2,9 +2,23 @@
     color: #2c5cc5 !important;
     cursor: pointer;
 }
+.editable-cell span {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
 
 .editable-cell {
     position: relative;
+
+
+
+      display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .edit-icon {

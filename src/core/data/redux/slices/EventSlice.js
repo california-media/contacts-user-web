@@ -6,7 +6,7 @@ export const profileEvents = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.post("/getProfileEvent");
-console.log(response.data,"response from profile events");
+      console.log(response.data,"response from profile events");
 
       return response.data.data;
     } catch (error) {

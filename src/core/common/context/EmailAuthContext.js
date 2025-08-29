@@ -31,6 +31,8 @@ export const EmailAuthProvider = ({ children }) => {
         const messageHandler = (event) => {
           console.log("origin:", event.origin);
           console.log("data:", event.data);
+         
+          
 
           const data = event.data;
           if (data?.status === "success" && data.googleConnected) {

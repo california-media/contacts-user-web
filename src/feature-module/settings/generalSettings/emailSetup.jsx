@@ -90,10 +90,16 @@ const EmailSetup = () => {
                           <Link to={route.security} className="fw-medium">
                             Security
                           </Link>
-                          <Link to={route.emailSetup} className="fw-medium active">
-                            Connected Mails
+                          <Link
+                            to={route.emailSetup}
+                            className="fw-medium active"
+                          >
+                            Sync and Integration
                           </Link>
-                          <Link to={route.myScans} className="fw-medium">
+                          <Link
+                            to={`${route.scans}#myScans`}
+                            className="fw-medium"
+                          >
                             My Scans
                           </Link>
                           <Link to={route.upgradePlan} className="fw-medium">
@@ -107,17 +113,19 @@ const EmailSetup = () => {
                 <div className="col-xl-9 col-lg-12">
                   <div className="card">
                     <div className="card-body">
-                      <h4 className="fw-semibold mb-3">Connected Emails</h4>
-                      <div className="card mb-3">
-                        <div className="row">
+                      <h4 className="fw-semibold mb-3">Sync and integration</h4>
+                      <div>
+                        {/* <div className="row">
                           {userProfile?.accounts?.map((account, index) => {
                             const type = account.type.toLowerCase();
                             const isConnected = account.isConnected;
+                            console.log(account, "account");
+                            
 
                             return (
                               <div className="col-md-4 col-sm-6" key={index}>
                                 <div className="card border mb-3">
-                                  <div className="card-body">
+                                  <div className="card-body pb-0">
                                     <div className="d-flex align-items-center justify-content-between mb-3">
                                       <ImageWithBasePath
                                         src={`assets/img/icons/${iconMap[type]}`}
@@ -152,6 +160,66 @@ const EmailSetup = () => {
                                         />
                                       </div>
                                     </div>
+                                    {account.email &&<p className="mb-0 text-muted mt-3">
+                                      ({account.email})
+                                    </p>}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div> */}
+                        <div className="row">
+                          {userProfile?.accounts?.map((account, index) => {
+                            const type = account.type.toLowerCase();
+                            const isConnected = account.isConnected;
+
+                            return (
+                              <div
+                                className="col-md-4 mb-md-0 mb-2 col-sm-6 d-flex"
+                                key={index}
+                              >
+                                <div className="card border mb-3 h-100 w-100 pb-0">
+                                  <div className="card-body pb-0">
+                                    <div className="d-flex align-items-center justify-content-between mb-3">
+                                      <ImageWithBasePath
+                                        src={`assets/img/icons/${iconMap[type]}`}
+                                        width={50}
+                                        alt={`${account.type} Icon`}
+                                      />
+                                      <div className="connect-btn">
+                                        <Link
+                                          to="#"
+                                          className="badge badge-soft-success"
+                                        >
+                                          {isConnected
+                                            ? "Connected"
+                                            : "Not Connected"}
+                                        </Link>
+                                      </div>
+                                    </div>
+
+                                    <div className="d-flex align-items-center justify-content-between">
+                                      <p className="mb-0 text-capitalize">
+                                        {account.type}
+                                      </p>
+                                      <div className="form-check form-switch">
+                                        <input
+                                          className="form-check-input"
+                                          type="checkbox"
+                                          role="switch"
+                                          checked={account.isConnected}
+                                          onChange={() =>
+                                            toggleHandlers(account)
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                    {account.email && (
+                                      <p className="mb-0 text-muted mt-3">
+                                        ({account.email})
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -323,7 +391,7 @@ const EmailSetup = () => {
                       smtpSignIn(formData);
                     }}
                   >
-                   Save Info
+                    Save Info
                   </Link>
                 </div>
               </div>

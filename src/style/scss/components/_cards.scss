@@ -3,9 +3,12 @@
     background-color: $white;
     transition: all .5s ease-in-out;
     position: relative;
-    border-radius: $border-radius-lg;
-    border: 0;
-    box-shadow: $box-shadow-sm;
+    // border-radius: $border-radius-lg;
+    border-radius: 20px;
+    padding-bottom: 20px;
+    border: none;
+    // box-shadow: $box-shadow-sm;
+    box-shadow: 0px 15px 30px 0px rgba(59, 68, 150, 0.078);
     color: inherit;
     .card-body {
         padding: 1rem;

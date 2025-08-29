@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
-import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../router/all_routes";
 import api from "../../core/axios/axiosInstance";
-import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import {
+  GoogleLogin,
+  GoogleOAuthProvider,
+  useGoogleLogin,
+} from "@react-oauth/google";
 import PhoneInput from "react-phone-input-2";
 import Slider from "react-slick";
 import { Player } from "@lottiefiles/react-lottie-player";
@@ -11,6 +14,9 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import loginAnimation1 from "../../style/animations/loginAnimation1.json";
 import loginAnimation2 from "../../style/animations/loginAnimation2.json";
 import loginAnimation3 from "../../style/animations/loginAnimation3.json";
+import ImageWithBasePath from "../../core/common/imageWithBasePath";
+import 'react-phone-input-2/lib/style.css'; // already done ✅
+
 
 const Login = () => {
   const sliderSettings = {
@@ -38,9 +44,10 @@ const Login = () => {
   const [message, setMessage] = useState("");
   const [canResend, setCanResend] = useState(true);
   const [timer, setTimer] = useState(0);
-
+  const searchParams = new URLSearchParams(window.location.search);
+  const referralCode = searchParams.get("ref");
   const clientId =
-    "401067515093-9j7faengj216m6uc9csubrmo3men1m7p.apps.googleusercontent.com";
+    "308171825690-ukpu99fsh0jsojolv0j4vrhidait4s5b.apps.googleusercontent.com";
 
   useEffect(() => {
     localStorage.setItem("menuOpened", "Dashboard");
@@ -108,34 +115,247 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+  const GoogleLoginButton = () => {
+    const login = useGoogleLogin({
+      onSuccess: (tokenResponse) => handleGoogleLogin(tokenResponse),
+      onError: () => console.log("Google Login Failed"),
+    });
 
-  const handleGoogleLogin = async (credentialResponse) => {
-    console.log("Google Token : ", credentialResponse.credential);
+    return (
+      <button
+        onClick={() => login()}
+        className="btn"
+        style={{
+          border: "1px solid #dadce0",
+          borderRadius: "50%",
+          padding: "15px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+        }}
+      >
+        <ImageWithBasePath
+          src="assets/img/icons/googleLogo.png"
+          width={20}
+          height={20}
+        />
+      </button>
+    );
+  };
+  // const GoogleLoginButton = ({ onSuccess }) => {
+  //   const login = useGoogleLogin({
+  //     onSuccess,
+  //     onError: (err) => console.log("Google Login Failed", err),
+  //   });
+
+  //   return (
+  //     <button
+  //       onClick={() => login()}
+  //       className="d-flex align-items-center justify-content-center"
+  //       style={{
+  //         width: 40,
+  //         height: 40,
+  //         borderRadius: "50%",
+  //         border: "1px solid #dadce0",
+  //         background: "#fff",
+  //         cursor: "pointer",
+  //       }}
+  //     >
+  //       <img
+  //         src="https://developers.google.com/identity/images/g-logo.png"
+  //         alt="Google"
+  //         width={18}
+  //         height={18}
+  //       />
+  //     </button>
+  //   );
+  // };
+  const handleLinkedinLogin = async () => {
+    let popup = null;
+
+    const finish = (data) => {
+      console.log(`LinkedIn finish`, data);
+
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
+      }
+      if (data?.isFirstTime) {
+        navigate("/registration-form", { replace: true, state: data });
+      } else {
+        navigate(route.dashboard);
+      }
+    };
 
     try {
-      setIsGoogleLoading(true);
-      const response = await api.post("user/login", {
-        googleToken: credentialResponse.credential,
-      });
-      console.log(response.data, "response from google");
-
-      if (response.data.status === "success") {
-        localStorage.setItem("token", response.data.data.token);
-        setMessage(response.data.message);
-        setIsGoogleLoading(false);
-        if (response.data.data.isFirstTime) {
-          navigate("/registration-form", {
-            replace: true,
-            state: response.data.data,
-          });
-        } else {
-          navigate(route.dashboard);
-        }
+      const url = referralCode
+        ? `/user/linkedin/login?ref=${referralCode}`
+        : `/user/linkedin/login`;
+        console.log("url for linkedin login", url);
+        
+      const response = await api.get(url);
+      console.log(response.data, "response from linkedin login");
+      if (
+        response.data?.status === "success" &&
+        response.data?.data?.token &&
+        typeof response.data?.data?.isFirstTime !== "undefined"
+      ) {
+        finish(response.data.data, "direct");
+        return;
       }
-    } catch (error) {
-      setMessage(error?.response?.data?.message || "Google login failed");
-    } finally {
-      setIsGoogleLoading(false);
+      if (response.data?.status === "success" && response.data?.url) {
+        const width = 500;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        const messageHandler = (event) => {
+          console.log(event.data, "event from LinkedIn popup");
+          const data = event.data;
+          if (data?.status === "success") {
+            console.log(data, "data inside the if condition");
+
+            if (data?.data?.token) {
+              localStorage.setItem("token", data.data.token);
+              console.log("token saved");
+            }
+            console.log("inside if condition");
+
+            if (data?.data?.isFirstTime) {
+              navigate("/registration-form", { replace: true, state: data });
+            } else {
+              navigate(route.dashboard);
+            }
+            popup?.close();
+            window.removeEventListener("message", messageHandler);
+          }
+        };
+
+        window.addEventListener("message", messageHandler);
+
+        popup = window.open(
+          response.data.url,
+          "_blank",
+          `width=${width},height=${height},left=${left},top=${top}`
+        );
+        if (!popup) {
+          console.error("Popup blocked");
+          window.removeEventListener("message", messageHandler);
+        }
+        return;
+      }
+
+      console.error("Unexpected LinkedIn login response shape:", response.data);
+    } catch (err) {
+      console.error("LinkedIn Sign-In initiation failed", err);
+    }
+  };
+
+  // const handleGoogleLogin = async (credentialResponse) => {
+  //   console.log("Google Token : ", credentialResponse.credential);
+
+  //   try {
+  //     setIsGoogleLoading(true);
+  //     const response = await api.post("user/login", {
+  //       googleToken: credentialResponse.credential,
+  //     });
+  //     console.log(response.data, "response from google");
+
+  //     if (response.data.status === "success") {
+  //       localStorage.setItem("token", response.data.data.token);
+  //       setMessage(response.data.message);
+  //       setIsGoogleLoading(false);
+  //       if (response.data.data.isFirstTime) {
+  //         navigate("/registration-form", {
+  //           replace: true,
+  //           state: response.data.data,
+  //         });
+  //       } else {
+  //         navigate(route.dashboard);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     setMessage(error?.response?.data?.message || "Google login failed");
+  //   } finally {
+  //     setIsGoogleLoading(false);
+  //   }
+  // };
+
+  const handleGoogleLogin = async () => {
+    let popup = null;
+
+    const finish = (data) => {
+      console.log(`Google finish`, data);
+
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
+      }
+      if (data?.isFirstTime) {
+        navigate("/registration-form", { replace: true, state: data });
+      } else {
+        navigate(route.dashboard);
+      }
+    };
+
+    try {
+      const url = referralCode
+        ? `/user/google/login?ref=${referralCode}`
+        : `/user/google/login`;
+         console.log("url for google login", url);
+      const response = await api.get(url);
+      console.log(response.data, "response from google login");
+      if (
+        response.data?.status === "success" &&
+        response.data?.data?.token &&
+        typeof response.data?.data?.isFirstTime !== "undefined"
+      ) {
+        finish(response.data.data, "direct");
+        return;
+      }
+      if (response.data?.status === "success" && response.data?.url) {
+        const width = 500;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        const messageHandler = (event) => {
+          console.log(event.data, "event from Google popup");
+          const data = event.data;
+          if (data?.status === "success") {
+            console.log(data, "data inside the if condition");
+
+            if (data?.data?.token) {
+              localStorage.setItem("token", data.data.token);
+              console.log("token saved");
+            }
+            console.log("inside if condition");
+
+            if (data?.data?.isFirstTime) {
+              navigate("/registration-form", { replace: true, state: data });
+            } else {
+              navigate(route.dashboard);
+            }
+            popup?.close();
+            window.removeEventListener("message", messageHandler);
+          }
+        };
+
+        window.addEventListener("message", messageHandler);
+
+        popup = window.open(
+          response.data.url,
+          "_blank",
+          `width=${width},height=${height},left=${left},top=${top}`
+        );
+        if (!popup) {
+          console.error("Popup blocked");
+          window.removeEventListener("message", messageHandler);
+        }
+        return;
+      }
+
+      console.error("Unexpected Google login response shape:", response.data);
+    } catch (err) {
+      console.error("Google Sign-In initiation failed", err);
     }
   };
 
@@ -144,7 +364,7 @@ const Login = () => {
       <div className="container-fluid position-relative">
         <div className="row p-0">
           <div className="col-md-6 px-5 bg-white">
-            <div className="mt-5">
+            <div className="pt-5">
               <img
                 src="/assets/img/contactsLogoTransparent.png"
                 alt="Logo"
@@ -164,50 +384,14 @@ const Login = () => {
                 <h2 className="fw-bold mb-4">Sign in to your account</h2>
 
                 <form onSubmit={handleLogin}>
-                  {/* <div className="d-flex justify-content-end gap-3 mb-4">
-                    <button
-                      type="button"
-                      className={`btn ${tab === "email" ? "" : ""}
-                          `}
-                      style={
-                        tab === "email"
-                          ? { backgroundColor: "#4f7df5", color: "#fff" }
-                          : { border: "1px solid #4f7df5" }
-                      }
-                      onClick={() => {
-                        setTab("email");
-                        setPhone("");
-                      }}
-                    >
-                      Email
-                    </button>
-
-                    <button
-                      type="button"
-                      className={`btn ${tab === "phone" ? "" : ""}`}
-                      style={
-                        tab === "phone"
-                          ? { backgroundColor: "#4f7df5", color: "#fff" }
-                          : { border: "1px solid #4f7df5" }
-                      }
-                      onClick={() => {
-                        setTab("phone");
-                        setEmail("");
-                      }}
-                    >
-                      Phone
-                    </button>
-                  </div> */}
-                  {/* <div className="d-flex justify-content-end mb-4">
-                    <label
+                  <div className="d-flex justify-content-end mb-4">
+                    <div
                       style={{
+                        display: "flex",
+                        width: "200px",
+                        borderRadius: "30px",
+                        backgroundColor: "#e0e0e0",
                         position: "relative",
-                        display: "inline-block",
-                        width: "100px",
-                        height: "40px",
-                        backgroundColor: "#ccc",
-                        borderRadius: "34px",
-                        cursor: "pointer",
                       }}
                     >
                       <input
@@ -225,122 +409,59 @@ const Login = () => {
                         style={{ opacity: 0, width: 0, height: 0 }}
                       />
 
-                      <span
+                      <div
                         style={{
                           position: "absolute",
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          left: tab === "email" ? "16px" : "auto",
-                          right: tab === "email" ? "auto" : "16px",
-                          fontSize: "13px",
-                          fontWeight: "bold",
-                          color: "#000",
-                          zIndex: 2,
-                          transition: "0.3s",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        {tab === "email" ? "Email" : "Phone"}
-                      </span>
-
-                      <span
-                        style={{
-                          position: "absolute",
-                          height: "32px",
-                          width: "32px",
-                          top: "4px",
-                          left: tab === "email" ? "60px" : "7px",
+                          top: "2px",
+                          bottom: "2px",
+                          left: tab === "email" ? "2px" : "98px",
+                          width: "100px",
+                          borderRadius: "28px",
                           backgroundColor: "#4f7df5",
-                          borderRadius: "50%",
-                          transition: "0.3s",
+                          transition: "left 0.3s ease",
                           zIndex: 1,
                         }}
-                      ></span>
-                    </label>
-                  </div> */}
+                      ></div>
 
-<div className="d-flex justify-content-end mb-4">
-  <div
-    style={{
-      display: "flex",
-      width: "200px",
-      borderRadius: "30px",
-      backgroundColor: "#e0e0e0",
-      position: "relative",
-    }}
-  >
-    <input
-      type="checkbox"
-      checked={tab === "email"}
-      onChange={(e) => {
-        if (e.target.checked) {
-          setTab("email");
-          setPhone("");
-        } else {
-          setTab("phone");
-          setEmail("");
-        }
-      }}
-      style={{ opacity: 0, width: 0, height: 0 }}
-    />
+                      <div
+                        style={{
+                          flex: 1,
+                          zIndex: 2,
+                          textAlign: "center",
+                          padding: "8px 0",
+                          fontWeight: "bold",
+                          color: tab === "email" ? "#fff" : "#000",
+                          cursor: "pointer",
+                          borderRadius: "30px",
+                        }}
+                        onClick={() => {
+                          setTab("email");
+                          setPhone("");
+                        }}
+                      >
+                        Email
+                      </div>
 
-    {/* Background slider */}
-    <div
-      style={{
-        position: "absolute",
-        top: "2px",
-        bottom: "2px",
-        left: tab === "email" ? "2px" : "98px",
-        width: "100px",
-        borderRadius: "28px",
-        backgroundColor: "#4f7df5",
-        transition: "left 0.3s ease",
-        zIndex: 1,
-      }}
-    ></div>
-
-    {/* Email tab */}
-    <div
-      style={{
-        flex: 1,
-        zIndex: 2,
-        textAlign: "center",
-        padding: "8px 0",
-        fontWeight: "bold",
-        color: tab === "email" ? "#fff" : "#000",
-        cursor: "pointer",
-        borderRadius: "30px",
-      }}
-      onClick={() => {
-        setTab("email");
-        setPhone("");
-      }}
-    >
-      Email
-    </div>
-
-    {/* Phone tab */}
-    <div
-      style={{
-        flex: 1,
-        zIndex: 2,
-        textAlign: "center",
-        padding: "8px 0",
-        fontWeight: "bold",
-        color: tab === "phone" ? "#fff" : "#000",
-        cursor: "pointer",
-        borderRadius: "30px",
-      }}
-      onClick={() => {
-        setTab("phone");
-        setEmail("");
-      }}
-    >
-      Phone
-    </div>
-  </div>
-</div>
-
+                      <div
+                        style={{
+                          flex: 1,
+                          zIndex: 2,
+                          textAlign: "center",
+                          padding: "8px 0",
+                          fontWeight: "bold",
+                          color: tab === "phone" ? "#fff" : "#000",
+                          cursor: "pointer",
+                          borderRadius: "30px",
+                        }}
+                        onClick={() => {
+                          setTab("phone");
+                          setEmail("");
+                        }}
+                      >
+                        Phone
+                      </div>
+                    </div>
+                  </div>
 
                   {tab === "email" && (
                     <div className="custom-floating-label">
@@ -432,22 +553,66 @@ const Login = () => {
                     )}
                   </button>
 
-                  <div className="text-center my-3 position-relative divider-line">
+                  {/* <div className="text-center my-3 position-relative divider-line">
                     <span className="bg-white px-2">or</span>
                   </div>
+                  <div className=" mt-4 d-flex justify-content-center flex-row align-items-center">
+ 
+                    <div
+                      onClick={handleGoogleLogin}
+                      style={{
+                        marginRight: 10,
+                        borderRadius: "50%",
+                        width: 50,
+                        height: 50,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        border: "1px solid #dadce0",
+                        padding: "8px",
+                        marginBottom: "10px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <ImageWithBasePath
+                        src="assets/img/icons/googleLogo.png"
+                        width={30}
+                        alt=""
+                      />
+                    </div>
+                    <div
+                      onClick={handleLinkedinLogin}
+                      style={{
+                        borderRadius: "50%",
+                        width: 50,
+                        height: 50,
+                        border: "1px solid #dadce0",
+                        padding: "12px",
+                        marginBottom: "10px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <ImageWithBasePath
+                        src="assets/img/icons/linkedinIcon.png"
+                        width={30}
+                        alt=""
+                      />
+                    </div>
+                    
 
-                  {/* <button className="btn btn-outline-light border w-100 d-flex align-items-center justify-content-center gap-2">
-                        <img
-                          src="https://developers.google.com/identity/images/g-logo.png"
-                          alt="Google"
-                          style={{ height: 20 }}
-                        />
-                        Continue with Google
-                      </button> */}
-                  <div className="d-flex justify-content-center mb-3 mt-4">
+               
+                  </div> */}
+                  {/* <div className="d-flex justify-content-center mb-3 mt-4">
                     <GoogleOAuthProvider clientId={clientId}>
                       {isgoogleLoading ? (
-                        <button className="btn btn-primary" disabled>
+                        <button
+                          className="btn"
+                          style={{ background: "#4f7df5", color: "#fff" }}
+                          disabled
+                        >
                           <span
                             className="spinner-border spinner-border-sm me-2"
                             role="status"
@@ -463,6 +628,23 @@ const Login = () => {
                       )}
                     </GoogleOAuthProvider>
                   </div>
+                  <div className="d-flex justify-content-center">
+                    <Link
+                      onClick={handleLinkedinLogin}
+                      className="d-inline-flex align-items-center p-2"
+                      style={{ border: "1px solid #dadce0", borderRadius: 5 }}
+                    >
+                      <div className="me-2">
+                        <ImageWithBasePath
+                          src="assets/img/icons/linkedinIcon.png"
+                          alt="link"
+                          width={18}
+                          height={18}
+                        />
+                      </div>
+                      <p className="mb-0">Sign in with Linkedin</p>
+                    </Link>
+                  </div> */}
                 </form>
                 <div className="text-center mt-4">
                   <small>
@@ -470,43 +652,27 @@ const Login = () => {
                     <Link to="/register">Create a free account</Link>
                   </small>
                 </div>
-
-                {/* <p className="text-muted mt-4 small text-center">
-                      By joining, you agree to our <a href="#">Terms of Use</a> and{" "}
-                      <a href="#">Privacy Policy</a>
-                    </p> */}
               </div>
             </div>
           </div>
 
-          <div className="col-md-6 p-0 overflow-hidden">
-
-
-
+          <div className="col-md-6 login-slider d-none d-md-block">
             <Slider {...sliderSettings}>
               <div>
                 <Player
-              autoplay
-              loop
-              src={loginAnimation1}
-            />
+                  className="lottie-player"
+                  autoplay
+                  loop
+                  src={loginAnimation1}
+                />
               </div>
-              <div>
-               <Player
-              autoplay
-              loop
-              src={loginAnimation2}
-            />
-              </div>
-              <div>
-               <Player
-              autoplay
-              loop
-              src={loginAnimation3}
-            />
-              </div>
+              {/* <div>
+                <Player className="lottie-player" autoplay loop src={loginAnimation2} />
+              </div> */}
+              {/* <div>
+                <Player style={{ width: "500px", height:"500px", margin: "auto" }} autoplay loop src={loginAnimation3} />
+              </div> */}
             </Slider>
-            
           </div>
         </div>
       </div>

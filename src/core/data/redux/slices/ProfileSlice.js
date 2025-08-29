@@ -15,7 +15,7 @@ const initialState = {
   favouriteCount: 0,
   tagCount: 0,
   isLoading: false,
-  error: null,
+  // error: null,
 };
 
 export const fetchProfile = createAsyncThunk(
@@ -39,15 +39,13 @@ export const editProfile = createAsyncThunk(
   "profile/editProfile",
   async (profileData, { rejectWithValue, dispatch }) => {
     try {
-      
-      
       const response = await api.put("/editProfile", profileData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       console.log("Edit profile response:", response.data);
-      
+
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );

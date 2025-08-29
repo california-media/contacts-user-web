@@ -108,7 +108,7 @@ const WhatsappTemplateOffcanvas = () => {
           <div className="row">
             <div className="col-12">
               <div className="mb-3">
-                <label className="col-form-label ms-3">Title</label>
+                <label className="col-form-label">Title</label>
                 <input
                   type="text"
                   value={formData.whatsappTemplateTitle}
@@ -135,6 +135,7 @@ const WhatsappTemplateOffcanvas = () => {
               </div>
             </div> */}
             <div className="col-12 mb-3">
+               <label className="col-form-label">Attributes</label>
               <select
                 className="form-select"
                 aria-label="Default select example"

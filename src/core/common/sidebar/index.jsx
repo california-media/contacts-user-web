@@ -1,484 +1,552 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Scrollbars from "react-custom-scrollbars-2";
-import { SidebarData } from "../../data/json/sidebarData";
+// import Scrollbars from "react-custom-scrollbars-2"; // unused currently
+import { SidebarData as StaticSidebarData } from "../../data/json/sidebarData";
 import ImageWithBasePath from "../imageWithBasePath";
 import { useDispatch, useSelector } from "react-redux";
-import { setExpandMenu } from "../../data/redux/commonSlice";
-import Calling from "../../../feature-module/crm/calling";
+import { setExpandMenu, setMobileSidebar } from "../../data/redux/commonSlice";
+// import Calling from "../../../feature-module/crm/calling";
 import { all_routes } from "../../../feature-module/router/all_routes";
+// import { resetProfile } from "../../data/redux/slices/ProfileSlice";
+// import { resetSelectedContact } from "../../data/redux/slices/SelectedContactSlice";
+// import { resetSelectedTemplate } from "../../data/redux/slices/SelectedTemplateSlice";
+// import { resetContacts } from "../../data/redux/slices/ContactSlice";
 
 const Sidebar = () => {
   const Location = useLocation();
-  const expandMenu = useSelector((state) => state.expandMenu);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-    const route = all_routes;
+
+  const userProfile = useSelector((state) => state.profile);
+  console.log(userProfile, "userProfile in sidebar");
+
+  const route = all_routes;
+  function getRemainingDays(trialEndDate) {
+    const now = new Date();
+    const end = new Date(trialEndDate);
+
+    const diff = end - now; // in ms
+    if (diff <= 0) return "Trial expired";
+
+    return Math.ceil(diff / (1000 * 60 * 60 * 24)) + " days remaining";
+  }
+  // ✅ Grab tags once at top level (required for hooks)
+  const { tags: allTags = [] } = useSelector((state) => state.tags);
+  // const expandMenu = useSelector((state) => state.expandMenu);
 
   const [subOpen, setSubopen] = useState("");
-  const [subsidebar, setSubsidebar] = useState("");
-  const [showDialer, setShowDialer] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(true);
+  // const [subsidebar, setSubsidebar] = useState("");
+  // const [showDialer, setShowDialer] = useState(false);
+  // const [openDropdown, setOpenDropdown] = useState(true);
   const [isHovered, setIsHovered] = useState(null);
-  const navigate = useNavigate();
-  const toggleDropdown = () => {
-    setOpenDropdown(!openDropdown);
-  };
+
+  // const toggleDropdown = () => setOpenDropdown((p) => !p);
+
+  //   const handleLogout = () => {
+  //     console.log("console log 1");
+
+  //     localStorage.removeItem("userId");
+  //     console.log("console log 2");
+  //     localStorage.removeItem("token");
+  //     console.log("console log 3");
+  //     dispatch(resetProfile());
+  //     console.log("console log 4");
+  //     dispatch(resetSelectedContact());
+  //     console.log("console log 4");
+  //     dispatch(resetSelectedTemplate());
+  //     console.log("console log 5");
+  //     dispatch(resetContacts());
+  // console.log("navigating to login route");
+
+  // navigate(route.login);
+  // console.log("navigated to login route");
+  //   };
 
   const toggleSidebar = (title) => {
     localStorage.setItem("menuOpened", title);
-    if (title === subOpen) {
-      setSubopen("");
-    } else {
-      setSubopen(title);
-    }
+    setSubopen((prev) => (prev === title ? "" : title));
   };
 
-  const toggleSubsidebar = (subitem) => {
-    if (subitem === subsidebar) {
-      setSubsidebar("");
-    } else {
-      setSubsidebar(subitem);
-    }
-  };
-  const toggle = () => {
-    dispatch(setExpandMenu(true));
-  };
-  const toggle2 = () => {
-    dispatch(setExpandMenu(false));
-  };
+  // const toggleSubsidebar = (subitem) => {
+  //   setSubsidebar((prev) => (prev === subitem ? "" : subitem));
+  // };
+
+  // const toggle = () => dispatch(setExpandMenu(true));
+  // const toggle2 = () => dispatch(setExpandMenu(false));
 
   useEffect(() => {
     setSubopen(localStorage.getItem("menuOpened"));
-    // Select all 'submenu' elements
+    // maintain legacy DOM-based active behavior
     const submenus = document.querySelectorAll(".submenu");
-    // Loop through each 'submenu'
     submenus.forEach((submenu) => {
-      // Find all 'li' elements within the 'submenu'
       const listItems = submenu.querySelectorAll("li");
       submenu.classList.remove("active");
-      // Check if any 'li' has the 'active' class
       listItems.forEach((item) => {
         if (item.classList.contains("active")) {
-          // Add 'active' class to the 'submenu'
           submenu.classList.add("active");
-          return;
         }
       });
     });
   }, [Location.pathname]);
-  const handleMouseEnter = (menuLabel) => {
-    setIsHovered(menuLabel);
-  };
 
-  const handleMouseLeave = () => {
-    setIsHovered(null);
-  };
+  const handleMouseEnter = (menuLabel) => setIsHovered(menuLabel);
+  const handleMouseLeave = () => setIsHovered(null);
+
+  /**
+   * Build dynamic GROUPS section from tags while preserving the
+   * rest of the statically‑defined sidebar structure.
+   *
+   * We DO NOT mutate the imported StaticSidebarData.
+   */
+  const sidebarItems = useMemo(() => {
+    if (!Array.isArray(StaticSidebarData)) return [];
+
+    // Build dynamic group submenu items from tags
+    // const dynamicGroupSubmenuItems =
+    //   allTags.length === 0
+    //     ? StaticSidebarData.find((s) => s.label === "GROUPS")?.submenuItems ??
+    //       []
+    //     : allTags.map((tag) => {
+    //         console.log(tag, "tagsfdfd");
+
+    //         const tagId = tag.tag_id ?? tag.id ?? tag.slug ?? tag.name;
+    //         const tagName = tag.tag ?? "Untitled Tag";
+    //         const tagIcon = tag.emoji;
+    //         return {
+    //           label: tagName,
+    //           icon: tagIcon,
+    //           submenu: true,
+    //           showSubRoute: false,
+    //           submenuItems: [
+    //             {
+    //               label: tagName,
+    //               // Adjust URL pattern if you prefer /contacts/tag/:id etc.
+    //               link: `${route.contacts}?tag=${encodeURIComponent(tagId)}`,
+    //               icon: tagIcon,
+    //             },
+    //           ],
+    //         };
+    //       });
+
+    const dynamicGroupSubmenuItems =
+      allTags.length === 0
+        ? StaticSidebarData.find((s) => s.label === "GROUPS")?.submenuItems ??
+          []
+        : allTags.map((tag) => {
+            const tagId = tag.tag_id ?? tag.id ?? tag.slug ?? tag.name;
+            const tagName = tag.tag ?? "Untitled Tag";
+            const tagIcon = tag.emoji ?? "🏷️";
+            return {
+              label: tagName,
+              icon: tagIcon,
+              isDynamicTag: true, // ✅ Mark it so we know it's special
+            };
+          });
+
+    // Return full structure with GROUPS replaced
+    return StaticSidebarData.map((section) =>
+      section.label === "GROUPS"
+        ? {
+            ...section,
+            submenuHdr: "Tags",
+            submenuItems: dynamicGroupSubmenuItems,
+          }
+        : section
+    );
+  }, [allTags]);
+
+  const now = new Date();
+  const trialEnd = new Date(userProfile?.trialEndDate);
+  const diff = trialEnd - now;
+  const daysLeft = diff > 0 ? Math.ceil(diff / (1000 * 60 * 60 * 24)) : 0;
 
   return (
     <>
-      <div
-        className="sidebar"
-        id="sidebar"
-        // onMouseEnter={toggle}
-        // onMouseLeave={toggle2}
-      >
-        {/* <Scrollbars
-          style={{ overflow: "visible" }}
-          renderView={(props) => (
-            <div
-              {...props}
-              style={{
-                ...props.style,
-                overflow: "visible",
-              }}
-            />
-          )}
-        > */}
-        <div className="sidebar-inner slimscroll d-flex justify-content-md-between flex-column align-items-md-center">
-          <div id="sidebar-menu" className="sidebar-menu">
-            <ul>
-              {SidebarData?.map((mainLabel, index) => (
-                <li className="clinicdropdown" key={index}>
-                  <h6 className="submenu-hdr">{mainLabel?.label}</h6>
-                  <ul>
-                    {/* {mainLabel?.submenuItems?.map((title, i) => {
-                      let link_array = [];
-                      if ("submenuItems" in title) {
-                        title.submenuItems?.forEach((link) => {
-                          link_array.push(link?.link);
-                          if (link?.submenu && "submenuItems" in link) {
-                            link.submenuItems?.forEach((item) => {
-                              link_array.push(item?.link);
-                            });
-                          }
-                        });
-                      }
-                      title.links = link_array;
+      <div className="sidebar" id="sidebar">
+        <div className="sidebar-inner slimscroll d-flex justify-content-md-between flex-column">
+          <div>
+            <div className="d-flex ms-4 mt-4 align-items-center justify-content-between">
+              <ImageWithBasePath
+                src="assets/img/contactsLogoTransparent.png"
+                alt="Profile"
+                width={150}
+              />
+              <button
+                className="btn btn-link p-0 me-3 d-md-none"
+                style={{ lineHeight: 1 }}
+                aria-label="Close sidebar"
+                onClick={() => dispatch(setMobileSidebar(false))}
+              >
+                <img
+                  src="/assets/img/icons/close.png"
+                  alt="Close"
+                  width={24}
+                  height={24}
+                />
+              </button>
+            </div>
 
-                      return (
-                        <li className="submenu" key={title.label}>
-                          <div
-                            onMouseEnter={() => handleMouseEnter(title.label)}
-                            onMouseLeave={() => handleMouseLeave}
-                          >
-                            <Link
-                              to={title?.submenu ? "#" : title?.link}
-                              onClick={() => toggleSidebar(title?.label)}
-                              className={`${
-                                subOpen === title?.label ? "subdrop" : ""
-                              } ${
-                                title?.links?.includes(Location.pathname)
-                                  ? "active"
-                                  : ""
+            <div id="sidebar-menu" className="sidebar-menu mt-4">
+              <ul>
+                {sidebarItems?.map((mainLabel, index) => {
+                  // console.log(mainLabel, "sidebar main label");
+                  return (
+                    <li className="clinicdropdown" key={index}>
+                      <h6 className="submenu-hdr">{mainLabel?.label}</h6>
+                      <ul>
+                        {mainLabel?.submenuItems?.map((title) => {
+                          // Flatten nested links for active state detection
+                          const link_array = [];
+                          if ("submenuItems" in title) {
+                            title.submenuItems?.forEach((link) => {
+                              link_array.push(link?.link);
+                              if (link?.submenu && "submenuItems" in link) {
+                                link.submenuItems?.forEach((item) => {
+                                  link_array.push(item?.link);
+                                });
                               }
-                                ${
-                                  title?.submenuItems
-                                    ?.map((link) => link?.link)
-                                    .includes(Location.pathname) ||
-                                  title?.link === Location.pathname
-                                    ? "active"
-                                    : "" ||
-                                      title?.subLink1 === Location.pathname
-                                    ? "active"
-                                    : "" ||
-                                      title?.subLink2 === Location.pathname
-                                    ? "active"
-                                    : "" ||
-                                      title?.subLink3 === Location.pathname
-                                    ? "active"
-                                    : "" ||
-                                      title?.subLink4 === Location.pathname
-                                    ? "active"
-                                    : ""
-                                }
-                               `}
-                            >
-                              <i className={title.icon}></i>
-                              <span>{title?.label}</span>
-                              <span
-                                className={title?.submenu ? "menu-arrow" : ""}
-                              />
-                            </Link>
-
-                            {isHovered === title.label && (
-                              <>
-                                <div
-                                  style={{
-                                    background: "transparent",
-                                    position: "absolute",
-                                    width: "100px",
-                                    height: "100%",
-                                    top: 0,
-                                    left: 0,
-                                    zIndex: 1,
-                                  }}
-                                  onMouseEnter={() =>
-                                    handleMouseEnter(title.label)
-                                  }
-                                  onMouseLeave={handleMouseLeave}
-                                ></div>
-                                <div
-                                  className="showOnHover"
-                                  onMouseEnter={() =>
-                                    handleMouseEnter(title.label)
-                                  }
-                                  onMouseLeave={handleMouseLeave}
-                                >
-                                  {isHovered === title.label && (
-                                    <div
-                                      style={{
-                                        marginBottom: "10px",
-                                        background: "#12344d",
-                                        borderRadius: 6,
-                                        minWidth: 240,
-                                        position: "absolute",
-                                        textAlign: "center",
-                                        top: 0,
-                                        left: 0,
-                                        zIndex: 1,
-                                      }}
-                                      onMouseEnter={() =>
-                                        handleMouseEnter(title.label)
-                                      }
-                                      onMouseLeave={handleMouseLeave}
-                                    >
-                                      {" "}
-                                      <div className="sideMenuHeadingContainer">
-                                        <p className="sideMenuHeading">
-                                          {title.label}
-                                        </p>
-                                      </div>
-                                      <ul
-                                        style={{
-                                          marginBottom: 0,
-                                          paddingLeft: 8,
-                                          paddingRight: 8,
-                                          paddingBottom: 12,
-                                          display: "block",
-                                        }}
-                                      >
-                                        {title?.submenuItems?.map((item) => (
-                                          <li
-                                            className="submenu submenu-two subMenuLi"
-                                            key={item.label}
-                                          >
-                                            <Link
-                                              to={item?.link}
-                                              className={`${
-                                                item?.submenuItems
-                                                  ?.map((link) => link?.link)
-                                                  .includes(
-                                                    Location.pathname
-                                                  ) ||
-                                                item?.link === Location.pathname
-                                                  ? "active subdrop"
-                                                  : ""
-                                              } `}
-                                              onClick={() => {
-                                                toggleSubsidebar(item?.label);
-                                              }}
-                                            >
-                                              <div className="me-2">
-                                                {item?.icon}
-                                              </div>
-                                              {item?.label}
-                                              <span
-                                                className={
-                                                  item?.submenu
-                                                    ? "menu-arrow"
-                                                    : ""
-                                                }
-                                              />
-                                            </Link>
-                                            <ul style={{}}>
-                                              {item?.submenuItems?.map(
-                                                (items) => (
-                                                  <li key={items.label}>
-                                                    <Link
-                                                      to={items?.link}
-                                                      className={`${
-                                                        subsidebar ===
-                                                        items?.label
-                                                          ? "submenu-two subdrop"
-                                                          : "submenu-two"
-                                                      } ${
-                                                        items?.submenuItems
-                                                          ?.map(
-                                                            (link) => link.link
-                                                          )
-                                                          .includes(
-                                                            Location.pathname
-                                                          ) ||
-                                                        items?.link ===
-                                                          Location.pathname
-                                                          ? "active"
-                                                          : ""
-                                                      }`}
-                                                    >
-                                                      {items?.label}
-                                                    </Link>
-                                                  </li>
-                                                )
-                                              )}
-                                            </ul>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </li>
-                      );
-                    })} */}
-
-                    {mainLabel?.submenuItems?.map((title, i) => {
-                      let link_array = [];
-                      if ("submenuItems" in title) {
-                        title.submenuItems?.forEach((link) => {
-                          link_array.push(link?.link);
-                          if (link?.submenu && "submenuItems" in link) {
-                            link.submenuItems?.forEach((item) => {
-                              link_array.push(item?.link);
                             });
                           }
-                        });
-                      }
-                      title.links = link_array;
+                          title.links = link_array;
 
-                      // Check if it has only one submenu item
-                      const hasSingleSubmenu = title.submenuItems?.length === 1;
-                      const submenuLink = hasSingleSubmenu
-                        ? title.submenuItems[0]?.link
-                        : "#";
+                          // Single submenu convenience
+                          const hasSingleSubmenu =
+                            title.submenuItems?.length === 1;
+                          const submenuLink = hasSingleSubmenu
+                            ? title.submenuItems[0]?.link
+                            : "#";
 
-                      return (
-                        <li
-                          className={`submenu ${
-                            hasSingleSubmenu ? "single-submenu" : ""
-                          }`}
-                          key={title.label}
-                          onClick={(e) => {
-                            if (hasSingleSubmenu) {
-                              e.stopPropagation();
-                              navigate(submenuLink);
-                            }
-                          }}
-                          style={{
-                            cursor: hasSingleSubmenu ? "pointer" : "default",
-                          }}
-                        >
-                          <div
-                            onMouseEnter={() => handleMouseEnter(title.label)}
-                            onMouseLeave={handleMouseLeave}
-                          >
-                            <Link
-                              to={title?.submenu ? "#" : title?.link}
-                              onClick={() => toggleSidebar(title?.label)}
-                              className={`${
-                                subOpen === title?.label ? "subdrop" : ""
-                              } ${
-                                title?.links?.includes(Location.pathname)
-                                  ? "active"
-                                  : ""
-                              } ${
-                                title?.submenuItems
-                                  ?.map((link) => link?.link)
-                                  .includes(Location.pathname) ||
-                                title?.link === Location.pathname
-                                  ? "active"
-                                  : ""
+                          return (
+                            <li
+                              className={`submenu ${
+                                hasSingleSubmenu ? "single-submenu" : ""
                               }`}
+                              key={title.label}
+                              onClick={async (e) => {
+                                if (hasSingleSubmenu) {
+                                  e.stopPropagation();
+                                  navigate(submenuLink);
+                                  // Close sidebar on mobile after navigation
+                                  if (window.innerWidth < 992) {
+                                    dispatch(setMobileSidebar(false));
+                                  }
+                                }
+                              }}
+                              style={{
+                                cursor: hasSingleSubmenu
+                                  ? "pointer"
+                                  : "default",
+                              }}
                             >
-                              <i className={title.icon}></i>
-                              <span>{title?.label}</span>
-                              <span
-                                className={title?.submenu ? "menu-arrow" : ""}
-                              />
-                            </Link>
-
-                            {isHovered === title.label && (
-                              <>
-                                <div
-                                  style={{
-                                    background: "transparent",
-                                    position: "absolute",
-                                    width: "100px",
-                                    height: "100%",
-                                    top: 0,
-                                    left: 0,
-                                    zIndex: 1,
+                              <div
+                                onMouseEnter={() =>
+                                  handleMouseEnter(title.label)
+                                }
+                                onMouseLeave={handleMouseLeave}
+                              >
+                                {/* <Link
+                                  to={title?.submenu ? "#" : title?.link}
+                                  onClick={() => {
+                                    toggleSidebar(title?.label);
+                                    // Close sidebar on mobile after navigation
+                                    if (!title?.submenu && window.innerWidth < 992) {
+                                      dispatch(setMobileSidebar(false));
+                                    }
                                   }}
-                                  onMouseEnter={() =>
-                                    handleMouseEnter(title.label)
-                                  }
-                                  onMouseLeave={handleMouseLeave}
-                                />
-                                <div
-                                  className="showOnHover"
-                                  onMouseEnter={() =>
-                                    handleMouseEnter(title.label)
-                                  }
-                                  onMouseLeave={handleMouseLeave}
+                                  className={`$ {
+                                    subOpen === title?.label ? "subdrop" : ""
+                                  } $ {
+                                    title?.links?.includes(Location.pathname)
+                                      ? "active"
+                                      : ""
+                                  } $ {
+                                    title?.submenuItems
+                                      ?.map((link) => link?.link)
+                                      .includes(Location.pathname) ||
+                                    title?.link === Location.pathname
+                                      ? "active"
+                                      : ""
+                                  }`}
                                 >
+                 
+                                  {mainLabel?.label == "GROUPS" ? (
+                                    <span>{title.icon}</span>
+                                  ) : (
+                                    <i className={title.icon}></i>
+                                  )}
+                                  <span>{title?.label}</span>
+                                  <span
+                                    className={
+                                      title?.submenu ? "menu-arrow" : ""
+                                    }
+                                  />
+                                </Link> */}
+                                {title.isDynamicTag ? (
                                   <div
+                                    onClick={() => {
+                                      if (window.innerWidth < 992) {
+                                        dispatch(setMobileSidebar(false));
+                                      }
+                                      navigate(route.contacts, {
+                                        state: {
+                                          preselectedTags: [
+                                            title.label.toLowerCase(),
+                                          ],
+                                        },
+                                      });
+                                    }}
+                                    className={`d-flex align-items-center`}
                                     style={{
-                                      marginBottom: "10px",
-                                      background: "#12344d",
-                                      borderRadius: 6,
-                                      minWidth: 240,
-                                      position: "absolute",
-                                      textAlign: "center",
-                                      top: 0,
-                                      left: 0,
-                                      zIndex: 1,
+                                      cursor: "pointer",
+                                      padding: "4px",
                                     }}
                                   >
-                                    <div
-                                      className="sideMenuHeadingContainer"
-                                      style={{
-                                        marginBottom: `${
-                                          title.submenuItems?.length > 1
-                                        } ? "10px" : "none"`,
-                                      }}
-                                    >
-                                      <p
-                                        className="sideMenuHeading text-white"
-                                        style={{
-                                          borderBottom: `${
-                                            title.submenuItems?.length > 1
-                                          } ? "1px solid #345c7c" : "none"`,
-                                        }}
-                                      >
-                                        {title.label}
-                                      </p>
-                                    </div>
-                                    {title.submenuItems?.length > 1 && (
-                                      <ul
-                                        style={{
-                                          marginBottom: 0,
-                                          paddingLeft: 8,
-                                          paddingRight: 8,
-                                          paddingBottom: 12,
-                                          display: "block",
-                                        }}
-                                      >
-                                        {title?.submenuItems?.map((item) => (
-                                          <li
-                                            className="submenu submenu-two subMenuLi"
-                                            key={item.label}
-                                          >
-                                            <Link
-                                              to={item?.link}
-                                              className={`${
-                                                item?.submenuItems
-                                                  ?.map((link) => link?.link)
-                                                  .includes(
-                                                    Location.pathname
-                                                  ) ||
-                                                item?.link === Location.pathname
-                                                  ? "active subdrop"
-                                                  : ""
-                                              }`}
-                                              onClick={() => {
-                                                toggleSubsidebar(item?.label);
-                                              }}
-                                            >
-                                              <div className="me-2">
-                                                {item?.icon}
-                                              </div>
-                                              {item?.label}
-                                              <span
-                                                className={
-                                                  item?.submenu
-                                                    ? "menu-arrow"
-                                                    : ""
-                                                }
-                                              />
-                                            </Link>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    )}
+                                    <span style={{ marginRight: 8 }}>
+                                      {title.icon}
+                                    </span>
+                                    <span>{title.label}</span>
                                   </div>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
+                                ) : (
+                                  // <Link
+                                  //   to={title?.submenu ? "#" : title?.link}
+                                  //   onClick={() => toggleSidebar(title?.label)}
+                                  //   className={`${
+                                  //     subOpen === title?.label ? "subdrop" : ""
+                                  //   } ${
+                                  //     title?.links?.includes(Location.pathname)
+                                  //       ? "active"
+                                  //       : ""
+                                  //   } ${
+                                  //     title?.submenuItems
+                                  //       ?.map((link) => link?.link)
+                                  //       .includes(Location.pathname) ||
+                                  //     title?.link === Location.pathname
+                                  //       ? "active"
+                                  //       : ""
+                                  //   }`}
+                                  // >
+                                  //   <i className={title.icon}></i>
+                                  //   <span>{title?.label}</span>
+                                  //   <span
+                                  //     className={
+                                  //       title?.submenu ? "menu-arrow" : ""
+                                  //     }
+                                  //   />
+                                  // </Link>
+                                  <Link
+                                    to={title?.submenu ? "#" : title?.link}
+                                    onClick={() => {
+                                      toggleSidebar(title?.label);
+                                      // Close sidebar on mobile after navigation
+                                      if (
+                                        !title?.submenu &&
+                                        window.innerWidth < 992
+                                      ) {
+                                        dispatch(setMobileSidebar(false));
+                                      }
+                                    }}
+                                    className={`${
+                                      subOpen === title?.label ? "subdrop" : ""
+                                    } ${
+                                      // Check for exact match with pathname+hash
+                                      title?.links?.includes(
+                                        Location.pathname + Location.hash
+                                      )
+                                        ? "active"
+                                        : ""
+                                    } ${
+                                      // Check for submenu items with pathname+hash
+                                      title?.submenuItems
+                                        ?.map((link) => link?.link)
+                                        .includes(
+                                          Location.pathname + Location.hash
+                                        ) ||
+                                      title?.link ===
+                                        Location.pathname + Location.hash
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                  >
+                                    {/* <i className={title.icon}></i> */}
+                                    {title.iconImg ? (
+                                      <img
+                                        src={title.iconImg}
+                                        alt={title.label}
+                                        style={{
+                                          width: 15,
+                                          height: 15,
+                                          marginRight: 5,
+                                        }}
+                                      />
+                                    ) : (
+                                      <i className={title.icon}></i>
+                                    )}
+                                    <span>{title?.label}</span>
+                                    <span
+                                      className={
+                                        title?.submenu ? "menu-arrow" : ""
+                                      }
+                                    />
+                                  </Link>
+                                )}
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
-          <div className="text-center mb-4"><Link to={route.profile} className="mb-4"><i class="fa-solid fa-gear fs-4"></i></Link></div>
+
+          {/* lower box content */}
+          <div>
+            <div className="sidebarTrialBox">
+              <div
+                className="d-flex justify-content-between"
+                style={{ marginBottom: 12 }}
+              >
+                <ImageWithBasePath
+                  src="assets/img/icons/diamond.png"
+                  className="uploadSectionImage"
+                  alt="Excel Logo"
+                />
+                {/* <ImageWithBasePath
+                  src="assets/img/icons/close.png"
+                  className="closeIcon"
+                  alt="Excel Logo"
+                /> */}
+              </div>
+              <div>
+                <p className="trialHeading">
+                  {diff > 0
+                    ? `Your trial ends in ${daysLeft} days`
+                    : "Your trial has expired"}
+                </p>
+                <p className="trialDescription">
+                  Select new plan and unlock all features
+                </p>
+                <p
+                  className="upgradePlan"
+                  onClick={() => navigate(route.upgradePlan)}
+                >
+                  Upgrade Plan
+                </p>
+              </div>
+            </div>
+
+            {/* <div style={{ padding: 15 }}>
+              <ul>
+                <li
+                  className="submenu single-submenu"
+                  style={{ cursor: "pointer" }}
+                >
+                  <div>
+                    <a href="/dashboard" className="customSideMenuItem">
+                      <i className="ti ti-tag customSideMenuItemIcon"></i>
+                      <span className="customSideMenuLabel">
+                        Refer &amp; Earn
+                      </span>
+                      <span className="menu-arrow"></span>
+                    </a>
+                  </div>
+                </li>
+                <li
+                  className="submenu single-submenu"
+                  style={{ cursor: "pointer" }}
+                >
+                  <div>
+                    <a href="/dashboard" className="customSideMenuItem">
+                      <i className="ti ti-tag customSideMenuItemIcon"></i>
+                      <span className="customSideMenuLabel">
+                        Help &amp; support
+                      </span>
+                      <span className="menu-arrow"></span>
+                    </a>
+                  </div>
+                </li>
+                <li
+                  className="submenu single-submenu"
+                  style={{ cursor: "pointer" }}
+                >
+                  <div>
+                    <a
+                      href="/general-settings/profile"
+                      className="customSideMenuItem"
+                    >
+                      <i className="ti ti-tag customSideMenuItemIcon"></i>
+                      <span className="customSideMenuLabel">Settings</span>
+                      <span className="menu-arrow"></span>
+                    </a>
+                  </div>
+                </li>
+              </ul>
+            </div> */}
+
+            <div className="mb-4" style={{ padding: 15 }}>
+              <Link
+                to=""
+                className={`d-flex align-items-center suserset me-2 ps-2`}
+                data-bs-toggle="modal"
+                data-bs-target="#logoutModal"
+              >
+                <ImageWithBasePath
+                  src="assets/img/icons/logout.png"
+                  alt="Logout"
+                  width={15}
+                  className="me-3"
+                />
+                <span>Logout</span>
+              </Link>
+            </div>
+          </div>
         </div>
-        {/* </Scrollbars> */}
+
+        {/* Logout Modal */}
+        {/* <div
+          className="modal fade"
+          id="logoutModal"
+          tabIndex="-1"
+          aria-labelledby="logout"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-body">
+                <div className="text-center">
+                  <div className="avatar avatar-xl bg-danger-light rounded-circle mb-3">
+                    <i className="fa-solid fa-right-from-bracket fs-36 text-danger" />
+                  </div>
+                  <h4 className="mb-2 text-capitalize">Logout?</h4>
+                  <p className="mb-0">
+                    Are you sure you want to logout the account?
+                  </p>
+                  <div className="d-flex align-items-center justify-content-center mt-4">
+                    <Link
+                      to="#"
+                      className="btn btn-light me-2"
+                      data-bs-dismiss="modal"
+                    >
+                      Cancel
+                    </Link>
+                    <Link
+                      to={"#"}
+                      data-bs-dismiss="modal"
+                      className="btn btn-danger"
+                      onClick={handleLogout}
+                    >
+                      Yes, Logout
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> */}
       </div>
+      {/* *sidebar */}
     </>
   );
 };

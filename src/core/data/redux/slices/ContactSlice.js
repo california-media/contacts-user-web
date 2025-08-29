@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../../axios/axiosInstance";
 import { setSelectedContact } from "./SelectedContactSlice";
 import { showToast } from "./ToastSlice";
+import { fetchContactActivities } from "./ActivitySlice";
 
 export const fetchContacts = createAsyncThunk(
   "contacts/fetchContacts",
@@ -46,6 +47,11 @@ export const fetchContacts = createAsyncThunk(
         totalContacts: response.data.pagination.totalContacts,
       };
     } catch (error) {
+      console.log(
+        error.response.data,
+        "response from error fetching contacts api"
+      );
+
       return rejectWithValue(error.response.data);
     }
   }
@@ -62,7 +68,11 @@ export const saveBulkContacts = createAsyncThunk(
       console.log(response.data, "response from bulk contacts");
 
       dispatch(
-        showToast({ message: response.data.message, variant: "success",delay:"10000" })
+        showToast({
+          message: response.data.message,
+          variant: "success",
+          delay: "10000",
+        })
       );
       return response.data;
     } catch (error) {
@@ -85,7 +95,7 @@ export const saveContact = createAsyncThunk(
         },
       });
       console.log("Response from saveContact:", response.data);
-
+      dispatch(fetchContactActivities(Object.fromEntries(formData).contact_id));
       dispatch(
         showToast({ message: response.data.message, variant: "success" })
       );
@@ -104,8 +114,8 @@ export const deleteContact = createAsyncThunk(
   "contacts/deleteContact",
   async (contactId, { rejectWithValue, dispatch }) => {
     try {
-      console.log(contactId,"contact idd");
-      
+      console.log(contactId, "contact idd");
+
       const response = await api.delete("/deleteContact", {
         data: { contact_id: contactId },
       });
@@ -190,11 +200,25 @@ const contactSlice = createSlice({
     builder.addCase(fetchContacts.pending, (state) => {
       state.loading = true;
     });
+    // builder.addCase(fetchContacts.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.totalPages = action.payload.totalPages;
+    //   state.contacts = action.payload.data;
+    //   state.totalContacts = action.payload.totalContacts;
+    // });
     builder.addCase(fetchContacts.fulfilled, (state, action) => {
       state.loading = false;
       state.totalPages = action.payload.totalPages;
-      state.contacts = action.payload.data;
       state.totalContacts = action.payload.totalContacts;
+
+      // Append if it's a subsequent page, else replace
+      const currentPage = action.meta.arg.filters.page;
+
+      if (currentPage === 1) {
+        state.contacts = action.payload.data;
+      } else {
+        state.contacts = [...state.contacts, ...action.payload.data];
+      }
     });
     builder.addCase(fetchContacts.rejected, (state, action) => {
       state.loading = false;
@@ -202,6 +226,13 @@ const contactSlice = createSlice({
     });
 
     builder.addCase(saveContact.fulfilled, (state, action) => {
+      // if (!action.payload) return;
+
+      console.log(
+        action.payload,
+        "action payload from fullfilled save contact"
+      );
+
       const index = state.contacts.findIndex(
         (contact) => contact.contact_id === action.payload.contact_id
       );
@@ -213,7 +244,12 @@ const contactSlice = createSlice({
         state.totalContacts += 1;
       }
     });
+    builder.addCase(saveContact.rejected, (state, action) => {
+      console.log(action.payload, "action payload from save contact rejected");
 
+      state.error = action.payload;
+      state.loading = false;
+    });
     // builder.addCase(deleteContact.fulfilled, (state, action) => {
     //   state.contacts = state.contacts.filter(
     //     (c) => c.contact_id !== action.payload
@@ -221,16 +257,21 @@ const contactSlice = createSlice({
     //   state.totalContacts -= 1;
     // });
     builder.addCase(deleteContact.fulfilled, (state, action) => {
-  const deletedIds = action.payload; // now an array
+      const deletedIds = action.payload; // now an array
 
-  state.contacts = state.contacts.filter(
-    (c) => !deletedIds.includes(c.contact_id)
-  );
+      state.contacts = state.contacts.filter(
+        (c) => !deletedIds.includes(c.contact_id)
+      );
 
-  state.totalContacts -= deletedIds.length;
-});
+      state.totalContacts -= deletedIds.length;
+    });
     builder.addCase(saveBulkContacts.fulfilled, (state, action) => {
       // state.contacts=action.payload;
+      console.log(
+        action.payload.data,
+        "action payload from save bulk contacts"
+      );
+
       action.payload.data.forEach((newContact) => {
         const index = state.contacts.findIndex(
           (c) => c.contact_id === newContact.contact_id

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Select from "react-select";
+import api from "../../axios/axiosInstance";
+import { fetchContactActivities } from "../../data/redux/slices/ActivitySlice";
 
 const WhatsappTemplateModal = () => {
   const [editWhatsappTemplateMessage, setEditWhatsappTemplateMessage] =
@@ -9,7 +11,7 @@ const WhatsappTemplateModal = () => {
   const selectedContact = useSelector((state) => state.selectedContact);
   const userProfile = useSelector((state) => state.profile);
 
-  const textareaRef = useRef(null)
+  const textareaRef = useRef(null);
   useEffect(() => {
     const whatsappTitles =
       userProfile?.templates?.whatsappTemplates?.whatsappTemplatesData?.map(
@@ -23,23 +25,51 @@ const WhatsappTemplateModal = () => {
     setWhatsppTemplateTitles(whatsappTitles);
   }, [userProfile]);
   const dispatch = useDispatch();
-const insertTag = (tag) => {
-  const textarea = textareaRef.current;
-  if (!textarea) return;
+  const insertTag = (tag) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
 
-  const startPos = textarea.selectionStart;
-  const endPos = textarea.selectionEnd;
-  const text = editWhatsappTemplateMessage;
+    const startPos = textarea.selectionStart;
+    const endPos = textarea.selectionEnd;
+    const text = editWhatsappTemplateMessage;
 
-  const newText =
-    text.substring(0, startPos) + tag + text.substring(endPos);
+    const newText = text.substring(0, startPos) + tag + text.substring(endPos);
 
-  setEditWhatsappTemplateMessage(newText);
+    setEditWhatsappTemplateMessage(newText);
 
-  // Set cursor position immediately (may not work perfectly without delay)
-  textarea.selectionStart = textarea.selectionEnd = startPos + tag.length;
-  textarea.focus();
-};
+    // Set cursor position immediately (may not work perfectly without delay)
+    textarea.selectionStart = textarea.selectionEnd = startPos + tag.length;
+    textarea.focus();
+  };
+
+  const handleSendWhatsappActivity = async () => {
+    if (selectedContact?.phonenumbers?.length > 0) {
+      const finalWhatsappTemplateMessage = editWhatsappTemplateMessage
+        .replace(/{{firstName}}/g, selectedContact.firstname || "")
+        .replace(/{{lastName}}/g, selectedContact.lastname || "")
+        .replace(/{{email}}/g, selectedContact.emailaddresses?.[0] || "")
+        .replace(/{{designation}}/g, selectedContact.designation || "");
+
+      const payload = {
+        contact_id: selectedContact.contact_id,
+        whatsappMessage: finalWhatsappTemplateMessage,
+      };
+      console.log(payload, "payload for whatsapp activity");
+
+      const response = await api.post("/whatsapp-email-activity", payload);
+      dispatch(fetchContactActivities(selectedContact.contact_id));
+      console.log(
+        response.data,
+        "response after activity api after sending whatsapp"
+      );
+
+      const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${finalWhatsappTemplateMessage}`;
+      window.open(url, "_blank");
+      document.getElementById("closeWhatsappTemplateModal")?.click();
+    } else {
+      alert("Phone number not available");
+    }
+  };
 
   return (
     <div
@@ -57,12 +87,12 @@ const insertTag = (tag) => {
               className="btn-close position-static"
               data-bs-dismiss="modal"
               aria-label="Close"
+              id="closeWhatsappTemplateModal"
             >
               <span aria-hidden="true">×</span>
             </button>
           </div>
 
-          
           <div className="modal-body">
             <div className="mb-3">
               <Select
@@ -79,7 +109,7 @@ const insertTag = (tag) => {
                 placeholder="Select a template"
               />
             </div>
-<div className="mb-3">
+            <div className="mb-3">
               <label className="col-form-label ms-3">Attributes</label>
               <select
                 className="form-select"
@@ -100,7 +130,7 @@ const insertTag = (tag) => {
               <label className="col-form-label col-md-2">Message</label>
               <div className="col-md-12">
                 <textarea
-                ref={textareaRef}
+                  ref={textareaRef}
                   rows={5}
                   cols={5}
                   className="form-control"
@@ -117,32 +147,7 @@ const insertTag = (tag) => {
               <button
                 className="btn text-white"
                 style={{ background: "#25d366" }}
-                onClick={() => {
-                  if (selectedContact?.phonenumbers?.length > 0) {
-                    const finalWhatsappTemplateMessage =
-                      editWhatsappTemplateMessage
-                        .replace(
-                          /{{firstName}}/g,
-                          selectedContact.firstname || ""
-                        )
-                        .replace(
-                          /{{lastName}}/g,
-                          selectedContact.lastname || ""
-                        )
-                        .replace(
-                          /{{email}}/g,
-                          selectedContact.emailaddresses?.[0] || ""
-                        )
-                        .replace(
-                          /{{designation}}/g,
-                          selectedContact.designation || ""
-                        );
-                    const url = `https://wa.me/${selectedContact.phonenumbers[0]}?text=${finalWhatsappTemplateMessage}`;
-                    window.open(url, "_blank");
-                  } else {
-                    alert("Phone number not available");
-                  }
-                }}
+                onClick={handleSendWhatsappActivity}
               >
                 <img
                   src="assets/img/icons/whatsappIcon96.png"

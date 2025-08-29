@@ -19,7 +19,8 @@ const Feature = () => {
   return (
     <div className={`
       ${miniSidebar ? "mini-sidebar" : ""}
-      ${expandMenu ? "expand-menu" : ""}`}>
+      ${expandMenu ? "expand-menu" : ""}`}
+      >
        <div
         className={`main-wrapper 
         ${headerCollapse ? "header-collapse" : ""} 

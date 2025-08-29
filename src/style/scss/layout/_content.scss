@@ -1,17 +1,36 @@
 .page-wrapper {
-    @include transition(all 0.5s ease);
-    // @include margin-padding( 0 0 0 0px, 56px 0 0);
-    @include margin-padding( 0 0 0 276px, 56px 0 0);
-    @include position(relative,null,null,null,0);
-    @include transition(all 0.2s ease);
+  @include transition(all 0.5s ease);
+  // @include margin-padding( 0 0 0 0px, 56px 0 0);
+  @include margin-padding(25px 0 0 0px, 70px 0 0);
+  @include position(relative, null, null, null, 0);
+  @include transition(all 0.2s ease);
+  @include respond-below(custom991) {
+    @include margin-padding(20px 10px 0 10px, 60px 0 0);
+  }
+height: calc(100vh - 40px);
+// height: 100%;
+  border-radius: 20px;
+  // margin-top: 25px;
+  margin-right: 20px;
+  background-color: #fff;
+  padding-bottom: 20px;
+  .content {
+    @include margin-padding(null, 24px);
+    // padding-bottom: 0;
+    padding: 0px;
+    margin: 24px;
+  display: flex;
+  flex-direction: column;
+    height: -webkit-fill-available;
+    padding-bottom: 0;
+    // background-color: #fff;
+    // border-radius: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
     @include respond-below(custom991) {
-        @include margin-padding( 0 , 60px 0 0);
+      @include margin-padding(null, 15px 15px 15px 15px);
+      margin-left: 0;
+      margin-right: 0;
     }
-    .content {
-        @include margin-padding(null, 24px);
-        padding-bottom: 0;
-        @include respond-below(custom991) {
-            @include margin-padding(null, 15px 15px 0);
-        }
-    }
+  }
 }

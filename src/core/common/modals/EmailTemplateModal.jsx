@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { sendEmail } from "../../data/redux/slices/EmailSlice";
+import api from "../../axios/axiosInstance";
+import { fetchContactActivities } from "../../data/redux/slices/ActivitySlice";
 
 const EmailTemplateModal = () => {
   const [emailTemplateTitles, setEmailTemplateTitles] = useState([]);
@@ -15,6 +17,9 @@ const EmailTemplateModal = () => {
   const userProfile = useSelector((state) => state.profile);
   const selectedContact = useSelector((state) => state.selectedContact);
   const dispatch = useDispatch();
+  console.log(selectedContact, "selected contact in email template modal");
+const referralData  = useSelector((state) => state.referral.data);
+console.log(referralData, "referralData in email template modal");
 
   const quillRef = useRef(null);
   console.log(userProfile, "userProfile in email modal");
@@ -42,22 +47,12 @@ const EmailTemplateModal = () => {
     }
   };
   const handleSendEmail = async () => {
-    // if (!userProfile.googleConnected || !userProfile.googleEmail) {
-    //   dispatch(
-    //     showToast({
-    //       message: "Please connect your Google account before sending emails.",
-    //       variant: "danger",
-    //     })
-    //   );
-    //   return;
-    // }
-
-
     const finalEmailBody = editEmailTemplateBody
       .replace(/{{firstName}}/g, selectedContact.firstname || "")
       .replace(/{{lastName}}/g, selectedContact.lastname || "")
       .replace(/{{email}}/g, selectedContact.emailaddresses?.[0] || "")
-      .replace(/{{designation}}/g, selectedContact.designation || "");
+      .replace(/{{designation}}/g, selectedContact.designation || "")
+      .replace(/{{referralUrl}}/g, referralData.referralUrl || "");
     if (
       !selectedContact.emailaddresses[0] ||
       !editEmailTemplateSubject ||
@@ -69,46 +64,43 @@ const EmailTemplateModal = () => {
     const selectedAccount = userProfile.accounts.find(
       (acc) => acc.type === emailProvider && acc.isConnected
     );
-    // const emailData = {
-    //   to: selectedContact.emailaddresses[0],
-    //   subject: editEmailTemplateSubject,
-    //   html: finalEmailBody,
-    //   ...(emailProvider === "google" && {
-    //     fromEmail: userProfile.googleEmail,
-    //     fromGoogleRefreshToken: userProfile.googleRefreshToken,
-    //   }),
-    //   ...(emailProvider === "microsoft" && {
-    //     fromEmail: userProfile.microsoftEmail,
-    //     fromMicrosoftAccessToken: userProfile.microsoftAccessToken,
-    //   }),
-    // };
-console.log(selectedContact.emailaddresses[0],"selectedContact.emailaddresses[0]");
 
     const emailData = {
-  to: selectedContact.emailaddresses[0],
-  subject: editEmailTemplateSubject,
-  html: finalEmailBody,
-  emailProvider,
-  ...(emailProvider === "google" && selectedAccount && {
-    fromEmail: selectedAccount.email,
-    fromGoogleRefreshToken: selectedAccount.googleRefreshToken,
-  }),
-  ...(emailProvider === "microsoft" && selectedAccount && {
-    fromEmail: selectedAccount.email,
-    fromMicrosoftAccessToken: selectedAccount.microsoftAccessToken,
-  }),
-  ...(emailProvider === "smtp" && selectedAccount && {
-    // fromEmail: selectedAccount.smtpUser,
-    // smtpHost: selectedAccount.smtpHost,
-    // smtpPort: selectedAccount.smtpPort,
-    // smtpPass: selectedAccount.smtpPass,
-    // smtpSecure: selectedAccount.smtpSecure,
-  }),
-};
-    console.log(userProfile, "userprofilee");
-console.log(emailData,"emaildata");
+      to: selectedContact.emailaddresses[0],
+      subject: editEmailTemplateSubject,
+      html: finalEmailBody,
+      emailProvider,
+      ...(emailProvider === "google" &&
+        selectedAccount && {
+          fromEmail: selectedAccount.email,
+          fromGoogleRefreshToken: selectedAccount.googleRefreshToken,
+        }),
+      ...(emailProvider === "microsoft" &&
+        selectedAccount && {
+          fromEmail: selectedAccount.email,
+          fromMicrosoftAccessToken: selectedAccount.microsoftAccessToken,
+        }),
+      ...(emailProvider === "smtp" &&
+        selectedAccount &&
+        {
+          // fromEmail: selectedAccount.smtpUser,
+          // smtpHost: selectedAccount.smtpHost,
+          // smtpPort: selectedAccount.smtpPort,
+          // smtpPass: selectedAccount.smtpPass,
+          // smtpSecure: selectedAccount.smtpSecure,
+        }),
+    };
 
-    dispatch(sendEmail(emailData));
+    const response = await dispatch(sendEmail(emailData)).unwrap();
+
+    if (response.status === "success") {
+      const payload = {
+        contact_id: selectedContact.contact_id,
+        emailMessage: editEmailTemplateSubject,
+      };
+      const response = await api.post("/whatsapp-email-activity", payload);
+      dispatch(fetchContactActivities(selectedContact.contact_id));
+    }
     document.getElementById("closeEmailTemplateModal")?.click();
   };
   const modules = {
@@ -140,11 +132,22 @@ console.log(emailData,"emaildata");
   const connectedMails = userProfile?.accounts
     ?.filter((account) => account.isConnected)
     ?.map((account) => ({
-      label: `${account.type.charAt(0).toUpperCase() + account.type.slice(1)} (${account.email})`,
+      label: `${
+        account.type.charAt(0).toUpperCase() + account.type.slice(1)
+      } (${account.email})`,
       value: account.type,
     }));
-console.log(emailProvider,"emailProvider");
-
+  console.log(emailProvider, "emailProvider");
+  // useEffect(() => {
+  //   if (connectedMails?.length > 0) {
+  //     setEmailProvider(connectedMails[0].value);
+  //   }
+  // }, [connectedMails]);
+  useEffect(() => {
+  if (connectedMails?.length > 0 && !emailProvider) {
+    setEmailProvider(connectedMails[0].value);
+  }
+}, [connectedMails, emailProvider]);
   return (
     <div
       className="modal custom-modal fade modal-padding"
@@ -195,9 +198,14 @@ console.log(emailProvider,"emailProvider");
                 <Select
                   classNamePrefix="react-select"
                   options={connectedMails}
+                  value={
+                    connectedMails?.find(
+                      (opt) => opt.value === emailProvider
+                    ) || null
+                  }
                   onChange={(selectedOption) => {
-                    console.log(selectedOption,"selected mail");
-                    
+                    console.log(selectedOption, "selected mail");
+
                     setEmailProvider(selectedOption?.value);
                   }}
                   placeholder="Select Email Account"
@@ -231,6 +239,7 @@ console.log(emailProvider,"emailProvider");
                 <option value="{{lastName}}">Last Name</option>
                 <option value="{{designation}}">Designation</option>
                 <option value="{{email}}">Email</option>
+                <option value="{{referralUrl}}">Referral Link</option>
               </select>
             </div>
             <div className="mb-3">
@@ -254,56 +263,6 @@ console.log(emailProvider,"emailProvider");
               <button className="btn btn-primary" onClick={handleSendEmail}>
                 Send Mail
               </button>
-              {/* <div className="btn-group my-1">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => handleSendEmail()}
-                  disabled={!emailProvider} // optional: disable if no provider
-                >
-                  Send Mail
-                  {emailProvider
-                    ? ` (${
-                        emailProvider.charAt(0).toUpperCase() +
-                        emailProvider.slice(1)
-                      })`
-                    : ""}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary dropdown-toggle dropdown-toggle-split me-2"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <span className="visually-hidden">Toggle Dropdown</span>
-                </button>
-                <ul className="dropdown-menu">
-                  <li>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => setEmailProvider("google")}
-                    >
-                      Google
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => setEmailProvider("microsoft")}
-                    >
-                      Microsoft
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => setEmailProvider("smtp")}
-                    >
-                      SMTP
-                    </button>
-                  </li>
-                </ul>
-              </div> */}
             </div>
           </div>
         </div>

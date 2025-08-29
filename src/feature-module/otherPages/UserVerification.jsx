@@ -20,6 +20,8 @@ const UserVerification = () => {
             "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup/email",
             { verifyToken: verificationToken }
           );
+          console.log(response.data,"response from the verification api");
+          
           localStorage.setItem("token", response.data.data.token);
           setMessage(response.data.message || "Verification successful!");
           setSubMessage("Redirecting shortly...");

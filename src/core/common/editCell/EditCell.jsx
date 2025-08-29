@@ -77,23 +77,34 @@ const EditCell = ({
         justifyContent: "space-between",
         alignItems: "center",
         width: "100%",
-        padding: "5px",
+        // padding: "5px",
       }}
     >
       {routeLink ? (
         <Link to={routeLink} state={{ record }} className="d-flex flex-column">
           {textColor ? (
             // when there is a link passed
+            // <span
+            //   className={`${fieldValue ? "" : "clickToAdd"}`}
+            //   style={{
+            //     color: fieldValue ? textColor : "#92a2b1",
+            //     fontWeight: fieldValue ? 400 : 600,
+            //   }}
+            //   onClick={fieldValue ? null : handleEditClick}
+            // >
+            //   {fieldValue ? fieldValue : "+  Click to add"}
+            // </span>
             <span
-              className={`${fieldValue ? "" : "clickToAdd"}`}
-              style={{
-                color: fieldValue ? textColor : "#92a2b1",
-                fontWeight: fieldValue ? 400 : 600,
-              }}
-              onClick={fieldValue ? null : handleEditClick}
-            >
-              {fieldValue ? fieldValue : "+  Click to add"}
-            </span>
+  className={`${fieldValue ? "" : "clickToAdd"}`}
+  style={{
+    color: fieldValue ? textColor : "#92a2b1",
+    fontWeight: fieldValue ? 400 : 600,
+  }}
+  onClick={fieldValue ? null : handleEditClick}
+  title={fieldValue && fieldValue.length > 24 ? fieldValue : undefined}
+>
+  {fieldValue ? fieldValue : "+  Click to add"}
+</span>
           ) : (
             <span className={`text-default`}>{fieldValue}</span>
           )}

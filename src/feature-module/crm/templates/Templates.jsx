@@ -4,11 +4,12 @@ import { FaTasks } from "react-icons/fa";
 import { IoMdDoneAll } from "react-icons/io";
 import { MdMail } from "react-icons/md";
 import { SlPeople } from "react-icons/sl";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import DeleteModal from "../../../core/common/modals/DeleteModal";
 import Table from "../../../core/common/dataTable/index";
 import { HiEllipsisVertical } from "react-icons/hi2";
 import { useDispatch, useSelector } from "react-redux";
+// import { Tab } from "bootstrap";
 import {
   deleteTemplate,
   editProfile,
@@ -38,9 +39,15 @@ const Templates = () => {
   const [showFavouriteWhatsappTemplates, setShowFavouriteWhatsappTemplates] =
     useState(false);
   const [deleteModalText, setDeleteModalText] = useState("");
+  const [activeTab, setActiveTab] = useState(() =>
+    window.location.hash === "#emailTemplates"
+      ? "emailTemplates"
+      : "whatsappTemplates"
+  );
   const [showFavouriteEmailTemplates, setShowFavouriteEmailTemplates] =
     useState(false);
   const dispatch = useDispatch();
+  const location = useLocation();
   const debouncedWhatsappSearchQuery = useDebounce(searchWhatsappTemplateQuery);
   const debouncedEmailSearchQuery = useDebounce(searchEmailTemplateQuery);
   const userProfile = useSelector((state) => state.profile);
@@ -62,6 +69,39 @@ const Templates = () => {
     };
     dispatch(setSelectedTemplate(updatedRecord));
   };
+  // useEffect(() => {
+  //   const hash = window.location.hash.replace("#", "");
+  //
+  //   if (hash === "whatsappTemplates" || hash === "emailTemplates") {
+  //     const tabLink = document.querySelector(`[data-bs-target="#${hash}"]`);
+  //     console.log(tabLink, "tabLink for hash:", hash);
+  //
+  //     if (tabLink) {
+  //       console.log("clicking tab link for:", hash);
+  //
+  //       tabLink.click();
+  //     }
+  //   }
+  // }, []);
+  function activateTemplateTab(hash) {
+    console.log("Activating tab via React state:", hash);
+    if (hash === "whatsappTemplates" || hash === "emailTemplates") {
+      setActiveTab(hash);
+    }
+  }
+  useEffect(() => {
+    const run = () => {
+      const hash = window.location.hash.replace("#", "");
+      console.log("Current hash:", hash);
+      if (hash === "whatsappTemplates" || hash === "emailTemplates") {
+        activateTemplateTab(hash);
+      }
+    };
+
+    run(); // initial (on mount)
+    window.addEventListener("hashchange", run);
+    return () => window.removeEventListener("hashchange", run);
+  }, [location]); // do NOT put window.location here
 
   useEffect(() => {
     const filters = {
@@ -120,42 +160,15 @@ const Templates = () => {
     };
     dispatch(deleteTemplate(templateDataDelete));
   };
-const handleBulkSelection = (selectedRowKeys, selectedRows) => {
-
-};
+  const handleBulkSelection = (selectedRowKeys, selectedRows) => {};
 
   const whatsappTemplateColumns = [
-    {
-      title: "",
-      dataIndex: "isFavourite",
-     key:"isFavourite",
-      width: 40,
-      render: (_, record, index) => (
-        <div
-          className="set-star rating-select"
-          onClick={() => handleWhatsappStarToggle(record)}
-          style={{ cursor: "pointer" }}
-        >
-          <i
-            className={`fa ${
-              record.whatsappTemplateIsFavourite
-                ? "fa-solid fa-star"
-                : "fa-regular fa-star"
-            }`}
-            style={{
-              color: record.whatsappTemplateIsFavourite ? "gold" : "gray",
-            }}
-          ></i>
-        </div>
-      ),
-    },
     {
       title: "Title",
       dataIndex: "whatsappTemplateTitle",
       key: "whatsappTemplateTitle",
       width: 200,
       render: (text, record) => {
-        
         return (
           <div className="cell-content justify-content-between">
             <Link
@@ -220,7 +233,7 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
       title: "Message",
       dataIndex: "whatsappTemplateMessage",
       key: "whatsappTemplateMessage",
-
+      width: 235,
       render: (text, record) => {
         return (
           <div
@@ -238,29 +251,29 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
     },
   ];
   const emailTemplateColumns = [
-    {
-      title: "",
-      dataIndex: "isFavourite",
-      width: 40,
-      render: (_, record, index) => (
-        <div
-          className="set-star rating-select"
-          onClick={() => handleEmailStarToggle(record)}
-          style={{ cursor: "pointer" }}
-        >
-          <i
-            className={`fa ${
-              record.emailTemplateIsFavourite
-                ? "fa-solid fa-star"
-                : "fa-regular fa-star"
-            }`}
-            style={{
-              color: record.emailTemplateIsFavourite ? "gold" : "gray",
-            }}
-          ></i>
-        </div>
-      ),
-    },
+    // {
+    //   title: "",
+    //   dataIndex: "isFavourite",
+    //   width: 40,
+    //   render: (_, record, index) => (
+    //     <div
+    //       className="set-star rating-select"
+    //       onClick={() => handleEmailStarToggle(record)}
+    //       style={{ cursor: "pointer" }}
+    //     >
+    //       <i
+    //         className={`fa ${
+    //           record.emailTemplateIsFavourite
+    //             ? "fa-solid fa-star"
+    //             : "fa-regular fa-star"
+    //         }`}
+    //         style={{
+    //           color: record.emailTemplateIsFavourite ? "gold" : "gray",
+    //         }}
+    //       ></i>
+    //     </div>
+    //   ),
+    // },
     {
       title: "Title",
       dataIndex: "emailTemplateTitle",
@@ -348,6 +361,7 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
       title: "Body",
       dataIndex: "emailTemplateBody",
       key: "emailTemplateBody",
+      width: 235,
       render: (text, record) => {
         return (
           <div
@@ -392,32 +406,42 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                 >
                   <li className="nav-item" role="presentation">
                     <Link
-                      to="#"
-                      data-bs-toggle="tab"
-                      data-bs-target="#whatsappTemplates"
-                      className="nav-link active"
-                      onClick={() => {
+                      to="#whatsappTemplates"
+                      // data-bs-toggle="tab"
+                      // data-bs-target="#whatsappTemplates"
+                      className={`nav-link ${
+                        activeTab === "whatsappTemplates" ? "active" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
                         setSearchEmailTemplateQuery("");
                         setSearchWhatsappTemplateQuery("");
+                        window.location.hash = "whatsappTemplates";
+                        activateTemplateTab("whatsappTemplates");
                       }}
                     >
                       <i className="fa-brands fa-whatsapp me-2"></i>
-                      Whatsapp Templates
+                      Whatsapp
                     </Link>
                   </li>
                   <li className="nav-item" role="presentation">
                     <Link
-                      to="#"
-                      data-bs-toggle="tab"
-                      data-bs-target="#emailTemplates"
-                      className="nav-link"
-                      onClick={() => {
+                      to="#emailTemplates"
+                      // data-bs-toggle="tab"
+                      // data-bs-target="#emailTemplates"
+                      className={`nav-link ${
+                        activeTab === "emailTemplates" ? "active" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
                         setSearchEmailTemplateQuery("");
                         setSearchWhatsappTemplateQuery("");
+                        window.location.hash = "emailTemplates";
+                        activateTemplateTab("emailTemplates");
                       }}
                     >
                       <MdMail className="me-2" />
-                      Email Templates
+                      Email
                     </Link>
                   </li>
                 </ul>
@@ -425,16 +449,19 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
               <div className="card-body pb-0">
                 <div className="tab-content pt-0">
                   <div
-                    className="tab-pane fade active show"
+                    // className="tab-pane fade active show"
+                    className={`tab-pane fade ${
+                      activeTab === "whatsappTemplates" ? "active show" : ""
+                    }`}
                     id="whatsappTemplates"
                     role="tabpanel"
                   >
                     <div className="row align-items-center mb-5">
                       <div className="col-sm-12">
-                        <div className="d-flex justify-content-between align-items-center">
+                        <div className="d-flex align-items-center justify-content-between">
                           <div className="page-header mb-0">
                             <div className="row align-items-center">
-                              <h4 className="page-title mb-0 ms-5">
+                              <h4 className="page-title mb-0 me-2">
                                 Templates
                                 <span className="count-title">
                                   {
@@ -448,34 +475,14 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                           </div>
 
                           <div className="d-flex">
-                            <Link
-                              to="#"
-                              className="btn btn-soft-secondary me-2"
-                              onClick={toggleAllFaouriteWhatsappTemplates}
-                            >
-                              <i
-                                className={`fa ${
-                                  showFavouriteWhatsappTemplates
-                                    ? "fa-solid fa-star"
-                                    : "fa-regular fa-star"
-                                } me-2`}
-                                style={{
-                                  color: showFavouriteWhatsappTemplates
-                                    ? "gold"
-                                    : "gray",
-                                }}
-                              ></i>
-                              Favourite
-                            </Link>
-
-                            <div className="icon-form mb-3  me-2 mb-sm-0">
+                            <div className="icon-form me-2 mb-sm-0">
                               <span className="form-icon">
                                 <i className="ti ti-search" />
                               </span>
                               <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search Template"
+                                placeholder="Search"
                                 value={searchWhatsappTemplateQuery}
                                 onChange={(text) =>
                                   setSearchWhatsappTemplateQuery(
@@ -496,7 +503,7 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                               }}
                             >
                               <i className="ti ti-square-rounded-plus me-2" />
-                              Add Template
+                              Add
                             </Link>
                           </div>
                         </div>
@@ -511,6 +518,7 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                         columns={whatsappTemplateColumns}
                         // rowKey={(record) => record.key}
                         rowKey="whatsappTemplate_id"
+                        scrollX={true}
                         // loading={isLoading}
                         totalCount={
                           userProfile.templates?.whatsappTemplates
@@ -522,7 +530,10 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                     </div>
                   </div>
                   <div
-                    className="tab-pane fade show"
+                    // className="tab-pane fade show"
+                    className={`tab-pane fade ${
+                      activeTab === "emailTemplates" ? "active show" : ""
+                    }`}
                     id="emailTemplates"
                     role="tabpanel"
                   >
@@ -531,7 +542,7 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="page-header mb-0">
                             <div className="row align-items-center">
-                              <h4 className="page-title mb-0 ms-5">
+                              <h4 className="page-title mb-0 me-2">
                                 Templates
                                 <span className="count-title">
                                   {
@@ -543,34 +554,14 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                             </div>
                           </div>
                           <div className="d-flex">
-                            <Link
-                              to="#"
-                              className="btn btn-soft-secondary me-2"
-                              onClick={() => {}}
-                            >
-                              <i
-                                className={`fa ${
-                                  showFavouriteEmailTemplates
-                                    ? "fa-solid fa-star"
-                                    : "fa-regular fa-star"
-                                } me-2`}
-                                style={{
-                                  color: showFavouriteEmailTemplates
-                                    ? "gold"
-                                    : "gray",
-                                }}
-                              ></i>
-                              Favourite
-                            </Link>
-
-                            <div className="icon-form mb-3  me-2 mb-sm-0">
+                            <div className="icon-form me-2 mb-sm-0">
                               <span className="form-icon">
                                 <i className="ti ti-search" />
                               </span>
                               <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search Template"
+                                placeholder="Search"
                                 value={searchEmailTemplateQuery}
                                 onChange={(text) =>
                                   setSearchEmailTemplateQuery(text.target.value)
@@ -589,7 +580,7 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                               }}
                             >
                               <i className="ti ti-square-rounded-plus me-2" />
-                              Add Template
+                              Add
                             </Link>
                           </div>
                         </div>
@@ -602,13 +593,16 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
                       <Table
                         dataSource={filteredEmailTemplateData}
                         columns={emailTemplateColumns}
-                        rowKey={(record) => record.key}
+                        // rowKey={(record) => record.key}
+                        rowKey="emailTemplate_id"
+                        scrollX={true}
                         // loading={isLoading}
                         totalCount={
                           userProfile.templates?.emailTemplates
                             ?.emailTemplatePagination?.totalTemplates
                         }
                         onPageChange={handleEmailTemplatePageChange}
+                        onRowSelectionChange={handleBulkSelection}
                       />
                     </div>
                   </div>
@@ -616,10 +610,15 @@ const handleBulkSelection = (selectedRowKeys, selectedRows) => {
               </div>
             </div>
           </div>
+          <WhatsappTemplateOffcanvas />
+          <EmailTemplateOffcanvas />
+          {
+            <DeleteModal
+              text={deleteModalText}
+              onDelete={handleDeleteTemplate}
+            />
+          }
         </div>
-        <WhatsappTemplateOffcanvas />
-        <EmailTemplateOffcanvas />
-        {<DeleteModal text={deleteModalText} onDelete={handleDeleteTemplate} />}
       </div>
     </div>
   );

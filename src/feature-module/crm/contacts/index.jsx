@@ -26,8 +26,9 @@ import CreatableSelect from "react-select/creatable";
 import { FcUpload } from "react-icons/fc";
 import { useDropzone } from "react-dropzone";
 import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import isToday from "dayjs/plugin/isToday";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 
 import {
   FaCloudDownloadAlt,
@@ -102,6 +103,7 @@ import EmailTemplateModal from "../../../core/common/modals/EmailTemplateModal";
 import WhatsappTemplateModal from "../../../core/common/modals/WhatsappTemplateModal";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
 import { EmailAuthContext } from "../../../core/common/context/EmailAuthContext";
+import { fetchContactActivities } from "../../../core/data/redux/slices/ActivitySlice";
 const route = all_routes;
 const allNotes = [
   {
@@ -204,7 +206,8 @@ export const initialSettings = {
 const ContactsDetails = () => {
   const data = leadsData;
   const navigate = useNavigate();
-
+  dayjs.extend(isToday);
+  dayjs.extend(localizedFormat);
   const [leadInfo, setLeadInfo] = useState({});
 
   const selectedContact = useSelector((state) => state.selectedContact);
@@ -218,27 +221,27 @@ const ContactsDetails = () => {
   useEffect(() => {
     setLeadInfo(selectedContact);
   }, [selectedContact]);
-const bootstrap = window.bootstrap;
+  const bootstrap = window.bootstrap;
 
-useEffect(() => {
-  const handleTabShown = (event) => {
-    const tabId = event.target.getAttribute("href")?.replace("#", "");
-    if (tabId) {
-      navigate("/contacts-details", { state: { tab: tabId }, replace: true });
-    }
-  };
+  useEffect(() => {
+    const handleTabShown = (event) => {
+      const tabId = event.target.getAttribute("href")?.replace("#", "");
+      if (tabId) {
+        navigate("/contacts-details", { state: { tab: tabId }, replace: true });
+      }
+    };
 
-  const tabLinks = document.querySelectorAll('[data-bs-toggle="tab"]');
-  tabLinks.forEach((tab) => {
-    tab.addEventListener("shown.bs.tab", handleTabShown);
-  });
-
-  return () => {
+    const tabLinks = document.querySelectorAll('[data-bs-toggle="tab"]');
     tabLinks.forEach((tab) => {
-      tab.removeEventListener("shown.bs.tab", handleTabShown);
+      tab.addEventListener("shown.bs.tab", handleTabShown);
     });
-  };
-}, [navigate]);
+
+    return () => {
+      tabLinks.forEach((tab) => {
+        tab.removeEventListener("shown.bs.tab", handleTabShown);
+      });
+    };
+  }, [navigate]);
   const [addcomment, setAddComment] = useState(false);
   const [activeEditorIndex, setActiveEditorIndex] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -405,13 +408,15 @@ useEffect(() => {
     meetingDescription: "",
     meetingType: "",
     meetingLink: "",
-    meetingTitle:"",
+    meetingTitle: "",
     meetingLocation: "",
     meetingStartDate: dayjs(),
     meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
     meetingEndDate: dayjs(),
     meetingEndTime: dayjs("00:00:00", "HH:mm:ss"),
   });
+  const { activities } = useSelector((state) => state.activity);
+  console.log(activities, "contact activities");
 
   const handleQuotationDropdownEditClick = (record) => {
     setSelectedDropdownQuotation(record);
@@ -520,6 +525,15 @@ useEffect(() => {
       [name]: value,
     });
   };
+  console.log(selectedMeeting, "selectedmeetinggggasf");
+
+  const todayActivities = activities
+    ?.filter((a) => dayjs(a.timestamp).isToday())
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  const olderActivities = activities
+    ?.filter((a) => !dayjs(a.timestamp).isToday())
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   useEffect(() => {
     if (selectedTask) {
@@ -550,7 +564,10 @@ useEffect(() => {
     console.log(selectedMeeting, "selected Meeting details");
 
     if (selectedMeeting) {
-      console.log(selectedMeeting, "selectedmeeting");
+      console.log(
+        selectedMeeting,
+        "selectedmeeting setting the meeting form data"
+      );
 
       setMeetingFormData({
         meeting_id: selectedMeeting.meeting_id,
@@ -566,6 +583,8 @@ useEffect(() => {
       });
     } else {
       // Reset form for new task
+      console.log("reset meeting form data");
+
       setMeetingFormData({
         meeting_id: "",
         meetingTitle: "",
@@ -601,6 +620,14 @@ useEffect(() => {
       });
     }
   }, [selectedQuotation]);
+
+  useEffect(() => {
+    if (selectedContact.contact_id) {
+      console.log(selectedContact.contact_id, "djsgfjshdgfjshd");
+
+      dispatch(fetchContactActivities(selectedContact.contact_id));
+    }
+  }, [selectedContact.contact_id]);
 
   const handleQuotationProductChange = (selectedProduct) => {
     setSelectedQuotationProduct(selectedProduct);
@@ -664,6 +691,10 @@ useEffect(() => {
       taskFormData.dueDate.format("YYYY-MM-DD")
     );
     formDataObj.append("taskDueTime", taskFormData.dueTime.format("HH:mm"));
+    console.log(
+      "Task submit before going to api :",
+      Object.fromEntries(formDataObj)
+    );
 
     dispatch(saveContact(formDataObj));
     setTaskFormData({
@@ -675,37 +706,22 @@ useEffect(() => {
       dueTime: dayjs("00:00", "HH:mm"),
     });
   };
-{console.log(meetingFormData,"meeting form data")
-}
+  {
+    console.log(meetingFormData, "meeting form data");
+  }
   const handleMeetingSubmit = async () => {
-    // if (!userProfile.googleConnected) {
-    //   return dispatch(
-    //     showToast({
-    //       message: "Please connect the Google account first",
-    //       variant: "danger",
-    //     })
-    //   );
-    // }
-
     const formDataObj = new FormData();
-    // let finalMeetLink = "";
-
-    // if (checkMeetingLink && meetingFormData.meetingLink === "") {
-    //   try {
-    //     console.log("generating link");
-
-    //     finalMeetLink = await generateGoogleMeetingLink();
-    //   } catch (err) {
-    //     console.error("Failed to generate meeting link:", err);
-    //     return;
-    //   }
-    // }
-console.log(meetingFormData,"jghjgjhgjg");
+    console.log(meetingFormData, "jghjgjhgjg");
 
     formDataObj.append("contact_id", selectedContact.contact_id);
 
     formDataObj.append("meeting_id", meetingFormData.meeting_id);
-    formDataObj.append("meetingType", meetingFormData.meetingType===""?"offline":meetingFormData.meetingType);
+    formDataObj.append(
+      "meetingType",
+      meetingFormData.meetingType === ""
+        ? "offline"
+        : meetingFormData.meetingType
+    );
     formDataObj.append("meetingLocation", meetingFormData.meetingLocation);
     // formDataObj.append("meetingLink", finalMeetLink);
     formDataObj.append(
@@ -722,27 +738,20 @@ console.log(meetingFormData,"jghjgjhgjg");
       "meetingStartTime",
       meetingFormData.meetingStartTime.format("HH:mm")
     );
-    // formDataObj.append(
-    //   "meetingEndDate",
-    //   meetingFormData.meetingEndDate.format("YYYY-MM-DD")
-    // );
-    // formDataObj.append(
-    //   "meetingEndTime",
-    //   meetingFormData.meetingEndTime.format("HH:mm")
-    // );
     console.log(
       "object before going to api:",
       Object.fromEntries(formDataObj.entries())
     );
 
     dispatch(saveContact(formDataObj));
-
+    setSelectedMeeting(null);
     setMeetingFormData({
       meeting_id: "",
       meetingDescription: "",
       meetingTitle: "",
       meetingType: "",
       meetingStartDate: dayjs(),
+      meetingLocation: "",
       meetingStartTime: dayjs("00:00", "HH:mm"),
       meetingEndDate: dayjs(),
       meetingEndTime: dayjs("00:00", "HH:mm"),
@@ -763,6 +772,8 @@ console.log(meetingFormData,"jghjgjhgjg");
   const handleMeetingEditClick = (meeting) => {
     setSelectedMeeting(meeting);
   };
+  console.log(selectedMeeting, "selected meetingg");
+
   const handleQuotationEditClick = (quotation) => {
     setSelectedQuotation(quotation);
   };
@@ -791,7 +802,7 @@ console.log(meetingFormData,"jghjgjhgjg");
   const sortNotes = (notes) => {
     const sortedNotes = [...notes];
     const parseDate = (dateString) => {
-      const [day, month, year, time, meridiem] = dateString.split(/[\s,]+/);
+      const [day, month, year, time, meridiem] = dateString?.split(/[\s,]+/);
       const formattedDate = `${day} ${month} ${year} ${time} ${meridiem}`;
       return new Date(formattedDate).getTime();
     };
@@ -900,6 +911,40 @@ console.log(meetingFormData,"jghjgjhgjg");
           console.error("Error creating event:", err);
         });
     });
+  };
+  const getIcon = (type) => {
+    switch (type) {
+      case "whatsapp":
+        return "ti ti-brand-whatsapp";
+      case "email":
+        return "ti ti-mail-code";
+      case "contact":
+        return "ti ti-user-plus";
+      case "task":
+        return "ti ti-note";
+      case "meeting":
+        return "ti ti-calendar-event";
+      case "tag":
+        return "ti ti-tag";
+      default:
+        return "ti ti-info-circle";
+    }
+  };
+  const getActivityColor = (type) => {
+    switch (type) {
+      case "whatsapp":
+        return "#0dcaf0"; // info
+      case "email":
+        return "#198754"; // success
+      case "contact":
+        return "#fd7e14"; // orange
+      case "task":
+        return "#ffc107"; // warning
+      case "meeting":
+        return "#0d6efd"; // primary
+      default:
+        return "#6c757d"; // secondary
+    }
   };
 
   const sortedNotes = sortNotes(allNotes);
@@ -1031,6 +1076,36 @@ console.log(meetingFormData,"jghjgjhgjg");
     } catch (error) {
       console.error("Error:", error);
       // setIsLoading(false);
+    }
+  };
+  const handleSocialClick = (platform, name, url, isActive) => {
+    if (isActive && url) {
+      window.open(url, "_blank");
+    } else {
+      const query = encodeURIComponent(name);
+      let searchUrl = "#";
+
+      switch (platform) {
+        case "facebook":
+          searchUrl = `https://www.facebook.com/search/top?q=${query}`;
+          break;
+        case "instagram":
+          searchUrl = `https://www.instagram.com/explore/search/keyword/?q=${query}`;
+          break;
+        case "linkedin":
+          searchUrl = `https://www.linkedin.com/search/results/all/?keywords=${query}`;
+          break;
+        case "twitter":
+          searchUrl = `https://twitter.com/search?q=${query}`;
+          break;
+        case "telegram":
+          searchUrl = `https://t.me/${query}`;
+          break;
+        default:
+          return;
+      }
+
+      window.open(searchUrl, "_blank");
     }
   };
 
@@ -1483,7 +1558,7 @@ console.log(meetingFormData,"jghjgjhgjg");
                       </div>
                     </div>
                     <div className=" px-2 mb-4 d-flex flex-wrap gap-3 justify-content-start">
-                      {leadInfo?.phonenumbers?.length > 0 && (
+                      {/* {leadInfo?.phonenumbers?.length > 0 && (
                         <a
                           href={`tel:${leadInfo?.phonenumbers[0]}`}
                           className="icon-wrapper-sm phone"
@@ -1579,7 +1654,201 @@ console.log(meetingFormData,"jghjgjhgjg");
                             alt="Telegram"
                           />
                         </Link>
-                      )}
+                      )} */}
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip id="tooltip-phone">
+                            {leadInfo?.phonenumbers?.length
+                              ? "Call Contact"
+                              : "Phone number not available"}
+                          </Tooltip>
+                        }
+                      >
+                        <span>
+                          <a
+                            href={
+                              leadInfo?.phonenumbers?.[0]
+                                ? `tel:${leadInfo.phonenumbers[0]}`
+                                : undefined
+                            }
+                            className={`icon-wrapper-sm phone ${
+                              !leadInfo?.phonenumbers?.length
+                                ? "disabled-icon"
+                                : ""
+                            }`}
+                            onClick={(e) => {
+                              if (!leadInfo?.phonenumbers?.length)
+                                e.preventDefault();
+                            }}
+                          >
+                            <img
+                              src="/assets/img/icons/phoneCallIcon.png"
+                              alt="Phone"
+                            />
+                          </a>
+                        </span>
+                      </OverlayTrigger>
+
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip id="tooltip-email">
+                            {leadInfo?.emailaddresses?.length > 0
+                              ? "Send Email"
+                              : "Email not available"}
+                          </Tooltip>
+                        }
+                      >
+                        <span>
+                          <Link
+                            to="#"
+                            data-bs-toggle={
+                              leadInfo?.emailaddresses?.length > 0
+                                ? "modal"
+                                : undefined
+                            }
+                            data-bs-target={
+                              leadInfo?.emailaddresses?.length > 0
+                                ? "#show_email_templates"
+                                : undefined
+                            }
+                            className={`icon-wrapper-sm mail ${
+                              !leadInfo?.emailaddresses?.length
+                                ? "disabled-icon"
+                                : ""
+                            }`}
+                            onClick={(e) => {
+                              if (!leadInfo?.emailaddresses?.length)
+                                e.preventDefault();
+                            }}
+                          >
+                            <img
+                              src="/assets/img/icons/mailIcon.png"
+                              alt="Mail"
+                            />
+                          </Link>
+                        </span>
+                      </OverlayTrigger>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip id="tooltip-whatsapp">
+                            {leadInfo?.phonenumbers?.length > 0
+                              ? "Send WhatsApp"
+                              : "Phone number not available"}
+                          </Tooltip>
+                        }
+                      >
+                        <span>
+                          <Link
+                            to="#"
+                            data-bs-toggle={
+                              leadInfo?.phonenumbers?.length > 0
+                                ? "modal"
+                                : undefined
+                            }
+                            data-bs-target={
+                              leadInfo?.phonenumbers?.length > 0
+                                ? "#show_whatsapp_templates"
+                                : undefined
+                            }
+                            className={`icon-wrapper-sm whatsapp no-filter ${
+                              !leadInfo?.phonenumbers?.length
+                                ? "disabled-icon"
+                                : ""
+                            }`}
+                            onClick={(e) => {
+                              if (!leadInfo?.phonenumbers?.length)
+                                e.preventDefault();
+                            }}
+                          >
+                            <img
+                              src="/assets/img/icons/whatsappIcon96.png"
+                              alt="WhatsApp"
+                            />
+                          </Link>
+                        </span>
+                      </OverlayTrigger>
+                      {[
+                        "instagram",
+                        "twitter",
+                        "linkedin",
+                        "facebook",
+                        "telegram",
+                      ].map((platform) => {
+                        const platformLabel =
+                          platform.charAt(0).toUpperCase() + platform.slice(1);
+                        const isActive = !!leadInfo?.[platform];
+                        const tooltipText = isActive
+                          ? `Open ${platformLabel}`
+                          : `Search on ${platformLabel}`;
+                        const fullName = `${leadInfo?.firstname || ""} ${
+                          leadInfo?.lastname || ""
+                        }`.trim();
+
+                        const searchUrls = {
+                          instagram: `https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(
+                            fullName
+                          )}`,
+                          twitter: `https://twitter.com/search?q=${encodeURIComponent(
+                            fullName
+                          )}`,
+                          linkedin: `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent(
+                            fullName
+                          )}`,
+                          facebook: `https://www.facebook.com/search/top?q=${encodeURIComponent(
+                            fullName
+                          )}`,
+                          telegram: `https://t.me/s/${encodeURIComponent(
+                            fullName.replace(/\s+/g, "_")
+                          )}`,
+                        };
+
+                        const handleSocialClick = () => {
+                          if (isActive) {
+                            window.open(leadInfo[platform], "_blank");
+                          } else if (fullName) {
+                            window.open(searchUrls[platform], "_blank");
+                          }
+                        };
+
+                        return (
+                          <OverlayTrigger
+                            key={platform}
+                            placement="bottom"
+                            overlay={
+                              <Tooltip id={`tooltip-${platform}`}>
+                                {tooltipText}
+                              </Tooltip>
+                            }
+                          >
+                            <span>
+                              <div
+                                className={`icon-wrapper-sm ${platform} no-filter ${
+                                  !isActive ? "disabled-icon" : ""
+                                }`}
+                                onClick={handleSocialClick}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <span className="icon-stack">
+                                  <img
+                                    src={`/assets/img/icons/${platform}Icon.png`}
+                                    alt={platformLabel}
+                                    className="main-icon"
+                                  />
+
+                                  <img
+                                    src="/assets/img/icons/searchIcon.png"
+                                    alt="Search"
+                                    className="search-icon"
+                                  />
+                                </span>
+                              </div>
+                            </span>
+                          </OverlayTrigger>
+                        );
+                      })}
                     </div>
                     <ul>
                       <div className="row mb-3 d-flex flex-column align-items-center">
@@ -1718,8 +1987,19 @@ console.log(meetingFormData,"jghjgjhgjg");
                         <Link
                           to="#"
                           data-bs-toggle="tab"
-                          data-bs-target="#tasks"
+                          data-bs-target="#activities"
                           className="nav-link active"
+                        >
+                          <i className="ti ti-alarm-minus me-1" />
+                          Activities
+                        </Link>
+                      </li>
+                      <li className="nav-item" role="presentation">
+                        <Link
+                          to="#"
+                          data-bs-toggle="tab"
+                          data-bs-target="#tasks"
+                          className="nav-link"
                         >
                           <FaTasks className="me-2" />
                           Notes
@@ -1731,7 +2011,6 @@ console.log(meetingFormData,"jghjgjhgjg");
                           data-bs-toggle="tab"
                           data-bs-target="#meeting"
                           className="nav-link"
-                          
                         >
                           <SlPeople className="me-2" />
                           Meeting
@@ -1782,18 +2061,8 @@ console.log(meetingFormData,"jghjgjhgjg");
                           Whatsapp
                         </Link>
                       </li> */}
-                      {/* <li className="nav-item" role="presentation">
-                        <Link
-                          to="#"
-                          data-bs-toggle="tab"
-                          data-bs-target="#activities"
-                          className="nav-link"
-                        >
-                          <i className="ti ti-alarm-minus me-1" />
-                          Activities
-                        </Link>
-                      </li>
-                      <li className="nav-item" role="presentation">
+
+                      {/*  <li className="nav-item" role="presentation">
                         <Link
                           to="#"
                           data-bs-toggle="tab"
@@ -1814,263 +2083,139 @@ console.log(meetingFormData,"jghjgjhgjg");
                 {/* Tab Content */}
                 <div className="tab-content pt-0">
                   {/* Activities */}
-                  <div className="tab-pane fade" id="activities">
+                  <div className="tab-pane fade active show" id="activities">
                     <div className="card">
                       <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
                         <h4 className="fw-semibold">Activities</h4>
-                        <div>
-                          <div className="form-sort mt-0">
-                            <i className="ti ti-sort-ascending-2" />
-                            <Select
-                              // className="select"
-                              // options={ascendingandDecending}
-                              // placeholder="Sort By Date"
-                              // classNamePrefix="react-select"
-                              className="select dropdownCusWidth"
-                              options={ascendingandDecending}
-                              placeholder="Sort By Date"
-                              classNamePrefix="react-select"
-                            />
-                          </div>
-                        </div>
                       </div>
-                      <div className="card-body">
-                        <div className="badge badge-soft-purple fs-14 fw-normal shadow-none mb-3">
-                          <i className="ti ti-calendar-check me-1" />
-                          29 Aug 2023
-                        </div>
-                        <div className="card border shadow-none mb-3">
-                          <div className="card-body p-3">
-                            <div className="d-flex">
-                              <span className="avatar avatar-md flex-shrink-0 rounded me-2 bg-pending">
-                                <i className="ti ti-mail-code" />
-                              </span>
-                              <div>
-                                <h6 className="fw-medium mb-1">
-                                  You sent 1 Message to the contact.
-                                </h6>
-                                <p>10:25 pm</p>
-                              </div>
+                      <div className="card-body overflow-auto overflow-x-hidden">
+                        {todayActivities?.length > 0 && (
+                          <>
+                            <div className="badge badge-soft-purple fs-14 fw-normal shadow-none mb-3">
+                              <i className="ti ti-calendar-check me-1" />
+                              Today
                             </div>
-                          </div>
-                        </div>
-                        <div className="card border shadow-none mb-3">
-                          <div className="card-body p-3">
-                            <div className="d-flex">
-                              <span className="avatar avatar-md flex-shrink-0 rounded me-2 bg-secondary-success">
-                                <i className="ti ti-phone" />
-                              </span>
-                              <div>
-                                <h6 className="fw-medium mb-1">
-                                  Denwar responded to your appointment schedule
-                                  question by call at 09:30pm.
-                                </h6>
-                                <p>09:25 pm</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="card border shadow-none mb-3">
-                          <div className="card-body p-3">
-                            <div className="d-flex">
-                              <span className="avatar avatar-md flex-shrink-0 rounded me-2 bg-orange">
-                                <i className="ti ti-notes" />
-                              </span>
-                              <div>
-                                <h6 className="fw-medium mb-1">
-                                  Notes added by Antony
-                                </h6>
-                                <p className="mb-1">
-                                  Please accept my apologies for the
-                                  inconvenience caused. It would be much
-                                  appreciated if it's possible to reschedule to
-                                  6:00 PM, or any other day that week.
-                                </p>
-                                <p>10.00 pm</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="badge badge-soft-purple fs-14 fw-normal shadow-none mb-3">
-                          <i className="ti ti-calendar-check me-1" />
-                          28 Feb 2024
-                        </div>
-                        <div className="card border shadow-none mb-3">
-                          <div className="card-body p-3">
-                            <div className="d-flex">
-                              <span className="avatar avatar-md flex-shrink-0 rounded me-2 bg-info">
-                                <i className="ti ti-user-pin" />
-                              </span>
-                              <div>
-                                <h6 className="fw-medium mb-1 d-inline-flex align-items-center flex-wrap">
-                                  Meeting With{" "}
-                                  <span className="avatar avatar-xs mx-2">
-                                    <ImageWithBasePath
-                                      src="assets/img/profiles/avatar-19.jpg"
-                                      alt="img"
-                                    />
-                                  </span>{" "}
-                                  Abraham
-                                </h6>
-                                <p>Schedueled on 05:00 pm</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="card border shadow-none mb-3">
-                          <div className="card-body p-3">
-                            <div className="d-flex">
-                              <span className="avatar avatar-md flex-shrink-0 rounded me-2 bg-secondary-success">
-                                <i className="ti ti-notes" />
-                              </span>
-                              <div>
-                                <h6 className="fw-medium mb-1">
-                                  Drain responded to your appointment schedule
-                                  question.
-                                </h6>
-                                <p>09:25 pm</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="badge badge-soft-purple fs-14 fw-normal shadow-none mb-3">
-                          <i className="ti ti-calendar-check me-1" />
-                          Upcoming Activity
-                        </div>
-                        <div className="card border shadow-none mb-0">
-                          <div className="card-body p-3">
-                            <div className="d-flex">
-                              <span className="avatar avatar-md flex-shrink-0 rounded me-2 bg-info">
-                                <i className="ti ti-user-pin" />
-                              </span>
-                              <div>
-                                <h6 className="fw-medium mb-1">
-                                  Product Meeting
-                                </h6>
-                                <p className="mb-1">
-                                  A product team meeting is a gathering of the
-                                  cross-functional product team — ideally
-                                  including team members from product,
-                                  engineering, marketing, and customer support.
-                                </p>
-                                <p>25 Jul 2023, 05:00 pm</p>
-                                <div className="upcoming-info">
-                                  <div className="row">
-                                    <div className="col-sm-4">
-                                      <p>Reminder</p>
-                                      <div className="dropdown">
-                                        <Link
-                                          to="#"
-                                          className="dropdown-toggle"
-                                          data-bs-toggle="dropdown"
-                                          aria-expanded="false"
-                                        >
-                                          <i className="ti ti-clock-edit me-1" />
-                                          Reminder
-                                          <i className="ti ti-chevron-down ms-1" />
-                                        </Link>
-                                        <div className="dropdown-menu dropdown-menu-right">
-                                          <Link
-                                            className="dropdown-item"
-                                            to="#"
-                                          >
-                                            Remainder
-                                          </Link>
-                                          <Link
-                                            className="dropdown-item"
-                                            to="#"
-                                          >
-                                            1 hr
-                                          </Link>
-                                          <Link
-                                            className="dropdown-item"
-                                            to="#"
-                                          >
-                                            10 hr
-                                          </Link>
-                                        </div>
+                            {todayActivities.map((activity, index) => {
+                              const isLastItem =
+                                index === todayActivities.length - 1;
+                              return (
+                                <div key={`today-${index}`}>
+                                  <div className="card-body px-3 py-0">
+                                    <div className="d-flex">
+                                      <span
+                                        className={`avatar avatar-md flex-shrink-0 rounded me-2`}
+                                        style={{ backgroundColor: "#f3f3f3" }}
+                                      >
+                                        <i
+                                          className={`${getIcon(
+                                            activity.type
+                                          )}`}
+                                          style={{
+                                            color: getActivityColor(
+                                              activity.type
+                                            ),
+                                            fontSize: "18px",
+                                          }}
+                                        />
+                                      </span>
+
+                                      <div>
+                                        <h6 className="fw-medium mb-1">
+                                          {activity.title}
+                                        </h6>
+                                        <p>
+                                          {dayjs(activity.timestamp).format(
+                                            "hh:mm A"
+                                          )}
+                                        </p>
                                       </div>
                                     </div>
-                                    <div className="col-sm-4">
-                                      <p>Task Priority</p>
-                                      <div className="dropdown">
-                                        <Link
-                                          to="#"
-                                          className="dropdown-toggle"
-                                          data-bs-toggle="dropdown"
-                                          aria-expanded="false"
-                                        >
-                                          <i className="ti ti-square-rounded-filled me-1 text-danger circle" />
-                                          High
-                                          <i className="ti ti-chevron-down ms-1" />
-                                        </Link>
-                                        <div className="dropdown-menu dropdown-menu-right">
-                                          <Link
-                                            className="dropdown-item"
-                                            to="#"
-                                          >
-                                            <i className="ti ti-square-rounded-filled me-1 text-danger circle" />
-                                            High
-                                          </Link>
-                                          <Link
-                                            className="dropdown-item"
-                                            to="#"
-                                          >
-                                            <i className="ti ti-square-rounded-filled me-1 text-success circle" />
-                                            Low
-                                          </Link>
-                                        </div>
-                                      </div>
+                                    {!isLastItem && (
+                                      <img
+                                        src="assets/img/icons/activitySeparator.png"
+                                        style={{
+                                          width: "2.5rem",
+                                          height: "1.5rem",
+                                        }}
+                                        alt="separator"
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </>
+                        )}
+
+                        {olderActivities?.length > 0 && (
+                          <div className="mt-4">
+                            {olderActivities.map((activity, index) => {
+                              const showDate =
+                                index === 0 ||
+                                !dayjs(activity.timestamp).isSame(
+                                  olderActivities[index - 1].timestamp,
+                                  "day"
+                                );
+                              const isLastItem =
+                                index === olderActivities.length - 1;
+                              return (
+                                <div key={`old-${index}`}>
+                                  {showDate && (
+                                    <div className="badge badge-soft-purple fs-14 fw-normal shadow-none mb-3">
+                                      <i className="ti ti-calendar-check me-1" />
+                                      {dayjs(activity.timestamp).format(
+                                        "DD MMM YYYY"
+                                      )}
                                     </div>
-                                    <div className="col-sm-4">
-                                      <p>Assigned to</p>
-                                      <div className="dropdown">
-                                        <Link
-                                          to="#"
-                                          className="dropdown-toggle"
-                                          data-bs-toggle="dropdown"
-                                          aria-expanded="false"
+                                  )}
+                                  <div>
+                                    <div className="card-body px-3 py-0">
+                                      <div className="d-flex">
+                                        <span
+                                          className={`avatar avatar-md flex-shrink-0 rounded me-2`}
+                                          style={{ backgroundColor: "#f3f3f3" }}
                                         >
-                                          <ImageWithBasePath
-                                            src="assets/img/profiles/avatar-19.jpg"
-                                            alt="img"
-                                            className="avatar-xs"
+                                          <i
+                                            className={`${getIcon(
+                                              activity.type
+                                            )}`}
+                                            style={{
+                                              color: getActivityColor(
+                                                activity.type
+                                              ),
+                                              fontSize: "18px",
+                                            }}
                                           />
-                                          John
-                                          <i className="ti ti-chevron-down ms-1" />
-                                        </Link>
-                                        <div className="dropdown-menu dropdown-menu-right">
-                                          <Link
-                                            className="dropdown-item"
-                                            to="#"
-                                          >
-                                            <ImageWithBasePath
-                                              src="assets/img/profiles/avatar-19.jpg"
-                                              alt="img"
-                                              className="avatar-xs"
-                                            />
-                                            John
-                                          </Link>
-                                          <Link
-                                            className="dropdown-item"
-                                            to="#"
-                                          >
-                                            <ImageWithBasePath
-                                              src="assets/img/profiles/avatar-15.jpg"
-                                              alt="img"
-                                              className="avatar-xs"
-                                            />
-                                            Peter
-                                          </Link>
+                                        </span>
+
+                                        <div>
+                                          <h6 className="fw-medium mb-1">
+                                            {activity.title} : {activity.description}
+                                          </h6>
+                                          <p>
+                                            {dayjs(activity.timestamp).format(
+                                              "hh:mm A"
+                                            )}
+                                          </p>
                                         </div>
                                       </div>
+                                       {!isLastItem && (
+                                      <img
+                                        src="assets/img/icons/activitySeparator.png"
+                                        style={{
+                                          width: "2.5rem",
+                                          height: "1.5rem",
+                                        }}
+                                        alt="separator"
+                                      />
+                                    )}
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            </div>
+                              );
+                            })}
                           </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2099,7 +2244,7 @@ console.log(meetingFormData,"jghjgjhgjg");
                           </div>
                         </div>
                       </div>
-                      <div className="card-body">
+                      <div className="card-body overflow-scroll overflow-x-hidden">
                         <div className="notes-activity">
                           <form>
                             <div className="row">
@@ -2286,7 +2431,7 @@ console.log(meetingFormData,"jghjgjhgjg");
                   </div>
                   {/* /Notes */}
                   {/*Add Edit Tasks */}
-                  <div className="tab-pane fade active show" id="tasks">
+                  <div className="tab-pane fade" id="tasks">
                     <div className="card" style={{ minHeight: 200 }}>
                       <div className="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
                         <h4 className="fw-semibold mb-0">Notes</h4>
@@ -2322,7 +2467,7 @@ console.log(meetingFormData,"jghjgjhgjg");
                         </div>
                       </div>
 
-                      <div className="card-body">
+                      <div className="card-body vh-50 overflow-auto overflow-x-hidden">
                         <div className="notes-activity">
                           {sortedIncompleteTask.length > 0 ? (
                             <div>
@@ -2403,7 +2548,6 @@ console.log(meetingFormData,"jghjgjhgjg");
                                         <div className="d-flex justify-content-between align-items-center">
                                           <p className="mb-0">
                                             ✎{" "}
-                                            
                                             {/* <span>{task.dateCreated} </span> */}
                                             <span>
                                               {dayjs(task.updatedAt).format(
@@ -2446,7 +2590,6 @@ console.log(meetingFormData,"jghjgjhgjg");
                             <div className="d-flex justify-content-center align-items-center h-100">
                               No Notes available
                             </div>
-                      
                           )}
                         </div>
                       </div>
@@ -2467,7 +2610,7 @@ console.log(meetingFormData,"jghjgjhgjg");
                           </div>
                         </div> */}
                       </div>
-                      <div className="card-body">
+                      <div className="card-body vh-50 overflow-auto overflow-x-hidden">
                         <div className="notes-activity">
                           {sortedCompletedTask.length > 0 ? (
                             <div>
@@ -2574,7 +2717,6 @@ console.log(meetingFormData,"jghjgjhgjg");
                                         <div className="d-flex justify-content-between align-items-center">
                                           <p className="mb-0">
                                             ✎{" "}
-                                           
                                             <span>
                                               {/* {task.taskDueDate}{" "}
                                             {task.taskDueTime && (
@@ -2646,7 +2788,7 @@ console.log(meetingFormData,"jghjgjhgjg");
                                 meetingDescription: "",
                                 meetingType: "",
                                 meetingLink: "",
-                                meetingTitle:"",
+                                meetingTitle: "",
                                 meetingLocation: "",
                                 meetingStartDate: dayjs(),
                                 meetingStartTime: dayjs("00:00:00", "HH:mm:ss"),
@@ -2660,9 +2802,9 @@ console.log(meetingFormData,"jghjgjhgjg");
                           </Link>
                         </div>
                       </div>
-                      <div className="card-body">
+                      <div className="card-body overflow-auto overflow-x-hidden" style={{ minHeight: "200px" }}>
                         <div className="notes-activity">
-                          {selectedContact.meetings.map(
+                      { selectedContact.meetings.length>0?   selectedContact.meetings.map(
                             (meeting, meetingIndex) => {
                               return (
                                 <div className="card mb-3" key={meetingIndex}>
@@ -2684,6 +2826,14 @@ console.log(meetingFormData,"jghjgjhgjg");
                                             right: 20,
                                           }}
                                         >
+                                          {console.log(
+                                            hoveredMeetingIndex,
+                                            "hovered meeting index",
+                                            meetingIndex,
+                                            "meeting index",
+                                            meeting,
+                                            "meeting data"
+                                          )}
                                           <Link
                                             to="#"
                                             className="me-3 styleForEditBtn"
@@ -2752,37 +2902,42 @@ console.log(meetingFormData,"jghjgjhgjg");
                                           )}
                                         </div>
                                         <p>
-                                            <span className="fw-medium text-black">
-                                             <i class="fa-solid fa-calendar me-2" ></i>
-                                            </span>{" "}
+                                          <span className="fw-medium text-black">
+                                            <i class="fa-solid fa-calendar me-2"></i>
+                                          </span>{" "}
+                                          <span
+                                            style={{
+                                              color: dayjs(
+                                                `${
+                                                  meeting.meetingStartDate?.split(
+                                                    "T"
+                                                  )[0]
+                                                }T${meeting.meetingStartTime}`
+                                              ).isBefore(dayjs())
+                                                ? "red"
+                                                : "inherit",
+                                            }}
+                                          >
+                                            {dayjs(
+                                              meeting.meetingStartDate
+                                            ).format("DD MMM YYYY")}
+                                            {", "}
                                             <span
                                               style={{
-                                                color: dayjs(
-                                                  `${
-                                                    meeting.meetingStartDate.split(
-                                                      "T"
-                                                    )[0]
-                                                  }T${meeting.meetingStartTime}`
-                                                ).isBefore(dayjs())
-                                                  ? "red"
-                                                  : "inherit",
+                                                background: "#d3d3d3",
+                                                borderRadius: "5px",
+                                                padding: "2px 3px",
                                               }}
                                             >
                                               {dayjs(
-                                                meeting.meetingStartDate
-                                              ).format("DD MMM YYYY")}
-                                              {", "}
-                                              <span style={{background:"#d3d3d3", borderRadius:"5px" , padding:"2px 3px"}}>
-                                                {dayjs(
-                                                  meeting.meetingStartTime,
-                                                  "HH:mm"
-                                                ).format("hh:mm A")}
-                                              </span>
+                                                meeting.meetingStartTime,
+                                                "HH:mm"
+                                              ).format("hh:mm A")}
                                             </span>
-                                          </p>
+                                          </span>
+                                        </p>
                                       </div>
                                       <div>
-                                        
                                         <p className="mb-0">
                                           ✎{" "}
                                           {/* <span className="fw-medium text-black ms-2">
@@ -2800,7 +2955,12 @@ console.log(meetingFormData,"jghjgjhgjg");
                                 </div>
                               );
                             }
-                          )}
+                          ):
+                          
+                            <div className="d-flex justify-content-center align-items-center h-100">
+                              No Meetings available
+                            </div>
+                          }
                         </div>
                       </div>
                     </div>
@@ -3995,7 +4155,7 @@ console.log(meetingFormData,"jghjgjhgjg");
             </div>
             <div className="modal-body">
               <form>
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label className="col-form-label">
                     Title <span className="text-danger"> *</span>
                   </label>
@@ -4008,10 +4168,10 @@ console.log(meetingFormData,"jghjgjhgjg");
                     }}
                     type="text"
                   />
-                </div>
+                </div> */}
                 <div className="mb-3">
                   <label className="col-form-label">
-                    Description <span className="text-danger"> *</span>
+                    Note <span className="text-danger"> *</span>
                   </label>
                   <textarea
                     className="form-control"
@@ -4025,53 +4185,6 @@ console.log(meetingFormData,"jghjgjhgjg");
                     }
                   />
                 </div>
-                {/* <div className="mb-3">
-                  <label className="col-form-label">
-                    Task Type
-                  </label>
-                  <Select
-                    className="select2"
-                    options={taskType}
-                    name="taskType"
-                    value={taskType.find(option => option.value === taskFormData.taskType)}
-                    onChange={(option) => handleTaskInputChange("taskType", option)}
-                    placeholder="Choose"
-                    classNamePrefix="react-select"
-                  />
-                </div> */}
-
-                {/* <div className="mb-3">
-                  <label className="col-form-label">Due Date</label>
-                  <div className="icon-form-end">
-                    <span className="form-icon">
-                      <i className="ti ti-calendar-event" />
-                    </span>
-                    <DatePicker
-                      className="form-control datetimepicker deals-details"
-                      value={taskFormData.dueDate}
-                      name="taskDueDate"
-                      onChange={(date) => {
-                        handleTaskInputChange("dueDate", date);
-                      }}
-                      format="DD-MM-YYYY"
-                    />
-                  </div>
-                </div>
-                <label className="col-form-label">Due Time</label>
-                <div className="mb-3 icon-form">
-                  <span className="form-icon">
-                    <i className="ti ti-clock-hour-10" />
-                  </span>
-                  <TimePicker
-                    placeholder="Select Time"
-                    className="form-control datetimepicker-time"
-                    name="taskDueTime"
-                    onChange={(time) => handleTaskInputChange("dueTime", time)}
-                    value={taskFormData.dueTime}
-                    defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
-                    format="hh:mm A"
-                  />
-                </div> */}
 
                 <div className="col-lg-12 text-end modal-btn">
                   <Link
@@ -4304,7 +4417,9 @@ console.log(meetingFormData,"jghjgjhgjg");
                         />
                         <div>Generate Meeting Link</div>
                       </div> */}
-                      {!userProfile.accounts?.some(acc => acc.type === "google" && acc.isConnected) &&(
+                      {!userProfile.accounts?.some(
+                        (acc) => acc.type === "google" && acc.isConnected
+                      ) && (
                         <>
                           <div className="text-danger mt-2">
                             *Generating meeting links Google Account is Required
@@ -4352,475 +4467,6 @@ console.log(meetingFormData,"jghjgjhgjg");
         </div>
       </div>
       {/* /Add Edit Meeting */}
-
-      {/* Add Edit Quotation Address */}
-      {/* <div
-        className="modal custom-modal fade modal-padding"
-        id="add_quotationAddress"
-        role="dialog"
-        aria-hidden="true"
-        aria-labelledby="add_quotationAddressLabel"
-        tabIndex={-1}
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">
-                {selectedMeeting ? "Edit Quotation" : "Add new Quotation"}
-              </h5>
-              <button
-                type="button"
-                className="btn-close position-static"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="filter-checks mb-2">
-                  <label className="checkboxs">
-                    <input
-                      type="checkbox"
-                      checked={haveShippingAddress}
-                      onChange={handleHaveShippingAddress}
-                    />
-                    <span className="checkmarks" />
-                    Shipping Address
-                  </label>
-                </div>
-                <div className="filter-checks mb-2">
-                  <label className="checkboxs">
-                    <input
-                      type="checkbox"
-                      // checked={haveShippingAddress}
-                      // onChange={handleHaveShippingAddress}
-                    />
-                    <span className="checkmarks" />
-                    Show shipping details in quotation
-                  </label>
-                </div>
-                <div className="row">
-                  <div
-                    className={haveShippingAddress ? "col-md-6" : "col-md-12"}
-                  >
-                    <h4>Bill to</h4>
-                    <div className="mb-3">
-                      <label className="col-form-label">Street</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">City</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">State</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">Zip Code</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <label className="col-form-label">Country</label>
-                      </div>
-                      <Select
-                        className="select"
-                        options={countryoptions1}
-                        classNamePrefix="react-select"
-                      />
-                    </div>
-                  </div>
-                  {haveShippingAddress && (
-                    <div className="col-md-6">
-                      <h4>Ship to</h4>
-                      <div className="mb-3">
-                        <label className="col-form-label">Street</label>
-                        <input
-                          className="form-control"
-                          name="meetingTitle"
-                          value={meetingFormData.meetingTitle}
-                          onChange={(e) => {
-                            handleMeetingInputChange(
-                              e.target.name,
-                              e.target.value
-                            );
-                          }}
-                          type="text"
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label className="col-form-label">City</label>
-                        <input
-                          className="form-control"
-                          name="meetingTitle"
-                          value={meetingFormData.meetingTitle}
-                          onChange={(e) => {
-                            handleMeetingInputChange(
-                              e.target.name,
-                              e.target.value
-                            );
-                          }}
-                          type="text"
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label className="col-form-label">State</label>
-                        <input
-                          className="form-control"
-                          name="meetingTitle"
-                          value={meetingFormData.meetingTitle}
-                          onChange={(e) => {
-                            handleMeetingInputChange(
-                              e.target.name,
-                              e.target.value
-                            );
-                          }}
-                          type="text"
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <label className="col-form-label">Zip Code</label>
-                        <input
-                          className="form-control"
-                          name="meetingTitle"
-                          value={meetingFormData.meetingTitle}
-                          onChange={(e) => {
-                            handleMeetingInputChange(
-                              e.target.name,
-                              e.target.value
-                            );
-                          }}
-                          type="text"
-                        />
-                      </div>
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <label className="col-form-label">Country</label>
-                        </div>
-                        <Select
-                          className="select"
-                          options={countryoptions1}
-                          classNamePrefix="react-select"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="col-lg-12 text-end modal-btn mt-4">
-                  <Link
-                    to="#"
-                    className="btn btn-light"
-                    data-bs-dismiss="modal"
-                  >
-                    Cancel
-                  </Link>
-                  <button
-                    className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    // data-bs-toggle="modal"
-                    // data-bs-target="#add_quotation"
-                    type="button"
-                  >
-                    Save changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* /Add Edit Quotation Address */}
-      {/* Add Quotation Item */}
-      {/* <div
-        className="modal custom-modal fade modal-padding"
-        id="add_quotationItem"
-        role="dialog"
-        aria-hidden="true"
-        aria-labelledby="add_quotationItemLabel"
-        tabIndex={-1}
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">
-                {selectedMeeting ? "Edit Product" : "Add new Product"}
-              </h5>
-              <button
-                type="button"
-                className="btn-close position-static"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="row">
-                  <div className="col-md-12">
-                    <div className="mb-3">
-                      <label className="col-form-label">Product Name</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">
-                        Product Description
-                      </label>
-                      <textarea
-                        className="form-control"
-                        rows={4}
-                        name="meetingDescription"
-                        value={meetingFormData.meetingDescription}
-                        onChange={(e) =>
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">Rate - AED</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">Unit</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">Rate - AED</label>
-                      <input
-                        className="form-control"
-                        name="meetingTitle"
-                        value={meetingFormData.meetingTitle}
-                        onChange={(e) => {
-                          handleMeetingInputChange(
-                            e.target.name,
-                            e.target.value
-                          );
-                        }}
-                        type="text"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="col-lg-12 text-end modal-btn mt-4">
-                  <Link
-                    to="#"
-                    className="btn btn-light"
-                    data-bs-dismiss="modal"
-                  >
-                    Cancel
-                  </Link>
-                  <button
-                    className="btn btn-primary"
-                    data-bs-dismiss="modal"
-                    // data-bs-toggle="modal"
-                    // data-bs-target="#add_quotation"
-                    type="button"
-                  >
-                    Save changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* /Add Quotation Item */}
-      {/* Create Call Log */}
-      {/* <div
-        className="modal custom-modal fade modal-padding"
-        id="create_call"
-        role="dialog"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Create Call Log</h5>
-              <button
-                type="button"
-                className="btn-close position-static"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="row">
-                  <div className="col-md-12">
-                    <div className="mb-3">
-                      <label className="col-form-label">
-                        Name <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Name"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="col-form-label">
-                        Status <span className="text-danger"> *</span>
-                      </label>
-                      <Select
-                        className="select2"
-                        options={statusList}
-                        placeholder="Choose"
-                        classNamePrefix="react-select"
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label className="col-form-label">Select Date</label>
-                      <div className="icon-form-end">
-                        <span className="form-icon">
-                          <i className="ti ti-calendar-event" />
-                        </span>
-                        <DatePicker
-                          className="form-control datetimepicker deals-details"
-                          selected={selectedDate}
-                          onChange={handleDateChange}
-                          dateFormat="dd-MM-yyyy"
-                        />
-                      </div>
-                    </div>
-
-                    <label className="col-form-label">
-                      Select Time <span className="text-danger">*</span>
-                    </label>
-                    <div className="mb-3 icon-form">
-                      <span className="form-icon">
-                        <i className="ti ti-clock-hour-10" />
-                      </span>
-                      <TimePicker
-                        placeholder="Select Time"
-                        className="form-control datetimepicker-time"
-                        onChange={onChange}
-                        defaultOpenValue={dayjs("00:00:00", "HH:mm:ss")}
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label className="col-form-label">
-                        Description <span className="text-danger"> *</span>
-                      </label>
-                      <textarea
-                        className="form-control"
-                        rows={4}
-                        placeholder="Add text"
-                        defaultValue={""}
-                      />
-                    </div>
-
-                    <div className="text-end modal-btn">
-                      <Link
-                        to="#"
-                        className="btn btn-light"
-                        data-bs-dismiss="modal"
-                      >
-                        Cancel
-                      </Link>
-                      <button
-                        className="btn btn-primary"
-                        data-bs-dismiss="modal"
-                        type="button"
-                      >
-                        Confirm
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* /Create Call Log */}
 
       {/* Add File */}
       <div

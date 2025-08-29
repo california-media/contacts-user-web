@@ -79,6 +79,28 @@ const userProfile = useSelector((state) =>state.profile)
                   ))}
                 </Route> */}
                 {publicRoutes.map((route, index) => {
+  // Skip routes with undefined paths
+  if (!route.path) return null;
+
+  const shouldUseFeature = !routesWithoutFeature.includes(
+    route.path.split("/")[1]
+      ? `/${route.path.split("/")[1]}`
+      : route.path
+  );
+
+  return shouldUseFeature ? (
+    <Route element={<Feature />} key={index}>
+      <Route path={route.path} element={route.element} />
+    </Route>
+  ) : (
+    <Route
+      path={route.path}
+      element={route.element}
+      key={index}
+    />
+  );
+})}
+                {/* {publicRoutes.map((route, index) => {
                   const shouldUseFeature = !routesWithoutFeature.includes(
                     route.path.split("/")[1]
                       ? `/${route.path.split("/")[1]}`
@@ -96,7 +118,7 @@ const userProfile = useSelector((state) =>state.profile)
                       key={index}
                     />
                   );
-                })}
+                })} */}
               </Routes>
             </PrivateRoute>
           }

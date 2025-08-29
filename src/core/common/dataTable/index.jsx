@@ -1,56 +1,65 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Spin, Table } from "antd";
-import { RiArrowLeftWideLine, RiArrowRightWideLine } from "react-icons/ri";
 
 const Datatable = ({
   columns,
   dataSource,
   loading,
+  isLoading,
   totalCount,
   onPageChange,
   onRowSelectionChange,
   rowKey,
+  scrollX
 }) => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [paginationConfig, setPaginationConfig] = useState({
-    current: 1,
-    pageSize: 10,
-    showQuickJumper: true,
-    showTotal: (total, range) =>
-      `Showing ${range[0]}–${range[1]} of ${total} results`,
-    showSizeChanger: true,
-    pageSizeOptions: ["10", "20", "30"],
-    total: totalCount,
-  });
+  const tableRef = useRef(null);
+
+  const pageSize = 20;
 
   useEffect(() => {
-    setPaginationConfig((prev) => ({
-      ...prev,
-      total: totalCount,
-    }));
-  }, [totalCount]);
+    const onWindowScroll = () => console.log("window scrolled");
+    window.addEventListener("scroll", onWindowScroll);
+    return () => window.removeEventListener("scroll", onWindowScroll);
+  }, []);
 
-  const handleTableChange = (pagination) => {
-    const { current, pageSize } = pagination;
+  useEffect(() => {
+    const container = tableRef.current?.querySelector(".ant-table-container");
 
-    setPaginationConfig((prev) => ({
-      ...prev,
-      current,
-      pageSize,
-    }));
-
-    onPageChange(current, pageSize);
-  };
-
-  const itemRender = (page, type, originalElement) => {
-    if (type === "prev") {
-      return <RiArrowLeftWideLine />;
+    if (!container) {
+      console.warn("❌ .ant-table-container not found. Waiting...");
+      return;
     }
-    if (type === "next") {
-      return <RiArrowRightWideLine />;
-    }
-    return originalElement;
-  };
+
+    const handleContainerScroll = () => {
+      if (isLoading) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = container;
+
+      console.log("🌀 Scrolling .ant-table-container");
+      console.log({ scrollTop, scrollHeight, clientHeight });
+
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+
+      if (isNearBottom) {
+        if (dataSource.length < totalCount) {
+          const nextPage = Math.ceil(dataSource.length / pageSize) + 1;
+          console.log(`📤 Fetching next page: ${nextPage}`);
+          onPageChange(nextPage, pageSize);
+        } else {
+          console.log("✅ All data loaded.");
+        }
+      }
+    };
+
+    container.addEventListener("scroll", handleContainerScroll);
+    console.log("📌 Attached scroll listener to .ant-table-container");
+
+    return () => {
+      container.removeEventListener("scroll", handleContainerScroll);
+      console.log("🔌 Removed scroll listener from .ant-table-container");
+    };
+  }, [dataSource, isLoading, totalCount]);
 
   const onSelectChange = (newSelectedRowKeys, selectedRows) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -59,35 +68,31 @@ const Datatable = ({
     }
   };
 
-  console.log(selectedRowKeys, "selected row keys");
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-  };
-
-  const paginationProps = {
-    ...paginationConfig,
-    itemRender,
-  };
-
   return (
-    <Table
-      className="table datanew dataTable no-footer"
-      rowSelection={rowSelection}
-      loading={loading}
-      columns={columns}
-      dataSource={dataSource}
-      tableLayout="fixed"
-      bordered
-      scroll={{
-        scrollToFirstRowOnChange: true,
-      }}
-      pagination={paginationProps}
-      onChange={handleTableChange}
-      rowKey={rowKey}
-    />
+    <div ref={tableRef}>
+      <Table
+        className="table datanew dataTable no-footer"
+        rowSelection={{
+          selectedRowKeys,
+          onChange: onSelectChange,
+        }}
+        columns={columns}
+        isLoading={isLoading}
+        dataSource={dataSource}
+        tableLayout="fixed"
+        bordered
+        pagination={false}
+        scroll={{ y: "calc(100vh - 325px)",x: scrollX }}
+        rowKey={rowKey}
+      />
+      {isLoading && (
+        <div className="d-flex justify-content-center">
+          <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
-
 export default Datatable;

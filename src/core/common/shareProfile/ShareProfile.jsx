@@ -28,18 +28,18 @@ const ShareProfile = () => {
   const modalRef = useRef(null);
 
   const { serialNumber } = useParams();
-  useEffect(() => {
-    const getQrCodeValue = JSON.stringify({
-      firstname: userProfile.firstname,
-      lastname: userProfile.lastname,
-      email: userProfile.email,
-      phone:
-        userProfile.phonenumbers?.length > 0
-          ? userProfile?.phonenumbers[0]
-          : "",
-    });
-    setQrCodeValue(getQrCodeValue);
-  }, [userProfile]);
+  // useEffect(() => {
+  //   const getQrCodeValue = JSON.stringify({
+  //     firstname: userProfile.firstname,
+  //     lastname: userProfile.lastname,
+  //     email: userProfile.email,
+  //     phone:
+  //       userProfile.phonenumbers?.length > 0
+  //         ? userProfile?.phonenumbers[0]
+  //         : "",
+  //   });
+  //   setQrCodeValue(getQrCodeValue);
+  // }, [userProfile]);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -210,11 +210,22 @@ console.log();
 
                   <div className="profileCardQrCodeContainer">
                     <div ref={qrCodeRef}>
-                      <QRCode
-                        value={qrCodeValue}
+                      {/* <QRCode
+                        value={userProfile}
                         size={150}
                         className="profileCardQrCode"
                         bgColor="#ffffff"
+                      /> */}
+                       <img
+                        src={userProfile.qrCode}
+                        alt="QR Code"
+                        className="qrCodeImg"
+                        width={150}
+                        height={150}
+                        // style={{
+                        //   border: "1px solid white",
+                        //   marginRight: "20px",
+                        // }}
                       />
                     </div>
                   </div>

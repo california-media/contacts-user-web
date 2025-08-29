@@ -118,7 +118,7 @@ const EmailTemplateOffcanvas = () => {
           <div className="row">
             <div className="col-12">
               <div className="mb-3">
-                <label className="col-form-label ms-3">Title</label>
+                <label className="col-form-label">Title</label>
                 <input
                   type="text"
                   value={formData.emailTemplateTitle}
@@ -132,7 +132,7 @@ const EmailTemplateOffcanvas = () => {
             </div>
             <div className="col-12">
               <div className="mb-3">
-                <label className="col-form-label ms-3">Subject</label>
+                <label className="col-form-label">Subject</label>
                 <input
                   type="text"
                   value={formData.emailTemplateSubject}
@@ -145,6 +145,7 @@ const EmailTemplateOffcanvas = () => {
               </div>
             </div>
  <div className="col-12">
+    <label className="col-form-label">Attributes</label>
             <select
               className="form-select"
               aria-label="Default select example"
@@ -162,7 +163,7 @@ const EmailTemplateOffcanvas = () => {
 </div>
             <div className="col-12">
               <div className="mb-3">
-                <label className="col-form-label ms-3">Body</label>
+                <label className="col-form-label">Body</label>
                 {/* <DefaultEditor
                   name="emailTemplateBody"
                   placeholder="Enter text here"
