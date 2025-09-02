@@ -19,7 +19,7 @@ const ALLRoutes = () => {
   const dispatch = useDispatch();
   const { toasts } = useSelector((state) => state.toast);
 
-const userProfile = useSelector((state) =>state.profile)
+  const userProfile = useSelector((state) => state.profile);
   const routesWithoutFeature = ["/registration-form"];
   const route = all_routes;
   // Find the current route in either public or auth routes
@@ -35,6 +35,7 @@ const userProfile = useSelector((state) =>state.profile)
   useEffect(() => {
     document.title = fullTitle;
   }, [fullTitle]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -79,27 +80,27 @@ const userProfile = useSelector((state) =>state.profile)
                   ))}
                 </Route> */}
                 {publicRoutes.map((route, index) => {
-  // Skip routes with undefined paths
-  if (!route.path) return null;
+                  // Skip routes with undefined paths
+                  if (!route.path) return null;
 
-  const shouldUseFeature = !routesWithoutFeature.includes(
-    route.path.split("/")[1]
-      ? `/${route.path.split("/")[1]}`
-      : route.path
-  );
+                  const shouldUseFeature = !routesWithoutFeature.includes(
+                    route.path.split("/")[1]
+                      ? `/${route.path.split("/")[1]}`
+                      : route.path
+                  );
 
-  return shouldUseFeature ? (
-    <Route element={<Feature />} key={index}>
-      <Route path={route.path} element={route.element} />
-    </Route>
-  ) : (
-    <Route
-      path={route.path}
-      element={route.element}
-      key={index}
-    />
-  );
-})}
+                  return shouldUseFeature ? (
+                    <Route element={<Feature />} key={index}>
+                      <Route path={route.path} element={route.element} />
+                    </Route>
+                  ) : (
+                    <Route
+                      path={route.path}
+                      element={route.element}
+                      key={index}
+                    />
+                  );
+                })}
                 {/* {publicRoutes.map((route, index) => {
                   const shouldUseFeature = !routesWithoutFeature.includes(
                     route.path.split("/")[1]

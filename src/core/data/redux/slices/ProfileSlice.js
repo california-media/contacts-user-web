@@ -15,6 +15,7 @@ const initialState = {
   favouriteCount: 0,
   tagCount: 0,
   isLoading: false,
+  role: "user",
   // error: null,
 };
 
@@ -93,7 +94,7 @@ const profileSlice = createSlice({
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-
+        console.log("Fetched profile data:", action.payload);
         // return { ...state, ...action.payload };
         Object.assign(state, action.payload.data);
       })
