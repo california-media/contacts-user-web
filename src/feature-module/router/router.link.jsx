@@ -12,6 +12,7 @@ import Profile from "../settings/generalSettings/profile";
 import Security from "../settings/generalSettings/security";
 import ContactList from "../crm/customers/customerList";
 import Dashboard from "../crm/dashboard/Dashboard";
+import AdminDashboard from "../crm/dashboard/AdminDashboard";
 import LeadsKanban from "../crm/contacts/leadskanban";
 import ContactGrid from "../crm/customers/customer-kanban";
 import Whatsapp from "../crm/chat/Whatsapp";
@@ -32,190 +33,247 @@ import SyncAndIntegration from "../crm/tools/SyncAndIntegration";
 import Zapier from "../crm/tools/Zapier";
 import ReferAndEarn from "../crm/support/ReferAndEarn";
 import HelpAndSupport from "../crm/support/HelpAndSupport";
+import Users from "../crm/users/Users";
 
 const route = all_routes;
 
+export const adminRoutes = [
+  {
+    path: "/admin/dashboard",
+    element: <AdminDashboard />,
+    route: Route,
+    title: "Admin Dashboard",
+  },
+  {
+    path: route.adminCalendar,
+    element: <Calendar />,
+    route: Route,
+    title: "Calendar",
+  },
+  {
+    path: route.adminHelpAndSupport,
+    element: <HelpAndSupport />,
+    route: Route,
+    title: "Help and Support",
+  },
+  {
+    path: route.adminSecurity,
+    element: <Security />,
+    route: Route,
+    title: "Security",
+  },
+  {
+    path: route.users,
+    element: <Users />,
+    route: Route,
+    title: "Security",
+  },
+  {
+    path: route.adminProfile,
+    element: <Profile />,
+    route: Route,
+    title: "Profile",
+  },
+];
+
 export const publicRoutes = [
   {
-    path: '/dashboard',
-    name: 'Root',
+    path: "/dashboard",
+    name: "Root",
     element: <Dashboard />,
     route: Route,
-    title:'Dashboard'
-  },
-  {
-    path: route.leadsKanban,
-    element: <LeadsKanban />,
-    route: Route,
-    title:'Leads Kanban'
-  },
-  {
-    path: route.upgradePlan,
-    element: <UpgradePlan />,
-    route: Route,
-    title:'Upgrade Plan'
-  },
-  {
-    path: route.contactDetails,
-    element: <ContactDetails />,
-    route: Route,
-    title:'Contact Details'
-  },
-
-
-  {
-    path: route.deals,
-    element: <Deals />,
-    route: Route,
-    title:'Deals'
-  },
-  {
-    path: route.dealsDetails,
-    element: <DealsDetails />,
-    route: Route,
-    title:'Deals Details'
-  },
-  {
-    path: route.dealsKanban,
-    element: <DealsKanban />,
-    route: Route,
-    title:'Deals Kanban'
-  },
-  {
-    path: route.contactsDetails,
-    element: <ContactsDetails />,
-    route: Route,
-    title:'Contacts Details'
-  },
-  {
-    path: route.contacts,
-    element: <Contacts />,
-    route: Route,
-    title:'Contacts'
-  },
-  {
-    path: route.groups,
-    element: <Groups />,
-    route: Route,
-    title:'Groups'
-  },
-  {
-    path: route.templates,
-    element: <Templates />,
-    route: Route,
-    title:'Templates'
-  },
-  {
-    path: route.emails,
-    element: <Emails />,
-    route: Route,
-    title:'Emails'
+    title: "Dashboard",
   },
   {
     path: route.calendar,
     element: <Calendar />,
     route: Route,
-    title:'Calendar'
+    title: "Calendar",
   },
   {
-    path: route.registrationForm,
-    element: <PostRegistrationForm />,
+    path: route.HelpAndSupport,
+    element: <HelpAndSupport />,
     route: Route,
-    title:'Registration Form'
-  },
-  {
-    path: route.scans,
-    element: <MyScans />,
-    route: Route,
-    title:'Scans'
-  },
-  {
-    path: route.profile,
-    element: <Profile />,
-    route: Route,
-    title:'Profile'
+    title: "Help and Support",
   },
   {
     path: route.security,
     element: <Security />,
     route: Route,
-    title:'Security'
+    title: "Security",
+  },
+
+  {
+    path: route.leadsKanban,
+    element: <LeadsKanban />,
+    route: Route,
+    title: "Leads Kanban",
+  },
+  {
+    path: route.upgradePlan,
+    element: <UpgradePlan />,
+    route: Route,
+    title: "Upgrade Plan",
+  },
+  {
+    path: route.contactDetails,
+    element: <ContactDetails />,
+    route: Route,
+    title: "Contact Details",
+  },
+
+  {
+    path: route.deals,
+    element: <Deals />,
+    route: Route,
+    title: "Deals",
+  },
+  {
+    path: route.dealsDetails,
+    element: <DealsDetails />,
+    route: Route,
+    title: "Deals Details",
+  },
+  {
+    path: route.dealsKanban,
+    element: <DealsKanban />,
+    route: Route,
+    title: "Deals Kanban",
+  },
+  {
+    path: route.contactsDetails,
+    element: <ContactsDetails />,
+    route: Route,
+    title: "Contacts Details",
+  },
+  {
+    path: route.contacts,
+    element: <Contacts />,
+    route: Route,
+    title: "Contacts",
+  },
+  {
+    path: route.groups,
+    element: <Groups />,
+    route: Route,
+    title: "Groups",
+  },
+  {
+    path: route.templates,
+    element: <Templates />,
+    route: Route,
+    title: "Templates",
+  },
+  {
+    path: route.emails,
+    element: <Emails />,
+    route: Route,
+    title: "Emails",
+  },
+  {
+    path: route.calendar,
+    element: <Calendar />,
+    route: Route,
+    title: "Calendar",
+  },
+  {
+    path: route.registrationForm,
+    element: <PostRegistrationForm />,
+    route: Route,
+    title: "Registration Form",
+  },
+  {
+    path: route.scans,
+    element: <MyScans />,
+    route: Route,
+    title: "Scans",
+  },
+  {
+    path: route.profile,
+    element: <Profile />,
+    route: Route,
+    title: "Profile",
+  },
+  {
+    path: route.security,
+    element: <Security />,
+    route: Route,
+    title: "Security",
   },
   {
     path: route.emailSetup,
     element: <EmailSetup />,
     route: Route,
-    title:'Email Setup'
+    title: "Email Setup",
   },
 
   {
     path: route.dashboard,
     element: <Dashboard />,
     route: Route,
-    title:'Dashboard'
+    title: "Dashboard",
   },
   {
     path: route.contactList,
     element: <ContactList />,
     route: Route,
-    title:'Contact List'
+    title: "Contact List",
   },
   {
     path: route.Whatsapp,
     element: <Whatsapp />,
     route: Route,
-    title:'Whatsapp'
+    title: "Whatsapp",
   },
 
   {
     path: route.contactGrid,
     element: <ContactGrid />,
     route: Route,
-    title:'Contact Grid'
+    title: "Contact Grid",
   },
   {
     path: route.pipeline,
     element: <Pipeline />,
     route: Route,
-    title:'Pipeline'
+    title: "Pipeline",
   },
   {
     path: route.ImportAndExport,
     element: <ImportAndExport />,
     route: Route,
-    title:'Import and Export'
+    title: "Import and Export",
   },
   {
     path: route.Api,
     element: <Api />,
     route: Route,
-    title:'Api'
+    title: "Api",
   },
   {
     path: route.SyncAndIntegration,
     element: <SyncAndIntegration />,
     route: Route,
-    title:'Sync and Integration'
+    title: "Sync and Integration",
   },
   {
     path: route.Zapier,
     element: <Zapier />,
     route: Route,
-    title:'Zapier'
+    title: "Zapier",
   },
   {
     path: route.ReferAndEarn,
     element: <ReferAndEarn />,
     route: Route,
-    title:'Refer and Earn'
+    title: "Refer and Earn",
   },
   {
     path: route.HelpAndSupport,
     element: <HelpAndSupport />,
     route: Route,
-    title:'Help and Support'
+    title: "Help and Support",
   },
-
 ];
 
 export const authRoutes = [
@@ -223,24 +281,24 @@ export const authRoutes = [
     path: route.login,
     element: <Login />,
     route: Route,
-    title:'Login'
+    title: "Login",
   },
   {
     path: route.register,
     element: <Register />,
     route: Route,
-    title:'Register'
+    title: "Register",
   },
   {
-    path: `${route.shareProfile}/:serialNumber`,  
+    path: `${route.shareProfile}/:serialNumber`,
     element: <ShareProfile />,
     route: Route,
-    title:'Share Profile'
+    title: "Share Profile",
   },
   {
-    path: `${route.userVerification}`,  
+    path: `${route.userVerification}`,
     element: <UserVerification />,
     route: Route,
-    title:'User Verification'
+    title: "User Verification",
   },
 ];

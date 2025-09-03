@@ -13,7 +13,7 @@ import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndi
 import CopyableInput from "../../../core/common/CopyableInput";
 import Calendar from "../calendar/Calendar";
 
-const Dashboard = () => {
+const AdminDashboard = () => {
   const [file, setFile] = useState();
   const [progress, setProgress] = useState(0);
   const [qrCodeValue, setQrCodeValue] = useState("");
@@ -30,7 +30,6 @@ const Dashboard = () => {
     /\s/g,
     ""
   )}${userProfile.serialNumber}`;
-
   const [sline] = useState({
     chart: {
       height: 350,
@@ -80,8 +79,6 @@ const Dashboard = () => {
   const onFileChange = (e) => {
     setFile(e.target.files[0]);
   };
-
-  ///already fethced it in router.jsx
   // useEffect(() => {
   //   const fetchUserProfile = async () => {
   //     try {
@@ -188,7 +185,6 @@ const Dashboard = () => {
                               marginRight: "20px",
                             }}
                           />
-                       
                         )}
                         <div>
                           <div>
@@ -574,4 +570,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;

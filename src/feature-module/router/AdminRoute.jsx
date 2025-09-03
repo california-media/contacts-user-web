@@ -4,11 +4,11 @@ import { useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
 import LoadingIndicator2 from "../../core/common/loadingIndicator/LoadingIndicator2";
 
-const PrivateRoute = ({ children }) => {
+const AdminRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   const { role, isLoading } = useSelector((state) => state.profile);
-
   const location = useLocation();
+
   if (!token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
@@ -22,13 +22,10 @@ const PrivateRoute = ({ children }) => {
     ); // Or your custom loading component
   }
 
-  if (role === "superadmin") {
-    return (
-      <Navigate to="/admin/dashboard" state={{ from: location }} replace />
-    );
+  if (role !== "superadmin") {
+    return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
-
+  console.log("now rendering children");
   return children;
 };
-
-export default PrivateRoute;
+export default AdminRoute;

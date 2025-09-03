@@ -97,8 +97,8 @@ const Contacts = () => {
   const [selectedLeadEmployee, setSelectedLeadEmployee] = useState([]);
   // const [isLoading, setIsLoading] = useState(false);
   const [allContacts, setAllContacts] = useState([]);
-  console.log(allContacts,"allcontacts in contact");
-  
+  console.log(allContacts, "allcontacts in contact");
+
   // const [stars, setStars] = useState({});
   const [newContents, setNewContents] = useState([0]);
   const [previousTags, setPreviousTags] = useState([]);
@@ -352,7 +352,7 @@ const Contacts = () => {
         <p className="uploadSubHeading">
           Contacts (or 'leads') are people you engage with
         </p>
-        
+
         <div className="d-md-flex justify-content-center">
           <div
             className={`importMenu  ${
@@ -807,7 +807,6 @@ const Contacts = () => {
     selectedContactGroup,
   ]);
 
-
   useEffect(() => {
     const shouldHideActionAndBlank = Object.keys(columnVisibility)
       .filter((key) => key !== "" && key !== "Action")
@@ -1158,7 +1157,6 @@ const Contacts = () => {
         }
 
         return (
-
           <div className="d-flex overflow-auto">
             {tags.map((tag, index) => {
               const isHovered = groupHoveredIndex === index;

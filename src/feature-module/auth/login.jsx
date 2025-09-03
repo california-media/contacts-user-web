@@ -15,8 +15,7 @@ import loginAnimation1 from "../../style/animations/loginAnimation1.json";
 import loginAnimation2 from "../../style/animations/loginAnimation2.json";
 import loginAnimation3 from "../../style/animations/loginAnimation3.json";
 import ImageWithBasePath from "../../core/common/imageWithBasePath";
-import 'react-phone-input-2/lib/style.css'; // already done ✅
-
+import "react-phone-input-2/lib/style.css"; // already done ✅
 
 const Login = () => {
   const sliderSettings = {
@@ -102,7 +101,10 @@ const Login = () => {
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.data.token);
         setMessage(response.data.message);
-        navigate(route.dashboard);
+        console.log(response.data.data.role);
+        response.data.data.role === "superadmin"
+          ? navigate(route.adminDashboard)
+          : navigate(route.dashboard);
       }
     } catch (error) {
       setMessage(error?.response?.data?.message || "Login failed");
@@ -190,8 +192,8 @@ const Login = () => {
       const url = referralCode
         ? `/user/linkedin/login?ref=${referralCode}`
         : `/user/linkedin/login`;
-        console.log("url for linkedin login", url);
-        
+      console.log("url for linkedin login", url);
+
       const response = await api.get(url);
       console.log(response.data, "response from linkedin login");
       if (
@@ -300,7 +302,7 @@ const Login = () => {
       const url = referralCode
         ? `/user/google/login?ref=${referralCode}`
         : `/user/google/login`;
-         console.log("url for google login", url);
+      console.log("url for google login", url);
       const response = await api.get(url);
       console.log(response.data, "response from google login");
       if (
