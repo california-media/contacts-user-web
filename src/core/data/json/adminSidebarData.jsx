@@ -31,13 +31,13 @@ export const adminSidebarData = [
           },
         ],
       },
-      {
-        label: "Calendar",
-        iconImg: "assets/img/icons/calendarIcon.png",
-        submenu: false,
-        showSubRoute: false,
-        submenuItems: [{ label: "Calendar", link: route.adminCalendar }],
-      },
+      // {
+      //   label: "Calendar",
+      //   iconImg: "assets/img/icons/calendarIcon.png",
+      //   submenu: false,
+      //   showSubRoute: false,
+      //   submenuItems: [{ label: "Calendar", link: route.adminCalendar }],
+      // },
     ],
   },
   // {

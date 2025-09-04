@@ -42,7 +42,7 @@ const ALLRoutes = () => {
     const token = localStorage.getItem("token");
     if (token) {
       // navigate(route.dashboard);
-
+      console.log("token found");
       dispatch(fetchProfile());
       dispatch(fetchTags());
     }

@@ -14,7 +14,7 @@ const initialState = {
   // emailTemplates: [],
   favouriteCount: 0,
   tagCount: 0,
-  isLoading: false,
+  isLoading: true,
   role: "user",
   // error: null,
 };

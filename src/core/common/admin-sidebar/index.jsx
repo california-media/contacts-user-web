@@ -39,7 +39,7 @@ const AdminSidebar = () => {
   // const [subsidebar, setSubsidebar] = useState("");
   // const [showDialer, setShowDialer] = useState(false);
   // const [openDropdown, setOpenDropdown] = useState(true);
-  const [isHovered, setIsHovered] = useState(null);
+  // const [isHovered, setIsHovered] = useState(null);
 
   // const toggleDropdown = () => setOpenDropdown((p) => !p);
 
@@ -90,8 +90,8 @@ const AdminSidebar = () => {
     });
   }, [Location.pathname]);
 
-  const handleMouseEnter = (menuLabel) => setIsHovered(menuLabel);
-  const handleMouseLeave = () => setIsHovered(null);
+  // const handleMouseEnter = (menuLabel) => setIsHovered(menuLabel);
+  // const handleMouseLeave = () => setIsHovered(null);
 
   /**
    * Build dynamic GROUPS section from tags while preserving the
@@ -240,10 +240,10 @@ const AdminSidebar = () => {
                               }}
                             >
                               <div
-                                onMouseEnter={() =>
-                                  handleMouseEnter(title.label)
-                                }
-                                onMouseLeave={handleMouseLeave}
+                                // onMouseEnter={() =>
+                                //   handleMouseEnter(title.label)
+                                // }
+                                // onMouseLeave={handleMouseLeave}
                               >
                                 {/* <Link
                                   to={title?.submenu ? "#" : title?.link}
@@ -404,39 +404,7 @@ const AdminSidebar = () => {
 
           {/* lower box content */}
           <div>
-            <div className="sidebarTrialBox">
-              <div
-                className="d-flex justify-content-between"
-                style={{ marginBottom: 12 }}
-              >
-                <ImageWithBasePath
-                  src="assets/img/icons/diamond.png"
-                  className="uploadSectionImage"
-                  alt="Excel Logo"
-                />
-                {/* <ImageWithBasePath
-                  src="assets/img/icons/close.png"
-                  className="closeIcon"
-                  alt="Excel Logo"
-                /> */}
-              </div>
-              <div>
-                <p className="trialHeading">
-                  {diff > 0
-                    ? `Your trial ends in ${daysLeft} days`
-                    : "Your trial has expired"}
-                </p>
-                <p className="trialDescription">
-                  Select new plan and unlock all features
-                </p>
-                <p
-                  className="upgradePlan"
-                  onClick={() => navigate(route.upgradePlan)}
-                >
-                  Upgrade Plan
-                </p>
-              </div>
-            </div>
+           
 
             {/* <div style={{ padding: 15 }}>
               <ul>

@@ -16,6 +16,8 @@ import loginAnimation2 from "../../style/animations/loginAnimation2.json";
 import loginAnimation3 from "../../style/animations/loginAnimation3.json";
 import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import "react-phone-input-2/lib/style.css"; // already done ✅
+import { fetchProfile } from "../../core/data/redux/slices/ProfileSlice";
+import { useDispatch } from "react-redux";
 
 const Login = () => {
   const sliderSettings = {
@@ -57,6 +59,7 @@ const Login = () => {
   const togglePasswordVisibility = () => {
     setPasswordVisible((prev) => !prev);
   };
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (timer <= 0) {
@@ -101,7 +104,8 @@ const Login = () => {
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.data.token);
         setMessage(response.data.message);
-        console.log(response.data.data.role);
+        // fetch data before navigating
+        await dispatch(fetchProfile());
         response.data.data.role === "superadmin"
           ? navigate(route.adminDashboard)
           : navigate(route.dashboard);

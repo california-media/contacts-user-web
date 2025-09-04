@@ -15,6 +15,7 @@ export const all_routes = {
   contactGrid: "/crm/customer-kanban",
 
   contactsDetails: "/contacts-details",
+  adminUserDetails: "/admin/user-details",
   leads: "/leads",
   contacts: "/contacts",
   templates: "/templates",

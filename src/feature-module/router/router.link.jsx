@@ -33,7 +33,8 @@ import SyncAndIntegration from "../crm/tools/SyncAndIntegration";
 import Zapier from "../crm/tools/Zapier";
 import ReferAndEarn from "../crm/support/ReferAndEarn";
 import HelpAndSupport from "../crm/support/HelpAndSupport";
-import Users from "../crm/users/Users";
+import Users from "../crm/contacts/Users";
+import AdminContactDetails from "../crm/contacts/AdminContactDetails";
 
 const route = all_routes;
 
@@ -66,13 +67,19 @@ export const adminRoutes = [
     path: route.users,
     element: <Users />,
     route: Route,
-    title: "Security",
+    title: "Users",
   },
   {
     path: route.adminProfile,
     element: <Profile />,
     route: Route,
     title: "Profile",
+  },
+  {
+    path: route.adminUserDetails,
+    element: <AdminContactDetails />,
+    route: Route,
+    title: "Contacts Details",
   },
 ];
 

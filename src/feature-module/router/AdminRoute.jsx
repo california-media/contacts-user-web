@@ -8,7 +8,7 @@ const AdminRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   const { role, isLoading } = useSelector((state) => state.profile);
   const location = useLocation();
-
+  console.log("CAME TO ADMIN ROUTE", location.pathname, role, isLoading);
   if (!token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
