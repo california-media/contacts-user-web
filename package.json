@@ -82,6 +82,7 @@
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.72.0",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.8.1",
     "start": "^5.1.0",
     "sweetalert2": "^11.10.7",
     "sweetalert2-react-content": "^5.0.7",

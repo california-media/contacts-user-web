@@ -34,7 +34,8 @@ import Zapier from "../crm/tools/Zapier";
 import ReferAndEarn from "../crm/support/ReferAndEarn";
 import HelpAndSupport from "../crm/support/HelpAndSupport";
 import Users from "../crm/contacts/Users";
-import AdminContactDetails from "../crm/contacts/AdminContactDetails";
+import AdminContactDetails from "../crm/contacts/AdminUserDetails";
+import AdminUserDetails from "../crm/contacts/AdminUserDetails";
 
 const route = all_routes;
 
@@ -77,7 +78,7 @@ export const adminRoutes = [
   },
   {
     path: route.adminUserDetails,
-    element: <AdminContactDetails />,
+    element: <AdminUserDetails />,
     route: Route,
     title: "Contacts Details",
   },

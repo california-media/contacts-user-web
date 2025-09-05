@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import { CiEdit } from "react-icons/ci";
-import ContactOffcanvas from "../../../core/common/offCanvas/contact/ContactOffcanvas";
+import UserOffcanvas from "../../../core/common/offCanvas/admin-user/UserOffcanvas";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
 import api from "../../../core/axios/axiosInstance";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -17,15 +17,14 @@ const AdminUserDetails = () => {
   const location = useLocation();
   const [userInfo, setUserInfo] = useState({});
   const [loading, setLoading] = useState(false);
-
   // Get user ID from query parameters
   const queryParams = new URLSearchParams(location.search);
-  const userId = queryParams.get('u');
+  const userId = queryParams.get("u");
 
   // Fetch user details
   const fetchUserDetails = async () => {
     if (!userId) return;
-    
+
     setLoading(true);
     try {
       const response = await api.get(`/admin/users/${userId}`);
@@ -47,7 +46,10 @@ const AdminUserDetails = () => {
     return (
       <div className="page-wrapper">
         <div className="content">
-          <div className="d-flex justify-content-center align-items-center" style={{ height: "50vh" }}>
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ height: "50vh" }}
+          >
             <div className="spinner-border" role="status">
               <span className="sr-only">Loading...</span>
             </div>
@@ -56,7 +58,7 @@ const AdminUserDetails = () => {
       </div>
     );
   }
-
+  console.log(userInfo, "user info");
   return (
     <>
       {/* Page Wrapper */}
@@ -75,15 +77,20 @@ const AdminUserDetails = () => {
                           Users
                         </Link>
                       </li>
-                      <li>{userInfo.firstname}</li>
+                      <li>{userInfo?.firstname}</li>
                     </ul>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             {/* User Sidebar */}
-            <ContactOffcanvas selectedContact={userInfo} />
+            <UserOffcanvas
+              selectedUser={userInfo}
+              setUserInfo={setUserInfo}
+              loading={loading}
+              setLoading={setLoading}
+            />
             <div className="col-xl-3 theiaStickySidebar">
               <div className="card">
                 <div className="card-body p-3">
@@ -92,28 +99,30 @@ const AdminUserDetails = () => {
                     <Link
                       to="#"
                       data-bs-toggle="offcanvas"
-                      data-bs-target="#contact_offcanvas"
+                      data-bs-target="#user_offcanvas"
                     >
                       <CiEdit size={20} />
                     </Link>
                   </div>
                   <div style={{ display: "flex" }}>
                     <div className="profilePic">
-                      {userInfo.profileImageURL ? (
+                      {userInfo?.profileImageURL ? (
                         <img
-                          src={userInfo.profileImageURL}
+                          src={userInfo?.profileImageURL}
                           className="profilePic"
                           id="profileImage"
                           alt="Profile"
                         />
                       ) : (
                         <AvatarInitialStyles
-                          name={`${userInfo.firstname || ""} ${userInfo.lastname || ""}`}
+                          name={`${userInfo?.firstname || ""} ${
+                            userInfo?.lastname || ""
+                          }`}
                         />
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="px-2 mb-4 d-flex flex-wrap gap-3 justify-content-start">
                     <OverlayTrigger
                       placement="bottom"
@@ -129,7 +138,7 @@ const AdminUserDetails = () => {
                         <a
                           href={
                             userInfo?.phonenumbers?.[0]
-                              ? `tel:${userInfo.phonenumbers[0].countryCode}${userInfo.phonenumbers[0].number}`
+                              ? `tel:${userInfo?.phonenumbers[0].countryCode}${userInfo?.phonenumbers[0].number}`
                               : undefined
                           }
                           className={`icon-wrapper-sm phone ${
@@ -179,7 +188,13 @@ const AdminUserDetails = () => {
                     </OverlayTrigger>
 
                     {/* Social Media Icons */}
-                    {["instagram", "twitter", "linkedin", "facebook", "telegram"].map((platform) => {
+                    {[
+                      "instagram",
+                      "twitter",
+                      "linkedin",
+                      "facebook",
+                      "telegram",
+                    ].map((platform) => {
                       const platformLabel =
                         platform.charAt(0).toUpperCase() + platform.slice(1);
                       const isActive = !!userInfo?.[platform];
@@ -252,14 +267,14 @@ const AdminUserDetails = () => {
                       );
                     })}
                   </div>
-                  
+
                   <ul>
                     <div className="row mb-3 d-flex flex-column align-items-center">
-                      {userInfo.userInfo?.companyName && (
+                      {userInfo?.userInfo?.companyName && (
                         <div className="d-flex align-items-center mb-2">
                           <i className="fa-regular fa-building me-2"></i>
                           <span className="col-12 fw-semibold text-black">
-                            {userInfo.userInfo.companyName}
+                            {userInfo?.userInfo?.companyName}
                           </span>
                         </div>
                       )}
@@ -267,24 +282,24 @@ const AdminUserDetails = () => {
                         <i className="fa-regular fa-user me-2"></i>
                         <span
                           className={`col-12 ${
-                            !userInfo.userInfo?.companyName
+                            !userInfo?.userInfo?.companyName
                               ? "fw-semibold text-black"
                               : ""
                           }`}
                         >
-                          {userInfo.firstname} {userInfo.lastname}
+                          {userInfo?.firstname} {userInfo?.lastname}
                         </span>
                       </div>
-                      {userInfo.designation && (
+                      {userInfo?.designation && (
                         <div className="d-flex align-items-center mb-2">
                           <i className="fa-solid fa-briefcase me-2"></i>
                           <span className="col-12 fst-italic">
-                            {userInfo.designation}
+                            {userInfo?.designation}
                           </span>
                         </div>
                       )}
                     </div>
-                    
+
                     {userInfo?.phonenumbers?.length > 0 && (
                       <li className="row mb-3">
                         <span className="col-12 fw-semibold text-black">
@@ -295,19 +310,21 @@ const AdminUserDetails = () => {
                             className="d-flex justify-content-between align-items-center"
                             key={index}
                           >
-                            <span>+{phoneObj.countryCode} {phoneObj.number}</span>
+                            <span>
+                              +{phoneObj.countryCode} {phoneObj.number}
+                            </span>
                           </div>
                         ))}
                       </li>
                     )}
-                    
+
                     {userInfo?.email && (
                       <li className="row mb-3">
                         <span className="col-12 fw-semibold text-black">
                           Email
                         </span>
                         <div className="d-flex align-items-center justify-content-between">
-                          <span>{userInfo.email}</span>
+                          <span>{userInfo?.email}</span>
                         </div>
                       </li>
                     )}
@@ -318,7 +335,7 @@ const AdminUserDetails = () => {
                           Plan
                         </span>
                         <span className="col-12">
-                          {userInfo.plan?.name || "N/A"}
+                          {userInfo?.plan?.name || "N/A"}
                         </span>
                       </li>
                     )}
@@ -329,35 +346,26 @@ const AdminUserDetails = () => {
                           Plan Expires At
                         </span>
                         <span className="col-12">
-                          {dayjs(userInfo.planExpiresAt).format("DD MMM YYYY")}
+                          {dayjs(userInfo?.planExpiresAt).format("DD MMM YYYY")}
                         </span>
                       </li>
                     )}
 
                     <li className="row mb-3">
                       <span className="col-12 fw-semibold text-black">
-                        Status
-                      </span>
-                      <span className="col-12">
-                        <span className={`badge ${userInfo.isActive ? 'bg-success' : 'bg-danger'}`}>
-                          {userInfo.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                      </span>
-                    </li>
-
-                    <li className="row mb-3">
-                      <span className="col-12 fw-semibold text-black">
                         Date Created
                       </span>
                       <span className="col-12">
-                        {dayjs(userInfo.createdAt).format("DD MMM YYYY, hh:mm A")}
+                        {dayjs(userInfo?.createdAt).format(
+                          "DD MMM YYYY, hh:mm A"
+                        )}
                       </span>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
-            
+
             {/* User Details */}
             <div className="col-xl-9">
               <div className="card mb-3">
@@ -377,7 +385,7 @@ const AdminUserDetails = () => {
                   </ul>
                 </div>
               </div>
-              
+
               {/* Tab Content */}
               <div className="tab-content pt-0">
                 <div className="tab-pane fade active show" id="user-info">
@@ -389,55 +397,119 @@ const AdminUserDetails = () => {
                       <div className="row">
                         <div className="col-md-6">
                           <div className="mb-3">
-                            <label className="form-label fw-semibold">Role</label>
-                            <p className="form-control-static">{userInfo.role || "N/A"}</p>
-                          </div>
-                        </div>
-                        <div className="col-md-6">
-                          <div className="mb-3">
-                            <label className="form-label fw-semibold">Signup Method</label>
-                            <p className="form-control-static">{userInfo.signupMethod || "N/A"}</p>
-                          </div>
-                        </div>
-                        <div className="col-md-6">
-                          <div className="mb-3">
-                            <label className="form-label fw-semibold">Is Premium</label>
+                            <label className="form-label fw-semibold">
+                              Role
+                            </label>
                             <p className="form-control-static">
-                              <span className={`badge ${userInfo.isPremium ? 'bg-success' : 'bg-secondary'}`}>
-                                {userInfo.isPremium ? 'Yes' : 'No'}
+                              {userInfo?.role || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="mb-3">
+                            <label className="form-label fw-semibold">
+                              Signup Method
+                            </label>
+                            <p className="form-control-static">
+                              {userInfo?.signupMethod || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="mb-3">
+                            <label className="form-label fw-semibold">
+                              Is Premium
+                            </label>
+                            <p className="form-control-static">
+                              <span
+                                className={`badge ${
+                                  userInfo?.isPremium
+                                    ? "bg-success"
+                                    : "bg-secondary"
+                                }`}
+                              >
+                                {userInfo?.isPremium ? "Yes" : "No"}
                               </span>
                             </p>
                           </div>
                         </div>
                         <div className="col-md-6">
                           <div className="mb-3">
-                            <label className="form-label fw-semibold">Is Verified</label>
+                            <label className="form-label fw-semibold">
+                              Is Verified
+                            </label>
                             <p className="form-control-static">
-                              <span className={`badge ${userInfo.isVerified ? 'bg-success' : 'bg-warning'}`}>
-                                {userInfo.isVerified ? 'Verified' : 'Not Verified'}
+                              <span
+                                className={`badge ${
+                                  userInfo?.isVerified
+                                    ? "bg-success"
+                                    : "bg-warning"
+                                }`}
+                              >
+                                {userInfo?.isVerified
+                                  ? "Verified"
+                                  : "Not Verified"}
                               </span>
                             </p>
                           </div>
                         </div>
-                        {userInfo.referralCode && (
+                        {userInfo?.referralCode && (
                           <div className="col-md-6">
                             <div className="mb-3">
-                              <label className="form-label fw-semibold">Referral Code</label>
-                              <p className="form-control-static">{userInfo.referralCode}</p>
+                              <label className="form-label fw-semibold">
+                                Referral Code
+                              </label>
+                              <p className="form-control-static">
+                                {userInfo?.referralCode}
+                              </p>
                             </div>
                           </div>
                         )}
                         <div className="col-md-6">
                           <div className="mb-3">
-                            <label className="form-label fw-semibold">Credit Balance</label>
-                            <p className="form-control-static">${userInfo.creditBalance || 0}</p>
+                            <label className="form-label fw-semibold">
+                              Credit Balance
+                            </label>
+                            <p className="form-control-static">
+                              ${userInfo?.creditBalance || 0}
+                            </p>
                           </div>
                         </div>
-                        {userInfo.userInfo?.goals && (
-                          <div className="col-md-12">
+                        {userInfo?.userInfo?.goals && (
+                          <div className="col-md-6">
                             <div className="mb-3">
-                              <label className="form-label fw-semibold">Goals</label>
-                              <p className="form-control-static">{userInfo.userInfo.goals}</p>
+                              <label className="form-label fw-semibold">
+                                Goals
+                              </label>
+                              <p className="form-control-static">
+                                {userInfo?.userInfo?.goals}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        {userInfo?.userInfo?.helps &&
+                          userInfo.userInfo.helps.length > 0 && (
+                            <div className="col-md-6">
+                              <div className="mb-3">
+                                <label className="form-label fw-semibold">
+                                  Areas of Help
+                                </label>
+                                <p className="form-control-static">
+                                  {userInfo.userInfo.helps.join(", ")}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                        {userInfo?.userInfo?.categories && (
+                          <div className="col-md-6">
+                            <div className="mb-3">
+                              <label className="form-label fw-semibold">
+                                Categories
+                              </label>
+                              <p className="form-control-static">
+                                {userInfo?.userInfo?.categories}
+                              </p>
                             </div>
                           </div>
                         )}
