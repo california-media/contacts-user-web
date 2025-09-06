@@ -28,6 +28,8 @@ export const all_routes = {
   login: "/login",
   register: "/register",
   upgradePlan: "/general-settings/upgrade-plan",
+  managePlans: "/admin/manage-plans",
+
   scans: "/general-settings/scans",
   profile: "/general-settings/profile",
   adminProfile: "/admin/general-settings/profile",

@@ -128,7 +128,7 @@ const AdminDashboard = () => {
                                     color: "#373940",
                                   }}
                                 >
-                                  Contacts
+                                  Acive Users
                                 </p>
                                 <p
                                   style={{

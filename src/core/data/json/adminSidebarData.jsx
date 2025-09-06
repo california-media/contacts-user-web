@@ -31,6 +31,19 @@ export const adminSidebarData = [
           },
         ],
       },
+      {
+        label: "Plans",
+        iconImg: "assets/img/icons/scanIcon.png",
+        submenu: false,
+        showSubRoute: false,
+        submenuItems: [
+          {
+            label: "Plans",
+            link: route.managePlans,
+            icon: <IoMdPeople />,
+          },
+        ],
+      },
       // {
       //   label: "Calendar",
       //   iconImg: "assets/img/icons/calendarIcon.png",

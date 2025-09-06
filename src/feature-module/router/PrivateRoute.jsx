@@ -6,21 +6,21 @@ import LoadingIndicator2 from "../../core/common/loadingIndicator/LoadingIndicat
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  const { role, isLoading } = useSelector((state) => state.profile);
+  const { id, role } = useSelector((state) => state.profile); ////if id  = "" then it is default user
 
   const location = useLocation();
   if (!token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
   // Show loading spinner while profile is being fetched
-  // if (isLoading) {
-  //   return (
-  //     <div className="d-flex justify-content-center align-items-center vh-100 w-100">
-  //       {" "}
-  //       <LoadingIndicator2 />
-  //     </div>
-  //   ); // Or your custom loading component
-  // }
+  if (id === "") {
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100 w-100">
+        {" "}
+        <LoadingIndicator2 />
+      </div>
+    ); // Or your custom loading component
+  }
 
   if (role === "superadmin") {
     return (
