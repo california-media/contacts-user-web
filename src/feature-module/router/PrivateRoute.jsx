@@ -13,14 +13,14 @@ const PrivateRoute = ({ children }) => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
   // Show loading spinner while profile is being fetched
-  if (isLoading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100 w-100">
-        {" "}
-        <LoadingIndicator2 />
-      </div>
-    ); // Or your custom loading component
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="d-flex justify-content-center align-items-center vh-100 w-100">
+  //       {" "}
+  //       <LoadingIndicator2 />
+  //     </div>
+  //   ); // Or your custom loading component
+  // }
 
   if (role === "superadmin") {
     return (

@@ -19,7 +19,7 @@ const Dashboard = () => {
   const [qrCodeValue, setQrCodeValue] = useState("");
   const [language, setLanguage] = useState("eng");
   const [result, setResult] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch();
   const qrCodeRef = useRef();
   const userProfile = useSelector((state) => state.profile);
@@ -77,25 +77,23 @@ const Dashboard = () => {
     },
   });
   const route = all_routes;
-  const onFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
+
 
   ///already fethced it in router.jsx
-  // useEffect(() => {
-  //   const fetchUserProfile = async () => {
-  //     try {
-  //       setIsLoading(true);
-  //       await dispatch(fetchProfile()).unwrap();
-  //     } catch (error) {
-  //       console.error("Error fetching profile:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        setIsLoading(true);
+        await dispatch(fetchProfile()).unwrap();
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  //   fetchUserProfile();
-  // }, [dispatch]);
+    fetchUserProfile();
+  }, [dispatch]);
   const settings = {
     dots: true,
     infinite: true,
@@ -188,7 +186,6 @@ const Dashboard = () => {
                               marginRight: "20px",
                             }}
                           />
-                       
                         )}
                         <div>
                           <div>
