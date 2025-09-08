@@ -46,4 +46,5 @@ export const all_routes = {
   contactReports: "/reports/contact-reports",
   ReferAndEarn: "/refer-and-earn",
   groups: "/groups",
+  manageTickets: "/admin/manage-tickets",
 };

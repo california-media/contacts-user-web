@@ -37,6 +37,7 @@ import Users from "../crm/contacts/Users";
 import AdminContactDetails from "../crm/contacts/AdminUserDetails";
 import AdminUserDetails from "../crm/contacts/AdminUserDetails";
 import ManagePlans from "../settings/generalSettings/ManagePlans";
+import ManageTickets from "../settings/generalSettings/ManageTickets";
 
 const route = all_routes;
 
@@ -88,6 +89,12 @@ export const adminRoutes = [
     element: <ManagePlans />,
     route: Route,
     title: "Manage Plans",
+  },
+  {
+    path: route.manageTickets,
+    element: <ManageTickets />,
+    route: Route,
+    title: "Manage Tickets",
   },
 ];
 

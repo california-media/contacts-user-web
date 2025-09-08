@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import api from "../../../core/axios/axiosInstance";
 import { all_routes } from "../../router/all_routes";
 import PlanModal from "./PlanModal"; // We'll create this component
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
 import { Modal } from "bootstrap";
+import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 
 const ManagePlans = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState(null);
   const [modalType, setModalType] = useState("add"); // 'add' or 'edit'
+  const [planToDelete, setPlanToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     fetchPlans();
@@ -25,7 +30,13 @@ const ManagePlans = () => {
       }
     } catch (error) {
       console.error("Error fetching plans:", error);
-      alert("Failed to fetch plans");
+      dispatch(
+        showToast({
+          heading: "Error",
+          message: "Failed to fetch plans",
+          variant: "danger",
+        })
+      );
     } finally {
       setLoading(false);
     }
@@ -41,18 +52,46 @@ const ManagePlans = () => {
     setModalType("edit");
   };
 
-  const handleDeletePlan = async (planId) => {
-    if (window.confirm("Are you sure you want to delete this plan?")) {
-      try {
-        const response = await api.delete(`/admin/plans/${planId}`);
-        if (response.data.success) {
-          setPlans(plans.filter((plan) => plan._id !== planId));
-          alert("Plan deleted successfully");
-        }
-      } catch (error) {
-        console.error("Error deleting plan:", error);
-        alert("Failed to delete plan");
+  const handleDeletePlan = (plan) => {
+    setPlanToDelete(plan);
+    const modalEl = document.getElementById("delete_confirmation_modal");
+    const modal = new Modal(modalEl);
+    modal.show();
+  };
+
+  const confirmDeletePlan = async () => {
+    if (!planToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const response = await api.delete(`/admin/plans/${planToDelete._id}`);
+      if (response.data.success) {
+        setPlans(plans.filter((plan) => plan._id !== planToDelete._id));
+        dispatch(
+          showToast({
+            heading: "Success",
+            message: "Plan deleted successfully",
+            variant: "success",
+          })
+        );
+
+        // Close modal
+        const modalEl = document.getElementById("delete_confirmation_modal");
+        const modal = Modal.getInstance(modalEl);
+        modal.hide();
+        setPlanToDelete(null);
       }
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      dispatch(
+        showToast({
+          heading: "Error",
+          message: "Failed to delete plan",
+          variant: "danger",
+        })
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -61,17 +100,27 @@ const ManagePlans = () => {
       const response = await api.patch(`/admin/plans/${planId}/status`);
       if (response.data.success) {
         setPlans(
-          plans.map((plan) => (plan._id === planId ? response.data.data : plan))
+          plans.map((plan) =>
+            plan._id === planId ? { ...plan, isActive: !plan.isActive } : plan
+          )
         );
-        alert(
-          `Plan ${
-            response.data.data.isActive ? "activated" : "deactivated"
-          } successfully`
+        dispatch(
+          showToast({
+            heading: "Success",
+            message: "Plan status updated successfully",
+            variant: "success",
+          })
         );
       }
     } catch (error) {
       console.error("Error toggling plan status:", error);
-      alert("Failed to toggle plan status");
+      dispatch(
+        showToast({
+          heading: "Error",
+          message: "Failed to update plan status",
+          variant: "danger",
+        })
+      );
     }
   };
 
@@ -139,12 +188,14 @@ const ManagePlans = () => {
                                 <div className="text-center border-bottom pb-3 mb-3">
                                   <span className="fw-bold">{plan.name}</span>
                                   <h5 className="d-flex align-items-end justify-content-center fw-bold mt-1">
-                                    ${plan.price !== undefined &&
+                                    $
+                                    {plan.price !== undefined &&
                                     plan.price !== null &&
                                     plan.price !== 0
                                       ? (plan.price / 100).toFixed(2) // convert cents → decimal with 2 places
                                       : "Free"}
-                                    {plan.price !== 0 && plan.pricePeriod !== "custom" &&
+                                    {plan.price !== 0 &&
+                                      plan.pricePeriod !== "custom" &&
                                       plan.pricePeriod && (
                                         <span className="fs-14 fw-medium ms-2">
                                           / {plan.pricePeriod}
@@ -207,7 +258,7 @@ const ManagePlans = () => {
                                 </button>
                                 <button
                                   className="btn btn-danger"
-                                  onClick={() => handleDeletePlan(plan._id)}
+                                  onClick={() => handleDeletePlan(plan)}
                                 >
                                   <i className="fa fa-trash me-1"></i> Delete
                                 </button>
@@ -231,6 +282,65 @@ const ManagePlans = () => {
         plan={editingPlan}
         type={modalType}
       />
+
+      {/* Delete Confirmation Modal */}
+      <div className="modal fade" id="delete_confirmation_modal">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirm Delete</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                disabled={isDeleting}
+              ></button>
+            </div>
+            <div className="modal-body">
+              <div className="text-center mb-3">
+                <i className="fa fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+                <h6>Are you sure you want to delete this plan?</h6>
+                {planToDelete && (
+                  <p className="text-muted mb-0">
+                    Plan: <strong>{planToDelete.name}</strong>
+                  </p>
+                )}
+                <p className="text-danger small mt-2">
+                  This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={confirmDeletePlan}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa fa-trash me-1"></i>
+                    Delete Plan
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 };

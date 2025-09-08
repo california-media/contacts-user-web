@@ -2,43 +2,74 @@ import React, { useState } from "react";
 import ImageWithBasePath from "../../../core/common/imageWithBasePath";
 import PhoneInput from "react-phone-input-2";
 import "./helpAndSupport.css";
+import api from "../../../core/axios/axiosInstance";
 
 const HelpAndSupport = () => {
   const [activeType, setActiveType] = useState("General");
   const [attachment, setAttachment] = useState(null);
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [subject, setSubject] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [subscribe, setSubscribe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
+  const [previewUrl, setPreviewUrl] = useState("");
   const handleFileChange = (e) => {
-    setAttachment(e.target.files[0]);
+    const file = e.target.files[0];
+    setAttachment(file);
+    if (file && file.type.startsWith("image/")) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl("");
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Form submitted successfully!");
-  };
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("subject", subject);
+      formData.append("emailaddresses", JSON.stringify([email]));
+      formData.append("phonenumber", phone);
+      formData.append("inquiryType", activeType);
+      formData.append("message", message);
+      formData.append("subscribe", subscribe);
+      formData.append("apiType", "web");
+      if (attachment) {
+        formData.append("helpAndSupportAttachments", attachment);
+      }
 
-  const socialMedia = [
-    {
-      name: "Instagram",
-      icon: "assets/img/icons/instagramIcon.png",
-      link: "https://www.instagram.com/californiamedia/",
-    },
-    {
-      name: "LinkedIn",
-      icon: "assets/img/icons/linkedinIcon.png",
-      link: "https://ae.linkedin.com/company/california-media-llc",
-    },
-    {
-      name: "Facebook",
-      icon: "assets/img/icons/facebookIcon.png",
-      link: "https://www.facebook.com/californiamediauae/",
-    },
-    {
-      name: "Twitter",
-      icon: "assets/img/icons/twitterIcon.png",
-      link: "https://x.com/californiamedia",
-    },
-  ];
+      const response = await api.post("/help-support/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      setSuccess("Form submitted successfully!");
+      setName("");
+      setSubject("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+      setAttachment(null);
+      setPreviewUrl("");
+      setSubscribe(false);
+      setActiveType("General");
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || "Failed to submit. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="page-wrapper">
@@ -52,7 +83,6 @@ const HelpAndSupport = () => {
           </p>
         </div>
         <div className="help-support-wrapper">
-
           <div className="help-right-section">
             {/* <h2>Tell Us What You Need</h2>
             <p>
@@ -60,6 +90,8 @@ const HelpAndSupport = () => {
             </p> */}
 
             <form className="help-form" onSubmit={handleSubmit}>
+              {error && <div className="alert alert-danger">{error}</div>}
+              {success && <div className="alert alert-success">{success}</div>}
               <div className="d-sm-flex">
                 <div className="custom-floating-label me-2" style={{ flex: 1 }}>
                   <input
@@ -68,6 +100,8 @@ const HelpAndSupport = () => {
                     placeholder="John Doe"
                     name="name"
                     required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                   <label htmlFor="name">Name</label>
                 </div>
@@ -78,6 +112,8 @@ const HelpAndSupport = () => {
                     placeholder="I have a question about ..."
                     name="subject"
                     required
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
                   />
                   <label htmlFor="subject">Subject</label>
                 </div>
@@ -90,13 +126,15 @@ const HelpAndSupport = () => {
                     placeholder="john.doe@example.com"
                     name="email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                   <label htmlFor="email">Email</label>
                 </div>
                 <div className="mb-4" style={{ flex: 1 }}>
                   <PhoneInput
                     country={"ae"}
-                    value={phone}
+                    value={phone.replace("+", "")}
                     onChange={(value) => setPhone("+" + value)}
                     enableSearch
                     inputProps={{ name: "phone" }}
@@ -134,10 +172,15 @@ const HelpAndSupport = () => {
                 placeholder="Message"
                 rows={4}
                 required
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
               ></textarea>
 
               <div className="help-attachment-wrapper">
-                <label htmlFor="fileUpload" className="help-attachment-btn">
+                <label
+                  htmlFor="fileUpload"
+                  className="help-attachment-btn flex-wrap-none text-nowrap "
+                >
                   Attach File
                 </label>
                 <input
@@ -149,17 +192,40 @@ const HelpAndSupport = () => {
                 {attachment && (
                   <span className="help-file-name">{attachment.name}</span>
                 )}
+                {previewUrl && (
+                  <div className="help-image-preview" style={{ marginTop: 8 }}>
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      style={{
+                        maxWidth: "120px",
+                        maxHeight: "120px",
+                        borderRadius: 8,
+                        border: "1px solid #eee",
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="help-checkbox">
-                <input type="checkbox" id="updates" />
+                <input
+                  type="checkbox"
+                  id="updates"
+                  checked={subscribe}
+                  onChange={(e) => setSubscribe(e.target.checked)}
+                />
                 <label htmlFor="updates" className="ms-2">
                   I'd like to receive exclusive offers & updates
                 </label>
               </div>
 
-              <button type="submit" className="help-submit-btn">
-                Submit
+              <button
+                type="submit"
+                className="help-submit-btn"
+                disabled={loading}
+              >
+                {loading ? "Submitting..." : "Submit"}
               </button>
             </form>
           </div>

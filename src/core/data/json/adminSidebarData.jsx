@@ -40,7 +40,20 @@ export const adminSidebarData = [
           {
             label: "Plans",
             link: route.managePlans,
-            icon: <IoMdPeople />,
+            icon: <IoMdPricetag />,
+          },
+        ],
+      },
+      {
+        label: "Tickets",
+        iconImg: "assets/img/icons/scanIcon.png",
+        submenu: false,
+        showSubRoute: false,
+        submenuItems: [
+          {
+            label: "Tickets",
+            link: route.manageTickets,
+            icon: <IoMdCalendar />,
           },
         ],
       },
