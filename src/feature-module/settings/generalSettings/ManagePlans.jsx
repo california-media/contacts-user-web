@@ -130,7 +130,12 @@ const ManagePlans = () => {
   };
 
   if (loading) {
-    return <LoadingIndicator2 />;
+    return (
+      <div className="d-flex justify-content-center align-items-center vh-100 w-100">
+        {" "}
+        <LoadingIndicator2 />
+      </div>
+    );
   }
 
   return (

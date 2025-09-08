@@ -130,7 +130,7 @@ const PlanModal = ({ onSuccess, plan, type }) => {
       dispatch(
         showToast({
           heading: "Error",
-          message: "Failed to save plan",
+          message: error.response?.data?.message || "Failed to save plan",
           variant: "danger",
         })
       );
@@ -218,6 +218,7 @@ const PlanModal = ({ onSuccess, plan, type }) => {
                     <div className="form-group">
                       <label className="form-label">Description</label>
                       <textarea
+                      required
                         className="form-control"
                         name="description"
                         value={formData.description}

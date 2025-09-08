@@ -164,12 +164,12 @@ const ManageTickets = () => {
       key: "status",
       render: (adminReply) =>
         adminReply ? (
-          <Tag color="green">
-            <CheckCircleOutlined /> Closed
+          <Tag color="red">
+            <CloseCircleOutlined /> Closed
           </Tag>
         ) : (
-          <Tag color="red">
-            <CloseCircleOutlined /> Open
+          <Tag color="green">
+            <CheckCircleOutlined /> Open
           </Tag>
         ),
     },
