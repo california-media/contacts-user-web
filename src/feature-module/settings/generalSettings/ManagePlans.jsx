@@ -193,11 +193,10 @@ const ManagePlans = () => {
                                 <div className="text-center border-bottom pb-3 mb-3">
                                   <span className="fw-bold">{plan.name}</span>
                                   <h5 className="d-flex align-items-end justify-content-center fw-bold mt-1">
-                                    $
                                     {plan.price !== undefined &&
                                     plan.price !== null &&
                                     plan.price !== 0
-                                      ? (plan.price / 100).toFixed(2) // convert cents → decimal with 2 places
+                                      ? "$" + (plan.price / 100).toFixed(2) // convert cents → decimal with 2 places
                                       : "Free"}
                                     {plan.price !== 0 &&
                                       plan.pricePeriod !== "custom" &&
