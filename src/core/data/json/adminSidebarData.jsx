@@ -1,6 +1,11 @@
 import { useSelector } from "react-redux";
 import { all_routes } from "../../../feature-module/router/all_routes";
-import { IoMdCalendar, IoMdPeople, IoMdPricetag } from "react-icons/io";
+import {
+  IoMdCalendar,
+  IoMdCube,
+  IoMdPeople,
+  IoMdPricetag,
+} from "react-icons/io";
 const route = all_routes;
 
 export const adminSidebarData = [
@@ -54,6 +59,19 @@ export const adminSidebarData = [
             label: "Tickets",
             link: route.manageTickets,
             icon: <IoMdCalendar />,
+          },
+        ],
+      },
+      {
+        label: "Coupons",
+        iconImg: "assets/img/icons/scanIcon.png",
+        submenu: false,
+        showSubRoute: false,
+        submenuItems: [
+          {
+            label: "Coupons",
+            link: route.manageCoupons,
+            icon: <IoMdCube />,
           },
         ],
       },

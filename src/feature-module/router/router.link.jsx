@@ -38,6 +38,7 @@ import AdminContactDetails from "../crm/contacts/AdminUserDetails";
 import AdminUserDetails from "../crm/contacts/AdminUserDetails";
 import ManagePlans from "../settings/generalSettings/ManagePlans";
 import ManageTickets from "../settings/generalSettings/ManageTickets";
+import ManageCoupons from "../settings/generalSettings/ManageCoupons";
 
 const route = all_routes;
 
@@ -95,6 +96,12 @@ export const adminRoutes = [
     element: <ManageTickets />,
     route: Route,
     title: "Manage Tickets",
+  },
+  {
+    path: route.manageCoupons,
+    element: <ManageCoupons />,
+    route: Route,
+    title: "Manage Coupons",
   },
 ];
 
