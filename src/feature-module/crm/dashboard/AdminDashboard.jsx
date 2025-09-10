@@ -16,6 +16,7 @@ const AdminDashboard = () => {
   const { tags, error } = useSelector((state) => state.tags);
   const [isLoading, setIsLoading] = useState(false);
   const [activeUserCount, setActiveUserCount] = useState(0);
+  const [totalUserCount, setTotalUserCount] = useState(0);
   const socketRef = useRef(null);
 
   const route = all_routes;
@@ -31,7 +32,7 @@ const AdminDashboard = () => {
 
       console.log("🔌 Initializing admin socket connection");
 
-      socket = io( "http://localhost:3003", {
+      socket = io("http://localhost:3003", {
         transports: ["websocket", "polling"],
         timeout: 10000,
         query: {
@@ -60,6 +61,9 @@ const AdminDashboard = () => {
       socket.on("user_count_changed", (data) => {
         console.log("📊 Received user_count_changed:", data);
         setActiveUserCount(data.count);
+        if (data.totalUsers !== undefined) {
+          setTotalUserCount(data.totalUsers);
+        }
       });
     };
 
@@ -108,6 +112,64 @@ const AdminDashboard = () => {
                 <div className="row">
                   <div className="col-md-12 fitContentHeight">
                     <div className="row mb-4">
+                      <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
+                        <Link to={route.templates}>
+                          <div className="dashboardSmallCards">
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <div>
+                                <p
+                                  style={{
+                                    fontSize: "14px",
+                                    fontWeight: 500,
+                                    lineHeight: "20px",
+                                    color: "#373940",
+                                  }}
+                                >
+                                  Total Users
+                                </p>
+                                <p
+                                  style={{
+                                    fontSize: "30px",
+                                    fontWeight: 700,
+                                    color: "#1C3C8C",
+                                    lineHeight: "38px",
+                                  }}
+                                >
+                                  {userProfile.isLoading ? (
+                                    <LoadingIndicator />
+                                  ) : (
+                                    totalUserCount
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="d-flex align-items-center mt-2">
+                              <img
+                                src="/assets/img/icons/trendingIcon.svg"
+                                className="me-2"
+                              />
+                              <p
+                                style={{
+                                  color: "#484A54",
+                                  marginBottom: 0,
+                                  fontSize: "12px",
+                                  fontWeight: 400,
+                                  lineHeight: "18px",
+                                }}
+                              >
+                                No change from last month
+                              </p>
+                            </div>
+                          </div>
+                        </Link>
+                      </div>
                       <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
                         <Link to={route.users}>
                           <div className="dashboardSmallCards">
@@ -228,7 +290,8 @@ const AdminDashboard = () => {
                           </div>
                         </Link>
                       </div>
-                      <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
+
+                      {/* <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
                         <Link to={route.scans}>
                           <div className="dashboardSmallCards">
                             <div
@@ -285,65 +348,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                         </Link>
-                      </div>
-                      <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
-                        <Link to={route.templates}>
-                          <div className="dashboardSmallCards">
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <div>
-                                <p
-                                  style={{
-                                    fontSize: "14px",
-                                    fontWeight: 500,
-                                    lineHeight: "20px",
-                                    color: "#373940",
-                                  }}
-                                >
-                                  Templates
-                                </p>
-                                <p
-                                  style={{
-                                    fontSize: "30px",
-                                    fontWeight: 700,
-                                    color: "#1C3C8C",
-                                    lineHeight: "38px",
-                                  }}
-                                >
-                                  {userProfile.isLoading ? (
-                                    <LoadingIndicator />
-                                  ) : (
-                                    userProfile.totalTemplates
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="d-flex align-items-center mt-2">
-                              <img
-                                src="/assets/img/icons/trendingIcon.svg"
-                                className="me-2"
-                              />
-                              <p
-                                style={{
-                                  color: "#484A54",
-                                  marginBottom: 0,
-                                  fontSize: "12px",
-                                  fontWeight: 400,
-                                  lineHeight: "18px",
-                                }}
-                              >
-                                No change from last month
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>

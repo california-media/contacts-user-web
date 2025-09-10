@@ -58,7 +58,6 @@ const AdminUserDetails = () => {
       </div>
     );
   }
-  console.log(userInfo, "user info");
   return (
     <>
       {/* Page Wrapper */}
@@ -77,7 +76,9 @@ const AdminUserDetails = () => {
                           Users
                         </Link>
                       </li>
-                      <li>{userInfo?.firstname}</li>
+                      <li>
+                        {userInfo?.firstname || userInfo?.email || "No info"}
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -329,17 +330,27 @@ const AdminUserDetails = () => {
                       </li>
                     )}
 
-                    {userInfo?.plan && (
+                    <li className="row mb-3">
+                      <span className="col-12 fw-semibold text-black">
+                        Plan
+                      </span>
+                      <span className="col-12">
+                        {userInfo?.plan?.name +
+                          (userInfo.onFreeTrial ? " (14 days Free Trial)" : "") || "N/A"}
+                      </span>
+                    </li>
+                    {userInfo?.planActivatedAt && (
                       <li className="row mb-3">
                         <span className="col-12 fw-semibold text-black">
-                          Plan
+                          Plan Activated At
                         </span>
                         <span className="col-12">
-                          {userInfo?.plan?.name || "N/A"}
+                          {dayjs(userInfo?.planActivatedAt).format(
+                            "DD MMM YYYY"
+                          )}
                         </span>
                       </li>
                     )}
-
                     {userInfo?.planExpiresAt && (
                       <li className="row mb-3">
                         <span className="col-12 fw-semibold text-black">
@@ -350,17 +361,6 @@ const AdminUserDetails = () => {
                         </span>
                       </li>
                     )}
-
-                    <li className="row mb-3">
-                      <span className="col-12 fw-semibold text-black">
-                        Date Created
-                      </span>
-                      <span className="col-12">
-                        {dayjs(userInfo?.createdAt).format(
-                          "DD MMM YYYY, hh:mm A"
-                        )}
-                      </span>
-                    </li>
                   </ul>
                 </div>
               </div>
@@ -401,7 +401,8 @@ const AdminUserDetails = () => {
                               Role
                             </label>
                             <p className="form-control-static">
-                              {userInfo?.role || "N/A"}
+                              {userInfo?.role?.charAt(0).toUpperCase() +
+                                userInfo?.role?.slice(1) || "N/A"}
                             </p>
                           </div>
                         </div>
@@ -411,28 +412,12 @@ const AdminUserDetails = () => {
                               Signup Method
                             </label>
                             <p className="form-control-static">
-                              {userInfo?.signupMethod || "N/A"}
+                              {userInfo?.signupMethod?.charAt(0).toUpperCase() +
+                                userInfo?.signupMethod?.slice(1) || "N/A"}
                             </p>
                           </div>
                         </div>
-                        <div className="col-md-6">
-                          <div className="mb-3">
-                            <label className="form-label fw-semibold">
-                              Is Premium
-                            </label>
-                            <p className="form-control-static">
-                              <span
-                                className={`badge ${
-                                  userInfo?.isPremium
-                                    ? "bg-success"
-                                    : "bg-secondary"
-                                }`}
-                              >
-                                {userInfo?.isPremium ? "Yes" : "No"}
-                              </span>
-                            </p>
-                          </div>
-                        </div>
+
                         <div className="col-md-6">
                           <div className="mb-3">
                             <label className="form-label fw-semibold">

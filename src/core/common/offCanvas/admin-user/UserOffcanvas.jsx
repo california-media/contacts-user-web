@@ -3,13 +3,17 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
+import { Select } from "antd";
 
 import api from "../../../../core/axios/axiosInstance";
 
 const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
   const [originalData, setOriginalData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(false);
   const fileInputRef = useRef(null);
+  const offcanvasRef = useRef(null);
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -29,6 +33,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
     employeeCount: "",
     helps: [],
     profileImage: null,
+    planId: "", // Add planId field
   });
 
   // Initialize form data when selectedUser changes
@@ -56,6 +61,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
         employeeCount: selectedUser.userInfo?.employeeCount || "",
         helps: selectedUser.userInfo?.helps || [],
         profileImage: null,
+        planId: selectedUser.plan?._id || "", // Add planId from user's current plan
       };
 
       setFormData(initialData);
@@ -63,6 +69,47 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
       setOriginalData({ ...initialData });
     }
   }, [selectedUser]);
+
+  // Fetch plans for dropdown
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setLoadingPlans(true);
+        const response = await api.get("/admin/users/plans");
+        if (response.data.status === "success") {
+          setPlans(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching plans:", error);
+        dispatch(
+          showToast({
+            type: "error",
+            message: "Failed to load plans",
+          })
+        );
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+
+    fetchPlans();
+  }, [dispatch]);
+
+  // Cleanup effect to remove any remaining backdrops on unmount
+  useEffect(() => {
+    return () => {
+      // Cleanup any remaining backdrops when component unmounts
+      const backdrops = document.querySelectorAll(".offcanvas-backdrop");
+      backdrops.forEach((backdrop) => backdrop.remove());
+
+      // Remove modal-open class from body if it exists
+      document.body.classList.remove("modal-open");
+
+      // Reset body styles
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +148,50 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
         ? [...prevData.helps, value]
         : prevData.helps.filter((help) => help !== value),
     }));
+  };
+
+  const handlePlanChange = (value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      planId: value,
+    }));
+  };
+
+  const closeOffcanvas = () => {
+    try {
+      // Get the offcanvas element
+      const offcanvasElement = document.getElementById("user_offcanvas");
+
+      if (offcanvasElement) {
+        // Use Bootstrap's Offcanvas API to properly close
+        const bsOffcanvas =
+          window.bootstrap?.Offcanvas?.getInstance(offcanvasElement);
+        if (bsOffcanvas) {
+          bsOffcanvas.hide();
+        } else {
+          // Fallback to creating new instance and hiding
+          const newOffcanvas = new window.bootstrap.Offcanvas(offcanvasElement);
+          newOffcanvas.hide();
+        }
+
+        // Additional cleanup - remove any remaining backdrops
+        setTimeout(() => {
+          const backdrops = document.querySelectorAll(".offcanvas-backdrop");
+          backdrops.forEach((backdrop) => backdrop.remove());
+
+          // Remove modal-open class from body if it exists
+          document.body.classList.remove("modal-open");
+
+          // Reset body styles
+          document.body.style.overflow = "";
+          document.body.style.paddingRight = "";
+        }, 100);
+      }
+    } catch (error) {
+      console.error("Error closing offcanvas:", error);
+      // Fallback method
+      document.getElementById("closeUserOffcanvas")?.click();
+    }
   };
 
   const getChangedData = () => {
@@ -186,9 +277,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
         // Update the user info in parent component
         setUserInfo(response.data.data);
 
-        // Close the offcanvas
-        document.getElementById("closeUserOffcanvas")?.click();
-
         // Show success toast
         dispatch(
           showToast({
@@ -196,6 +284,9 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
             variant: "success",
           })
         );
+
+        // Close the offcanvas properly
+        closeOffcanvas();
 
         // Reset original data to new values
         const phoneNumber = response.data.data.phonenumbers?.[0]
@@ -220,6 +311,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
           employeeCount: response.data.data.userInfo?.employeeCount || "",
           helps: response.data.data.userInfo?.helps || [],
           profileImage: null,
+          planId: response.data.data.plan?._id || "", // Add planId
         };
         setOriginalData(newOriginalData);
       }
@@ -257,12 +349,12 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
     "Something else",
   ];
 
-
   return (
     <div
       className="offcanvas offcanvas-end offcanvas-large"
       tabIndex={-1}
       id="user_offcanvas"
+      ref={offcanvasRef}
     >
       <div className="offcanvas-header border-bottom">
         <h5 className="fw-semibold">Edit User Profile</h5>
@@ -449,6 +541,30 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
                   value={formData.companyName}
                   onChange={handleChange}
                   className="form-control"
+                />
+              </div>
+            </div>
+
+            {/* Plan Selection */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">User Plan</label>
+                <Select
+                  style={{ width: "100%", height: "38px" }}
+                  placeholder="Select a plan"
+                  allowClear
+                  loading={loadingPlans}
+                  value={formData.planId || undefined}
+                  onChange={handlePlanChange}
+                  options={[
+                    { value: null, label: "No Plan (Free)" },
+                    ...plans.map((plan) => ({
+                      value: plan._id,
+                      label: `${plan.name} - $${(plan.price / 100).toFixed(
+                        2
+                      )}/${plan.pricePeriod}`,
+                    })),
+                  ]}
                 />
               </div>
             </div>
@@ -730,6 +846,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
           <div className="d-flex align-items-center justify-content-end mt-4">
             <button
               type="button"
+              data-bs-target="#user_offcanvas"
               data-bs-dismiss="offcanvas"
               className="btn btn-light me-2"
             >
@@ -738,7 +855,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
             <button
               type="submit"
               className="btn btn-primary"
-              data-bs-dismiss="offcanvas"
+              // data-bs-dismiss="offcanvas"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
