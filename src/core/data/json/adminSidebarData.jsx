@@ -17,7 +17,7 @@ export const adminSidebarData = [
     submenuItems: [
       {
         label: "Dashboard",
-        iconImg: "assets/img/icons/dashboardIcon.png",
+        iconImg: "/assets/img/icons/dashboardIcon.png",
         submenu: false,
         showSubRoute: false,
 
@@ -25,7 +25,7 @@ export const adminSidebarData = [
       },
       {
         label: "Users",
-        iconImg: "assets/img/icons/contactsIcon.png",
+        iconImg: "/assets/img/icons/tagIcon.svg",
         submenu: false,
         showSubRoute: false,
         submenuItems: [
@@ -38,7 +38,7 @@ export const adminSidebarData = [
       },
       {
         label: "Plans",
-        iconImg: "assets/img/icons/scanIcon.png",
+        iconImg: "/assets/img/icons/diamond.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [
@@ -51,7 +51,7 @@ export const adminSidebarData = [
       },
       {
         label: "Tickets",
-        iconImg: "assets/img/icons/scanIcon.png",
+        iconImg: "/assets/img/icons/copyIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [
@@ -64,7 +64,7 @@ export const adminSidebarData = [
       },
       {
         label: "Coupons",
-        iconImg: "assets/img/icons/scanIcon.png",
+        iconImg: "/assets/img/icons/briefCase.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [
@@ -219,14 +219,14 @@ export const adminSidebarData = [
       // },
       {
         label: "Help & Support",
-        iconImg: "assets/img/icons/helpAndSupport.png",
+        iconImg: "/assets/img/icons/helpAndSupport.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "SUPPORT", link: route.adminHelpAndSupport }],
       },
       {
         label: "Settings",
-        iconImg: "assets/img/icons/settingIcon.png",
+        iconImg: "/assets/img/icons/settingIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "SUPPORT", link: route.adminSecurity }],

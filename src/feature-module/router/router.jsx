@@ -12,19 +12,15 @@ import { useDispatch, useSelector } from "react-redux";
 import PrivateRoute from "./PrivateRoute";
 import { Toast } from "react-bootstrap";
 import { hideToast } from "../../core/data/redux/slices/ToastSlice";
-import { EmailAuthContext } from "../../core/common/context/EmailAuthContext";
 import { fetchGoogleCalendarEvents } from "../../core/common/googleEvents/GoogleEvents";
 import AdminRoute from "./AdminRoute";
-import { io } from "socket.io-client";
 import AdminFeature from "../AdminFeature";
 const ALLRoutes = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { toasts } = useSelector((state) => state.toast);
-  const userProfile = useSelector((state) => state.profile);
-  const socketRef = useRef(null);
 
+  const userProfile = useSelector((state) => state.profile);
   const routesWithoutFeature = ["/registration-form"];
   const route = all_routes;
   // Find the current route in either public or auth routes
@@ -42,126 +38,19 @@ const ALLRoutes = () => {
   }, [fullTitle]);
 
   useEffect(() => {
-    const initializeApp = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          console.log("token found, fetching profile");
-
-          // Fetch user profile and wait for completion
-          const profileResult = await dispatch(fetchProfile()).unwrap();
-          console.log("Profile fetched:", profileResult);
-
-          // Fetch tags (non-blocking)
-          dispatch(fetchTags());
-
-          // Initialize socket connection if user role is "user"
-          if (profileResult.data && profileResult.data.role === "user") {
-            console.log("profile result id", profileResult.data.id);
-            initializeUserSocket(profileResult.data.id);
-          }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-          // Handle error - maybe redirect to login or show error message
-          localStorage.removeItem("token");
-          navigate("/");
-        }
-      }
-    };
-
-    initializeApp();
-
-    // Cleanup socket on component unmount
-    return () => {
-      if (socketRef.current) {
-        console.log("🔌 Cleaning up user socket connection");
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-    };
-  }, [dispatch, navigate]);
-
-  // Initialize socket connection for regular users
-  const initializeUserSocket = (userId) => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
+    const token = localStorage.getItem("token");
+    if (token) {
+      // navigate(route.dashboard);
+      console.log("token found");
+      dispatch(fetchProfile());
+      dispatch(fetchTags());
     }
-
-    console.log("🔌 Initializing user socket connection for userId:", userId);
-
-    const socket = io("http://localhost:3003", {
-      transports: ["websocket", "polling"],
-      timeout: 10000,
-      query: {
-        userId: userId,
-      },
-    });
-
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      console.log("🔌 User connected to socket server:", socket.id);
-    });
-
-    socket.on("disconnect", (reason) => {
-      console.log("🔌 User disconnected from socket server:", reason);
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("🔌 User socket connection error:", error);
-    });
-
-    // Handle page visibility changes to maintain connection
-    const handleVisibilityChange = () => {
-      if (!document.hidden && socket.disconnected) {
-        console.log("🔌 Page became visible, reconnecting socket");
-        socket.connect();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    // Handle beforeunload to gracefully disconnect
-    const handleBeforeUnload = () => {
-      if (socket.connected) {
-        socket.disconnect();
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Store cleanup functions in socket for later removal
-    socket._cleanupFunctions = [
-      () =>
-        document.removeEventListener(
-          "visibilitychange",
-          handleVisibilityChange
-        ),
-      () => window.removeEventListener("beforeunload", handleBeforeUnload),
-    ];
-  };
-
+  }, []);
   useEffect(() => {
     if (userProfile.googleConnected) {
       fetchGoogleCalendarEvents(dispatch);
     }
-  }, [userProfile.googleConnected, dispatch]);
-
-  // Clean up socket when user logs out (profile is reset)
-  useEffect(() => {
-    // If profile was reset (user logged out), disconnect socket
-    if (!userProfile.id && socketRef.current) {
-      console.log("🔌 Profile reset detected, disconnecting socket");
-
-      // Clean up event listeners
-      if (socketRef.current._cleanupFunctions) {
-        socketRef.current._cleanupFunctions.forEach((cleanup) => cleanup());
-      }
-
-      socketRef.current.disconnect();
-      socketRef.current = null;
-    }
-  }, [userProfile.id]);
+  }, [userProfile.googleConnected]);
 
   return (
     <>

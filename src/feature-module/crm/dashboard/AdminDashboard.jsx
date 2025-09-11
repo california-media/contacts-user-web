@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import GroupsOffcanvas from "../../../core/common/offCanvas/groups/GroupsOffcanvas";
 import { all_routes } from "../../router/all_routes";
 import { Link } from "react-router-dom";
-import { io } from "socket.io-client";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndicator";
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
@@ -15,84 +14,33 @@ const AdminDashboard = () => {
   const userProfile = useSelector((state) => state.profile);
   const { tags, error } = useSelector((state) => state.tags);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeUserCount, setActiveUserCount] = useState(0);
   const [totalUserCount, setTotalUserCount] = useState(0);
-  const socketRef = useRef(null);
+
+  // fetch total users count (excluding superadmin)
+  useEffect(() => {
+    let mounted = true;
+    const fetchCount = async () => {
+      try {
+        setIsLoading(true);
+        const res = await api.get("/admin/users/count");
+        if (mounted && res && res.data && res.data.data) {
+          setTotalUserCount(res.data.data.totalUsers || 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch users count", err);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+
+    fetchCount();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const route = all_routes;
-
-  // Initialize socket connection for admin dashboard
-  useEffect(() => {
-    let socket = null;
-
-    const initializeAdminSocket = () => {
-      if (!userProfile.id || userProfile.role !== "superadmin") {
-        return;
-      }
-
-      console.log("🔌 Initializing admin socket connection");
-
-      socket = io("http://localhost:3003", {
-        transports: ["websocket", "polling"],
-        timeout: 10000,
-        query: {
-          userId: userProfile.id,
-        },
-      });
-
-      socketRef.current = socket;
-
-      socket.on("connect", () => {
-        console.log(
-          "🔌 Admin dashboard connected to socket server:",
-          socket.id
-        );
-      });
-
-      socket.on("disconnect", (reason) => {
-        console.log("🔌 Admin dashboard disconnected:", reason);
-      });
-
-      socket.on("connect_error", (error) => {
-        console.error("🔌 Admin socket connection error:", error);
-      });
-
-      // Listen for active user count updates
-      socket.on("user_count_changed", (data) => {
-        console.log("📊 Received user_count_changed:", data);
-        setActiveUserCount(data.count);
-        if (data.totalUsers !== undefined) {
-          setTotalUserCount(data.totalUsers);
-        }
-      });
-    };
-
-    // Initialize socket if user profile is loaded and user is superadmin
-    if (
-      !userProfile.isLoading &&
-      userProfile.id &&
-      userProfile.role === "superadmin"
-    ) {
-      initializeAdminSocket();
-    }
-
-    // Cleanup function
-    return () => {
-      if (socket) {
-        console.log("🔌 Disconnecting admin socket");
-        socket.disconnect();
-        socketRef.current = null;
-      }
-    };
-  }, [userProfile.isLoading, userProfile.id, userProfile.role]);
-
-  // Format the active user count display
-  const formatActiveUserCount = () => {
-    if (userProfile.isLoading) {
-      return <LoadingIndicator />;
-    }
-    return activeUserCount;
-  };
 
   return (
     <>
@@ -170,7 +118,7 @@ const AdminDashboard = () => {
                           </div>
                         </Link>
                       </div>
-                      <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
+                      {/* <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
                         <Link to={route.users}>
                           <div className="dashboardSmallCards">
                             <div
@@ -227,7 +175,7 @@ const AdminDashboard = () => {
                             </div>
                           </div>
                         </Link>
-                      </div>
+                      </div> */}
                       <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
                         <Link
                           className="dropdown-item p-0 bgWhiteOnLinkHover"
