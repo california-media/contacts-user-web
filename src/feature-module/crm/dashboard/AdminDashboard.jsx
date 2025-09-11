@@ -61,7 +61,7 @@ const AdminDashboard = () => {
                   <div className="col-md-12 fitContentHeight">
                     <div className="row mb-4">
                       <div className="col-md-3 mb-md-4 mb-2 fitContentHeight">
-                        <Link to={route.templates}>
+                        <Link to={route.users}>
                           <div className="dashboardSmallCards">
                             <div
                               style={{

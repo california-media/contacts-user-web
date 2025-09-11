@@ -5,7 +5,10 @@ import { all_routes } from "../../router/all_routes";
 import { useDispatch, useSelector } from "react-redux";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/bootstrap.css";
-import { editProfile } from "../../../core/data/redux/slices/ProfileSlice";
+import {
+  editProfile,
+  changePassword,
+} from "../../../core/data/redux/slices/ProfileSlice";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
 import { SlPhone } from "react-icons/sl";
 
@@ -18,10 +21,13 @@ const Profile = () => {
 
   const dispatch = useDispatch();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [passwordVisibility, setPasswordVisibility] = useState({
-    password: false,
+    currentPassword: false,
+    newPassword: false,
     confirmPassword: false,
   });
   const [formData, setFormData] = useState({
@@ -36,6 +42,11 @@ const Profile = () => {
     facebook: "",
     telegram: "",
     designation: "",
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [changeSignin, setChangeSignin] = useState({
     email: "",
@@ -78,7 +89,7 @@ const Profile = () => {
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsProfileLoading(true);
 
     const data = new FormData();
     data.append("firstname", formData.firstname);
@@ -102,8 +113,11 @@ const Profile = () => {
     data.append("designation", formData.designation);
     console.log(Object.fromEntries(data.entries()), "formData before dispatch");
 
-    dispatch(editProfile(data));
-    setIsLoading(false);
+    try {
+      await dispatch(editProfile(data));
+    } finally {
+      setIsProfileLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -118,6 +132,67 @@ const Profile = () => {
     document.getElementById("open-change-signin-method-modal").click();
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
+      setMessage({ text: "All password fields are required", type: "error" });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setMessage({ text: "New passwords do not match", type: "error" });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setMessage({
+        text: "New password must be at least 6 characters long",
+        type: "error",
+      });
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      setMessage({
+        text: "New password must be different from current password",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsPasswordLoading(true);
+    try {
+      await dispatch(
+        changePassword({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        })
+      );
+
+      // Reset form on success
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setMessage({ text: "", type: "" });
+    } catch (error) {
+      // Error handling is done in the Redux slice
+    } finally {
+      setIsPasswordLoading(false);
+    }
+  };
+
   return (
     <div className="page-wrapper">
       <div className="content">
@@ -130,24 +205,57 @@ const Profile = () => {
                     <div className="settings-sidebar">
                       <h4 className="fw-semibold mb-3">Settings</h4>
                       <div className="list-group list-group-flush settings-sidebar">
-                        <Link to={route.profile} className="fw-medium active">
-                          Profile
-                        </Link>
-                        <Link to={route.security} className="fw-medium">
-                          Security
-                        </Link>
-                        <Link to={route.emailSetup} className="fw-medium">
-                          Sync and Integration
-                        </Link>
                         <Link
-                          to={`${route.scans}#myScans`}
-                          className="fw-medium"
+                          to="#"
+                          className={`fw-medium ${
+                            activeTab === "profile" ? "active" : ""
+                          }`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setActiveTab("profile");
+                          }}
+                          style={{
+                            textDecoration: "none",
+                            padding: "10px 15px",
+                            display: "block",
+                            color: activeTab === "profile" ? "#007bff" : "#333",
+                            backgroundColor:
+                              activeTab === "profile"
+                                ? "#f8f9fa"
+                                : "transparent",
+                            borderRadius: "4px",
+                            marginBottom: "5px",
+                          }}
                         >
-                          My Scans
+                          Profile Settings
                         </Link>
-                        <Link to={route.upgradePlan} className="fw-medium">
-                          Upgrade Plan
-                        </Link>
+                        {userProfile.signupMethod !== "google" && (
+                          <Link
+                            to="#"
+                            className={`fw-medium ${
+                              activeTab === "password" ? "active" : ""
+                            }`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setActiveTab("password");
+                            }}
+                            style={{
+                              textDecoration: "none",
+                              padding: "10px 15px",
+                              display: "block",
+                              color:
+                                activeTab === "password" ? "#007bff" : "#333",
+                              backgroundColor:
+                                activeTab === "password"
+                                  ? "#f8f9fa"
+                                  : "transparent",
+                              borderRadius: "4px",
+                              marginBottom: "5px",
+                            }}
+                          >
+                            Change Password
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -155,13 +263,14 @@ const Profile = () => {
               </div>
 
               <div className="col-xl-9 col-lg-12">
-                <div className="card">
-                  <div className="card-body">
-                    <h4 className="fw-semibold mb-3">Personal Details</h4>
-                    <form onSubmit={handleEditProfile}>
-                      <div className="mb-3 d-flex justify-content-between align-items-center">
-                        <div className="profile-upload">
-                          {/* <div className="profile-upload-img">
+                {activeTab === "profile" && (
+                  <div className="card">
+                    <div className="card-body">
+                      <h4 className="fw-semibold mb-3">Personal Details</h4>
+                      <form onSubmit={handleEditProfile}>
+                        <div className="mb-3 d-flex justify-content-between align-items-center">
+                          <div className="profile-upload">
+                            {/* <div className="profile-upload-img">
                             {!formData.profileImage && (
                               <span>
                                 <i className="ti ti-photo" />
@@ -186,152 +295,155 @@ const Profile = () => {
                             </button>
                           </div> */}
 
-                          <div
-                            className="profile-upload-img position-relative"
-                            style={{
-                              border: formData.profileImage
-                                ? ""
-                                : "2px dashed #E8E8E8",
-                            }}
-                          >
-                            {console.log(
-                              formData.profileImage,
-                              "formData.profileImage"
-                            )}
-                            {formData.profileImage && (
-                              <Link
-                                style={{
-                                  width: 20,
-                                  height: 20,
-                                  top: -5,
-                                  right: -5,
-                                }}
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    profileImage: null,
-                                  }))
-                                }
-                                id="removeImage1"
-                                className="position-absolute p-1 bg-danger text-white d-flex justify-content-center align-items-center rounded-circle"
-                              >
-                                <i className="feather-x" />
-                              </Link>
-                            )}
-                            {!formData.profileImage ? (
-                              <AvatarInitialStyles
-                                name={`${formData.firstname} ${formData.lastname}`}
-                                divStyles={{ width: 80, height: 80 }}
-                              />
-                            ) : (
-                              <img
-                                src={
-                                  formData.profileImage instanceof File
-                                    ? URL.createObjectURL(formData.profileImage)
-                                    : formData.profileImage
-                                }
-                                alt="Profile"
-                              />
-                            )}
-                          </div>
-                          <div className="profile-upload-content">
-                            <label className="profile-upload-btn">
-                              <i className="ti ti-file-broken" /> Upload Photo
-                              <input
-                                type="file"
-                                id="imag"
-                                className="input-img"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files[0];
-                                  if (file) {
+                            <div
+                              className="profile-upload-img position-relative"
+                              style={{
+                                border: formData.profileImage
+                                  ? ""
+                                  : "2px dashed #E8E8E8",
+                              }}
+                            >
+                              {console.log(
+                                formData.profileImage,
+                                "formData.profileImage"
+                              )}
+                              {formData.profileImage && (
+                                <Link
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    top: -5,
+                                    right: -5,
+                                  }}
+                                  onClick={() =>
                                     setFormData((prev) => ({
                                       ...prev,
-                                      profileImage: file,
-                                    }));
+                                      profileImage: null,
+                                    }))
                                   }
-                                }}
-                              />
-                            </label>
-                            <p>Supported file types PNG, JPG</p>
+                                  id="removeImage1"
+                                  className="position-absolute p-1 bg-danger text-white d-flex justify-content-center align-items-center rounded-circle"
+                                >
+                                  <i className="feather-x" />
+                                </Link>
+                              )}
+                              {!formData.profileImage ? (
+                                <AvatarInitialStyles
+                                  name={`${formData.firstname} ${formData.lastname}`}
+                                  divStyles={{ width: 80, height: 80 }}
+                                />
+                              ) : (
+                                <img
+                                  src={
+                                    formData.profileImage instanceof File
+                                      ? URL.createObjectURL(
+                                          formData.profileImage
+                                        )
+                                      : formData.profileImage
+                                  }
+                                  alt="Profile"
+                                />
+                              )}
+                            </div>
+                            <div className="profile-upload-content">
+                              <label className="profile-upload-btn">
+                                <i className="ti ti-file-broken" /> Upload Photo
+                                <input
+                                  type="file"
+                                  id="imag"
+                                  className="input-img"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        profileImage: file,
+                                      }));
+                                    }
+                                  }}
+                                />
+                              </label>
+                              <p>Supported file types PNG, JPG</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="border-bottom mb-3">
-                        <div className="row">
-                          <div className="col-md-4">
-                            <div className="mb-3">
-                              <label className="form-label">
-                                First Name{" "}
-                                <span className="text-danger">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                name="firstname"
-                                value={formData.firstname}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="col-md-4">
-                            <div className="mb-3">
-                              <label className="form-label">
-                                Last Name <span className="text-danger">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                name="lastname"
-                                value={formData.lastname}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-                          <div className="col-md-4">
-                            <div className="mb-3">
-                              <label className="form-label">
-                                Designation{" "}
-                                <span className="text-grey">
-                                  <i>(job profile)</i>
-                                </span>
-                              </label>
-                              <input
-                                type="text"
-                                name="designation"
-                                value={formData.designation}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="col-md-4">
-                            <div className="mb-3">
-                              <div className="d-flex justify-content-between align-items-center">
+                        <div className="border-bottom mb-3">
+                          <div className="row">
+                            <div className="col-md-4">
+                              <div className="mb-3">
                                 <label className="form-label">
-                                  Phone Number{" "}
+                                  First Name{" "}
                                   <span className="text-danger">*</span>
                                 </label>
-                                {/* {userProfile.signupMethod === "phoneNumber" && (
+                                <input
+                                  type="text"
+                                  name="firstname"
+                                  value={formData.firstname}
+                                  onChange={handleChange}
+                                  className="form-control"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Last Name{" "}
+                                  <span className="text-danger">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  name="lastname"
+                                  value={formData.lastname}
+                                  onChange={handleChange}
+                                  className="form-control"
+                                />
+                              </div>
+                            </div>
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Designation{" "}
+                                  <span className="text-grey">
+                                    <i>(job profile)</i>
+                                  </span>
+                                </label>
+                                <input
+                                  type="text"
+                                  name="designation"
+                                  value={formData.designation}
+                                  onChange={handleChange}
+                                  className="form-control"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <label className="form-label">
+                                    Phone Number{" "}
+                                    <span className="text-danger">*</span>
+                                  </label>
+                                  {/* {userProfile.signupMethod === "phoneNumber" && (
                                   <p className="mb-0">Change signin method</p>
                                 )} */}
-                              </div>
-                              <PhoneInput
-                                country={"ae"}
-                                value={formData.phoneNumbers}
-                                onChange={handleOnPhoneChange}
-                                enableSearch
-                                inputProps={{
-                                  name: "phone",
-                                  required: true,
-                                  autoFocus: true,
-                                }}
-                              />
-                              
-                              {/* <PhoneInput
+                                </div>
+                                <PhoneInput
+                                  country={"ae"}
+                                  value={formData.phoneNumbers}
+                                  onChange={handleOnPhoneChange}
+                                  enableSearch
+                                  inputProps={{
+                                    name: "phone",
+                                    required: true,
+                                    autoFocus: true,
+                                  }}
+                                />
+
+                                {/* <PhoneInput
   country={"ae"}
   value={formData.phoneNumbers}
   onChange={handleOnPhoneChange}
@@ -359,18 +471,16 @@ const Profile = () => {
     width: "100%",
   }}
 /> */}
-
-
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="col-md-4">
-                            <div className="mb-3">
-                              <div className="d-flex justify-content-between align-items-center">
-                                <label className="form-label">
-                                  Email <span className="text-danger">*</span>
-                                </label>
-                                {/* {(userProfile.signupMethod === "google" ||
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <label className="form-label">
+                                    Email <span className="text-danger">*</span>
+                                  </label>
+                                  {/* {(userProfile.signupMethod === "google" ||
                                   userProfile.signupMethod === "email") && (
                                   <Link
                                     className="mb-0 text-primary"
@@ -379,181 +489,348 @@ const Profile = () => {
                                     Change signin method
                                   </Link>
                                 )} */}
+                                </div>
+                                <input
+                                  type="text"
+                                  name="email"
+                                  value={formData.email}
+                                  disabled={
+                                    userProfile.signupMethod === "google"
+                                  }
+                                  onChange={handleChange}
+                                  className="form-control"
+                                />
                               </div>
-                              <input
-                                type="text"
-                                name="email"
-                                value={formData.email}
-                                disabled={userProfile.signupMethod === "google"}
-                                onChange={handleChange}
-                                className="form-control"
-                              />
+                            </div>
+
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <label className="form-label">User Role</label>
+                                <input
+                                  type="text"
+                                  value={userProfile.role || "user"}
+                                  disabled
+                                  className="form-control"
+                                  style={{
+                                    backgroundColor: "#f8f9fa",
+                                    cursor: "not-allowed",
+                                  }}
+                                />
+                                <small className="text-muted">
+                                  This field cannot be modified
+                                </small>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="row mt-4">
+                            <h4 className="fw-semibold mb-3">
+                              Social Profiles
+                            </h4>
+                            <div className="col-md-4">
+                              <div className="mb-3 row">
+                                <div className="input-group">
+                                  <span
+                                    className="input-group-text"
+                                    id="basic-addon1"
+                                  >
+                                    <img
+                                      src="/assets/img/icons/instagramIcon.png"
+                                      alt="Instagram"
+                                      style={{ width: 20, height: 20 }}
+                                    />
+                                  </span>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Instagram"
+                                    name="instagram"
+                                    value={formData.instagram}
+                                    onChange={handleChange}
+                                    aria-label="Instagram"
+                                    aria-describedby="basic-addon1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-4">
+                              <div className="mb-3 row">
+                                <div className="input-group">
+                                  <span
+                                    className="input-group-text"
+                                    id="basic-addon1"
+                                  >
+                                    <img
+                                      src="/assets/img/icons/twitterIcon.png"
+                                      alt="Instagram"
+                                      style={{ width: 20, height: 20 }}
+                                    />
+                                  </span>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Twitter"
+                                    name="twitter"
+                                    value={formData.twitter}
+                                    onChange={handleChange}
+                                    aria-label="Twitter"
+                                    aria-describedby="basic-addon1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-4">
+                              <div className="mb-3 row">
+                                <div className="input-group">
+                                  <span
+                                    className="input-group-text"
+                                    id="basic-addon1"
+                                  >
+                                    <img
+                                      src="/assets/img/icons/linkedinIcon.png"
+                                      alt="Instagram"
+                                      style={{ width: 20, height: 20 }}
+                                    />
+                                  </span>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Linkedin"
+                                    name="linkedin"
+                                    value={formData.linkedin}
+                                    onChange={handleChange}
+                                    aria-label="Linkedin"
+                                    aria-describedby="basic-addon1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-4">
+                              <div className="mb-3 row">
+                                <div className="input-group">
+                                  <span
+                                    className="input-group-text"
+                                    id="basic-addon1"
+                                  >
+                                    <img
+                                      src="/assets/img/icons/facebookIcon.png"
+                                      alt="Instagram"
+                                      style={{ width: 20, height: 20 }}
+                                    />
+                                  </span>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Facebook"
+                                    value={formData.facebook}
+                                    onChange={handleChange}
+                                    name="facebook"
+                                    aria-label="Facebook"
+                                    aria-describedby="basic-addon1"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="col-md-4">
+                              <div className="mb-3 row">
+                                <div className="input-group">
+                                  <span
+                                    className="input-group-text"
+                                    id="basic-addon1"
+                                  >
+                                    <img
+                                      src="/assets/img/icons/telegramIcon.png"
+                                      alt="Instagram"
+                                      style={{ width: 20, height: 20 }}
+                                    />
+                                  </span>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Telegram"
+                                    value={formData.telegram}
+                                    onChange={handleChange}
+                                    name="telegram"
+                                    aria-label="Telegram"
+                                    aria-describedby="basic-addon1"
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                        <div className="row mt-4">
-                          <h4 className="fw-semibold mb-3">Social Profiles</h4>
-                          <div className="col-md-4">
-                            <div className="mb-3 row">
-                              <div className="input-group">
-                                <span
-                                  className="input-group-text"
-                                  id="basic-addon1"
-                                >
-                                  <img
-                                    src="/assets/img/icons/instagramIcon.png"
-                                    alt="Instagram"
-                                    style={{ width: 20, height: 20 }}
-                                  />
-                                </span>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Instagram"
-                                  name="instagram"
-                                  value={formData.instagram}
-                                  onChange={handleChange}
-                                  aria-label="Instagram"
-                                  aria-describedby="basic-addon1"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-4">
-                            <div className="mb-3 row">
-                              <div className="input-group">
-                                <span
-                                  className="input-group-text"
-                                  id="basic-addon1"
-                                >
-                                  <img
-                                    src="/assets/img/icons/twitterIcon.png"
-                                    alt="Instagram"
-                                    style={{ width: 20, height: 20 }}
-                                  />
-                                </span>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Twitter"
-                                  name="twitter"
-                                  value={formData.twitter}
-                                  onChange={handleChange}
-                                  aria-label="Twitter"
-                                  aria-describedby="basic-addon1"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-4">
-                            <div className="mb-3 row">
-                              <div className="input-group">
-                                <span
-                                  className="input-group-text"
-                                  id="basic-addon1"
-                                >
-                                  <img
-                                    src="/assets/img/icons/linkedinIcon.png"
-                                    alt="Instagram"
-                                    style={{ width: 20, height: 20 }}
-                                  />
-                                </span>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Linkedin"
-                                  name="linkedin"
-                                  value={formData.linkedin}
-                                  onChange={handleChange}
-                                  aria-label="Linkedin"
-                                  aria-describedby="basic-addon1"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-4">
-                            <div className="mb-3 row">
-                              <div className="input-group">
-                                <span
-                                  className="input-group-text"
-                                  id="basic-addon1"
-                                >
-                                  <img
-                                    src="/assets/img/icons/facebookIcon.png"
-                                    alt="Instagram"
-                                    style={{ width: 20, height: 20 }}
-                                  />
-                                </span>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Facebook"
-                                  value={formData.facebook}
-                                  onChange={handleChange}
-                                  name="facebook"
-                                  aria-label="Facebook"
-                                  aria-describedby="basic-addon1"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-4">
-                            <div className="mb-3 row">
-                              <div className="input-group">
-                                <span
-                                  className="input-group-text"
-                                  id="basic-addon1"
-                                >
-                                  <img
-                                    src="/assets/img/icons/telegramIcon.png"
-                                    alt="Instagram"
-                                    style={{ width: 20, height: 20 }}
-                                  />
-                                </span>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="Telegram"
-                                  value={formData.telegram}
-                                  onChange={handleChange}
-                                  name="telegram"
-                                  aria-label="Telegram"
-                                  aria-describedby="basic-addon1"
-                                />
-                              </div>
-                            </div>
-                          </div>
+
+                        {message.text && (
+                          <p
+                            className={`fw-medium ${
+                              message.type === "success"
+                                ? "text-success"
+                                : "text-danger"
+                            }`}
+                          >
+                            {message.text}
+                          </p>
+                        )}
+
+                        <div>
+                          <Link to="#" className="btn btn-light me-2">
+                            Cancel
+                          </Link>
+                          <button
+                            type="submit"
+                            className="btn btn-primary"
+                            style={{ width: 150 }}
+                            disabled={isProfileLoading}
+                          >
+                            {isProfileLoading ? "Saving..." : "Save Changes"}
+                          </button>
                         </div>
-                      </div>
-
-                      {message.text && (
-                        <p
-                          className={`fw-medium ${
-                            message.type === "success"
-                              ? "text-success"
-                              : "text-danger"
-                          }`}
-                        >
-                          {message.text}
-                        </p>
-                      )}
-
-                      <div>
-                        <Link to="#" className="btn btn-light me-2">
-                          Cancel
-                        </Link>
-                        <button
-                          type="submit"
-                          className="btn btn-primary"
-                          style={{ width: 150 }}
-                          disabled={isLoading}
-                        >
-                          {isLoading ? "Saving..." : "Save Changes"}
-                        </button>
-                      </div>
-                    </form>
+                      </form>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {activeTab === "password" &&
+                  userProfile.signupMethod !== "google" && (
+                    <div className="card">
+                      <div className="card-body">
+                        <h4 className="fw-semibold mb-3">Change Password</h4>
+                        <form onSubmit={handleChangePassword}>
+                          <div className="row">
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Current Password{" "}
+                                  <span className="text-danger">*</span>
+                                </label>
+                                <div className="pass-group">
+                                  <input
+                                    type={
+                                      passwordVisibility.currentPassword
+                                        ? "text"
+                                        : "password"
+                                    }
+                                    name="currentPassword"
+                                    value={passwordData.currentPassword}
+                                    onChange={handlePasswordChange}
+                                    className="pass-input form-control"
+                                    required
+                                  />
+                                  <span
+                                    className={`ti toggle-passwords ${
+                                      passwordVisibility.currentPassword
+                                        ? "ti-eye"
+                                        : "ti-eye-off"
+                                    }`}
+                                    onClick={() =>
+                                      togglePasswordVisibility(
+                                        "currentPassword"
+                                      )
+                                    }
+                                  ></span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  New Password{" "}
+                                  <span className="text-danger">*</span>
+                                </label>
+                                <div className="pass-group">
+                                  <input
+                                    type={
+                                      passwordVisibility.newPassword
+                                        ? "text"
+                                        : "password"
+                                    }
+                                    name="newPassword"
+                                    value={passwordData.newPassword}
+                                    onChange={handlePasswordChange}
+                                    className="pass-input form-control"
+                                    required
+                                    minLength="6"
+                                  />
+                                  <span
+                                    className={`ti toggle-passwords ${
+                                      passwordVisibility.newPassword
+                                        ? "ti-eye"
+                                        : "ti-eye-off"
+                                    }`}
+                                    onClick={() =>
+                                      togglePasswordVisibility("newPassword")
+                                    }
+                                  ></span>
+                                </div>
+                                <small className="text-muted">
+                                  Password must be at least 6 characters long
+                                </small>
+                              </div>
+                            </div>
+
+                            <div className="col-md-4">
+                              <div className="mb-3">
+                                <label className="form-label">
+                                  Confirm New Password{" "}
+                                  <span className="text-danger">*</span>
+                                </label>
+                                <div className="pass-group">
+                                  <input
+                                    type={
+                                      passwordVisibility.confirmPassword
+                                        ? "text"
+                                        : "password"
+                                    }
+                                    name="confirmPassword"
+                                    value={passwordData.confirmPassword}
+                                    onChange={handlePasswordChange}
+                                    className="pass-input form-control"
+                                    required
+                                  />
+                                  <span
+                                    className={`ti toggle-passwords ${
+                                      passwordVisibility.confirmPassword
+                                        ? "ti-eye"
+                                        : "ti-eye-off"
+                                    }`}
+                                    onClick={() =>
+                                      togglePasswordVisibility(
+                                        "confirmPassword"
+                                      )
+                                    }
+                                  ></span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {message.text && (
+                            <p
+                              className={`fw-medium ${
+                                message.type === "success"
+                                  ? "text-success"
+                                  : "text-danger"
+                              }`}
+                            >
+                              {message.text}
+                            </p>
+                          )}
+
+                          <div className="mt-3">
+                            <button
+                              type="submit"
+                              className="btn btn-danger"
+                              disabled={isPasswordLoading}
+                            >
+                              {isPasswordLoading
+                                ? "Changing..."
+                                : "Change Password"}
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  )}
               </div>
               {/* /Settings Info */}
               <button
@@ -630,6 +907,7 @@ const Profile = () => {
                                       : "password"
                                   }
                                   className="pass-input form-control"
+                                  name="emailPassword"
                                   value={changeSignin.emailPassword}
                                   onChange={handleChangeSignin}
                                 />
@@ -667,7 +945,7 @@ const Profile = () => {
                               <label className="form-label">Password </label>
                               <input
                                 type="text"
-                                name="password"
+                                name="phonePassword"
                                 value={changeSignin.phonePassword}
                                 onChange={handleChangeSignin}
                                 className="form-control"

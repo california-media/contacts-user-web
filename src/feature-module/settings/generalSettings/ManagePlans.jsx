@@ -26,7 +26,10 @@ const ManagePlans = () => {
       setLoading(true);
       const response = await api.get("/admin/plans");
       if (response.data.success) {
-        setPlans(response.data.data);
+        const sorted = (response.data.data || [])
+          .slice()
+          .sort((a, b) => (a.price ?? 0) - (b.price ?? 0)); // ascending by price (cents)
+        setPlans(sorted);
       }
     } catch (error) {
       console.error("Error fetching plans:", error);

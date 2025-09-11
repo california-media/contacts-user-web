@@ -7,7 +7,7 @@ import { Select } from "antd";
 
 import api from "../../../../core/axios/axiosInstance";
 
-const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
+const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
   const [originalData, setOriginalData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [plans, setPlans] = useState([]);
@@ -95,22 +95,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
     fetchPlans();
   }, [dispatch]);
 
-  // Cleanup effect to remove any remaining backdrops on unmount
-  useEffect(() => {
-    return () => {
-      // Cleanup any remaining backdrops when component unmounts
-      const backdrops = document.querySelectorAll(".offcanvas-backdrop");
-      backdrops.forEach((backdrop) => backdrop.remove());
-
-      // Remove modal-open class from body if it exists
-      document.body.classList.remove("modal-open");
-
-      // Reset body styles
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    };
-  }, []);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -155,43 +139,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
       ...prevData,
       planId: value,
     }));
-  };
-
-  const closeOffcanvas = () => {
-    try {
-      // Get the offcanvas element
-      const offcanvasElement = document.getElementById("user_offcanvas");
-
-      if (offcanvasElement) {
-        // Use Bootstrap's Offcanvas API to properly close
-        const bsOffcanvas =
-          window.bootstrap?.Offcanvas?.getInstance(offcanvasElement);
-        if (bsOffcanvas) {
-          bsOffcanvas.hide();
-        } else {
-          // Fallback to creating new instance and hiding
-          const newOffcanvas = new window.bootstrap.Offcanvas(offcanvasElement);
-          newOffcanvas.hide();
-        }
-
-        // Additional cleanup - remove any remaining backdrops
-        setTimeout(() => {
-          const backdrops = document.querySelectorAll(".offcanvas-backdrop");
-          backdrops.forEach((backdrop) => backdrop.remove());
-
-          // Remove modal-open class from body if it exists
-          document.body.classList.remove("modal-open");
-
-          // Reset body styles
-          document.body.style.overflow = "";
-          document.body.style.paddingRight = "";
-        }, 100);
-      }
-    } catch (error) {
-      console.error("Error closing offcanvas:", error);
-      // Fallback method
-      document.getElementById("closeUserOffcanvas")?.click();
-    }
   };
 
   const getChangedData = () => {
@@ -247,7 +194,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
       return;
     }
 
-    setLoading(true);
     setIsSubmitting(true);
     const formDataObj = new FormData();
 
@@ -284,9 +230,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
             variant: "success",
           })
         );
-
-        // Close the offcanvas properly
-        closeOffcanvas();
 
         // Reset original data to new values
         const phoneNumber = response.data.data.phonenumbers?.[0]
@@ -329,7 +272,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
         })
       );
     } finally {
-      setLoading(false);
       setIsSubmitting(false);
     }
   };
@@ -546,7 +488,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
             </div>
 
             {/* Plan Selection */}
-            <div className="col-md-6">
+            {/* <div className="col-md-6">
               <div className="mb-3">
                 <label className="col-form-label">User Plan</label>
                 <Select
@@ -567,7 +509,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
                   ]}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Gender */}
             <div className="col-md-6">
@@ -673,26 +615,27 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
             <div className="col-md-6">
               <div className="mb-3">
                 <label className="col-form-label">Employee Count</label>
-                <select
-                  name="employeeCount"
-                  value={formData.employeeCount}
-                  onChange={handleChange}
-                  className="form-control"
-                >
-                  <option value="">Select Employee Count</option>
-                  <option value="1-4">1-4</option>
-                  <option value="5-19">5-19</option>
-                  <option value="20-49">20-49</option>
-                  <option value="50-99">50-99</option>
-                  <option value="100-249">100-249</option>
-                  <option value="250-499">250-499</option>
-                  <option value="500-999">500-999</option>
-                  <option value="1000+">1000+</option>
-                </select>
+                <Select
+                  style={{ width: "100%", height: 38 }}
+                  placeholder="Select Employee Count"
+                  allowClear
+                  value={formData.employeeCount || undefined}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, employeeCount: value }))
+                  }
+                  options={[
+                    { value: "1-4", label: "1-4" },
+                    { value: "5-19", label: "5-19" },
+                    { value: "20-49", label: "20-49" },
+                    { value: "50-99", label: "50-99" },
+                    { value: "100-249", label: "100-249" },
+                    { value: "250-499", label: "250-499" },
+                    { value: "500-999", label: "500-999" },
+                    { value: "1000+", label: "1000+" },
+                  ]}
+                />
               </div>
             </div>
-
-            {/* Helps */}
             <div className="col-md-12">
               <div className="mb-3">
                 <label className="col-form-label">Areas of Help</label>
@@ -855,7 +798,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo, loading, setLoading }) => {
             <button
               type="submit"
               className="btn btn-primary"
-              // data-bs-dismiss="offcanvas"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
