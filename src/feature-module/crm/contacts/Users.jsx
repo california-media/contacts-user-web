@@ -100,7 +100,7 @@ const Users = () => {
           const phone = phonenumbers[0];
           return `${phone.countryCode || ""} ${phone.number || ""}`.trim();
         }
-        return "N/A";
+        return "No Phone Number";
       },
     },
     {
@@ -124,7 +124,7 @@ const Users = () => {
         if (planExpiresAt) {
           return new Date(planExpiresAt).toLocaleDateString();
         }
-        return "N/A";
+        return "No Expiry Date";
       },
     },
   ];

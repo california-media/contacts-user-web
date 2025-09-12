@@ -466,7 +466,9 @@ const AdminUserDetails = () => {
                                 Credit Balance
                               </label>
                               <p className="form-control-static">
-                                ${userInfo?.creditBalance || 0}
+                                {`$${(
+                                  Number(userInfo?.creditBalance ?? 0) / 100
+                                ).toFixed(2)}`}
                               </p>
                             </div>
                           </div>
