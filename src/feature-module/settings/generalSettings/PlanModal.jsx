@@ -226,7 +226,6 @@ const PlanModal = ({ onSuccess, plan, type }) => {
                         <option value="month">Monthly</option>
                         <option value="year">Yearly</option>
                         <option value="lifetime">Lifetime</option>
-                        <option value="custom">Custom</option>
                       </select>
                     </div>
                   </div>
