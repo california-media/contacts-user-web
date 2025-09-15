@@ -219,21 +219,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
     return true;
   };
 
-  const validateDateRelationship = () => {
-    if (
-      formData.onFreeTrial ||
-      isStarterPlan() ||
-      !formData.planActivationDate ||
-      !formData.planExpiryDate
-    ) {
-      return true;
-    }
-
-    const activationDate = dayjs(formData.planActivationDate);
-    const expiryDate = dayjs(formData.planExpiryDate);
-
-    return activationDate.isBefore(expiryDate);
-  };
+  
 
   const getValidationMessage = () => {
     // Skip validation for starter plans
@@ -407,7 +393,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
         formDataObj.append(key, changedData[key]);
       }
     });
-
+    console.log("Changed Data:", formDataObj);
     try {
       const response = await api.put(
         `/admin/users/${selectedUser.id}`,

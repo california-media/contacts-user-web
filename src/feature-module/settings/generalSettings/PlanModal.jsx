@@ -175,8 +175,25 @@ const PlanModal = ({ onSuccess, plan, type }) => {
                         value={formData.name}
                         onChange={handleInputChange}
                         required
-                        disabled={loading}
+                        disabled={
+                          loading ||
+                          (type === "edit" &&
+                            (plan?.name === "Starter" || plan?.name === "Pro"))
+                        }
+                        title={
+                          type === "edit" &&
+                          (plan?.name === "Starter" || plan?.name === "Pro")
+                            ? `Cannot edit the name of ${plan?.name} plan - this is a protected plan`
+                            : ""
+                        }
                       />
+                      {type === "edit" &&
+                        (plan?.name === "Starter" || plan?.name === "Pro") && (
+                          <small className="text-muted">
+                            Note: The name of {plan?.name} plan cannot be
+                            modified as it's a protected plan.
+                          </small>
+                        )}
                     </div>
                   </div>
                   <div className="col-md-6">
@@ -218,7 +235,7 @@ const PlanModal = ({ onSuccess, plan, type }) => {
                     <div className="form-group">
                       <label className="form-label">Description</label>
                       <textarea
-                      required
+                        required
                         className="form-control"
                         name="description"
                         value={formData.description}
@@ -349,11 +366,22 @@ const PlanModal = ({ onSuccess, plan, type }) => {
                         name="isActive"
                         checked={formData.isActive}
                         onChange={handleInputChange}
-                        disabled={loading}
+                        disabled={
+                          loading ||
+                          (type === "edit" &&
+                            (plan?.name === "Starter" || plan?.name === "Pro"))
+                        }
                         role="switch"
                       />
                       <label className="form-check-label">Active Plan</label>
                     </div>
+                    {type === "edit" &&
+                      (plan?.name === "Starter" || plan?.name === "Pro") && (
+                        <small className="text-muted">
+                          Note: The active status of {plan?.name} plan cannot be
+                          modified as it's a protected plan.
+                        </small>
+                      )}
                   </div>
                 </div>
               </div>

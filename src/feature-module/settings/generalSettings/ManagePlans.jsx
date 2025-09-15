@@ -252,23 +252,39 @@ const ManagePlans = () => {
                                 >
                                   <i className="fa fa-edit me-1"></i> Edit
                                 </button>
-                                <button
-                                  className="btn btn-secondary me-2"
-                                  onClick={() => handleToggleStatus(plan._id)}
-                                >
-                                  <i
-                                    className={`fa fa-${
-                                      plan.isActive ? "times" : "check"
-                                    } me-1`}
-                                  ></i>
-                                  {plan.isActive ? "Deactivate" : "Activate"}
-                                </button>
-                                <button
-                                  className="btn btn-danger"
-                                  onClick={() => handleDeletePlan(plan)}
-                                >
-                                  <i className="fa fa-trash me-1"></i> Delete
-                                </button>
+                                {plan.name === "Starter" ||
+                                plan.name === "Pro" ? (
+                                  null
+                                ) : (
+                                  <button
+                                    className="btn btn-secondary me-2"
+                                    onClick={() => handleToggleStatus(plan._id)}
+                                  >
+                                    <i
+                                      className={`fa fa-${
+                                        plan.isActive ? "times" : "check"
+                                      } me-1`}
+                                    ></i>
+                                    {plan.isActive ? "Deactivate" : "Activate"}
+                                  </button>
+                                )}
+                                {plan.name === "Starter" ||
+                                plan.name === "Pro" ? (
+                                  <button
+                                    className="btn btn-danger"
+                                    disabled
+                                    title={`Cannot delete ${plan.name} plan - this is a protected plan`}
+                                  >
+                                    <i className="fa fa-trash me-1"></i> Delete
+                                  </button>
+                                ) : (
+                                  <button
+                                    className="btn btn-danger"
+                                    onClick={() => handleDeletePlan(plan)}
+                                  >
+                                    <i className="fa fa-trash me-1"></i> Delete
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>
