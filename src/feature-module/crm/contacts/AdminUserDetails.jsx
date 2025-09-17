@@ -42,7 +42,7 @@ const AdminUserDetails = () => {
   useEffect(() => {
     fetchUserDetails();
   }, [userId]);
-
+  console.log(userInfo);
   if (loading) {
     return (
       <div className="page-wrapper">
@@ -340,30 +340,30 @@ const AdminUserDetails = () => {
                         </span>
                         <span className="col-12">
                           {userInfo?.plan?.name +
-                            (userInfo.onFreeTrial
+                            (userInfo?.plan?.isTrialing
                               ? " (14 days Free Trial)"
                               : "") || "N/A"}
                         </span>
                       </li>
-                      {userInfo?.planActivatedAt && (
+                      {userInfo?.plan?.activatedAt && (
                         <li className="row mb-3">
                           <span className="col-12 fw-semibold text-black">
                             Plan Activated At
                           </span>
                           <span className="col-12">
-                            {dayjs(userInfo?.planActivatedAt).format(
+                            {dayjs(userInfo?.plan?.activatedAt).format(
                               "DD MMM YYYY"
                             )}
                           </span>
                         </li>
                       )}
-                      {userInfo?.planExpiresAt && (
+                      {userInfo?.plan?.expiresAt && (
                         <li className="row mb-3">
                           <span className="col-12 fw-semibold text-black">
                             Plan Expires At
                           </span>
                           <span className="col-12">
-                            {dayjs(userInfo?.planExpiresAt).format(
+                            {dayjs(userInfo?.plan?.expiresAt).format(
                               "DD MMM YYYY"
                             )}
                           </span>

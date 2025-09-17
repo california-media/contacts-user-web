@@ -26,7 +26,6 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [passwordVisibility, setPasswordVisibility] = useState({
-    currentPassword: false,
     newPassword: false,
     confirmPassword: false,
   });
@@ -44,7 +43,6 @@ const Profile = () => {
     designation: "",
   });
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -140,12 +138,11 @@ const Profile = () => {
   const handleChangePassword = async (e) => {
     e.preventDefault();
 
-    if (
-      !passwordData.currentPassword ||
-      !passwordData.newPassword ||
-      !passwordData.confirmPassword
-    ) {
-      setMessage({ text: "All password fields are required", type: "error" });
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      setMessage({
+        text: "New password and confirm password are required",
+        type: "error",
+      });
       return;
     }
 
@@ -162,26 +159,16 @@ const Profile = () => {
       return;
     }
 
-    if (passwordData.currentPassword === passwordData.newPassword) {
-      setMessage({
-        text: "New password must be different from current password",
-        type: "error",
-      });
-      return;
-    }
-
     setIsPasswordLoading(true);
     try {
       await dispatch(
         changePassword({
-          currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
         })
       );
 
       // Reset form on success
       setPasswordData({
-        currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
@@ -696,41 +683,6 @@ const Profile = () => {
                         <h4 className="fw-semibold mb-3">Change Password</h4>
                         <form onSubmit={handleChangePassword}>
                           <div className="row">
-                            <div className="col-md-4">
-                              <div className="mb-3">
-                                <label className="form-label">
-                                  Current Password{" "}
-                                  <span className="text-danger">*</span>
-                                </label>
-                                <div className="pass-group">
-                                  <input
-                                    type={
-                                      passwordVisibility.currentPassword
-                                        ? "text"
-                                        : "password"
-                                    }
-                                    name="currentPassword"
-                                    value={passwordData.currentPassword}
-                                    onChange={handlePasswordChange}
-                                    className="pass-input form-control"
-                                    required
-                                  />
-                                  <span
-                                    className={`ti toggle-passwords ${
-                                      passwordVisibility.currentPassword
-                                        ? "ti-eye"
-                                        : "ti-eye-off"
-                                    }`}
-                                    onClick={() =>
-                                      togglePasswordVisibility(
-                                        "currentPassword"
-                                      )
-                                    }
-                                  ></span>
-                                </div>
-                              </div>
-                            </div>
-
                             <div className="col-md-4">
                               <div className="mb-3">
                                 <label className="form-label">

@@ -112,17 +112,17 @@ const Users = () => {
         if (!plan?.name) {
           return "No Plan";
         }
-        return plan.onFreeTrial ? `${plan.name} (Free Trial)` : plan.name;
+        return plan.isTrialing ? `${plan.name} (Free Trial)` : plan.name;
       },
     },
     {
       title: "Plan Expiry",
-      dataIndex: "planExpiresAt",
+      dataIndex: "plan",
       key: "planExpiresAt",
       width: 150,
-      render: (planExpiresAt) => {
-        if (planExpiresAt) {
-          return new Date(planExpiresAt).toLocaleDateString();
+      render: (plan) => {
+        if (plan?.expiresAt) {
+          return new Date(plan.expiresAt).toLocaleDateString();
         }
         return "No Expiry Date";
       },

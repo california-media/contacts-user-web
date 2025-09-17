@@ -3,7 +3,7 @@ import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../data/redux/slices/ToastSlice";
-import { Select, DatePicker, Switch } from "antd";
+import { Select, Switch } from "antd";
 import dayjs from "dayjs";
 
 import api from "../../../../core/axios/axiosInstance";
@@ -42,9 +42,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
     helps: [],
     profileImage: null,
     planId: "", // Add planId field
-    planActivationDate: null, // Plan activation date
-    planExpiryDate: null, // Plan expiry date
-    onFreeTrial: false, // Free trial toggle
+    // onFreeTrial: false, // Free trial toggle for Stripe subscriptions
   });
 
   // Initialize form data when selectedUser changes
@@ -73,13 +71,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
         helps: selectedUser.userInfo?.helps || [],
         profileImage: null,
         planId: selectedUser.plan?._id || "", // Add planId from user's current plan
-        planActivationDate: selectedUser.planActivatedAt
-          ? dayjs(selectedUser.planActivatedAt)
-          : null,
-        planExpiryDate: selectedUser.planExpiresAt
-          ? dayjs(selectedUser.planExpiresAt)
-          : null,
-        onFreeTrial: selectedUser.onFreeTrial || false,
+        // onFreeTrial: selectedUser.plan?.isTrialing || false,
       };
 
       setFormData(initialData);
@@ -159,120 +151,24 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
     }));
   };
 
-  const handleFreeTrialToggle = (checked) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      onFreeTrial: checked,
-    }));
-  };
-
-  const handleActivationDateChange = (date) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      planActivationDate: date,
-    }));
-  };
-
-  const handleExpiryDateChange = (date) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      planExpiryDate: date,
-    }));
-  };
-
-  // Validation functions
-  const validateActivationDate = (date) => {
-    if (!date || isStarterPlan()) return true;
-
-    const currentDate = dayjs();
-    const activationDate = dayjs(date);
-
-    if (formData.onFreeTrial) {
-      // For free trial: activation cannot be greater than current date
-      if (activationDate.isAfter(currentDate)) {
-        return false;
-      }
-      // Also check if activation + 14 days > current date
-      const expiryDate = activationDate.add(14, "day");
-      return expiryDate.isAfter(currentDate);
-    } else {
-      // For regular plan: activation cannot be greater than current date
-      return !activationDate.isAfter(currentDate);
-    }
-  };
-
-  const validateExpiryDate = (date) => {
-    if (!date || formData.onFreeTrial || isStarterPlan()) return true;
-
-    const currentDate = dayjs();
-    const expiryDate = dayjs(date);
-
-    // Expiry must be greater than current date
-    if (!expiryDate.isAfter(currentDate)) return false;
-
-    // If activation date exists, expiry must be after activation
-    if (formData.planActivationDate) {
-      const activationDate = dayjs(formData.planActivationDate);
-      return expiryDate.isAfter(activationDate);
-    }
-
-    return true;
-  };
-
-  
-
+  // Helper function to get validation message for form
   const getValidationMessage = () => {
-    // Skip validation for starter plans
-    if (isStarterPlan()) return null;
+    // With Stripe integration, most validations are handled by the backend
+    // Only basic frontend validations remain
 
-    const currentDate = dayjs();
-
-    if (formData.onFreeTrial && formData.planActivationDate) {
-      const activationDate = dayjs(formData.planActivationDate);
-
-      // Check if activation date is in the future
-      if (activationDate.isAfter(currentDate)) {
-        return "Activation date cannot be greater than the current date.";
-      }
-
-      const expiryDate = activationDate.add(14, "day");
-
-      if (expiryDate.isBefore(currentDate) || expiryDate.isSame(currentDate)) {
-        return "Activation date would make the free trial expired. Please choose a more recent date.";
-      }
+    if (!formData.planId) {
+      return null; // No plan selected, no validation needed
     }
 
-    if (!formData.onFreeTrial) {
-      // Check activation date validations
-      if (formData.planActivationDate) {
-        const activationDate = dayjs(formData.planActivationDate);
+    if (isStarterPlan()) {
+      return null; // Starter plan doesn't need validation
+    }
 
-        if (activationDate.isAfter(currentDate)) {
-          return "Activation date cannot be greater than the current date.";
-        }
-      }
-
-      // Check expiry date validations
-      if (formData.planExpiryDate) {
-        const expiryDate = dayjs(formData.planExpiryDate);
-
-        if (
-          expiryDate.isBefore(currentDate) ||
-          expiryDate.isSame(currentDate)
-        ) {
-          return "Expiry date must be greater than the current date.";
-        }
-      }
-
-      // Check relationship between activation and expiry
-      if (formData.planActivationDate && formData.planExpiryDate) {
-        const activationDate = dayjs(formData.planActivationDate);
-        const expiryDate = dayjs(formData.planExpiryDate);
-
-        if (!activationDate.isBefore(expiryDate)) {
-          return "Activation date must be earlier than the expiry date.";
-        }
-      }
+    // Basic validation: if a premium plan is selected, ensure it has proper configuration
+    const selectedPlan = plans.find((plan) => plan._id === formData.planId);
+    if (selectedPlan && selectedPlan.name.toLowerCase() !== "starter") {
+      // This is a premium plan - backend will handle Stripe subscription creation
+      return null;
     }
 
     return null;
@@ -301,30 +197,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
 
         if (!areArraysEqual) {
           changedData[key] = currentHelps;
-        }
-      } else if (key === "planActivationDate" || key === "planExpiryDate") {
-        // Compare dayjs dates
-        const originalDate = originalData[key];
-        const currentDate = formData[key];
-
-        // Both are null or undefined
-        if (!originalDate && !currentDate) {
-          return;
-        }
-
-        // One is null/undefined and the other is not
-        if ((!originalDate && currentDate) || (originalDate && !currentDate)) {
-          changedData[key] = currentDate;
-          return;
-        }
-
-        // Both are dates, compare them
-        if (
-          originalDate &&
-          currentDate &&
-          !originalDate.isSame(currentDate, "day")
-        ) {
-          changedData[key] = currentDate;
         }
       } else {
         // Compare strings and other values
@@ -376,19 +248,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
         formDataObj.append("helps", JSON.stringify(changedData.helps));
       } else if (key === "profileImage" && changedData.profileImage) {
         formDataObj.append("profileImage", changedData.profileImage);
-      } else if (
-        key === "planActivationDate" &&
-        changedData.planActivationDate
-      ) {
-        formDataObj.append(
-          "planActivationDate",
-          changedData.planActivationDate.toISOString()
-        );
-      } else if (key === "planExpiryDate" && changedData.planExpiryDate) {
-        formDataObj.append(
-          "planExpiryDate",
-          changedData.planExpiryDate.toISOString()
-        );
       } else if (changedData[key] !== null && changedData[key] !== undefined) {
         formDataObj.append(key, changedData[key]);
       }
@@ -441,13 +300,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
           helps: response.data.data.userInfo?.helps || [],
           profileImage: null,
           planId: response.data.data.plan?._id || "", // Add planId
-          planActivationDate: response.data.data.planActivatedAt
-            ? dayjs(response.data.data.planActivatedAt)
-            : null,
-          planExpiryDate: response.data.data.planExpiresAt
-            ? dayjs(response.data.data.planExpiresAt)
-            : null,
-          onFreeTrial: response.data.data.onFreeTrial || false,
+          // onFreeTrial: response.data.data.plan?.isTrialing || false,
         };
         setOriginalData(newOriginalData);
         setFormData(newOriginalData);
@@ -690,28 +543,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                 >
                   <h6 className="mb-3">Plan Management</h6>
 
-                  {/* Free Trial Toggle - Hidden for Starter Plan */}
-                  {!isStarterPlan() && (
-                    <div className="row mb-3">
-                      <div className="col-md-6">
-                        <label className="col-form-label d-flex align-items-center">
-                          <span className="me-2">Free Trial</span>
-                          <Switch
-                            checked={formData.onFreeTrial}
-                            onChange={handleFreeTrialToggle}
-                            checkedChildren="ON"
-                            unCheckedChildren="OFF"
-                          />
-                        </label>
-                        <small className="text-muted d-block">
-                          {formData.onFreeTrial
-                            ? "User is currently on free trial (14 days)"
-                            : "User is not on free trial"}
-                        </small>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Plan Selection */}
                   <div className="row mb-3">
                     <div className="col-md-12">
@@ -732,92 +563,30 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                           })),
                         ]}
                       />
+                      <small className="text-muted d-block mt-1">
+                        Plan changes will create/update Stripe subscriptions
+                        automatically
+                      </small>
                     </div>
                   </div>
 
-                  {/* Date Pickers - Hidden for Starter Plan */}
-                  {formData.planId && !isStarterPlan() && (
-                    <div className="row">
-                      <div className="col-md-6">
-                        <label className="col-form-label">
-                          Plan Activation Date
-                        </label>
-                        <DatePicker
-                          style={{
-                            width: "100%",
-                            height: "38px",
-                            borderColor: !validateActivationDate(
-                              formData.planActivationDate
-                            )
-                              ? "#ff4d4f"
-                              : undefined,
-                          }}
-                          value={formData.planActivationDate}
-                          onChange={handleActivationDateChange}
-                          format="YYYY-MM-DD"
-                          placeholder="Select activation date"
-                          disabledDate={(current) => {
-                            if (!current) return false;
-                            // For both free trial and regular plans: disable future dates
-                            return current > dayjs().endOf("day");
-                          }}
-                        />
-                        {formData.onFreeTrial && (
-                          <small className="text-muted d-block mt-1">
-                            Expiry will be automatically set to 14 days from
-                            activation
-                          </small>
-                        )}
-                      </div>
-                      {!formData.onFreeTrial && (
-                        <div className="col-md-6">
-                          <label className="col-form-label">
-                            Plan Expiry Date
-                          </label>
-                          <DatePicker
-                            style={{
-                              width: "100%",
-                              height: "38px",
-                              borderColor: !validateExpiryDate(
-                                formData.planExpiryDate
-                              )
-                                ? "#ff4d4f"
-                                : undefined,
-                            }}
-                            value={formData.planExpiryDate}
-                            onChange={handleExpiryDateChange}
-                            format="YYYY-MM-DD"
-                            placeholder="Select expiry date"
-                            disabledDate={(current) => {
-                              if (!current) return false;
-
-                              // Cannot be before or equal to today
-                              if (current <= dayjs().startOf("day"))
-                                return true;
-
-                              // Cannot be before or equal to activation date
-                              if (formData.planActivationDate) {
-                                const activationDate = dayjs(
-                                  formData.planActivationDate
-                                );
-                                return current <= activationDate.startOf("day");
-                              }
-
-                              return false;
-                            }}
-                          />
+                  {/* Current Plan Status Display */}
+                  {selectedUser?.plan?.subscriptionStatus && (
+                    <div className="row mb-3">
+                      <div className="col-md-12">
+                        <div className="alert alert-info">
+                          <strong>Current Subscription Status:</strong>{" "}
+                          {selectedUser.plan.subscriptionStatus}
+                          {selectedUser.plan?.expiresAt && (
+                            <div className="mt-1">
+                              <strong>Current Period Ends:</strong>{" "}
+                              {dayjs(selectedUser.plan.expiresAt).format(
+                                "YYYY-MM-DD"
+                              )}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Validation Messages */}
-                  {getValidationMessage() && (
-                    <div className="alert alert-warning mt-2 mb-0">
-                      <small>
-                        <i className="fas fa-exclamation-triangle me-1"></i>
-                        {getValidationMessage()}
-                      </small>
+                      </div>
                     </div>
                   )}
 
@@ -826,34 +595,21 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                     <div className="alert alert-info mt-2 mb-0">
                       <small>
                         <i className="fas fa-info-circle me-1"></i>
-                        Starter plan: This is a basic plan with default
-                        settings. Free trial and custom dates are not available.
+                        Starter plan: This is a free plan with basic features.
+                        No subscription required.
                       </small>
                     </div>
                   )}
 
-                  {formData.onFreeTrial &&
-                    formData.planId &&
-                    !isStarterPlan() && (
-                      <div className="alert alert-info mt-2 mb-0">
-                        <small>
-                          <i className="fas fa-info-circle me-1"></i>
-                          Free trial mode: Expiry date is automatically
-                          calculated as 14 days from activation date.
-                          {formData.planActivationDate && (
-                            <span>
-                              {" "}
-                              Current expiry:{" "}
-                              <strong>
-                                {dayjs(formData.planActivationDate)
-                                  .add(14, "day")
-                                  .format("YYYY-MM-DD")}
-                              </strong>
-                            </span>
-                          )}
-                        </small>
-                      </div>
-                    )}
+                  {formData.planId && !isStarterPlan() && (
+                    <div className="alert alert-warning mt-2 mb-0">
+                      <small>
+                        <i className="fas fa-exclamation-triangle me-1"></i>
+                        Immediate billing: User will be charged immediately for
+                        the selected plan via Stripe.
+                      </small>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
