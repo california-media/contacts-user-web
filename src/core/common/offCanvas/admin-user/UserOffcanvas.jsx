@@ -42,7 +42,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
     helps: [],
     profileImage: null,
     planId: "", // Add planId field
-    // onFreeTrial: false, // Free trial toggle for Stripe subscriptions
   });
 
   // Initialize form data when selectedUser changes
@@ -71,7 +70,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
         helps: selectedUser.userInfo?.helps || [],
         profileImage: null,
         planId: selectedUser.plan?._id || "", // Add planId from user's current plan
-        // onFreeTrial: selectedUser.plan?.isTrialing || false,
       };
 
       setFormData(initialData);
@@ -300,7 +298,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
           helps: response.data.data.userInfo?.helps || [],
           profileImage: null,
           planId: response.data.data.plan?._id || "", // Add planId
-          // onFreeTrial: response.data.data.plan?.isTrialing || false,
         };
         setOriginalData(newOriginalData);
         setFormData(newOriginalData);
