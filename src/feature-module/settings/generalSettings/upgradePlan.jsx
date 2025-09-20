@@ -19,67 +19,9 @@ const stripePromise = loadStripe(
 
 // Checkout Form Component
 const CheckoutForm = ({ clientSecret, onSuccess, onCancel, planDetails }) => {
-  const dispatch = useDispatch();
-  const [processingComplete, setProcessingComplete] = useState(false);
-
   const fetchClientSecret = () => {
     // Return the clientSecret directly since it's passed as prop
     return Promise.resolve(clientSecret);
-  };
-
-  const handleComplete = async (result) => {
-    if (processingComplete) return; // Prevent double processing
-    setProcessingComplete(true);
-
-    try {
-      console.log("Checkout completed:", result);
-
-      // The result contains the session information
-      // if (result && result.session) {
-      //   // Complete the subscription using the session ID
-      //   const response = await api.post("/user/payment/complete-subscription", {
-      //     sessionId: result.session.id,
-      //   });
-
-      //   if (response.data.success) {
-      //     dispatch(
-      //       showToast({
-      //         type: "success",
-      //         message:
-      //           response.data.message ||
-      //           `Successfully upgraded to ${planDetails.name}!`,
-      //       })
-      //     );
-      //     onSuccess();
-      //   } else {
-      //     dispatch(
-      //       showToast({
-      //         type: "error",
-      //         message:
-      //           response.data.message || "Failed to complete subscription",
-      //       })
-      //     );
-      //   }
-      // } else {
-      //   dispatch(
-      //     showToast({
-      //       type: "error",
-      //       message: "Payment session information not available",
-      //     })
-      //   );
-      // }
-    } catch (error) {
-      console.error("Error completing subscription:", error);
-      dispatch(
-        showToast({
-          type: "error",
-          message:
-            error.response?.data?.message || "Failed to complete subscription",
-        })
-      );
-    } finally {
-      setProcessingComplete(false);
-    }
   };
 
   return (
@@ -95,18 +37,13 @@ const CheckoutForm = ({ clientSecret, onSuccess, onCancel, planDetails }) => {
         stripe={stripePromise}
         options={{
           fetchClientSecret,
-          onComplete: handleComplete,
         }}
       >
         <EmbeddedCheckout />
       </EmbeddedCheckoutProvider>
 
       <div className="d-flex justify-content-end gap-2 mt-4">
-        <Button
-          variant="secondary"
-          onClick={onCancel}
-          disabled={processingComplete}
-        >
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
       </div>
@@ -236,7 +173,7 @@ const UpgradePlan = () => {
     setClientSecret("");
     setSelectedPlan(null);
     // Refresh user profile to get updated plan
-    window.location.reload();
+    // window.location.reload();
   };
 
   const handlePaymentCancel = () => {
@@ -345,12 +282,13 @@ const UpgradePlan = () => {
       <div className="page-wrapper">
         <div className="content">
           <div
-            className="d-flex justify-content-center align-items-center"
+            className="d-flex flex-column justify-content-center align-items-center"
             style={{ height: "50vh" }}
           >
-            <Spinner animation="border" role="status">
+            <Spinner animation="border" role="status" className="mb-3">
               <span className="visually-hidden">Loading...</span>
             </Spinner>
+            <p className="text-muted">{"Loading..."}</p>
           </div>
         </div>
       </div>

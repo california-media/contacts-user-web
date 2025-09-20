@@ -26,6 +26,7 @@ import Calendar from "../crm/calendar/Calendar";
 import EmailSetup from "../settings/generalSettings/emailSetup";
 import ShareProfile from "../../core/common/shareProfile/ShareProfile";
 import UserVerification from "../otherPages/UserVerification";
+import PaymentSuccess from "../otherPages/PaymentSuccess";
 import PostRegistrationForm from "../otherPages/PostRegistrationForm";
 import ImportAndExport from "../crm/tools/ImportAndExport";
 import Api from "../crm/tools/Api";
@@ -329,5 +330,11 @@ export const authRoutes = [
     element: <UserVerification />,
     route: Route,
     title: "User Verification",
+  },
+  {
+    path: route.paymentSuccess,
+    element: <PaymentSuccess />,
+    route: Route,
+    title: "Payment Success",
   },
 ];

@@ -48,4 +48,5 @@ export const all_routes = {
   groups: "/groups",
   manageTickets: "/admin/manage-tickets",
   manageCoupons: "/admin/manage-coupons",
+  paymentSuccess: "/payment-success",
 };
