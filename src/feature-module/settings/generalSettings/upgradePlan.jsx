@@ -64,11 +64,23 @@ const UpgradePlan = () => {
   const [clientSecret, setClientSecret] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [activePaymentTab, setActivePaymentTab] = useState("checkout"); // "checkout" or "credits"
+  const [creditBalance, setCreditBalance] = useState(0);
+  const [loadingCredits, setLoadingCredits] = useState(false);
+  const [subscriptionDetails, setSubscriptionDetails] = useState(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(false);
 
   // Fetch plans on component mount
   useEffect(() => {
     fetchPlans();
   }, []);
+
+  // Fetch subscription details when user has a paid plan
+  useEffect(() => {
+    if (userProfile?.plan && userProfile.plan.name !== "Starter") {
+      fetchSubscriptionDetails();
+    }
+  }, [userProfile]);
 
   const fetchPlans = async () => {
     try {
@@ -136,6 +148,140 @@ const UpgradePlan = () => {
     }
   };
 
+  const fetchCreditBalance = async () => {
+    try {
+      setLoadingCredits(true);
+      const response = await api.get("/user/payment/credit-balance");
+
+      if (response.data.success) {
+        setCreditBalance(response.data.creditBalance);
+      }
+    } catch (error) {
+      console.error("Error fetching credit balance:", error);
+      dispatch(
+        showToast({
+          type: "error",
+          message: "Failed to load credit balance",
+        })
+      );
+    } finally {
+      setLoadingCredits(false);
+    }
+  };
+
+  const handleCreditPurchase = async (plan) => {
+    try {
+      setPaymentLoading(true);
+
+      const response = await api.post("/user/payment/purchase-with-credits", {
+        planId: plan._id,
+        autoRenewal: false, // Default to false for credit purchases
+      });
+
+      if (response.data.success) {
+        dispatch(
+          showToast({
+            type: "success",
+            message:
+              response.data.message ||
+              `Successfully purchased ${plan.name} with credits!`,
+          })
+        );
+
+        // Update credit balance
+        setCreditBalance(response.data.credits.remaining);
+
+        // Close modal and refresh page
+        setShowPaymentModal(false);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        dispatch(
+          showToast({
+            type: "error",
+            message: response.data.message || "Failed to purchase with credits",
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error purchasing with credits:", error);
+      dispatch(
+        showToast({
+          type: "error",
+          message:
+            error.response?.data?.message || "Failed to purchase with credits",
+        })
+      );
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const fetchSubscriptionDetails = async () => {
+    try {
+      setLoadingSubscription(true);
+      const response = await api.get("/user/payment/status");
+
+      if (response.data.success) {
+        setSubscriptionDetails(response.data.data.subscription);
+      }
+    } catch (error) {
+      console.error("Error fetching subscription details:", error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
+
+  const handleToggleAutoRenewal = async () => {
+    try {
+      setLoadingSubscription(true);
+
+      const response = await api.post("/user/payment/toggle-auto-renewal");
+
+      if (response.data.success) {
+        dispatch(
+          showToast({
+            type: "success",
+            message: response.data.message || "Auto-renewal settings updated",
+          })
+        );
+
+        // Refresh subscription details
+        await fetchSubscriptionDetails();
+      }
+    } catch (error) {
+      console.error("Error toggling auto-renewal:", error);
+      dispatch(
+        showToast({
+          type: "error",
+          message:
+            error.response?.data?.message ||
+            "Failed to update auto-renewal settings",
+        })
+      );
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const isSubscriptionActive = () => {
+    return subscriptionDetails && subscriptionDetails.status === "active";
+  };
+
+  const isPaidWithCredits = () => {
+    return subscriptionDetails?.cancelAtPeriodEnd === true;
+  };
+
   const handleUpgrade = async (plan) => {
     try {
       setPaymentLoading(true);
@@ -195,6 +341,8 @@ const UpgradePlan = () => {
           // Check if client secret is provided
           if (response.data.clientSecret) {
             setClientSecret(response.data.clientSecret);
+            // Fetch credit balance when showing payment modal
+            await fetchCreditBalance();
             setShowPaymentModal(true);
           } else {
             // Subscription was activated immediately
@@ -392,6 +540,133 @@ const UpgradePlan = () => {
             <span className="text-muted">{plan.description}</span>
           </div>
 
+          {/* Subscription Details for Current Plan */}
+          {isCurrentPlan(plan) && plan.name !== "Starter" && (
+            <div className="mb-3">
+              {loadingSubscription ? (
+                <div className="text-center py-2">
+                  <Spinner size="sm" className="me-2" />
+                  <small className="text-muted">Loading subscription...</small>
+                </div>
+              ) : subscriptionDetails ? (
+                <div className="subscription-info bg-light rounded p-3">
+                  <h6 className="fw-semibold mb-2 text-primary">
+                    <i className="fa fa-calendar me-1"></i>
+                    Subscription Details
+                  </h6>
+
+                  <div className="row mb-2">
+                    <div className="col-12">
+                      <small className="text-muted">Status:</small>
+                      <span
+                        className={`badge ms-2 ${
+                          subscriptionDetails.status === "active"
+                            ? "bg-success"
+                            : "bg-warning"
+                        }`}
+                      >
+                        {subscriptionDetails.status?.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {isPaidWithCredits() ? (
+                    // For credit-paid subscriptions (will cancel at period end)
+                    <div>
+                      <div className="row mb-2">
+                        <div className="col-12">
+                          <small className="text-muted">Plan expires on:</small>
+                          <div className="fw-semibold text-warning">
+                            {formatDate(subscriptionDetails.currentPeriodEnd)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="alert alert-warning py-2 mb-0">
+                        <i className="fa fa-info-circle me-1"></i>
+                        <small>
+                          Subscription will cancel at the end of this period.
+                          Renew to continue using premium features.
+                        </small>
+                      </div>
+                    </div>
+                  ) : (
+                    // For card-paid subscriptions (auto-renewal)
+                    <div>
+                      <div className="row mb-2">
+                        <div className="col-12">
+                          <small className="text-muted">
+                            Next billing date:
+                          </small>
+                          <div className="fw-semibold text-success">
+                            {formatDate(subscriptionDetails.currentPeriodEnd)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <small className="text-muted">Auto-renewal:</small>
+                          <span
+                            className={`badge ms-2 ${
+                              !subscriptionDetails.cancelAtPeriodEnd
+                                ? "bg-success"
+                                : "bg-danger"
+                            }`}
+                          >
+                            {!subscriptionDetails.cancelAtPeriodEnd
+                              ? "ON"
+                              : "OFF"}
+                          </span>
+                        </div>
+
+                        <Button
+                          variant={
+                            !subscriptionDetails.cancelAtPeriodEnd
+                              ? "outline-danger"
+                              : "outline-success"
+                          }
+                          size="sm"
+                          onClick={handleToggleAutoRenewal}
+                          disabled={loadingSubscription}
+                        >
+                          {loadingSubscription ? (
+                            <Spinner size="sm" />
+                          ) : !subscriptionDetails.cancelAtPeriodEnd ? (
+                            <>
+                              <i className="fa fa-times me-1"></i>
+                              Cancel Auto-Renewal
+                            </>
+                          ) : (
+                            <>
+                              <i className="fa fa-refresh me-1"></i>
+                              Enable Auto-Renewal
+                            </>
+                          )}
+                        </Button>
+                      </div>
+
+                      {subscriptionDetails.cancelAtPeriodEnd && (
+                        <div className="alert alert-info py-2 mt-2 mb-0">
+                          <i className="fa fa-info-circle me-1"></i>
+                          <small>
+                            Auto-renewal is disabled. Your subscription will end
+                            on{" "}
+                            {formatDate(subscriptionDetails.currentPeriodEnd)}.
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="alert alert-info py-2">
+                  <i className="fa fa-info-circle me-1"></i>
+                  <small>No active subscription found.</small>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="d-block">
             <div>
               {plan.features?.map((feature, index) => (
@@ -546,7 +821,7 @@ const UpgradePlan = () => {
         </div>
       </div>
 
-      {/* Stripe Checkout Modal */}
+      {/* Payment Options Modal */}
       <Modal
         show={showPaymentModal}
         onHide={handlePaymentCancel}
@@ -554,16 +829,152 @@ const UpgradePlan = () => {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Complete Your Upgrade</Modal.Title>
+          <Modal.Title>Choose Payment Method</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {clientSecret && selectedPlan && (
-            <CheckoutForm
-              clientSecret={clientSecret}
-              onSuccess={handlePaymentSuccess}
-              onCancel={handlePaymentCancel}
-              planDetails={selectedPlan}
-            />
+          {selectedPlan && (
+            <div>
+              <div className="mb-3">
+                <h5>Subscribe to {selectedPlan.name}</h5>
+                <p className="text-muted">
+                  Amount: ${(selectedPlan.price / 100).toFixed(2)}/month
+                </p>
+              </div>
+
+              {/* Payment Method Tabs */}
+              <ul className="nav nav-tabs mb-4" role="tablist">
+                <li className="nav-item" role="presentation">
+                  <button
+                    className={`nav-link ${
+                      activePaymentTab === "checkout" ? "active" : ""
+                    }`}
+                    onClick={() => setActivePaymentTab("checkout")}
+                    type="button"
+                  >
+                    💳 Credit/Debit Card
+                  </button>
+                </li>
+                <li className="nav-item" role="presentation">
+                  <button
+                    className={`nav-link ${
+                      activePaymentTab === "credits" ? "active" : ""
+                    }`}
+                    onClick={() => setActivePaymentTab("credits")}
+                    type="button"
+                  >
+                    💰 Billing Credits
+                  </button>
+                </li>
+              </ul>
+
+              {/* Tab Content */}
+              <div className="tab-content">
+                {/* Checkout Tab */}
+                {activePaymentTab === "checkout" && clientSecret && (
+                  <div className="tab-pane fade show active">
+                    <CheckoutForm
+                      clientSecret={clientSecret}
+                      onSuccess={handlePaymentSuccess}
+                      onCancel={handlePaymentCancel}
+                      planDetails={selectedPlan}
+                    />
+                  </div>
+                )}
+
+                {/* Credits Tab */}
+                {activePaymentTab === "credits" && (
+                  <div className="tab-pane fade show active">
+                    <div className="p-3">
+                      <div className="mb-4">
+                        <h6 className="fw-semibold mb-3">
+                          Pay with Billing Credits
+                        </h6>
+
+                        <div className="row">
+                          <div className="col-md-6">
+                            <div className="card border border-primary">
+                              <div className="card-body text-center">
+                                <h6 className="card-title text-muted">
+                                  Your Credit Balance
+                                </h6>
+                                {loadingCredits ? (
+                                  <Spinner animation="border" size="sm" />
+                                ) : (
+                                  <div className="h4 text-primary mb-0">
+                                    ${(creditBalance / 100).toFixed(2)}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-md-6">
+                            <div className="card border">
+                              <div className="card-body text-center">
+                                <h6 className="card-title text-muted">
+                                  Plan Cost
+                                </h6>
+                                <div className="h4 text-dark mb-0">
+                                  ${(selectedPlan.price / 100).toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {creditBalance >= selectedPlan.price / 100 ? (
+                          <div className="alert alert-success mt-3">
+                            <i className="fa fa-check-circle me-2"></i>
+                            You have sufficient credits to purchase this plan!
+                          </div>
+                        ) : (
+                          <div className="alert alert-warning mt-3">
+                            <i className="fa fa-exclamation-triangle me-2"></i>
+                            Insufficient credits. You need $
+                            {(selectedPlan.price / 100 - creditBalance).toFixed(
+                              2
+                            )}{" "}
+                            more.
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="d-flex justify-content-end gap-2">
+                        <Button
+                          variant="secondary"
+                          onClick={handlePaymentCancel}
+                          disabled={paymentLoading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={() => handleCreditPurchase(selectedPlan)}
+                          disabled={
+                            paymentLoading ||
+                            creditBalance < selectedPlan.price / 100
+                          }
+                        >
+                          {paymentLoading ? (
+                            <>
+                              <Spinner
+                                animation="border"
+                                size="sm"
+                                className="me-2"
+                              />
+                              Processing...
+                            </>
+                          ) : (
+                            `Pay with Credits - $${(
+                              selectedPlan.price / 100
+                            ).toFixed(2)}`
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </Modal.Body>
       </Modal>

@@ -43,3 +43,23 @@
   border-color: #28a745 !important;
   border-width: 2px !important;
 }
+
+/* Subscription info section styling */
+.subscription-info {
+  border-left: 4px solid #007bff;
+}
+
+.subscription-info .badge {
+  font-size: 0.7rem;
+}
+
+.subscription-info .btn-sm {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.subscription-info .alert {
+  font-size: 0.8rem;
+  border: none;
+  margin: 0;
+}
