@@ -5,25 +5,18 @@
   top: -5px;
   z-index: 1;
   overflow: hidden;
-  width: 75px;
-  height: 75px;
+  width: 125px;
+  height: 125px;
   text-align: right;
 }
 
-.ribbon-top-right::before,
-.ribbon-top-right::after {
-  position: absolute;
-  z-index: -1;
-  content: '';
-  display: block;
-  border: 5px solid #2980b9;
-}
 
 .ribbon span {
   position: absolute;
   display: block;
-  width: 105px;
+  width: 175px;
   padding: 8px 0;
+  left: -10px;
   background-color: #28a745 !important;
   box-shadow: 0 5px 10px rgba(0,0,0,.1);
   color: #fff !important;
@@ -32,8 +25,7 @@
   text-shadow: 0 1px 1px rgba(0,0,0,.2);
   text-transform: uppercase;
   text-align: center;
-  left: -20px;
-  top: 15px;
+  top: 35px;
   transform: rotate(45deg);
 }
 

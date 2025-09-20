@@ -26,12 +26,12 @@ const CheckoutForm = ({ clientSecret, onSuccess, onCancel, planDetails }) => {
 
   return (
     <div>
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <h5>Complete your upgrade to {planDetails.name}</h5>
         <p className="text-muted">
           Amount: ${(planDetails.price / 100).toFixed(2)}/month
         </p>
-      </div>
+      </div> */}
 
       <EmbeddedCheckoutProvider
         stripe={stripePromise}
@@ -510,14 +510,14 @@ const UpgradePlan = () => {
   };
 
   const renderPlanCard = (plan) => (
-    <div key={plan._id} className="col-lg-6 mb-4">
+    <div key={plan._id} className="col-lg-6 mb-4 overflow-visible">
       <div
-        className={`card custom-card border ${
+        className={`card custom-card border overflow-visible ${
           isCurrentPlan(plan) ? "plan-card-current" : ""
         }`}
       >
         {isCurrentPlan(plan) && (
-          <div className="ribbon ribbon-top-right">
+          <div className="ribbon ribbon-top-right z-2">
             <span>Current Plan</span>
           </div>
         )}
@@ -581,13 +581,13 @@ const UpgradePlan = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="alert alert-warning py-2 mb-0">
+                      {/* <div className="alert alert-warning py-2 mb-0">
                         <i className="fa fa-info-circle me-1"></i>
                         <small>
                           Subscription will cancel at the end of this period.
                           Renew to continue using premium features.
                         </small>
-                      </div>
+                      </div> */}
                     </div>
                   ) : (
                     // For card-paid subscriptions (auto-renewal)
@@ -834,15 +834,52 @@ const UpgradePlan = () => {
         <Modal.Body>
           {selectedPlan && (
             <div>
-              <div className="mb-3">
-                <h5>Subscribe to {selectedPlan.name}</h5>
-                <p className="text-muted">
-                  Amount: ${(selectedPlan.price / 100).toFixed(2)}/month
-                </p>
+              <div className="mb-3 d-flex justify-content-between align-items-start">
+                <div>
+                  <h5>Subscribe to {selectedPlan.name}</h5>
+                  <p className="text-muted mb-0">
+                    Amount: ${(selectedPlan.price / 100).toFixed(2)}/month
+                  </p>
+                </div>
+                <div className="text-end">
+                  <p className="text-muted d-block mb-1">
+                    Current Credits:{" "}
+                    <span className="fw-semibold text-primary">
+                      ${(creditBalance / 100).toFixed(2)}
+                    </span>
+                  </p>
+
+                  <p className="text-muted d-block mb-1">
+                    Credits Deduction:{" "}
+                    <span className="fw-semibold text-danger">
+                      -${(selectedPlan.price / 100).toFixed(2)}
+                    </span>
+                  </p>
+
+                  <p className="text-muted mb-0">
+                    Credit Balance after: {"  "}
+                    {(creditBalance - selectedPlan.price) / 100 >= 0 ? (
+                      <span className="fw-semibold text-success">
+                        $
+                        {((creditBalance - selectedPlan.price) / 100).toFixed(
+                          2
+                        )}
+                      </span>
+                    ) : (
+                      <span className="fw-semibold ">
+                        $
+                        {Math.max(
+                          (creditBalance - selectedPlan.price) / 100,
+                          0
+                        ).toFixed(2)}{" "}
+                      </span>
+                    )}
+                  </p>
+                </div>
               </div>
 
               {/* Payment Method Tabs */}
-              <ul className="nav nav-tabs mb-4" role="tablist">
+              {/* <ul className="nav nav-tabs mb-4" role="tablist">
                 <li className="nav-item" role="presentation">
                   <button
                     className={`nav-link ${
@@ -865,7 +902,7 @@ const UpgradePlan = () => {
                     💰 Billing Credits
                   </button>
                 </li>
-              </ul>
+              </ul> */}
 
               {/* Tab Content */}
               <div className="tab-content">
