@@ -9,6 +9,10 @@ import { loadStripe } from "@stripe/stripe-js";
 import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
+  CardElement,
+  Elements,
+  useStripe,
+  useElements,
 } from "@stripe/react-stripe-js";
 import "./upgradePlan.css";
 
@@ -51,6 +55,98 @@ const CheckoutForm = ({ clientSecret, onSuccess, onCancel, planDetails }) => {
   );
 };
 
+// Card Addition Form Component
+const AddCardForm = ({ onCardAdded, loading, onCancel }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setProcessing(true);
+    setError(null);
+
+    const cardElement = elements.getElement(CardElement);
+
+    try {
+      // Create payment method
+      const { error, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+      });
+
+      if (error) {
+        setError(error.message);
+        setProcessing(false);
+        return;
+      }
+
+      // Pass the payment method ID to parent component
+      await onCardAdded(paymentMethod.id);
+    } catch (err) {
+      console.error('Error adding card:', err);
+      setError('Failed to add payment method');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="mb-3">
+        <label className="form-label">Card Details</label>
+        <div className="border rounded p-3" style={{ minHeight: '40px' }}>
+          <CardElement
+            options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#424770',
+                  '::placeholder': {
+                    color: '#aab7c4',
+                  },
+                },
+              },
+            }}
+          />
+        </div>
+        {error && (
+          <div className="text-danger mt-2">
+            <small>{error}</small>
+          </div>
+        )}
+      </div>
+
+      <div className="d-flex justify-content-end gap-2">
+        <Button variant="secondary" onClick={onCancel} disabled={processing}>
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={!stripe || processing || loading}
+        >
+          {processing ? (
+            <>
+              <Spinner size="sm" className="me-2" />
+              Adding Card...
+            </>
+          ) : (
+            'Add Card'
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
 const UpgradePlan = () => {
   const route = all_routes;
   const userProfile = useSelector((state) => state.profile);
@@ -70,9 +166,18 @@ const UpgradePlan = () => {
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
 
+  // Payment method states
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("auto");
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(null);
+  const [showAddCardForm, setShowAddCardForm] = useState(false);
+  const [addingCard, setAddingCard] = useState(false);
+
   // Fetch plans on component mount
   useEffect(() => {
     fetchPlans();
+    fetchPaymentMethods();
   }, []);
 
   // Fetch subscription details when user has a paid plan
@@ -166,6 +271,65 @@ const UpgradePlan = () => {
       );
     } finally {
       setLoadingCredits(false);
+    }
+  };
+
+  const fetchPaymentMethods = async () => {
+    try {
+      setLoadingPaymentMethods(true);
+      const response = await api.get("/user/payment/payment-methods");
+      if (response.data.success) {
+        setPaymentMethods(response.data.paymentMethods);
+        
+        // Set default payment method if available
+        const defaultMethod = response.data.paymentMethods.find(pm => pm.isDefault);
+        if (defaultMethod && selectedPaymentMethod === "auto") {
+          setSelectedPaymentMethodId(defaultMethod.id);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+    } finally {
+      setLoadingPaymentMethods(false);
+    }
+  };
+
+  const handleAddPaymentMethod = async (paymentMethodId) => {
+    try {
+      setAddingCard(true);
+      const response = await api.post("/user/payment/add-payment-method", {
+        paymentMethodId,
+        setAsDefault: paymentMethods.length === 0, // Set as default if it's the first card
+      });
+
+      if (response.data.success) {
+        dispatch(
+          showToast({
+            type: "success",
+            message: "Payment method added successfully",
+          })
+        );
+
+        // Refresh payment methods
+        await fetchPaymentMethods();
+        setShowAddCardForm(false);
+
+        // Enable card payment option if this was the first card
+        if (paymentMethods.length === 0) {
+          setSelectedPaymentMethod("card");
+          setSelectedPaymentMethodId(response.data.paymentMethod.id);
+        }
+      }
+    } catch (error) {
+      console.error("Error adding payment method:", error);
+      dispatch(
+        showToast({
+          type: "error",
+          message: "Failed to add payment method",
+        })
+      );
+    } finally {
+      setAddingCard(false);
     }
   };
 
@@ -307,6 +471,13 @@ const UpgradePlan = () => {
         try {
           const preview = await fetchUpgradePreview(plan);
           setUpgradePreview(preview);
+          
+          // Fetch payment methods and credit balance for payment selection
+          await Promise.all([
+            fetchPaymentMethods(),
+            fetchCreditBalance()
+          ]);
+          
           setShowConfirmationModal(true);
           setPaymentLoading(false); // Stop loading since we're showing modal
           return; // Exit here, actual upgrade happens after confirmation
@@ -449,6 +620,8 @@ const UpgradePlan = () => {
       const response = await api.post("/user/payment/upgrade-subscription", {
         planId: selectedPlan._id,
         autoRenewal: true,
+        paymentMethod: selectedPaymentMethod,
+        paymentMethodId: selectedPaymentMethodId,
       });
 
       if (response.data.success) {
@@ -1089,6 +1262,167 @@ const UpgradePlan = () => {
                 </div>
               </div>
 
+              {/* Payment Method Selection */}
+              {upgradePreview.billing.immediateCharge > 0 && (
+                <div className="mb-4">
+                  <h6 className="fw-semibold mb-3">Payment Method</h6>
+                  
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <div className="card border">
+                        <div className="card-body text-center">
+                          <h6 className="card-title text-muted">Available Credits</h6>
+                          {loadingCredits ? (
+                            <Spinner animation="border" size="sm" />
+                          ) : (
+                            <div className="h5 text-primary mb-0">
+                              ${(creditBalance / 100).toFixed(2)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-md-6">
+                      <div className="card border">
+                        <div className="card-body text-center">
+                          <h6 className="card-title text-muted">Upgrade Cost</h6>
+                          <div className="h5 text-dark mb-0">
+                            ${upgradePreview.billing.immediateCharge.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="payment-methods">
+                    {/* Auto Payment Option */}
+                    <div className="form-check mb-3">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="auto"
+                        value="auto"
+                        checked={selectedPaymentMethod === "auto"}
+                        onChange={(e) => {
+                          setSelectedPaymentMethod(e.target.value);
+                          setSelectedPaymentMethodId(null);
+                        }}
+                      />
+                      <label className="form-check-label" htmlFor="auto">
+                        <strong>Auto (Recommended)</strong>
+                        <br />
+                        <small className="text-muted">
+                          Use credits first, then default payment method
+                        </small>
+                      </label>
+                    </div>
+
+                    {/* Credits Only Option */}
+                    <div className="form-check mb-3">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="credits"
+                        value="credits"
+                        checked={selectedPaymentMethod === "credits"}
+                        onChange={(e) => {
+                          setSelectedPaymentMethod(e.target.value);
+                          setSelectedPaymentMethodId(null);
+                        }}
+                        disabled={creditBalance < upgradePreview.billing.immediateCharge * 100}
+                      />
+                      <label className="form-check-label" htmlFor="credits">
+                        <strong>Credits Only</strong>
+                        <br />
+                        <small className="text-muted">
+                          Pay entirely with billing credits
+                          {creditBalance < upgradePreview.billing.immediateCharge * 100 && (
+                            <span className="text-danger"> (Insufficient credits)</span>
+                          )}
+                        </small>
+                      </label>
+                    </div>
+
+                    {/* Card Payment Options */}
+                    <div className="form-check mb-3">
+                      <input
+                        className="form-check-input"
+                        type="radio"
+                        name="paymentMethod"
+                        id="card"
+                        value="card"
+                        checked={selectedPaymentMethod === "card"}
+                        onChange={(e) => {
+                          setSelectedPaymentMethod(e.target.value);
+                          if (paymentMethods.length > 0) {
+                            const defaultMethod = paymentMethods.find(pm => pm.isDefault);
+                            setSelectedPaymentMethodId(defaultMethod?.id || paymentMethods[0].id);
+                          }
+                        }}
+                        disabled={paymentMethods.length === 0}
+                      />
+                      <label className="form-check-label" htmlFor="card">
+                        <strong>Card Payment</strong>
+                        <br />
+                        <small className="text-muted">
+                          {paymentMethods.length === 0 
+                            ? "No payment methods available" 
+                            : "Pay with saved payment method"
+                          }
+                        </small>
+                      </label>
+                    </div>
+
+                    {/* Card Selection Dropdown */}
+                    {selectedPaymentMethod === "card" && paymentMethods.length > 0 && (
+                      <div className="ms-4 mb-3">
+                        <label className="form-label">Select Payment Method</label>
+                        <select
+                          className="form-select"
+                          value={selectedPaymentMethodId || ""}
+                          onChange={(e) => setSelectedPaymentMethodId(e.target.value)}
+                        >
+                          {paymentMethods.map((pm) => (
+                            <option key={pm.id} value={pm.id}>
+                              {pm.card.brand.toUpperCase()} •••• {pm.card.last4} 
+                              {pm.isDefault && " (Default)"}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Add New Card Option */}
+                    <div className="mt-3">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => setShowAddCardForm(!showAddCardForm)}
+                        disabled={addingCard}
+                      >
+                        <i className="fa fa-plus me-1"></i>
+                        {showAddCardForm ? "Cancel" : "Add New Payment Method"}
+                      </Button>
+                    </div>
+
+                    {/* Add Card Form */}
+                    {showAddCardForm && (
+                      <div className="mt-3 p-3 border rounded bg-light">
+                        <Elements stripe={stripePromise}>
+                          <AddCardForm
+                            onCardAdded={handleAddPaymentMethod}
+                            loading={addingCard}
+                            onCancel={() => setShowAddCardForm(false)}
+                          />
+                        </Elements>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="alert alert-info">
                 <i className="ti ti-info-circle me-2"></i>
                 <strong>What happens next?</strong>
@@ -1141,4 +1475,12 @@ const UpgradePlan = () => {
   );
 };
 
-export default UpgradePlan;
+const UpgradePlanWithStripe = () => {
+  return (
+    <Elements stripe={stripePromise}>
+      <UpgradePlan />
+    </Elements>
+  );
+};
+
+export default UpgradePlanWithStripe;
