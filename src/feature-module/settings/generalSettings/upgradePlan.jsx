@@ -852,7 +852,10 @@ const UpgradePlan = () => {
                   <p className="text-muted d-block mb-1">
                     Credits Deduction:{" "}
                     <span className="fw-semibold text-danger">
-                      -${(selectedPlan.price / 100).toFixed(2)}
+                      -$
+                      {creditBalance < selectedPlan.price
+                        ? creditBalance?.toFixed(2)
+                        : (selectedPlan.price / 100).toFixed(2)}
                     </span>
                   </p>
 
