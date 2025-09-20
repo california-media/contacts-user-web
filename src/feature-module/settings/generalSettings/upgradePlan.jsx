@@ -91,6 +91,7 @@ const UpgradePlan = () => {
   };
 
   const getCurrentPlan = () => {
+    console.log("Current user plan:", userProfile?.plan);
     return userProfile?.plan;
   };
 
@@ -105,6 +106,7 @@ const UpgradePlan = () => {
 
   const canUpgrade = (plan) => {
     const currentPrice = getCurrentPlanPrice();
+    console.log("Comparing plan prices:", plan, ">", currentPrice);
     return plan.price > currentPrice;
   };
 
@@ -425,8 +427,8 @@ const UpgradePlan = () => {
               Basic Plan
             </Button>
           ) : isDowngrade(plan) ? (
-            <Button variant="outline-secondary" disabled className="px-4">
-              Downgrade Not Available
+            <Button variant="primary" disabled className="px-4">
+              Upgrade
             </Button>
           ) : canUpgrade(plan) ? (
             <Button
