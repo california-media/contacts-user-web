@@ -59,6 +59,8 @@ const UpgradePlan = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [upgradePreview, setUpgradePreview] = useState(null);
   const [clientSecret, setClientSecret] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -115,57 +117,232 @@ const UpgradePlan = () => {
     return plan.price === 0 || plan.name.toLowerCase().includes("starter");
   };
 
+  const fetchUpgradePreview = async (plan) => {
+    try {
+      const response = await api.post("/user/payment/preview-upgrade", {
+        planId: plan._id,
+      });
+
+      if (response.data.success) {
+        return response.data.preview;
+      } else {
+        throw new Error(response.data.message || "Failed to fetch preview");
+      }
+    } catch (error) {
+      console.error("Error fetching upgrade preview:", error);
+      throw error;
+    }
+  };
+
   const handleUpgrade = async (plan) => {
     try {
       setPaymentLoading(true);
       console.log("Selected plan for upgrade:", plan);
       setSelectedPlan(plan);
 
-      // Create checkout session
-      const response = await api.post("/user/payment/create-checkout-session", {
-        planId: plan._id,
-        autoRenewal: true,
-      });
+      // Check if user has an active subscription (not on Starter plan)
+      const currentPlan = getCurrentPlan();
+      const isOnStarterPlan =
+        !currentPlan ||
+        currentPlan.name === "Starter" ||
+        currentPlan.name?.toLowerCase().includes("starter");
 
-      if (response.data.success) {
-        // Check if client secret is provided
-        if (response.data.clientSecret) {
-          setClientSecret(response.data.clientSecret);
-          setShowPaymentModal(true);
-        } else {
-          // Subscription was activated immediately (shouldn't happen with checkout sessions)
+      console.log("Current plan:", currentPlan);
+      console.log("Is on Starter plan:", isOnStarterPlan);
+
+      if (!isOnStarterPlan) {
+        // User has active subscription (not Starter) - show preview first
+        console.log(
+          "User has active subscription, fetching upgrade preview..."
+        );
+
+        try {
+          const preview = await fetchUpgradePreview(plan);
+          setUpgradePreview(preview);
+          setShowConfirmationModal(true);
+          setPaymentLoading(false); // Stop loading since we're showing modal
+          return; // Exit here, actual upgrade happens after confirmation
+        } catch (previewError) {
+          console.error("Error fetching preview:", previewError);
           dispatch(
             showToast({
-              type: "success",
+              type: "error",
               message:
-                response.data.message ||
-                `Successfully upgraded to ${plan.name}!`,
+                previewError.response?.data?.message ||
+                "Failed to calculate upgrade cost",
             })
           );
-          // Refresh the page to show updated plan
-          // window.location.reload();
+          setPaymentLoading(false);
+          return;
+        }
+      } else {
+        // User is on Starter plan (no active subscription) - use checkout session
+        console.log(
+          "User is on Starter plan, creating new subscription via checkout..."
+        );
+
+        const response = await api.post(
+          "/user/payment/create-checkout-session",
+          {
+            planId: plan._id,
+            autoRenewal: true,
+          }
+        );
+
+        if (response.data.success) {
+          // Check if client secret is provided
+          if (response.data.clientSecret) {
+            setClientSecret(response.data.clientSecret);
+            setShowPaymentModal(true);
+          } else {
+            // Subscription was activated immediately
+            dispatch(
+              showToast({
+                type: "success",
+                message:
+                  response.data.message ||
+                  `Successfully subscribed to ${plan.name}!`,
+              })
+            );
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          }
+        } else {
+          // Check if we should redirect to upgrade instead
+          if (response.data.redirectToUpgrade) {
+            dispatch(
+              showToast({
+                type: "info",
+                message: "Detected active subscription. Upgrading directly...",
+              })
+            );
+            // Retry with upgrade endpoint
+            return handleUpgrade(plan);
+          }
+
+          dispatch(
+            showToast({
+              type: "error",
+              message:
+                response.data.message || "Failed to create checkout session",
+            })
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error handling plan upgrade:", error);
+
+      // Check if the error suggests we should use upgrade instead
+      if (error.response?.data?.redirectToUpgrade) {
+        dispatch(
+          showToast({
+            type: "info",
+            message: "Detected existing subscription. Upgrading directly...",
+          })
+        );
+        // Retry with different approach (this prevents infinite loops)
+        try {
+          const response = await api.post(
+            "/user/payment/upgrade-subscription",
+            {
+              planId: plan._id,
+              autoRenewal: true,
+            }
+          );
+
+          if (response.data.success) {
+            dispatch(
+              showToast({
+                type: "success",
+                message:
+                  response.data.message ||
+                  `Successfully upgraded to ${plan.name}!`,
+              })
+            );
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          }
+        } catch (upgradeError) {
+          console.error("Error with direct upgrade:", upgradeError);
+          dispatch(
+            showToast({
+              type: "error",
+              message:
+                upgradeError.response?.data?.message ||
+                "Failed to upgrade subscription",
+            })
+          );
         }
       } else {
         dispatch(
           showToast({
             type: "error",
             message:
-              response.data.message || "Failed to create checkout session",
+              error.response?.data?.message || "Failed to process upgrade",
+          })
+        );
+      }
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleConfirmUpgrade = async () => {
+    if (!selectedPlan) return;
+
+    try {
+      setPaymentLoading(true);
+      setShowConfirmationModal(false);
+
+      const response = await api.post("/user/payment/upgrade-subscription", {
+        planId: selectedPlan._id,
+        autoRenewal: true,
+      });
+
+      if (response.data.success) {
+        dispatch(
+          showToast({
+            type: "success",
+            message:
+              response.data.message ||
+              `Successfully upgraded to ${selectedPlan.name}!`,
+          })
+        );
+
+        // Refresh user profile to show updated plan
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        dispatch(
+          showToast({
+            type: "error",
+            message: response.data.message || "Failed to upgrade subscription",
           })
         );
       }
     } catch (error) {
-      console.error("Error creating checkout session:", error);
+      console.error("Error confirming upgrade:", error);
       dispatch(
         showToast({
           type: "error",
-          message:
-            error.response?.data?.message || "Failed to initiate upgrade",
+          message: error.response?.data?.message || "Failed to process upgrade",
         })
       );
     } finally {
       setPaymentLoading(false);
+      setUpgradePreview(null);
+      setSelectedPlan(null);
     }
+  };
+
+  const handleCancelUpgrade = () => {
+    setShowConfirmationModal(false);
+    setUpgradePreview(null);
+    setSelectedPlan(null);
+    setPaymentLoading(false);
   };
 
   const handlePaymentSuccess = () => {
@@ -387,6 +564,163 @@ const UpgradePlan = () => {
             />
           )}
         </Modal.Body>
+      </Modal>
+
+      {/* Upgrade Confirmation Modal */}
+      <Modal
+        show={showConfirmationModal}
+        onHide={handleCancelUpgrade}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Upgrade to {selectedPlan?.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {upgradePreview && selectedPlan && (
+            <div>
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">Upgrade Summary</h6>
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="card border">
+                      <div className="card-body">
+                        <h6 className="card-title text-muted">Current Plan</h6>
+                        <p className="mb-1 fw-semibold">
+                          {upgradePreview.currentPlan.name}
+                        </p>
+                        <p className="mb-1 text-success">
+                          ${upgradePreview.currentPlan.price.toFixed(2)}/month
+                        </p>
+                        <small className="text-muted">
+                          Remaining value: $
+                          {upgradePreview.currentPlan.remainingValue.toFixed(2)}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="card border-primary">
+                      <div className="card-body">
+                        <h6 className="card-title text-primary">New Plan</h6>
+                        <p className="mb-1 fw-semibold">
+                          {upgradePreview.newPlan.name}
+                        </p>
+                        <p className="mb-1 text-primary">
+                          ${upgradePreview.newPlan.price.toFixed(2)}/month
+                        </p>
+                        <small className="text-muted">
+                          Pro-rated amount: $
+                          {upgradePreview.newPlan.proRatedAmount.toFixed(2)}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">Billing Details</h6>
+                <div className="border rounded p-3 bg-light">
+                  {upgradePreview.billing.immediateCharge > 0 ? (
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span>Immediate charge:</span>
+                      <span className="fw-semibold text-primary">
+                        ${upgradePreview.billing.immediateCharge.toFixed(2)}
+                      </span>
+                    </div>
+                  ) : upgradePreview.billing.creditApplied > 0 ? (
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span>Credit applied:</span>
+                      <span className="fw-semibold text-success">
+                        ${upgradePreview.billing.creditApplied.toFixed(2)}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span>Next billing date:</span>
+                    <span>
+                      {new Date(
+                        upgradePreview.billing.nextBillingDate
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span>Next billing amount:</span>
+                    <span className="fw-semibold">
+                      ${upgradePreview.billing.nextBillingAmount.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">Billing Period</h6>
+                <div className="row">
+                  <div className="col-6">
+                    <small className="text-muted">
+                      Days remaining in period:
+                    </small>
+                    <p className="mb-0 fw-semibold">
+                      {upgradePreview.period.daysRemaining} days
+                    </p>
+                  </div>
+                  <div className="col-6">
+                    <small className="text-muted">Period used:</small>
+                    <p className="mb-0 fw-semibold">
+                      {upgradePreview.period.percentUsed}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="alert alert-info">
+                <i className="ti ti-info-circle me-2"></i>
+                <strong>What happens next?</strong>
+                <ul className="mb-0 mt-2">
+                  <li>Your plan will be upgraded immediately</li>
+                  {upgradePreview.billing.immediateCharge > 0 && (
+                    <li>
+                      You'll be charged $
+                      {upgradePreview.billing.immediateCharge.toFixed(2)} today
+                      for the prorated amount
+                    </li>
+                  )}
+                  <li>
+                    Future billing will be $
+                    {upgradePreview.billing.nextBillingAmount.toFixed(2)}/month
+                  </li>
+                  <li>You can cancel or change your plan anytime</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCancelUpgrade}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleConfirmUpgrade}
+            disabled={paymentLoading}
+          >
+            {paymentLoading ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Processing...
+              </>
+            ) : (
+              `Confirm Upgrade${
+                upgradePreview && upgradePreview.billing.immediateCharge > 0
+                  ? ` - $${upgradePreview.billing.immediateCharge.toFixed(2)}`
+                  : ""
+              }`
+            )}
+          </Button>
+        </Modal.Footer>
       </Modal>
 
       {/* /Page Wrapper */}
