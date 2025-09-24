@@ -17,7 +17,7 @@ import loginAnimation3 from "../../style/animations/loginAnimation3.json";
 import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import "react-phone-input-2/lib/style.css"; // already done ✅
 import { fetchProfile } from "../../core/data/redux/slices/ProfileSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const Login = () => {
   const sliderSettings = {
@@ -50,10 +50,15 @@ const Login = () => {
   const clientId =
     "308171825690-ukpu99fsh0jsojolv0j4vrhidait4s5b.apps.googleusercontent.com";
 
+  const {
+    id,
+    role,
+    error: fetchUserError,
+  } = useSelector((state) => state.profile); ////if id  = "" then it is default user
+
   useEffect(() => {
-    localStorage.setItem("menuOpened", "Dashboard");
-    const token = localStorage.getItem("token");
-    if (token) navigate(route.dashboard);
+    console.log("Checking user authentication status", fetchUserError);
+    if (!fetchUserError) navigate(route.dashboard);
   }, []);
 
   const togglePasswordVisibility = () => {

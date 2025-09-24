@@ -325,12 +325,7 @@ export const authRoutes = [
     route: Route,
     title: "Share Profile",
   },
-  {
-    path: `${route.userVerification}`,
-    element: <UserVerification />,
-    route: Route,
-    title: "User Verification",
-  },
+  
   {
     path: route.paymentSuccess,
     element: <PaymentSuccess />,

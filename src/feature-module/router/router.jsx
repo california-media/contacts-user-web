@@ -15,6 +15,7 @@ import { hideToast } from "../../core/data/redux/slices/ToastSlice";
 import { fetchGoogleCalendarEvents } from "../../core/common/googleEvents/GoogleEvents";
 import AdminRoute from "./AdminRoute";
 import AdminFeature from "../AdminFeature";
+import UserVerification from "../otherPages/UserVerification";
 const ALLRoutes = () => {
   const location = useLocation();
   const dispatch = useDispatch();
@@ -60,6 +61,8 @@ const ALLRoutes = () => {
       <Routes>
         {/* Public Route - Login */}
         <Route path="/" element={<Login />} />
+        <Route path="/user-verification" element={<UserVerification />} />
+
         <Route element={<AuthFeature />}>
           {authRoutes.map((route, index) => (
             <Route path={route.path} element={route.element} key={index} />

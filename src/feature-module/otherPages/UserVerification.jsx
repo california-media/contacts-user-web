@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import api from "../../core/axios/axiosInstance";
+import { fetchProfile } from "../../core/data/redux/slices/ProfileSlice";
+import { useDispatch } from "react-redux";
 
 const UserVerification = () => {
   const [searchParams] = useSearchParams();
@@ -11,7 +13,7 @@ const UserVerification = () => {
     "This should just take a few moments…"
   );
   const [loading, setLoading] = useState(true);
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +29,8 @@ const UserVerification = () => {
           setMessage(response.data.message || "Verification successful!");
           setSubMessage("Redirecting shortly...");
           setLoading(false);
+          ///fetch profile before navigating
+          await dispatch(fetchProfile());
 
           setTimeout(() => {
             navigate("/registration-form", {

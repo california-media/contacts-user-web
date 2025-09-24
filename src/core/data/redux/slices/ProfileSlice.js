@@ -115,6 +115,7 @@ const profileSlice = createSlice({
         console.log("Fetched profile data:", action.payload);
         // return { ...state, ...action.payload };
         Object.assign(state, action.payload.data);
+        state.error = undefined;
       })
       .addCase(fetchProfile.rejected, (state, action) => {
         state.isLoading = false;

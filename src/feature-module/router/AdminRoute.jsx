@@ -6,9 +6,9 @@ import LoadingIndicator2 from "../../core/common/loadingIndicator/LoadingIndicat
 
 const AdminRoute = ({ children }) => {
   const token = localStorage.getItem("token");
-  const { id, role } = useSelector((state) => state.profile); ////if id  = "" then it is default user
+  const { id, role, error } = useSelector((state) => state.profile); ////if id  = "" then it is default user
   const location = useLocation();
-  if (!token) {
+  if (error) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
   // Show loading spinner while profile is being fetched
