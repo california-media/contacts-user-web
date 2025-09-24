@@ -40,6 +40,7 @@ import AdminUserDetails from "../crm/contacts/AdminUserDetails";
 import ManagePlans from "../settings/generalSettings/ManagePlans";
 import ManageTickets from "../settings/generalSettings/ManageTickets";
 import ManageCoupons from "../settings/generalSettings/ManageCoupons";
+import BillingInfo from "../settings/generalSettings/BillingInfo";
 
 const route = all_routes;
 
@@ -304,6 +305,12 @@ export const publicRoutes = [
     route: Route,
     title: "Help and Support",
   },
+  {
+    path: route.biilingInfo,
+    element: <BillingInfo />,
+    route: Route,
+    title: "Billing Info",
+  },
 ];
 
 export const authRoutes = [
@@ -325,7 +332,7 @@ export const authRoutes = [
     route: Route,
     title: "Share Profile",
   },
-  
+
   {
     path: route.paymentSuccess,
     element: <PaymentSuccess />,

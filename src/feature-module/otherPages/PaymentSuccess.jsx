@@ -82,7 +82,7 @@ const PaymentSuccess = () => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            navigate("/dashboard", { replace: true });
+            navigate("/general-settings/upgrade-plan", { replace: true });
             return 0;
           }
           return prev - 1;

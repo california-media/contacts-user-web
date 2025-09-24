@@ -8,7 +8,7 @@ const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   const { id, role, error } = useSelector((state) => state.profile); ////if id  = "" then it is default user
   const location = useLocation();
-  if (error) {
+  if (error || !token) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
   // Show loading spinner while profile is being fetched

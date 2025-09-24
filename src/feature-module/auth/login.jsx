@@ -57,8 +57,9 @@ const Login = () => {
   } = useSelector((state) => state.profile); ////if id  = "" then it is default user
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
     console.log("Checking user authentication status", fetchUserError);
-    if (!fetchUserError) navigate(route.dashboard);
+    if (token && !fetchUserError) navigate(route.dashboard);
   }, []);
 
   const togglePasswordVisibility = () => {

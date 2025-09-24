@@ -131,6 +131,17 @@ const UpgradePlan = () => {
     return plan.price === 0 || plan.name.toLowerCase().includes("starter");
   };
 
+  const isOnFreeTrial = () => {
+    const currentPlan = getCurrentPlan();
+
+    // Check if user is on Stripe subscription trial
+    if (currentPlan?.isTrialing) {
+      return true;
+    }
+
+    return false;
+  };
+
   const fetchUpgradePreview = async (plan) => {
     try {
       const response = await api.post("/user/payment/preview-upgrade", {
@@ -785,6 +796,9 @@ const UpgradePlan = () => {
                           >
                             Upgrade Plan
                           </Link>
+                          <Link to={route.biilingInfo} className="fw-medium ">
+                            Billing Info
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -800,10 +814,40 @@ const UpgradePlan = () => {
                         <h5 className="fw-semibold mb-0">Upgrade Plan</h5>
                         {getCurrentPlan() && (
                           <div className="text-end">
-                            <small className="text-muted">Current Plan:</small>
-                            <div className="fw-semibold text-success">
+                            <small className="text-muted">
+                              {isOnFreeTrial()
+                                ? "Current Trial:"
+                                : "Current Plan:"}
+                            </small>
+                            <div
+                              className={`fw-semibold ${
+                                isOnFreeTrial()
+                                  ? "text-warning"
+                                  : "text-success"
+                              }`}
+                            >
+                              {isOnFreeTrial() && "Free Trial: "}
                               {getCurrentPlan().name}
                             </div>
+                            {isOnFreeTrial() && userProfile?.trialEndDate && (
+                              <small className="text-muted d-block">
+                                {(() => {
+                                  const now = new Date();
+                                  const trialEnd = new Date(
+                                    userProfile.trialEndDate
+                                  );
+                                  const daysLeft = Math.max(
+                                    0,
+                                    Math.ceil(
+                                      (trialEnd - now) / (1000 * 60 * 60 * 24)
+                                    )
+                                  );
+                                  return daysLeft > 0
+                                    ? `${daysLeft} days left`
+                                    : "Expired";
+                                })()}
+                              </small>
+                            )}
                           </div>
                         )}
                       </div>
