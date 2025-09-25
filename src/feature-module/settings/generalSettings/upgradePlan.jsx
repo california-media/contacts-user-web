@@ -81,6 +81,8 @@ const UpgradePlan = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
+  const [showCancelConfirmationModal, setShowCancelConfirmationModal] =
+    useState(false);
 
   // Fetch plans on component mount
   useEffect(() => {
@@ -275,6 +277,47 @@ const UpgradePlan = () => {
       }
     } catch (error) {
       console.error("Error fetching subscription details:", error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
+
+  const handleShowCancelConfirmation = () => {
+    setShowCancelConfirmationModal(true);
+  };
+
+  const handleCancelConfirmationClose = () => {
+    setShowCancelConfirmationModal(false);
+  };
+
+  const handleConfirmCancellation = async () => {
+    try {
+      setLoadingSubscription(true);
+      setShowCancelConfirmationModal(false);
+
+      const response = await api.post("/user/payment/toggle-auto-renewal");
+
+      if (response.data.success) {
+        dispatch(
+          showToast({
+            type: "success",
+            message:
+              response.data.message || "Subscription cancelled successfully",
+          })
+        );
+
+        // Refresh subscription details
+        await fetchSubscriptionDetails();
+      }
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      dispatch(
+        showToast({
+          type: "error",
+          message:
+            error.response?.data?.message || "Failed to cancel subscription",
+        })
+      );
     } finally {
       setLoadingSubscription(false);
     }
@@ -786,7 +829,7 @@ const UpgradePlan = () => {
             !subscriptionDetails.cancelAtPeriodEnd ? (
               <Button
                 variant="outline-danger"
-                onClick={handleToggleAutoRenewal}
+                onClick={handleShowCancelConfirmation}
                 disabled={loadingSubscription}
                 className="px-4"
               >
@@ -1301,8 +1344,9 @@ const UpgradePlan = () => {
                               <div className="d-flex align-items-center">
                                 <CreditCardOutlined className="me-2 text-primary" />
                                 <div className="d-flex gap-3">
-                                  <span className="fw-semibold"
-                                        style={{ fontSize: "12px" }}
+                                  <span
+                                    className="fw-semibold"
+                                    style={{ fontSize: "12px" }}
                                   >
                                     {method.card.brand.toUpperCase()} ••••{" "}
                                     {method.card.last4}
@@ -1407,6 +1451,99 @@ const UpgradePlan = () => {
                   ? ` - $${upgradePreview.billing.immediateCharge.toFixed(2)}`
                   : ""
               }`
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Cancel Subscription Confirmation Modal */}
+      <Modal
+        show={showCancelConfirmationModal}
+        onHide={handleCancelConfirmationClose}
+        size="md"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="text-danger">
+            <CloseCircleOutlined className="me-2" />
+            Cancel Subscription
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="text-center mb-4">
+            <div className="mb-3">
+              <CloseCircleOutlined
+                style={{ fontSize: "48px", color: "#dc3545" }}
+              />
+            </div>
+            <h5 className="mb-3">
+              Are you sure you want to cancel your subscription?
+            </h5>
+            <p className="text-muted mb-4">
+              This action will disable auto-renewal for your current plan.
+              You'll continue to have access to premium features until your
+              current billing period ends.
+            </p>
+
+            {subscriptionDetails && (
+              <Card
+                className="mb-4"
+                style={{ background: "#f8f9fa" }}
+                bodyStyle={{ padding: "12px 16px" }}
+              >
+                <div className="row text-start">
+                  <div className="col-6">
+                    <small className="text-muted">Current Plan:</small>
+                    <div className="fw-semibold">{getCurrentPlan()?.name}</div>
+                  </div>
+                  <div className="col-6">
+                    <small className="text-muted">Access Until:</small>
+                    <div className="fw-semibold text-warning">
+                      {formatDate(subscriptionDetails.currentPeriodEnd)}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            <div className="alert alert-warning text-start">
+              <strong>What happens after cancellation:</strong>
+              <ul className="mb-0 mt-2">
+                <li>
+                  Your subscription will remain active until{" "}
+                  {subscriptionDetails &&
+                    formatDate(subscriptionDetails.currentPeriodEnd)}
+                </li>
+                <li>You won't be charged for the next billing cycle</li>
+                
+                <li>After expiration, you'll be moved to the Starter plan</li>
+              </ul>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleCancelConfirmationClose}
+            disabled={loadingSubscription}
+          >
+            Keep Subscription
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleConfirmCancellation}
+            disabled={loadingSubscription}
+          >
+            {loadingSubscription ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Cancelling...
+              </>
+            ) : (
+              <>
+                <CloseCircleOutlined className="me-1" />
+                Yes, Cancel Subscription
+              </>
             )}
           </Button>
         </Modal.Footer>
