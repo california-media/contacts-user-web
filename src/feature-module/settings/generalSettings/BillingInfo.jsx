@@ -626,7 +626,7 @@ const BillingInfo = () => {
                                               Next billing:{" "}
                                               {new Date(
                                                 paymentStatus.subscription
-                                                  .currentPeriodEnd * 1000
+                                                  .currentPeriodEnd 
                                               ).toLocaleDateString()}
                                             </Text>
                                             <br />
