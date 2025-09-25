@@ -69,8 +69,11 @@ const UpgradePlan = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showNewSubscriptionModal, setShowNewSubscriptionModal] =
+    useState(false);
   const [upgradePreview, setUpgradePreview] = useState(null);
+  const [newSubscriptionPreview, setNewSubscriptionPreview] = useState(null);
   const [clientSecret, setClientSecret] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -91,6 +94,7 @@ const UpgradePlan = () => {
   // Fetch plans on component mount
   useEffect(() => {
     fetchPlans();
+    fetchPaymentMethods();
   }, []);
 
   // Fetch subscription details when user has a paid plan
@@ -177,6 +181,41 @@ const UpgradePlan = () => {
     } catch (error) {
       console.error("Error fetching upgrade preview:", error);
       throw error;
+    }
+  };
+
+  const fetchNewSubscriptionPreview = async (plan) => {
+    try {
+      const response = await api.post(
+        "/user/payment/preview-new-subscription",
+        {
+          planId: plan._id,
+        }
+      );
+
+      if (response.data.success) {
+        return response.data.preview;
+      } else {
+        throw new Error(
+          response.data.message || "Failed to fetch new subscription preview"
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching new subscription preview:", error);
+      throw error;
+    }
+  };
+
+  const checkSubscriptionStatus = async () => {
+    try {
+      const response = await api.get("/user/payment/status");
+      if (response.data.success) {
+        return response.data.data.hasActiveSubscription;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking subscription status:", error);
+      return false;
     }
   };
 
@@ -405,29 +444,82 @@ const UpgradePlan = () => {
       console.log("Selected plan for upgrade:", plan);
       setSelectedPlan(plan);
 
-      // Check if user has an active subscription (not on Starter plan)
-      const currentPlan = getCurrentPlan();
-      const isOnStarterPlan =
-        !currentPlan ||
-        currentPlan.name === "Starter" ||
-        currentPlan.name?.toLowerCase().includes("starter");
+      // First, fetch payment methods to check availability
+      await fetchPaymentMethods();
 
-      if (!isOnStarterPlan) {
-        // User has active subscription (not Starter) - show preview first
+      // Check if user has payment methods available
+      const hasPaymentMethods = paymentMethods.length > 0;
+
+      if (hasPaymentMethods) {
+        // User has payment methods - show upgrade confirmation with payment method selection
         console.log(
-          "User has active subscription, fetching upgrade preview..."
+          "User has payment methods available, checking subscription status..."
         );
 
+        // Check if user has an active subscription via API
+        const hasActiveSubscription = await checkSubscriptionStatus();
+        const currentPlan = getCurrentPlan();
+
+        console.log("Detailed subscription check:", {
+          currentPlan,
+          currentPlanName: currentPlan?.name,
+          hasActiveSubscription,
+          hasPaymentMethods,
+          paymentMethodsCount: paymentMethods.length,
+          subscriptionDetails: subscriptionDetails,
+          subscriptionStatus: subscriptionDetails?.status,
+          isSubscriptionActive: isSubscriptionActive(),
+          hasActiveSubscriptionFromAPI: hasActiveSubscription,
+        });
+
         try {
-          const preview = await fetchUpgradePreview(plan);
-          setUpgradePreview(preview);
-          // Fetch payment methods for the confirmation modal
-          await fetchPaymentMethods();
-          setShowConfirmationModal(true);
+          let preview;
+          if (hasActiveSubscription) {
+            // Existing subscriber - use upgrade preview
+            console.log("Existing subscriber, fetching upgrade preview...");
+            console.log("Calling fetchUpgradePreview for plan:", plan.name);
+            preview = await fetchUpgradePreview(plan);
+            setUpgradePreview(preview);
+            setShowUpgradeModal(true);
+          } else {
+            // New subscriber with payment methods - fetch preview from API
+            console.log(
+              "New subscriber with payment methods, fetching subscription preview from API..."
+            );
+            console.log(
+              "Calling fetchNewSubscriptionPreview for plan:",
+              plan.name
+            );
+            preview = await fetchNewSubscriptionPreview(plan);
+            setNewSubscriptionPreview(preview);
+            setShowNewSubscriptionModal(true);
+          }
+
           setPaymentLoading(false); // Stop loading since we're showing modal
           return; // Exit here, actual upgrade happens after confirmation
         } catch (previewError) {
           console.error("Error fetching preview:", previewError);
+
+          // If it's a "NO_ACTIVE_SUBSCRIPTION" error and we thought they had an active subscription,
+          // fall back to fetching a new subscription preview
+          if (
+            previewError.response?.data?.code === "NO_ACTIVE_SUBSCRIPTION" &&
+            hasActiveSubscription
+          ) {
+            console.log(
+              "Falling back to new subscription preview due to no active subscription found"
+            );
+            try {
+              const preview = await fetchNewSubscriptionPreview(plan);
+              setNewSubscriptionPreview(preview);
+              setShowNewSubscriptionModal(true);
+              setPaymentLoading(false);
+              return;
+            } catch (fallbackError) {
+              console.error("Fallback preview also failed:", fallbackError);
+            }
+          }
+
           dispatch(
             showToast({
               type: "error",
@@ -440,9 +532,9 @@ const UpgradePlan = () => {
           return;
         }
       } else {
-        // User is on Starter plan (no active subscription) - use checkout session
+        // User has no payment methods - use checkout session to add payment method
         console.log(
-          "User is on Starter plan, creating new subscription via checkout..."
+          "User has no payment methods, creating checkout session to add payment method..."
         );
 
         const response = await api.post(
@@ -618,21 +710,51 @@ const UpgradePlan = () => {
 
     try {
       setPaymentLoading(true);
-      setShowConfirmationModal(false);
+      setShowUpgradeModal(false);
 
-      const response = await api.post("/user/payment/upgrade-subscription", {
-        planId: selectedPlan._id,
-        autoRenewal: true,
-        paymentMethodId: selectedPaymentMethod,
-      });
+      let response;
+
+      // Check if this is a new subscription or an upgrade
+      if (upgradePreview && upgradePreview.isNewSubscription) {
+        // New subscription - create subscription with payment method
+        console.log("Creating new subscription with payment method...");
+
+        // Check if we can cover the full cost with credits
+        if (upgradePreview.credits.finalChargeAfterCredits === 0) {
+          // Can pay with credits only
+          response = await api.post("/user/payment/purchase-with-credits", {
+            planId: selectedPlan._id,
+            autoRenewal: true,
+          });
+        } else {
+          // Need to charge payment method - use upgrade endpoint as it handles payment methods
+          response = await api.post("/user/payment/upgrade-subscription", {
+            planId: selectedPlan._id,
+            autoRenewal: true,
+            paymentMethodId: selectedPaymentMethod,
+          });
+        }
+      } else {
+        // Existing subscription - upgrade
+        console.log("Upgrading existing subscription...");
+        response = await api.post("/user/payment/upgrade-subscription", {
+          planId: selectedPlan._id,
+          autoRenewal: true,
+          paymentMethodId: selectedPaymentMethod,
+        });
+      }
 
       if (response.data.success) {
+        const actionType =
+          upgradePreview && upgradePreview.isNewSubscription
+            ? "subscribed"
+            : "upgraded";
         dispatch(
           showToast({
             type: "success",
             message:
               response.data.message ||
-              `Successfully upgraded to ${selectedPlan.name}!`,
+              `Successfully ${actionType} to ${selectedPlan.name}!`,
           })
         );
 
@@ -644,7 +766,7 @@ const UpgradePlan = () => {
         dispatch(
           showToast({
             type: "error",
-            message: response.data.message || "Failed to upgrade subscription",
+            message: response.data.message || "Failed to process subscription",
           })
         );
       }
@@ -653,7 +775,8 @@ const UpgradePlan = () => {
       dispatch(
         showToast({
           type: "error",
-          message: error.response?.data?.message || "Failed to process upgrade",
+          message:
+            error.response?.data?.message || "Failed to process subscription",
         })
       );
     } finally {
@@ -664,7 +787,7 @@ const UpgradePlan = () => {
   };
 
   const handleCancelUpgrade = () => {
-    setShowConfirmationModal(false);
+    setShowUpgradeModal(false);
     setUpgradePreview(null);
     setSelectedPlan(null);
     setPaymentLoading(false);
@@ -682,6 +805,77 @@ const UpgradePlan = () => {
     setShowPaymentModal(false);
     setClientSecret("");
     setSelectedPlan(null);
+  };
+
+  const handleCancelNewSubscription = () => {
+    setShowNewSubscriptionModal(false);
+    setNewSubscriptionPreview(null);
+    setSelectedPlan(null);
+    setPaymentLoading(false);
+  };
+
+  const handleConfirmNewSubscription = async () => {
+    if (!selectedPlan || !selectedPaymentMethod || !newSubscriptionPreview) {
+      showToast({
+        type: "error",
+        message: "Missing required information for subscription",
+      });
+      return;
+    }
+
+    try {
+      setPaymentLoading(true);
+
+      const response = await api.post(
+        "/user/payment/create-subscription-with-payment-method",
+        {
+          planId: selectedPlan._id,
+          paymentMethodId: selectedPaymentMethod,
+          autoRenewal: true, // Default to true for new subscriptions
+        }
+      );
+
+      if (response.data.success) {
+        dispatch(
+          showToast({
+            type: "success",
+            message:
+              response.data.message ||
+              `Successfully subscribed to ${selectedPlan.name}!`,
+          })
+        );
+
+        // Close modal and refresh
+        setShowNewSubscriptionModal(false);
+        setNewSubscriptionPreview(null);
+        setSelectedPlan(null);
+        setPaymentLoading(false);
+
+        // Refresh user profile to get updated plan
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        dispatch(
+          showToast({
+            type: "error",
+            message: response.data.message || "Failed to subscribe to plan",
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error subscribing to plan:", error);
+      dispatch(
+        showToast({
+          type: "error",
+          message:
+            error.response?.data?.message ||
+            "An error occurred while subscribing to the plan",
+        })
+      );
+    } finally {
+      setPaymentLoading(false);
+    }
   };
 
   const renderPlanCard = (plan) => (
@@ -1292,9 +1486,299 @@ const UpgradePlan = () => {
         </Modal.Body>
       </Modal>
 
+      {/* New Subscription Modal */}
+      <Modal
+        show={showNewSubscriptionModal}
+        onHide={handleCancelNewSubscription}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Subscribe to {selectedPlan?.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {newSubscriptionPreview && selectedPlan && (
+            <div>
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">Subscription Summary</h6>
+                <div className="row">
+                  <div className="col-12">
+                    <div className="card border border-primary">
+                      <div className="card-body">
+                        <h6 className="card-title text-muted">Selected Plan</h6>
+                        <p className="mb-1 fw-semibold">{selectedPlan.name}</p>
+                        <p className="mb-1 text-primary">
+                          ${newSubscriptionPreview.plan.price.toFixed(2)}/month
+                        </p>
+                        <small className="text-muted">Billed monthly</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">Billing Details</h6>
+                <div className="border rounded p-3 bg-light">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span>Plan cost:</span>
+                    <span className="fw-semibold text-dark">
+                      ${newSubscriptionPreview.plan.price.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {newSubscriptionPreview.credits && (
+                    <>
+                      {newSubscriptionPreview.credits.availableCredits > 0 && (
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span>Available Stripe credits:</span>
+                          <span className="fw-semibold text-info">
+                            $
+                            {newSubscriptionPreview.credits.availableCredits.toFixed(
+                              2
+                            )}
+                          </span>
+                        </div>
+                      )}
+
+                      {newSubscriptionPreview.credits.creditsToUse > 0 && (
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span>Stripe credits used:</span>
+                          <span className="fw-semibold text-warning">
+                            -$
+                            {newSubscriptionPreview.credits.creditsToUse.toFixed(
+                              2
+                            )}
+                          </span>
+                        </div>
+                      )}
+
+                      <hr className="my-2" />
+
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <span className="fw-semibold">Final charge:</span>
+                        <span className="fw-bold text-primary fs-5">
+                          $
+                          {newSubscriptionPreview.credits.finalChargeAfterCredits.toFixed(
+                            2
+                          )}
+                        </span>
+                      </div>
+
+                      {newSubscriptionPreview.credits
+                        .finalChargeAfterCredits === 0 && (
+                        <div className="alert alert-success py-2 px-3 mb-2">
+                          <small>
+                            <i className="ti ti-check me-1"></i>
+                            Your subscription will be fully covered by available
+                            credits!
+                          </small>
+                        </div>
+                      )}
+
+                      {newSubscriptionPreview.credits
+                        .remainingCreditsAfterPurchase >= 0 && (
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span>Credits after purchase:</span>
+                          <span className="fw-semibold text-info">
+                            $
+                            {newSubscriptionPreview.credits.remainingCreditsAfterPurchase.toFixed(
+                              2
+                            )}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <hr className="my-2" />
+
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span>Next billing date:</span>
+                    <span>
+                      {new Date(
+                        newSubscriptionPreview.billing.nextBillingDate
+                      ).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="d-flex justify-content-between align-items-center">
+                    <span>Next billing amount:</span>
+                    <span className="fw-semibold">
+                      $
+                      {newSubscriptionPreview.billing.nextBillingAmount.toFixed(
+                        2
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method Selection for New Subscriptions */}
+              {newSubscriptionPreview.credits &&
+                newSubscriptionPreview.credits.finalChargeAfterCredits > 0 && (
+                  <div className="mb-4">
+                    <h6 className="fw-semibold mb-3">
+                      <CreditCardOutlined className="me-2" />
+                      Payment Method
+                    </h6>
+                    {loadingPaymentMethods ? (
+                      <div className="text-center py-3">
+                        <Spinner size="sm" className="me-2" />
+                        Loading payment methods...
+                      </div>
+                    ) : paymentMethods.length > 0 ? (
+                      <div>
+                        <Select
+                          value={selectedPaymentMethod}
+                          onChange={setSelectedPaymentMethod}
+                          style={{ width: "100%" }}
+                          size="large"
+                          placeholder="Select a payment method"
+                          suffixIcon={<CreditCardOutlined />}
+                        >
+                          {paymentMethods.map((method) => (
+                            <Option key={method.id} value={method.id}>
+                              <div className="d-flex align-items-center justify-content-between w-100">
+                                <div className="d-flex align-items-center">
+                                  <CreditCardOutlined className="me-2 text-primary" />
+                                  <div className="d-flex gap-3">
+                                    <span
+                                      className="fw-semibold"
+                                      style={{ fontSize: "12px" }}
+                                    >
+                                      {method.card.brand.toUpperCase()} ••••{" "}
+                                      {method.card.last4}
+                                    </span>
+                                    <span
+                                      className="text-muted"
+                                      style={{ fontSize: "11px" }}
+                                    >
+                                      {method.card.exp_month
+                                        .toString()
+                                        .padStart(2, "0")}
+                                      /{method.card.exp_year}
+                                    </span>
+                                    {method.isDefault && (
+                                      <span
+                                        className="text-success fw-semibold"
+                                        style={{ fontSize: "11px" }}
+                                      >
+                                        Default
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </Option>
+                          ))}
+                        </Select>
+                        <div className="mt-2">
+                          <Link
+                            to={route.biilingInfo}
+                            className="btn btn-outline-primary btn-sm"
+                          >
+                            <CreditCardOutlined className="me-1" />
+                            Manage Payment Methods
+                          </Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="alert alert-warning">
+                        <i className="ti ti-alert-triangle me-2"></i>
+                        No payment methods found. Please add a payment method to
+                        continue.
+                        <div className="mt-2">
+                          <Link
+                            to={route.biilingInfo}
+                            className="btn btn-primary btn-sm"
+                          >
+                            <i className="ti ti-plus me-1"></i>
+                            Add Payment Method
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              <div className="alert alert-info">
+                <i className="ti ti-info-circle me-2"></i>
+                <strong>What happens next?</strong>
+                <ul className="mb-0 mt-2">
+                  <li>Your subscription will be activated immediately</li>
+                  {newSubscriptionPreview.credits &&
+                  newSubscriptionPreview.credits.finalChargeAfterCredits > 0 ? (
+                    <li>
+                      You'll be charged $
+                      {newSubscriptionPreview.credits.finalChargeAfterCredits.toFixed(
+                        2
+                      )}{" "}
+                      today (after applying available credits)
+                    </li>
+                  ) : newSubscriptionPreview.credits &&
+                    newSubscriptionPreview.credits.finalChargeAfterCredits ===
+                      0 ? (
+                    <li>
+                      No charge today - your subscription is fully covered by
+                      available credits
+                    </li>
+                  ) : null}
+                  <li>
+                    Future billing will be $
+                    {newSubscriptionPreview.billing.nextBillingAmount.toFixed(
+                      2
+                    )}
+                    /month
+                  </li>
+                  <li>You can cancel or change your plan anytime</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCancelNewSubscription}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleConfirmNewSubscription}
+            disabled={
+              paymentLoading ||
+              (newSubscriptionPreview &&
+                newSubscriptionPreview.credits &&
+                newSubscriptionPreview.credits.finalChargeAfterCredits > 0 &&
+                (!selectedPaymentMethod || paymentMethods.length === 0))
+            }
+          >
+            {paymentLoading ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Processing...
+              </>
+            ) : (
+              `Confirm Subscription${
+                newSubscriptionPreview &&
+                newSubscriptionPreview.credits &&
+                newSubscriptionPreview.credits.finalChargeAfterCredits > 0
+                  ? ` - $${newSubscriptionPreview.credits.finalChargeAfterCredits.toFixed(
+                      2
+                    )}`
+                  : newSubscriptionPreview &&
+                    newSubscriptionPreview.credits &&
+                    newSubscriptionPreview.credits.finalChargeAfterCredits === 0
+                  ? " - Free with Credits"
+                  : ""
+              }`
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {/* Upgrade Confirmation Modal */}
       <Modal
-        show={showConfirmationModal}
+        show={showUpgradeModal}
         onHide={handleCancelUpgrade}
         size="lg"
         centered
@@ -1326,19 +1810,13 @@ const UpgradePlan = () => {
                     </div>
                   </div>
                   <div className="col-md-6">
-                    <div className="card border-primary">
+                    <div className="card border border-primary">
                       <div className="card-body">
-                        <h6 className="card-title text-primary">New Plan</h6>
-                        <p className="mb-1 fw-semibold">
-                          {upgradePreview.newPlan.name}
-                        </p>
+                        <h6 className="card-title text-muted">New Plan</h6>
+                        <p className="mb-1 fw-semibold">{selectedPlan.name}</p>
                         <p className="mb-1 text-primary">
                           ${upgradePreview.newPlan.price.toFixed(2)}/month
                         </p>
-                        {/* <small className="text-muted">
-                          Pro-rated amount: $
-                          {upgradePreview.newPlan.proRatedAmount.toFixed(2)}
-                        </small> */}
                       </div>
                     </div>
                   </div>
@@ -1442,25 +1920,27 @@ const UpgradePlan = () => {
                 </div>
               </div>
 
-              <div className="mb-4">
-                <h6 className="fw-semibold mb-3">Billing Period</h6>
-                <div className="row">
-                  <div className="col-6">
-                    <small className="text-muted">
-                      Days remaining in period:
-                    </small>
-                    <p className="mb-0 fw-semibold">
-                      {upgradePreview.period.daysRemaining} days
-                    </p>
-                  </div>
-                  <div className="col-6">
-                    <small className="text-muted">Period used:</small>
-                    <p className="mb-0 fw-semibold">
-                      {upgradePreview.period.percentUsed}%
-                    </p>
+              {!upgradePreview.isNewSubscription && upgradePreview.period && (
+                <div className="mb-4">
+                  <h6 className="fw-semibold mb-3">Billing Period</h6>
+                  <div className="row">
+                    <div className="col-6">
+                      <small className="text-muted">
+                        Days remaining in period:
+                      </small>
+                      <p className="mb-0 fw-semibold">
+                        {upgradePreview.period.daysRemaining} days
+                      </p>
+                    </div>
+                    <div className="col-6">
+                      <small className="text-muted">Period used:</small>
+                      <p className="mb-0 fw-semibold">
+                        {upgradePreview.period.percentUsed}%
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Payment Method Selection */}
               {upgradePreview.credits &&
@@ -1622,7 +2102,9 @@ const UpgradePlan = () => {
                     upgradePreview.credits &&
                     upgradePreview.credits.finalChargeAfterCredits === 0
                   ? " - Free with Credits"
-                  : upgradePreview && upgradePreview.billing.immediateCharge > 0
+                  : upgradePreview &&
+                    upgradePreview.billing &&
+                    upgradePreview.billing.immediateCharge > 0
                   ? ` - $${upgradePreview.billing.immediateCharge.toFixed(2)}`
                   : ""
               }`
