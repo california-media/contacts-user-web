@@ -69,6 +69,9 @@ const UpgradePlan = () => {
   const [loadingCredits, setLoadingCredits] = useState(false);
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
   const [loadingSubscription, setLoadingSubscription] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
 
   // Fetch plans on component mount
   useEffect(() => {
@@ -180,6 +183,30 @@ const UpgradePlan = () => {
     }
   };
 
+  const fetchPaymentMethods = async () => {
+    setLoadingPaymentMethods(true);
+    try {
+      const response = await api.get("/user/payment/payment-methods");
+      if (response.data.success) {
+        setPaymentMethods(response.data.paymentMethods);
+        // Set default payment method as selected
+        const defaultMethod = response.data.paymentMethods.find(
+          (pm) => pm.isDefault
+        );
+        if (defaultMethod) {
+          setSelectedPaymentMethod(defaultMethod.id);
+        } else if (response.data.paymentMethods.length > 0) {
+          // If no default, select the first one
+          setSelectedPaymentMethod(response.data.paymentMethods[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+    } finally {
+      setLoadingPaymentMethods(false);
+    }
+  };
+
   const handleCreditPurchase = async (plan) => {
     try {
       setPaymentLoading(true);
@@ -278,11 +305,30 @@ const UpgradePlan = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("en-US", {
+
+    const date = new Date(dateString * 1000); // Convert from Unix timestamp
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+  };
+
+  const formatBillingPeriod = (period) => {
+    if (!period) return "month"; // fallback
+
+    // Handle different duration formats
+    const periodMap = {
+      monthly: "month",
+      yearly: "year",
+      annual: "year",
+      weekly: "week",
+      daily: "day",
+      1: "month", // if period is just a number
+      12: "year",
+    };
+
+    return periodMap[period.toLowerCase()] || period;
   };
 
   const isSubscriptionActive = () => {
@@ -318,6 +364,8 @@ const UpgradePlan = () => {
         try {
           const preview = await fetchUpgradePreview(plan);
           setUpgradePreview(preview);
+          // Fetch payment methods for the confirmation modal
+          await fetchPaymentMethods();
           setShowConfirmationModal(true);
           setPaymentLoading(false); // Stop loading since we're showing modal
           return; // Exit here, actual upgrade happens after confirmation
@@ -460,6 +508,7 @@ const UpgradePlan = () => {
       const response = await api.post("/user/payment/upgrade-subscription", {
         planId: selectedPlan._id,
         autoRenewal: true,
+        paymentMethodId: selectedPaymentMethod,
       });
 
       if (response.data.success) {
@@ -543,7 +592,7 @@ const UpgradePlan = () => {
                 <>
                   ${(plan.price / 100).toFixed(2)}
                   <span className="fs-14 fw-medium ms-2">
-                    / {plan.pricePeriod}
+                    / {formatBillingPeriod(plan.pricePeriod || plan.duration)}
                   </span>
                 </>
               )}
@@ -1173,6 +1222,100 @@ const UpgradePlan = () => {
                 </div>
               </div>
 
+              {/* Payment Method Selection */}
+              {upgradePreview.billing.immediateCharge > 0 && (
+                <div className="mb-4">
+                  <h6 className="fw-semibold mb-3">Payment Method</h6>
+                  {loadingPaymentMethods ? (
+                    <div className="text-center py-3">
+                      <Spinner size="sm" className="me-2" />
+                      Loading payment methods...
+                    </div>
+                  ) : paymentMethods.length > 0 ? (
+                    <div>
+                      <div className="row">
+                        {paymentMethods.map((method) => (
+                          <div key={method.id} className="col-12 mb-2">
+                            <div
+                              className={`card border ${
+                                selectedPaymentMethod === method.id
+                                  ? "border-primary"
+                                  : ""
+                              }`}
+                              style={{ cursor: "pointer" }}
+                              onClick={() =>
+                                setSelectedPaymentMethod(method.id)
+                              }
+                            >
+                              <div className="card-body py-2">
+                                <div className="d-flex align-items-center justify-content-between">
+                                  <div className="d-flex align-items-center">
+                                    <input
+                                      type="radio"
+                                      className="form-check-input me-3"
+                                      checked={
+                                        selectedPaymentMethod === method.id
+                                      }
+                                      onChange={() =>
+                                        setSelectedPaymentMethod(method.id)
+                                      }
+                                    />
+                                    <div>
+                                      <span className="fw-semibold">
+                                        {method.card.brand.toUpperCase()} ••••{" "}
+                                        {method.card.last4}
+                                      </span>
+                                      <br />
+                                      <small className="text-muted">
+                                        Expires{" "}
+                                        {String(method.card.exp_month).padStart(
+                                          2,
+                                          "0"
+                                        )}
+                                        /{method.card.exp_year}
+                                      </small>
+                                    </div>
+                                  </div>
+                                  {method.isDefault && (
+                                    <span className="badge bg-success">
+                                      Default
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3">
+                        <Link
+                          to={route.biilingInfo}
+                          className="btn btn-outline-primary btn-sm"
+                        >
+                          <i className="ti ti-credit-card me-1"></i>
+                          Manage Payment Methods
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="alert alert-warning">
+                      <i className="ti ti-alert-triangle me-2"></i>
+                      No payment methods found. Please add a payment method to
+                      continue.
+                      <div className="mt-2">
+                        <Link
+                          to={route.biilingInfo}
+                          className="btn btn-primary btn-sm"
+                        >
+                          <i className="ti ti-plus me-1"></i>
+                          Add Payment Method
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="alert alert-info">
                 <i className="ti ti-info-circle me-2"></i>
                 <strong>What happens next?</strong>
@@ -1202,7 +1345,12 @@ const UpgradePlan = () => {
           <Button
             variant="primary"
             onClick={handleConfirmUpgrade}
-            disabled={paymentLoading}
+            disabled={
+              paymentLoading ||
+              (upgradePreview &&
+                upgradePreview.billing.immediateCharge > 0 &&
+                (!selectedPaymentMethod || paymentMethods.length === 0))
+            }
           >
             {paymentLoading ? (
               <>
