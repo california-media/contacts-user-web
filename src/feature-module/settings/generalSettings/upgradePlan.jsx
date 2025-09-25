@@ -3,6 +3,13 @@ import { Link } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button, Spinner } from "react-bootstrap";
+import { Select, Card, Badge, Divider } from "antd";
+import {
+  CreditCardOutlined,
+  CalendarOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+} from "@ant-design/icons";
 import api from "../../../core/axios/axiosInstance";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 import { loadStripe } from "@stripe/stripe-js";
@@ -11,6 +18,8 @@ import {
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import "./upgradePlan.css";
+
+const { Option } = Select;
 
 // Load Stripe
 const stripePromise = loadStripe(
@@ -306,7 +315,7 @@ const UpgradePlan = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
 
-    const date = new Date(dateString * 1000); // Convert from Unix timestamp
+    const date = new Date(dateString); // Convert from Unix timestamp
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -335,7 +344,7 @@ const UpgradePlan = () => {
     return subscriptionDetails && subscriptionDetails.status === "active";
   };
 
-  const isPaidWithCredits = () => {
+  const isCancelAtPeriodEnd = () => {
     return subscriptionDetails?.cancelAtPeriodEnd === true;
   };
 
@@ -604,125 +613,143 @@ const UpgradePlan = () => {
           {isCurrentPlan(plan) && plan.name !== "Starter" && (
             <div className="mb-3">
               {loadingSubscription ? (
-                <div className="text-center py-2">
+                <div className="text-center py-3">
                   <Spinner size="sm" className="me-2" />
                   <small className="text-muted">Loading subscription...</small>
                 </div>
               ) : subscriptionDetails ? (
-                <div className="subscription-info bg-light rounded p-3">
-                  <h6 className="fw-semibold mb-2 text-primary">
-                    <i className="fa fa-calendar me-1"></i>
-                    Subscription Details
-                  </h6>
-
-                  <div className="row mb-2">
-                    <div className="col-12">
-                      <small className="text-muted">Status:</small>
-                      <span
-                        className={`badge ms-2 ${
-                          subscriptionDetails.status === "active"
-                            ? "bg-success"
-                            : "bg-warning"
-                        }`}
-                      >
-                        {subscriptionDetails.status?.toUpperCase()}
-                      </span>
-                    </div>
+                <Card
+                  size="small"
+                  className="subscription-info-card"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%)",
+                    border: "1px solid #e6f7ff",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <div className="d-flex align-items-center mb-3">
+                    <CalendarOutlined
+                      className="text-primary me-2"
+                      style={{ fontSize: "16px" }}
+                    />
+                    <span className="fw-semibold text-primary">
+                      Subscription Status
+                    </span>
                   </div>
 
-                  {isPaidWithCredits() ? (
-                    // For credit-paid subscriptions (will cancel at period end)
-                    <div>
-                      <div className="row mb-2">
+                  <div className="row g-3">
+                    {isCancelAtPeriodEnd() ? (
+                      <>
                         <div className="col-12">
-                          <small className="text-muted">Plan expires on:</small>
-                          <div className="fw-semibold text-warning">
-                            {formatDate(subscriptionDetails.currentPeriodEnd)}
+                          <div className="d-flex align-items-baseline">
+                            <p className="text-muted me-2">Expires:</p>
+                            <span
+                              className="fw-semibold text-warning"
+                              style={{ fontSize: "13px" }}
+                            >
+                              {formatDate(subscriptionDetails.currentPeriodEnd)}
+                            </span>
                           </div>
                         </div>
-                      </div>
-                      {/* <div className="alert alert-warning py-2 mb-0">
-                        <i className="fa fa-info-circle me-1"></i>
-                        <small>
-                          Subscription will cancel at the end of this period.
-                          Renew to continue using premium features.
-                        </small>
-                      </div> */}
-                    </div>
-                  ) : (
-                    // For card-paid subscriptions (auto-renewal)
-                    <div>
-                      <div className="row mb-2">
                         <div className="col-12">
-                          <small className="text-muted">
-                            Next billing date:
-                          </small>
-                          <div className="fw-semibold text-success">
-                            {formatDate(subscriptionDetails.currentPeriodEnd)}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <small className="text-muted">Auto-renewal:</small>
-                          <span
-                            className={`badge ms-2 ${
-                              !subscriptionDetails.cancelAtPeriodEnd
-                                ? "bg-success"
-                                : "bg-danger"
-                            }`}
+                          <div
+                            className="d-flex align-items-center p-2 rounded"
+                            style={{
+                              background: "#fff7e6",
+                              border: "1px solid #ffd591",
+                            }}
                           >
-                            {!subscriptionDetails.cancelAtPeriodEnd
-                              ? "ON"
-                              : "OFF"}
-                          </span>
+                            <CloseCircleOutlined className="text-warning me-2" />
+                            <small className="text-warning mb-0">
+                              Plan will expire at the end of this period. Renew
+                              to continue premium features.
+                            </small>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      // For card-paid subscriptions (auto-renewal)
+                      <>
+                        <div className="col-12">
+                          <div className="d-flex align-items-baseline">
+                            <p className="text-muted me-2">Next billing:</p>
+                            <span
+                              className="fw-semibold text-success"
+                              style={{ fontSize: "13px" }}
+                            >
+                              {formatDate(subscriptionDetails.currentPeriodEnd)}
+                            </span>
+                          </div>
                         </div>
 
-                        <Button
-                          variant={
-                            !subscriptionDetails.cancelAtPeriodEnd
-                              ? "outline-danger"
-                              : "outline-success"
-                          }
-                          size="sm"
-                          onClick={handleToggleAutoRenewal}
-                          disabled={loadingSubscription}
-                        >
-                          {loadingSubscription ? (
-                            <Spinner size="sm" />
-                          ) : !subscriptionDetails.cancelAtPeriodEnd ? (
-                            <>
-                              <i className="fa fa-times me-1"></i>
-                              Cancel Auto-Renewal
-                            </>
-                          ) : (
-                            <>
-                              <i className="fa fa-refresh me-1"></i>
-                              Enable Auto-Renewal
-                            </>
+                        <div className="col-12">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <div className="d-flex align-items-baseline">
+                              <p className="text-muted me-2">Auto-renewal:</p>
+                              <Badge
+                                status={
+                                  !subscriptionDetails.cancelAtPeriodEnd
+                                    ? "success"
+                                    : "error"
+                                }
+                                text={
+                                  !subscriptionDetails.cancelAtPeriodEnd
+                                    ? "ENABLED"
+                                    : "DISABLED"
+                                }
+                              />
+                            </div>
+                          </div>
+
+                          {subscriptionDetails.cancelAtPeriodEnd && (
+                            <div
+                              className="d-flex align-items-center p-2 rounded mt-2"
+                              style={{
+                                background: "#e6f7ff",
+                                border: "1px solid #91d5ff",
+                              }}
+                            >
+                              <CheckCircleOutlined className="text-info me-2" />
+                              <small className="text-info mb-0">
+                                Auto-renewal is disabled. Your subscription will
+                                end on{" "}
+                                {formatDate(
+                                  subscriptionDetails.currentPeriodEnd
+                                )}
+                                .
+                              </small>
+                            </div>
                           )}
-                        </Button>
-                      </div>
-
-                      {subscriptionDetails.cancelAtPeriodEnd && (
-                        <div className="alert alert-info py-2 mt-2 mb-0">
-                          <i className="fa fa-info-circle me-1"></i>
-                          <small>
-                            Auto-renewal is disabled. Your subscription will end
-                            on{" "}
-                            {formatDate(subscriptionDetails.currentPeriodEnd)}.
-                          </small>
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                        <div className="col-12">
+                          <div className="d-flex align-items-center justify-content-between">
+                            <div className="d-flex align-items-baseline">
+                              <p className="text-muted me-2">Status:</p>
+                              <Badge
+                                status={
+                                  subscriptionDetails.status === "active"
+                                    ? "success"
+                                    : "warning"
+                                }
+                                text={subscriptionDetails.status?.toUpperCase()}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
               ) : (
-                <div className="alert alert-info py-2">
-                  <i className="fa fa-info-circle me-1"></i>
-                  <small>No active subscription found.</small>
-                </div>
+                <Card size="small" className="alert-card">
+                  <div className="d-flex align-items-center">
+                    <CheckCircleOutlined className="text-info me-2" />
+                    <small className="mb-0">
+                      No active subscription found.
+                    </small>
+                  </div>
+                </Card>
               )}
             </div>
           )}
@@ -754,9 +781,33 @@ const UpgradePlan = () => {
 
         <div className="text-center mb-3">
           {isCurrentPlan(plan) ? (
-            <Button variant="success" disabled className="px-4">
-              Current Plan
-            </Button>
+            plan.name !== "Starter" &&
+            subscriptionDetails &&
+            !subscriptionDetails.cancelAtPeriodEnd ? (
+              <Button
+                variant="outline-danger"
+                onClick={handleToggleAutoRenewal}
+                disabled={loadingSubscription}
+                className="px-4"
+              >
+                {loadingSubscription ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CloseCircleOutlined className="me-1" />
+                    Cancel Subscription
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button variant="success" disabled className="px-4">
+                <CheckCircleOutlined className="me-1" />
+                Current Plan
+              </Button>
+            )
           ) : isStarterPlan(plan) ? (
             <Button variant="outline-secondary" disabled className="px-4">
               Basic Plan
@@ -1225,7 +1276,10 @@ const UpgradePlan = () => {
               {/* Payment Method Selection */}
               {upgradePreview.billing.immediateCharge > 0 && (
                 <div className="mb-4">
-                  <h6 className="fw-semibold mb-3">Payment Method</h6>
+                  <h6 className="fw-semibold mb-3">
+                    <CreditCardOutlined className="me-2" />
+                    Payment Method
+                  </h6>
                   {loadingPaymentMethods ? (
                     <div className="text-center py-3">
                       <Spinner size="sm" className="me-2" />
@@ -1233,66 +1287,56 @@ const UpgradePlan = () => {
                     </div>
                   ) : paymentMethods.length > 0 ? (
                     <div>
-                      <div className="row">
+                      <Select
+                        value={selectedPaymentMethod}
+                        onChange={setSelectedPaymentMethod}
+                        style={{ width: "100%" }}
+                        size="large"
+                        placeholder="Select a payment method"
+                        suffixIcon={<CreditCardOutlined />}
+                      >
                         {paymentMethods.map((method) => (
-                          <div key={method.id} className="col-12 mb-2">
-                            <div
-                              className={`card border ${
-                                selectedPaymentMethod === method.id
-                                  ? "border-primary"
-                                  : ""
-                              }`}
-                              style={{ cursor: "pointer" }}
-                              onClick={() =>
-                                setSelectedPaymentMethod(method.id)
-                              }
-                            >
-                              <div className="card-body py-2">
-                                <div className="d-flex align-items-center justify-content-between">
-                                  <div className="d-flex align-items-center">
-                                    <input
-                                      type="radio"
-                                      className="form-check-input me-3"
-                                      checked={
-                                        selectedPaymentMethod === method.id
-                                      }
-                                      onChange={() =>
-                                        setSelectedPaymentMethod(method.id)
-                                      }
-                                    />
-                                    <div>
-                                      <span className="fw-semibold">
-                                        {method.card.brand.toUpperCase()} ••••{" "}
-                                        {method.card.last4}
-                                      </span>
-                                      <br />
-                                      <small className="text-muted">
-                                        Expires{" "}
-                                        {String(method.card.exp_month).padStart(
-                                          2,
-                                          "0"
-                                        )}
-                                        /{method.card.exp_year}
-                                      </small>
-                                    </div>
+                          <Option key={method.id} value={method.id}>
+                            <div className="d-flex align-items-center justify-content-between w-100">
+                              <div className="d-flex align-items-center">
+                                <CreditCardOutlined className="me-2 text-primary" />
+                                <div className="d-flex gap-3">
+                                  <span className="fw-semibold"
+                                        style={{ fontSize: "12px" }}
+                                  >
+                                    {method.card.brand.toUpperCase()} ••••{" "}
+                                    {method.card.last4}
+                                  </span>
+                                  <div
+                                    className="text-muted"
+                                    style={{ fontSize: "12px" }}
+                                  >
+                                    Expires{" "}
+                                    {String(method.card.exp_month).padStart(
+                                      2,
+                                      "0"
+                                    )}
+                                    /{method.card.exp_year}
                                   </div>
-                                  {method.isDefault && (
-                                    <span className="badge bg-success">
-                                      Default
-                                    </span>
-                                  )}
                                 </div>
                               </div>
+                              {method.isDefault && (
+                                <Badge
+                                  color="green"
+                                  text="Default"
+                                  style={{ marginLeft: "auto" }}
+                                />
+                              )}
                             </div>
-                          </div>
+                          </Option>
                         ))}
-                      </div>
+                      </Select>
                       <div className="mt-3">
                         <Link
                           to={route.biilingInfo}
                           className="btn btn-outline-primary btn-sm"
                         >
-                          <i className="ti ti-credit-card me-1"></i>
+                          <CreditCardOutlined className="me-1" />
                           Manage Payment Methods
                         </Link>
                       </div>

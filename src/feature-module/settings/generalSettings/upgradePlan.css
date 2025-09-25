@@ -50,6 +50,36 @@
   padding: 0.25rem 0.5rem;
 }
 
+/* Enhanced subscription info card styling */
+.subscription-info-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.subscription-info-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.subscription-info-card .ant-card-body {
+  padding: 16px;
+}
+
+/* Alert card styling */
+.alert-card {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+}
+
+.alert-card .ant-card-body {
+  padding: 12px 16px;
+}
+
+
+/* Badge styling for payment methods */
+.ant-badge {
+  margin-left: auto;
+}
+
 .subscription-info .alert {
   font-size: 0.8rem;
   border: none;
