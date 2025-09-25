@@ -158,6 +158,11 @@ const UpgradePlan = () => {
     return false;
   };
 
+  const isScheduledForDowngrade = (plan) => {
+    // Check if this plan is already scheduled for downgrade
+    return subscriptionDetails?.metadata?.downgradeTo === plan.name;
+  };
+
   const fetchUpgradePreview = async (plan) => {
     try {
       const response = await api.post("/user/payment/preview-upgrade", {
@@ -392,6 +397,7 @@ const UpgradePlan = () => {
   const isCancelAtPeriodEnd = () => {
     return subscriptionDetails?.cancelAtPeriodEnd === true;
   };
+  console.log(subscriptionDetails);
 
   const handleUpgrade = async (plan) => {
     try {
@@ -914,24 +920,31 @@ const UpgradePlan = () => {
               Basic Plan
             </Button>
           ) : isDowngrade(plan) ? (
-            <Button
-              variant="outline-warning"
-              onClick={() => handleShowDowngradeConfirmation(plan)}
-              disabled={paymentLoading}
-              className="px-4"
-            >
-              {paymentLoading && selectedPlan?._id === plan._id ? (
-                <>
-                  <Spinner size="sm" className="me-2" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <ArrowDownOutlined className="me-1" />
-                  Downgrade
-                </>
-              )}
-            </Button>
+            isScheduledForDowngrade(plan) ? (
+              <Button variant="outline-success" disabled className="px-4">
+                <CheckCircleOutlined className="me-1" />
+                Scheduled
+              </Button>
+            ) : (
+              <Button
+                variant="outline-warning"
+                onClick={() => handleShowDowngradeConfirmation(plan)}
+                disabled={paymentLoading}
+                className="px-4"
+              >
+                {paymentLoading && selectedDowngradePlan?._id === plan._id ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <ArrowDownOutlined className="me-1" />
+                    Downgrade
+                  </>
+                )}
+              </Button>
+            )
           ) : canUpgrade(plan) ? (
             <Button
               variant="primary"
@@ -1322,10 +1335,10 @@ const UpgradePlan = () => {
                         <p className="mb-1 text-primary">
                           ${upgradePreview.newPlan.price.toFixed(2)}/month
                         </p>
-                        <small className="text-muted">
+                        {/* <small className="text-muted">
                           Pro-rated amount: $
                           {upgradePreview.newPlan.proRatedAmount.toFixed(2)}
-                        </small>
+                        </small> */}
                       </div>
                     </div>
                   </div>
