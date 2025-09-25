@@ -9,6 +9,7 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  ArrowDownOutlined,
 } from "@ant-design/icons";
 import api from "../../../core/axios/axiosInstance";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
@@ -83,6 +84,9 @@ const UpgradePlan = () => {
   const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
   const [showCancelConfirmationModal, setShowCancelConfirmationModal] =
     useState(false);
+  const [showDowngradeConfirmationModal, setShowDowngradeConfirmationModal] =
+    useState(false);
+  const [selectedDowngradePlan, setSelectedDowngradePlan] = useState(null);
 
   // Fetch plans on component mount
   useEffect(() => {
@@ -117,7 +121,6 @@ const UpgradePlan = () => {
   };
 
   const getCurrentPlan = () => {
-    console.log("Current user plan:", userProfile?.plan);
     return userProfile?.plan;
   };
 
@@ -132,7 +135,6 @@ const UpgradePlan = () => {
 
   const canUpgrade = (plan) => {
     const currentPrice = getCurrentPlanPrice();
-    console.log("Comparing plan prices:", plan, ">", currentPrice);
     return plan.price > currentPrice;
   };
 
@@ -404,9 +406,6 @@ const UpgradePlan = () => {
         currentPlan.name === "Starter" ||
         currentPlan.name?.toLowerCase().includes("starter");
 
-      console.log("Current plan:", currentPlan);
-      console.log("Is on Starter plan:", isOnStarterPlan);
-
       if (!isOnStarterPlan) {
         // User has active subscription (not Starter) - show preview first
         console.log(
@@ -547,6 +546,64 @@ const UpgradePlan = () => {
       }
     } finally {
       setPaymentLoading(false);
+    }
+  };
+
+  const handleShowDowngradeConfirmation = (plan) => {
+    setSelectedDowngradePlan(plan);
+    setShowDowngradeConfirmationModal(true);
+  };
+
+  const handleDowngradeConfirmationClose = () => {
+    setShowDowngradeConfirmationModal(false);
+    setSelectedDowngradePlan(null);
+  };
+
+  const handleConfirmDowngrade = async () => {
+    if (!selectedDowngradePlan) return;
+
+    try {
+      setPaymentLoading(true);
+      setShowDowngradeConfirmationModal(false);
+
+      const response = await api.post("/user/payment/downgrade-subscription", {
+        planId: selectedDowngradePlan._id,
+      });
+
+      if (response.data.success) {
+        dispatch(
+          showToast({
+            type: "success",
+            message:
+              response.data.message ||
+              `Successfully scheduled downgrade to ${selectedDowngradePlan.name}. Change will take effect at the end of your current billing period.`,
+          })
+        );
+
+        // Refresh page to show updated status
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        dispatch(
+          showToast({
+            type: "error",
+            message: response.data.message || "Failed to schedule downgrade",
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error scheduling downgrade:", error);
+      dispatch(
+        showToast({
+          type: "error",
+          message:
+            error.response?.data?.message || "Failed to schedule downgrade",
+        })
+      );
+    } finally {
+      setPaymentLoading(false);
+      setSelectedDowngradePlan(null);
     }
   };
 
@@ -705,8 +762,9 @@ const UpgradePlan = () => {
                           >
                             <CloseCircleOutlined className="text-warning me-2" />
                             <small className="text-warning mb-0">
-                              Plan will expire at the end of this period. Renew
-                              to continue premium features.
+                              {subscriptionDetails.metadata?.downgradeTo
+                                ? `Plan will downgrade to ${subscriptionDetails.metadata.downgradeTo} at the end of this period.`
+                                : "Plan will expire at the end of this period. Renew to continue premium features."}
                             </small>
                           </div>
                         </div>
@@ -856,8 +914,23 @@ const UpgradePlan = () => {
               Basic Plan
             </Button>
           ) : isDowngrade(plan) ? (
-            <Button variant="primary" disabled className="px-4">
-              Upgrade
+            <Button
+              variant="outline-warning"
+              onClick={() => handleShowDowngradeConfirmation(plan)}
+              disabled={paymentLoading}
+              className="px-4"
+            >
+              {paymentLoading && selectedPlan?._id === plan._id ? (
+                <>
+                  <Spinner size="sm" className="me-2" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <ArrowDownOutlined className="me-1" />
+                  Downgrade
+                </>
+              )}
             </Button>
           ) : canUpgrade(plan) ? (
             <Button
@@ -1262,21 +1335,81 @@ const UpgradePlan = () => {
               <div className="mb-4">
                 <h6 className="fw-semibold mb-3">Billing Details</h6>
                 <div className="border rounded p-3 bg-light">
-                  {upgradePreview.billing.immediateCharge > 0 ? (
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span>Upgrade charge:</span>
+                    <span className="fw-semibold text-dark">
+                      ${upgradePreview.billing.immediateCharge.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {upgradePreview.billing.creditApplied > 0 && (
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span>Immediate charge:</span>
-                      <span className="fw-semibold text-primary">
-                        ${upgradePreview.billing.immediateCharge.toFixed(2)}
-                      </span>
-                    </div>
-                  ) : upgradePreview.billing.creditApplied > 0 ? (
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span>Credit applied:</span>
+                      <span>Plan credit applied:</span>
                       <span className="fw-semibold text-success">
-                        ${upgradePreview.billing.creditApplied.toFixed(2)}
+                        -${upgradePreview.billing.creditApplied.toFixed(2)}
                       </span>
                     </div>
-                  ) : null}
+                  )}
+
+                  {upgradePreview.credits && (
+                    <>
+                      {upgradePreview.credits.availableCredits > 0 && (
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span>Available Stripe credits:</span>
+                          <span className="fw-semibold text-info">
+                            $
+                            {upgradePreview.credits.availableCredits.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+
+                      {upgradePreview.credits.creditsToUse > 0 && (
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span>Stripe credits used:</span>
+                          <span className="fw-semibold text-warning">
+                            -${upgradePreview.credits.creditsToUse.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+
+                      <hr className="my-2" />
+
+                      <div className="d-flex justify-content-between align-items-center mb-3">
+                        <span className="fw-semibold">Final charge:</span>
+                        <span className="fw-bold text-primary fs-5">
+                          $
+                          {upgradePreview.credits.finalChargeAfterCredits.toFixed(
+                            2
+                          )}
+                        </span>
+                      </div>
+
+                      {upgradePreview.credits.finalChargeAfterCredits === 0 && (
+                        <div className="alert alert-success py-2 px-3 mb-2">
+                          <small>
+                            <i className="ti ti-check me-1"></i>
+                            Your upgrade will be fully covered by available
+                            credits!
+                          </small>
+                        </div>
+                      )}
+
+                      {upgradePreview.credits.remainingCreditsAfterPurchase >=
+                        0 && (
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span>Credits after purchase:</span>
+                          <span className="fw-semibold text-info">
+                            $
+                            {upgradePreview.credits.remainingCreditsAfterPurchase.toFixed(
+                              2
+                            )}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <hr className="my-2" />
 
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span>Next billing date:</span>
@@ -1317,104 +1450,122 @@ const UpgradePlan = () => {
               </div>
 
               {/* Payment Method Selection */}
-              {upgradePreview.billing.immediateCharge > 0 && (
-                <div className="mb-4">
-                  <h6 className="fw-semibold mb-3">
-                    <CreditCardOutlined className="me-2" />
-                    Payment Method
-                  </h6>
-                  {loadingPaymentMethods ? (
-                    <div className="text-center py-3">
-                      <Spinner size="sm" className="me-2" />
-                      Loading payment methods...
-                    </div>
-                  ) : paymentMethods.length > 0 ? (
-                    <div>
-                      <Select
-                        value={selectedPaymentMethod}
-                        onChange={setSelectedPaymentMethod}
-                        style={{ width: "100%" }}
-                        size="large"
-                        placeholder="Select a payment method"
-                        suffixIcon={<CreditCardOutlined />}
-                      >
-                        {paymentMethods.map((method) => (
-                          <Option key={method.id} value={method.id}>
-                            <div className="d-flex align-items-center justify-content-between w-100">
-                              <div className="d-flex align-items-center">
-                                <CreditCardOutlined className="me-2 text-primary" />
-                                <div className="d-flex gap-3">
-                                  <span
-                                    className="fw-semibold"
-                                    style={{ fontSize: "12px" }}
-                                  >
-                                    {method.card.brand.toUpperCase()} ••••{" "}
-                                    {method.card.last4}
-                                  </span>
-                                  <div
-                                    className="text-muted"
-                                    style={{ fontSize: "12px" }}
-                                  >
-                                    Expires{" "}
-                                    {String(method.card.exp_month).padStart(
-                                      2,
-                                      "0"
-                                    )}
-                                    /{method.card.exp_year}
+              {upgradePreview.credits &&
+                upgradePreview.credits.finalChargeAfterCredits > 0 && (
+                  <div className="mb-4">
+                    <h6 className="fw-semibold mb-3">
+                      <CreditCardOutlined className="me-2" />
+                      Payment Method
+                    </h6>
+                    {loadingPaymentMethods ? (
+                      <div className="text-center py-3">
+                        <Spinner size="sm" className="me-2" />
+                        Loading payment methods...
+                      </div>
+                    ) : paymentMethods.length > 0 ? (
+                      <div>
+                        <Select
+                          value={selectedPaymentMethod}
+                          onChange={setSelectedPaymentMethod}
+                          style={{ width: "100%" }}
+                          size="large"
+                          placeholder="Select a payment method"
+                          suffixIcon={<CreditCardOutlined />}
+                        >
+                          {paymentMethods.map((method) => (
+                            <Option key={method.id} value={method.id}>
+                              <div className="d-flex align-items-center justify-content-between w-100">
+                                <div className="d-flex align-items-center">
+                                  <CreditCardOutlined className="me-2 text-primary" />
+                                  <div className="d-flex gap-3">
+                                    <span
+                                      className="fw-semibold"
+                                      style={{ fontSize: "12px" }}
+                                    >
+                                      {method.card.brand.toUpperCase()} ••••{" "}
+                                      {method.card.last4}
+                                    </span>
+                                    <div
+                                      className="text-muted"
+                                      style={{ fontSize: "12px" }}
+                                    >
+                                      Expires{" "}
+                                      {String(method.card.exp_month).padStart(
+                                        2,
+                                        "0"
+                                      )}
+                                      /{method.card.exp_year}
+                                    </div>
                                   </div>
                                 </div>
+                                {method.isDefault && (
+                                  <Badge
+                                    color="green"
+                                    text="Default"
+                                    style={{ marginLeft: "auto" }}
+                                  />
+                                )}
                               </div>
-                              {method.isDefault && (
-                                <Badge
-                                  color="green"
-                                  text="Default"
-                                  style={{ marginLeft: "auto" }}
-                                />
-                              )}
-                            </div>
-                          </Option>
-                        ))}
-                      </Select>
-                      <div className="mt-3">
-                        <Link
-                          to={route.biilingInfo}
-                          className="btn btn-outline-primary btn-sm"
-                        >
-                          <CreditCardOutlined className="me-1" />
-                          Manage Payment Methods
-                        </Link>
+                            </Option>
+                          ))}
+                        </Select>
+                        <div className="mt-3">
+                          <Link
+                            to={route.biilingInfo}
+                            className="btn btn-outline-primary btn-sm"
+                          >
+                            <CreditCardOutlined className="me-1" />
+                            Manage Payment Methods
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="alert alert-warning">
-                      <i className="ti ti-alert-triangle me-2"></i>
-                      No payment methods found. Please add a payment method to
-                      continue.
-                      <div className="mt-2">
-                        <Link
-                          to={route.biilingInfo}
-                          className="btn btn-primary btn-sm"
-                        >
-                          <i className="ti ti-plus me-1"></i>
-                          Add Payment Method
-                        </Link>
+                    ) : (
+                      <div className="alert alert-warning">
+                        <i className="ti ti-alert-triangle me-2"></i>
+                        No payment methods found. Please add a payment method to
+                        continue.
+                        <div className="mt-2">
+                          <Link
+                            to={route.biilingInfo}
+                            className="btn btn-primary btn-sm"
+                          >
+                            <i className="ti ti-plus me-1"></i>
+                            Add Payment Method
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
 
               <div className="alert alert-info">
                 <i className="ti ti-info-circle me-2"></i>
                 <strong>What happens next?</strong>
                 <ul className="mb-0 mt-2">
                   <li>Your plan will be upgraded immediately</li>
-                  {upgradePreview.billing.immediateCharge > 0 && (
+                  {upgradePreview.credits &&
+                  upgradePreview.credits.finalChargeAfterCredits > 0 ? (
                     <li>
                       You'll be charged $
-                      {upgradePreview.billing.immediateCharge.toFixed(2)} today
-                      for the prorated amount
+                      {upgradePreview.credits.finalChargeAfterCredits.toFixed(
+                        2
+                      )}{" "}
+                      today (after applying available credits)
                     </li>
+                  ) : upgradePreview.credits &&
+                    upgradePreview.credits.finalChargeAfterCredits === 0 ? (
+                    <li>
+                      No charge today - your upgrade is fully covered by
+                      available credits
+                    </li>
+                  ) : (
+                    upgradePreview.billing.immediateCharge > 0 && (
+                      <li>
+                        You'll be charged $
+                        {upgradePreview.billing.immediateCharge.toFixed(2)}{" "}
+                        today for the prorated amount
+                      </li>
+                    )
                   )}
                   <li>
                     Future billing will be $
@@ -1436,7 +1587,8 @@ const UpgradePlan = () => {
             disabled={
               paymentLoading ||
               (upgradePreview &&
-                upgradePreview.billing.immediateCharge > 0 &&
+                upgradePreview.credits &&
+                upgradePreview.credits.finalChargeAfterCredits > 0 &&
                 (!selectedPaymentMethod || paymentMethods.length === 0))
             }
           >
@@ -1447,7 +1599,17 @@ const UpgradePlan = () => {
               </>
             ) : (
               `Confirm Upgrade${
-                upgradePreview && upgradePreview.billing.immediateCharge > 0
+                upgradePreview &&
+                upgradePreview.credits &&
+                upgradePreview.credits.finalChargeAfterCredits > 0
+                  ? ` - $${upgradePreview.credits.finalChargeAfterCredits.toFixed(
+                      2
+                    )}`
+                  : upgradePreview &&
+                    upgradePreview.credits &&
+                    upgradePreview.credits.finalChargeAfterCredits === 0
+                  ? " - Free with Credits"
+                  : upgradePreview && upgradePreview.billing.immediateCharge > 0
                   ? ` - $${upgradePreview.billing.immediateCharge.toFixed(2)}`
                   : ""
               }`
@@ -1515,7 +1677,7 @@ const UpgradePlan = () => {
                     formatDate(subscriptionDetails.currentPeriodEnd)}
                 </li>
                 <li>You won't be charged for the next billing cycle</li>
-                
+
                 <li>After expiration, you'll be moved to the Starter plan</li>
               </ul>
             </div>
@@ -1543,6 +1705,132 @@ const UpgradePlan = () => {
               <>
                 <CloseCircleOutlined className="me-1" />
                 Yes, Cancel Subscription
+              </>
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Downgrade Confirmation Modal */}
+      <Modal
+        show={showDowngradeConfirmationModal}
+        onHide={handleDowngradeConfirmationClose}
+        size="md"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="text-warning">
+            <ArrowDownOutlined className="me-2" />
+            Schedule Plan Downgrade
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedDowngradePlan && (
+            <div className="text-center mb-4">
+              <div className="mb-3">
+                <ArrowDownOutlined
+                  style={{ fontSize: "48px", color: "#faad14" }}
+                />
+              </div>
+              <h5 className="mb-3">
+                Downgrade to {selectedDowngradePlan.name}?
+              </h5>
+              <p className="text-muted mb-4">
+                Your plan will be downgraded at the end of your current billing
+                period. You'll continue to have access to your current plan
+                features until then.
+              </p>
+
+              {subscriptionDetails && (
+                <Card
+                  className="mb-4"
+                  style={{ background: "#f8f9fa" }}
+                  bodyStyle={{ padding: "12px 16px" }}
+                >
+                  <div className="row text-start">
+                    <div className="col-6">
+                      <small className="text-muted">Current Plan:</small>
+                      <div className="fw-semibold">
+                        {getCurrentPlan()?.name}
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <small className="text-muted">New Plan (from):</small>
+                      <div className="fw-semibold text-warning">
+                        {formatDate(subscriptionDetails.currentPeriodEnd)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row text-start mt-2">
+                    <div className="col-6">
+                      <small className="text-muted">Current Price:</small>
+                      <div className="fw-semibold text-success">
+                        ${(getCurrentPlan()?.price / 100 || 0).toFixed(2)}/month
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <small className="text-muted">New Price:</small>
+                      <div className="fw-semibold text-warning">
+                        ${(selectedDowngradePlan.price / 100).toFixed(2)}/month
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              <div className="alert alert-info text-start">
+                <strong>What happens after scheduling downgrade:</strong>
+                <ul className="mb-0 mt-2">
+                  <li>
+                    Your current plan remains active until{" "}
+                    {subscriptionDetails &&
+                      formatDate(subscriptionDetails.currentPeriodEnd)}
+                  </li>
+                  <li>
+                    No immediate charges or changes to your current features
+                  </li>
+                  <li>
+                    On{" "}
+                    {subscriptionDetails &&
+                      formatDate(subscriptionDetails.currentPeriodEnd)}
+                    , you'll automatically switch to{" "}
+                    {selectedDowngradePlan.name}
+                  </li>
+                  <li>
+                    Future billing will be $
+                    {(selectedDowngradePlan.price / 100).toFixed(2)}/month
+                  </li>
+                  <li>
+                    You can upgrade again at any time before the change takes
+                    effect
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleDowngradeConfirmationClose}
+            disabled={paymentLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="warning"
+            onClick={handleConfirmDowngrade}
+            disabled={paymentLoading}
+          >
+            {paymentLoading ? (
+              <>
+                <Spinner size="sm" className="me-2" />
+                Scheduling...
+              </>
+            ) : (
+              <>
+                <ArrowDownOutlined className="me-1" />
+                Schedule Downgrade
               </>
             )}
           </Button>
