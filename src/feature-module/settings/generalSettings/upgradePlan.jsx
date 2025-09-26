@@ -163,8 +163,8 @@ const UpgradePlan = () => {
   };
 
   const isScheduledForDowngrade = (plan) => {
-    // Check if this plan is already scheduled for downgrade
-    return subscriptionDetails?.metadata?.downgradeTo === plan.name;
+    // Check if this plan is already scheduled by comparing with scheduled plan info
+    return subscriptionDetails?.scheduledPlan?.name === plan.name;
   };
 
   const fetchUpgradePreview = async (plan) => {
@@ -435,6 +435,25 @@ const UpgradePlan = () => {
 
   const isCancelAtPeriodEnd = () => {
     return subscriptionDetails?.cancelAtPeriodEnd === true;
+  };
+
+  const formatScheduledDate = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp * 1000); // Convert Unix timestamp to Date
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const formatScheduledDateShort = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp * 1000); // Convert Unix timestamp to Date
+    return date.toLocaleDateString("en-US", {
+      month: "numeric",
+      day: "numeric",
+    });
   };
   console.log(subscriptionDetails);
 
@@ -962,8 +981,8 @@ const UpgradePlan = () => {
                           >
                             <CloseCircleOutlined className="text-warning me-2" />
                             <small className="text-warning mb-0">
-                              {subscriptionDetails.metadata?.downgradeTo
-                                ? `Plan will downgrade to ${subscriptionDetails.metadata.downgradeTo} at the end of this period.`
+                              {subscriptionDetails.scheduledPlan
+                                ? `Plan will downgrade to ${subscriptionDetails.scheduledPlan.name} at the end of this period.`
                                 : "Plan will expire at the end of this period. Renew to continue premium features."}
                             </small>
                           </div>
@@ -1117,7 +1136,11 @@ const UpgradePlan = () => {
             isScheduledForDowngrade(plan) ? (
               <Button variant="outline-success" disabled className="px-4">
                 <CheckCircleOutlined className="me-1" />
-                Scheduled
+                {subscriptionDetails.scheduledPlan.startDate
+                  ? `Starts ${formatScheduledDate(
+                      subscriptionDetails.scheduledPlan.startDate
+                    )}`
+                  : "Scheduled"}
               </Button>
             ) : (
               <Button
