@@ -449,7 +449,10 @@ const Sidebar = () => {
 
           {/* lower box content */}
           <div>
-            <div className="sidebarTrialBox">
+            <div
+              className="sidebarTrialBox cursor-pointer"
+              onClick={() => navigate(route.upgradePlan)}
+            >
               <div
                 className="d-flex justify-content-between"
                 style={{ marginBottom: 12 }}
@@ -488,7 +491,6 @@ const Sidebar = () => {
                           </p>
                           <p
                             className="upgradePlan"
-                            onClick={() => navigate(route.upgradePlan)}
                             style={{ cursor: "pointer" }}
                           >
                             Upgrade Plan
@@ -510,7 +512,6 @@ const Sidebar = () => {
                           {showUpgradeButton && (
                             <p
                               className="upgradePlan"
-                              onClick={() => navigate(route.upgradePlan)}
                               style={{ cursor: "pointer" }}
                             >
                               Upgrade Plan
@@ -534,7 +535,6 @@ const Sidebar = () => {
                           </p>
                           <p
                             className="upgradePlan"
-                            onClick={() => navigate(route.upgradePlan)}
                             style={{ cursor: "pointer" }}
                           >
                             Upgrade Plan
@@ -552,7 +552,6 @@ const Sidebar = () => {
                           {showUpgradeButton && (
                             <p
                               className="upgradePlan"
-                              onClick={() => navigate(route.upgradePlan)}
                               style={{ cursor: "pointer" }}
                             >
                               Upgrade Plan

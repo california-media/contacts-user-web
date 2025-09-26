@@ -1,12 +1,11 @@
-
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../../../axios/axiosInstance';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import api from "../../../axios/axiosInstance";
 
 export const fetchReferralData = createAsyncThunk(
-  'referral/fetchReferralData',
+  "referral/fetchReferralData",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get('/my-referrals');
+      const response = await api.get("/my-referrals/referral-data");
       return response.data.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || error.message);
@@ -15,12 +14,13 @@ export const fetchReferralData = createAsyncThunk(
 );
 
 const referralSlice = createSlice({
-  name: 'referral',
+  name: "referral",
   initialState: {
     data: {
       creditBalance: 0,
+      totalEarned: 0,
       referralCount: 0,
-      referralUrl: '',
+      referralUrl: "",
       referrals: [],
     },
     loading: false,

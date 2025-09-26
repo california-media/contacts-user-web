@@ -12,12 +12,49 @@ import EmailTemplateModal from "../../../core/common/modals/EmailTemplateModal";
 const ReferAndEarn = () => {
   const dispatch = useDispatch();
   const referralData = useSelector((state) => state.referral.data);
+  const referralLoading = useSelector((state) => state.referral.loading);
+  const referralError = useSelector((state) => state.referral.error);
   const referralLink = referralData.referralUrl;
-console.log(referralLink,"referralLink");
+
+  console.log("Referral Data:", referralData);
 
   useEffect(() => {
     dispatch(fetchReferralData());
   }, [dispatch]);
+
+  if (referralLoading) {
+    return (
+      <div className="page-wrapper">
+        <div className="content">
+          <div className="text-center py-5">
+            <div className="spinner-border" role="status">
+              <span className="sr-only">Loading...</span>
+            </div>
+            <p className="mt-2">Loading referral data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (referralError) {
+    return (
+      <div className="page-wrapper">
+        <div className="content">
+          <div className="alert alert-danger" role="alert">
+            <h4 className="alert-heading">Error!</h4>
+            <p>Failed to load referral data: {referralError}</p>
+            <button
+              className="btn btn-outline-danger"
+              onClick={() => dispatch(fetchReferralData())}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-wrapper">
@@ -90,7 +127,12 @@ console.log(referralLink,"referralLink");
 
         <div className="dashboardSmallCards mt-5 mb-5">
           <h3 className="text-lg font-semibold mb-4">
-            Total credit earned: ${referralData.creditBalance}
+            Total credit earned: $
+            {(
+              referralData.creditBalance ||
+              referralData.totalEarned ||
+              0
+            ).toFixed(2)}
           </h3>
           <div className="w-100 overflow-x-auto border-b mb-4">
             <table className="w-100">
