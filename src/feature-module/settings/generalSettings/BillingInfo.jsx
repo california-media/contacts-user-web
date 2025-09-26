@@ -22,6 +22,9 @@ import {
   Alert,
   Badge,
   Tooltip,
+  Table,
+  Statistic,
+  message,
 } from "antd";
 import {
   CreditCardOutlined,
@@ -32,6 +35,11 @@ import {
   StarFilled,
   WalletOutlined,
   InfoCircleOutlined,
+  EyeOutlined,
+  DownloadOutlined,
+  HistoryOutlined,
+  DollarOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 
 import "./upgradePlan.css";
@@ -63,6 +71,21 @@ const BillingInfo = () => {
   const [cardElement, setCardElement] = useState(null);
   const [processingPayment, setProcessingPayment] = useState(false);
   const [form] = Form.useForm();
+  const [billingHistory, setBillingHistory] = useState([]);
+  const [loadingBillingHistory, setLoadingBillingHistory] = useState(false);
+  const [billingHistorySummary, setBillingHistorySummary] = useState({
+    totalInvoices: 0,
+    totalPaid: 0,
+    totalOutstanding: 0,
+    currency: "usd",
+  });
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    showSizeChanger: true,
+    showQuickJumper: true,
+    showTotal: (total) => `Total ${total} items`,
+  });
 
   // Initialize Stripe
   useEffect(() => {
@@ -143,6 +166,7 @@ const BillingInfo = () => {
         fetchPaymentStatus(),
         fetchPaymentMethods(),
         fetchCreditBalance(),
+        fetchBillingHistory(),
       ]);
     } catch (error) {
       console.error("Error fetching billing data:", error);
@@ -206,6 +230,35 @@ const BillingInfo = () => {
       console.error("Error fetching credit balance:", error);
     }
     setLoadingCredits(false);
+  };
+
+  const fetchBillingHistory = async () => {
+    setLoadingBillingHistory(true);
+    try {
+      const response = await api.get("/user/payment/billing-history");
+      if (response.data.success) {
+        setBillingHistory(response.data.data.history);
+        setBillingHistorySummary(response.data.data.summary);
+      }
+    } catch (error) {
+      console.error("Error fetching billing history:", error);
+      dispatch(
+        showToast({
+          message: "Failed to load billing history",
+          variant: "warning",
+          heading: "Warning",
+        })
+      );
+    }
+    setLoadingBillingHistory(false);
+  };
+
+  const handleTableChange = (paginationConfig, filters, sorter) => {
+    setPagination({
+      ...pagination,
+      current: paginationConfig.current,
+      pageSize: paginationConfig.pageSize,
+    });
   };
 
   const handleAddPaymentMethod = async () => {
@@ -403,6 +456,137 @@ const BillingInfo = () => {
     }).format(amount);
   };
 
+  const getStatusColor = (status) => {
+    const statusColors = {
+      paid: "green",
+      open: "orange",
+      upcoming: "blue",
+      void: "red",
+      draft: "gray",
+      past_due: "orange",
+    };
+    return statusColors[status] || "default";
+  };
+
+  const getStatusText = (status) => {
+    const statusTexts = {
+      paid: "Paid",
+      open: "Outstanding",
+      upcoming: "Upcoming",
+      void: "Void",
+      draft: "Draft",
+      past_due: "Past Due",
+    };
+    return (
+      statusTexts[status] || status.charAt(0).toUpperCase() + status.slice(1)
+    );
+  };
+
+  const billingHistoryColumns = [
+    {
+      title: "Invoice",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
+      render: (text, record) => (
+        <div>
+          <Text strong={record.status === "upcoming"}>{text}</Text>
+          {record.invoiceNumber && (
+            <div>
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                Invoice #{record.invoiceNumber}
+              </Text>
+            </div>
+          )}
+          {/* {record.periodStart && record.periodEnd && (
+            <div>
+              <Text type="secondary" style={{ fontSize: "12px" }}>
+                Billing Period:{" "}
+                {new Date(record.periodStart).toLocaleDateString()} -{" "}
+                {new Date(record.periodEnd).toLocaleDateString()}
+              </Text>
+            </div>
+          )} */}
+        </div>
+      ),
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      width: 120,
+      render: (date) => <Text>{new Date(date).toLocaleDateString()}</Text>,
+      sorter: (a, b) => new Date(a.date) - new Date(b.date),
+      defaultSortOrder: "descend",
+    },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+      key: "amount",
+      width: 100,
+      render: (amount, record) => (
+        <Text
+          strong
+          style={{
+            color:
+              record.status === "upcoming"
+                ? "#1890ff"
+                : record.status === "paid"
+                ? "#52c41a"
+                : record.status === "open"
+                ? "#fa8c16"
+                : "#000",
+          }}
+        >
+          {formatCurrency(amount)}
+        </Text>
+      ),
+      sorter: (a, b) => a.amount - b.amount,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      width: 120,
+      render: (status, record) => (
+        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
+      ),
+      filters: [
+        { text: "Paid", value: "paid" },
+        { text: "Outstanding", value: "open" },
+        { text: "Upcoming", value: "upcoming" },
+      ],
+      onFilter: (value, record) => record.status === value,
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 100,
+      render: (_, record) => (
+        <Space size="small">
+          {record.hostedUrl && (
+            <Button
+              type="link"
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => window.open(record.hostedUrl, "_blank")}
+              title="View Invoice"
+            />
+          )}
+          {record.pdfUrl && (
+            <Button
+              type="link"
+              size="small"
+              icon={<DownloadOutlined />}
+              onClick={() => window.open(record.pdfUrl, "_blank")}
+              title="Download PDF"
+            />
+          )}
+        </Space>
+      ),
+    },
+  ];
+
   const renderPaymentMethodCard = (method) => (
     <Card
       key={method.id}
@@ -555,7 +739,12 @@ const BillingInfo = () => {
                               >
                                 <Row align="top" justify="space-between">
                                   <Col>
-                                    <Space style={{ alignItems: "flex-start", gap:"17px" }}>
+                                    <Space
+                                      style={{
+                                        alignItems: "flex-start",
+                                        gap: "17px",
+                                      }}
+                                    >
                                       <WalletOutlined
                                         style={{
                                           fontSize: "24px",
@@ -625,8 +814,7 @@ const BillingInfo = () => {
                                             <Text type="secondary">
                                               Next billing:{" "}
                                               {new Date(
-                                                paymentStatus.subscription
-                                                  .currentPeriodEnd 
+                                                paymentStatus.subscription.currentPeriodEnd
                                               ).toLocaleDateString()}
                                             </Text>
                                             <br />
@@ -696,13 +884,127 @@ const BillingInfo = () => {
 
                               {/* Billing History Section */}
                               <Card>
-                                <Title level={4}>Billing History</Title>
-                                <Alert
-                                  message="Billing History"
-                                  description="Your billing history will appear here. You can download invoices and view payment details."
-                                  type="info"
-                                  showIcon
-                                />
+                                <div className="mb-4">
+                                  <Row align="middle" justify="space-between">
+                                    <Col>
+                                      <Title level={4} className="mb-0">
+                                        <HistoryOutlined className="mr-2" />
+                                        <span
+                                          style={{ marginLeft: "19px" }}
+                                          className="ml-2"
+                                        >
+                                          Billing History
+                                        </span>
+                                      </Title>
+                                    </Col>
+                                    <Col>
+                                      <Button
+                                        type="text"
+                                        onClick={fetchBillingHistory}
+                                        loading={loadingBillingHistory}
+                                        icon={<HistoryOutlined />}
+                                      >
+                                        Refresh
+                                      </Button>
+                                    </Col>
+                                  </Row>
+                                </div>
+
+                                {/* Summary Statistics */}
+                                <div className="mb-4">
+                                  <Row gutter={16}>
+                                    <Col xs={36} sm={12}>
+                                      <Card
+                                        size="small"
+                                        className="text-center"
+                                      >
+                                        <Statistic
+                                          title="Total Invoices"
+                                          value={
+                                            billingHistorySummary.totalInvoices
+                                          }
+                                          prefix={<FileTextOutlined />}
+                                        />
+                                      </Card>
+                                    </Col>
+                                    <Col xs={36} sm={12}>
+                                      <Card
+                                        size="small"
+                                        className="text-center"
+                                      >
+                                        <Statistic
+                                          title="Total Paid"
+                                          value={
+                                            billingHistorySummary.totalPaid
+                                          }
+                                          precision={2}
+                                          prefix={<DollarOutlined />}
+                                          valueStyle={{ color: "#52c41a" }}
+                                        />
+                                      </Card>
+                                    </Col>
+                                    {/* <Col xs={24} sm={8}>
+                                      <Card
+                                        size="small"
+                                        className="text-center"
+                                      >
+                                        <Statistic
+                                          title="Outstanding"
+                                          value={
+                                            billingHistorySummary.totalOutstanding
+                                          }
+                                          precision={2}
+                                          prefix={<DollarOutlined />}
+                                          valueStyle={{
+                                            color:
+                                              billingHistorySummary.totalOutstanding >
+                                              0
+                                                ? "#fa8c16"
+                                                : "#52c41a",
+                                          }}
+                                        />
+                                      </Card>
+                                    </Col> */}
+                                  </Row>
+                                </div>
+
+                                {/* Billing History Table */}
+                                {loadingBillingHistory ? (
+                                  <div className="text-center p-4">
+                                    <Spin size="large" />
+                                    <div className="mt-2">
+                                      <Text type="secondary">
+                                        Loading billing history...
+                                      </Text>
+                                    </div>
+                                  </div>
+                                ) : billingHistory.length === 0 ? (
+                                  <Alert
+                                    message="No Billing History"
+                                    description="You don't have any billing history yet. Your invoices and subscription changes will appear here once you start using our services."
+                                    type="info"
+                                    showIcon
+                                    className="mb-3"
+                                  />
+                                ) : (
+                                  <Table
+                                    className="billing-history-table"
+                                    columns={billingHistoryColumns}
+                                    dataSource={billingHistory}
+                                    rowKey="id"
+                                    pagination={pagination}
+                                    onChange={handleTableChange}
+                                    scroll={{ x: 800 }}
+                                    size="small"
+                                    rowClassName={(record) => {
+                                      if (record.status === "upcoming")
+                                        return "billing-upcoming-row";
+                                      if (record.status === "open")
+                                        return "billing-outstanding-row";
+                                      return "";
+                                    }}
+                                  />
+                                )}
                               </Card>
                             </div>
                           )}
