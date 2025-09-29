@@ -998,9 +998,14 @@ const UpgradePlan = () => {
 
         <div className="text-center mb-3">
           {isCurrentPlan(plan) ? (
-            plan.name !== "Starter" &&
-            subscriptionDetails &&
-            !subscriptionDetails.cancelAtPeriodEnd ? (
+            isOnFreeTrial() ? (
+              <Button variant="primary" disabled className="px-4">
+                <CheckCircleOutlined className="me-1" />
+                Free Trial
+              </Button>
+            ) : plan.name !== "Starter" &&
+              subscriptionDetails &&
+              !subscriptionDetails.cancelAtPeriodEnd ? (
               <Button
                 variant="outline-danger"
                 onClick={handleShowCancelConfirmation}
@@ -1268,6 +1273,14 @@ const UpgradePlan = () => {
                 </div>
               </div>
 
+              {isOnFreeTrial() && (
+                <div className="alert alert-warning mb-3">
+                  <i className="ti ti-alert-triangle me-2"></i>
+                  <strong>Important:</strong> Your current free trial will be
+                  cancelled and replaced with this paid subscription.
+                </div>
+              )}
+
               {/* Tab Content */}
               <div className="tab-content">
                 {/* Checkout Tab */}
@@ -1503,10 +1516,21 @@ const UpgradePlan = () => {
                   </div>
                 )}
 
+              {isOnFreeTrial() && (
+                <div className="alert alert-warning mb-3">
+                  <i className="ti ti-alert-triangle me-2"></i>
+                  <strong>Important:</strong> Your current free trial will be
+                  cancelled and replaced with this paid subscription.
+                </div>
+              )}
+
               <div className="alert alert-info">
                 <i className="ti ti-info-circle me-2"></i>
                 <strong>What happens next?</strong>
                 <ul className="mb-0 mt-2">
+                  {isOnFreeTrial() && (
+                    <li>Your free trial will be cancelled immediately</li>
+                  )}
                   <li>Your subscription will be activated immediately</li>
                   {newSubscriptionPreview.credits &&
                   newSubscriptionPreview.credits.finalChargeAfterCredits > 0 ? (

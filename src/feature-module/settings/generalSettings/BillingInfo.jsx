@@ -115,6 +115,7 @@ const BillingInfo = () => {
               },
             },
           },
+          hidePostalCode: true,
         });
 
         // Check if element container exists before mounting
