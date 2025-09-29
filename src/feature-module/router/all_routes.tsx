@@ -39,6 +39,7 @@ export const all_routes = {
   emailSetup: "/general-settings/emailSetup",
   ImportAndExport: "/import-and-export",
   Api: "/api",
+  AdminApi: "/admin/api",
   SyncAndIntegration: "/sync-and-integration",
   HelpAndSupport: "/help-and-support",
   adminHelpAndSupport: "/admin/help-and-support",

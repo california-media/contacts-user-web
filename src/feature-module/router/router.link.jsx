@@ -88,6 +88,12 @@ export const adminRoutes = [
     route: Route,
     title: "User Details",
   },
+   {
+    path: route.AdminApi,
+    element: <Api />,
+    route: Route,
+    title: "Api",
+  },
   {
     path: route.managePlans,
     element: <ManagePlans />,

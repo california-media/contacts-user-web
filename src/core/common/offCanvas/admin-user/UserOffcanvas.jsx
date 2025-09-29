@@ -13,6 +13,8 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
+  const [userHasPaymentMethod, setUserHasPaymentMethod] = useState(false);
+  const [checkingPaymentMethod, setCheckingPaymentMethod] = useState(false);
   const fileInputRef = useRef(null);
   const offcanvasRef = useRef(null);
   const dispatch = useDispatch();
@@ -22,6 +24,13 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
     if (!formData.planId || !plans.length) return false;
     const selectedPlan = plans.find((plan) => plan._id === formData.planId);
     return selectedPlan?.name?.toLowerCase().includes("starter");
+  };
+
+  // Helper function to check if a plan is starter by ID
+  const isPlanStarter = (planId) => {
+    if (!planId || !plans.length) return false;
+    const plan = plans.find((p) => p._id === planId);
+    return plan?.name?.toLowerCase().includes("starter");
   };
 
   const [formData, setFormData] = useState({
@@ -75,8 +84,32 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
       setFormData(initialData);
       // Store original data for comparison
       setOriginalData({ ...initialData });
+
+      // Check if user has payment methods
+      checkUserPaymentMethods();
     }
   }, [selectedUser]);
+
+  // Function to check if user has payment methods
+  const checkUserPaymentMethods = async () => {
+    if (!selectedUser?.id) return;
+
+    try {
+      setCheckingPaymentMethod(true);
+      const response = await api.get(
+        `/admin/users/${selectedUser.id}/payment-methods`
+      );
+      if (response.data.status === "success") {
+        setUserHasPaymentMethod(response.data.data.hasPaymentMethod);
+      }
+    } catch (error) {
+      console.error("Error checking payment methods:", error);
+      // Default to false if error occurs
+      setUserHasPaymentMethod(false);
+    } finally {
+      setCheckingPaymentMethod(false);
+    }
+  };
 
   // Fetch plans for dropdown
   useEffect(() => {
@@ -143,6 +176,18 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
   };
 
   const handlePlanChange = (value) => {
+    // If user has no payment method and tries to select a non-starter plan, prevent it
+    if (!userHasPaymentMethod && value && !isPlanStarter(value)) {
+      dispatch(
+        showToast({
+          message:
+            "User must have a payment method to be assigned a premium plan",
+          variant: "error",
+        })
+      );
+      return;
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       planId: value,
@@ -548,24 +593,61 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                         style={{ width: "100%", height: "38px" }}
                         placeholder="Select a plan"
                         allowClear
-                        loading={loadingPlans}
+                        loading={loadingPlans || checkingPaymentMethod}
                         value={formData.planId || undefined}
                         onChange={handlePlanChange}
-                        options={[
-                          ...plans.map((plan) => ({
+                        options={plans
+                          .filter((plan) => {
+                            // If user has no payment method, only show starter plans
+                            if (!userHasPaymentMethod) {
+                              return plan.name
+                                .toLowerCase()
+                                .includes("starter");
+                            }
+                            // If user has payment method, show all plans
+                            return true;
+                          })
+                          .map((plan) => ({
                             value: plan._id,
                             label: `${plan.name} - $${(
                               plan.price / 100
                             ).toFixed(2)}/${plan.pricePeriod}`,
-                          })),
-                        ]}
+                          }))}
                       />
                       <small className="text-muted d-block mt-1">
                         Plan changes will create/update Stripe subscriptions
                         automatically
+                        
                       </small>
                     </div>
                   </div>
+
+                  {/* Payment Method Status */}
+                  {!checkingPaymentMethod && (
+                    <div className="row mb-3">
+                      <div className="col-md-12">
+                        <div
+                          className={`alert ${
+                            userHasPaymentMethod
+                              ? "alert-success"
+                              : "alert-warning"
+                          }`}
+                        >
+                          <strong>Payment Method Status:</strong>{" "}
+                          {userHasPaymentMethod ? (
+                            <span>
+                              User has payment methods set up
+                            </span>
+                          ) : (
+                            <span>
+                              User has no payment methods - only starter plans
+                              available
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Current Plan Status Display */}
                   {selectedUser?.plan?.subscriptionStatus && (
