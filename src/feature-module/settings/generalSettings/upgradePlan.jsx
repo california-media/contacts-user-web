@@ -413,11 +413,13 @@ const UpgradePlan = () => {
       // Check if user has an active subscription via API
       const hasActiveSubscription = await checkSubscriptionStatus();
       const currentPlan = getCurrentPlan();
+      const isOnTrial = isOnFreeTrial();
 
       console.log("Detailed subscription check:", {
         currentPlan,
         currentPlanName: currentPlan?.name,
         hasActiveSubscription,
+        isOnTrial,
         paymentMethodsCount: paymentMethods.length,
         subscriptionDetails: subscriptionDetails,
         subscriptionStatus: subscriptionDetails?.status,
@@ -427,25 +429,81 @@ const UpgradePlan = () => {
 
       try {
         let preview;
-        if (hasActiveSubscription) {
-          // Existing subscriber - use upgrade preview
-          console.log("Existing subscriber, fetching upgrade preview...");
+        // Treat trialing subscriptions as new purchases, not upgrades
+        if (hasActiveSubscription && !isOnTrial) {
+          // Existing paid subscriber - use upgrade preview
+          console.log("Existing paid subscriber, fetching upgrade preview...");
           console.log("Calling fetchUpgradePreview for plan:", plan.name);
           preview = await fetchUpgradePreview(plan);
           setUpgradePreview(preview);
           setShowUpgradeModal(true);
         } else {
-          // New subscriber - fetch preview from API
+          // New subscriber or trialing subscriber - check payment methods
           console.log(
-            "New subscriber, fetching subscription preview from API..."
+            isOnTrial
+              ? "Trialing subscriber, treating as new subscription..."
+              : "New subscriber, fetching subscription preview from API..."
           );
-          console.log(
-            "Calling fetchNewSubscriptionPreview for plan:",
-            plan.name
-          );
-          preview = await fetchNewSubscriptionPreview(plan);
-          setNewSubscriptionPreview(preview);
-          setShowNewSubscriptionModal(true);
+
+          // Ensure payment methods are loaded
+          let currentPaymentMethods = paymentMethods;
+          if (paymentMethods.length === 0 && !loadingPaymentMethods) {
+            console.log("Payment methods not loaded, fetching...");
+            await fetchPaymentMethods();
+            // After fetching, we need to get the updated payment methods from the API response
+            // Since state update is async, let's fetch them directly here
+            try {
+              const pmResponse = await api.get("/user/payment/payment-methods");
+              if (pmResponse.data.success) {
+                currentPaymentMethods = pmResponse.data.paymentMethods;
+                console.log(
+                  "Fetched payment methods directly:",
+                  currentPaymentMethods.length
+                );
+              }
+            } catch (pmError) {
+              console.error(
+                "Error fetching payment methods directly:",
+                pmError
+              );
+            }
+          }
+
+          // If user has no payment methods, use checkout session approach
+          if (currentPaymentMethods.length === 0) {
+            console.log("No payment methods found, using checkout session...");
+
+            // Create checkout session
+            const checkoutResponse = await api.post(
+              "/user/payment/create-checkout-session",
+              {
+                planId: plan._id,
+                autoRenewal: true,
+              }
+            );
+
+            if (checkoutResponse.data.success) {
+              setClientSecret(checkoutResponse.data.clientSecret);
+              setShowPaymentModal(true);
+            } else {
+              throw new Error(
+                checkoutResponse.data.message ||
+                  "Failed to create checkout session"
+              );
+            }
+          } else {
+            // User has payment methods, use new subscription modal
+            console.log(
+              "Payment methods available, using subscription modal..."
+            );
+            console.log(
+              "Calling fetchNewSubscriptionPreview for plan:",
+              plan.name
+            );
+            preview = await fetchNewSubscriptionPreview(plan);
+            setNewSubscriptionPreview(preview);
+            setShowNewSubscriptionModal(true);
+          }
         }
 
         setPaymentLoading(false); // Stop loading since we're showing modal
@@ -453,11 +511,12 @@ const UpgradePlan = () => {
       } catch (previewError) {
         console.error("Error fetching preview:", previewError);
 
-        // If it's a "NO_ACTIVE_SUBSCRIPTION" error and we thought they had an active subscription,
+        // If it's a "NO_ACTIVE_SUBSCRIPTION" error and we thought they had an active paid subscription,
         // fall back to fetching a new subscription preview
         if (
           previewError.response?.data?.code === "NO_ACTIVE_SUBSCRIPTION" &&
-          hasActiveSubscription
+          hasActiveSubscription &&
+          !isOnTrial
         ) {
           console.log(
             "Falling back to new subscription preview due to no active subscription found"
