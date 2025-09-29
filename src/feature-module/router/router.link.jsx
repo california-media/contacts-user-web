@@ -41,6 +41,7 @@ import ManagePlans from "../settings/generalSettings/ManagePlans";
 import ManageTickets from "../settings/generalSettings/ManageTickets";
 import ManageCoupons from "../settings/generalSettings/ManageCoupons";
 import BillingInfo from "../settings/generalSettings/BillingInfo";
+import PaymentUnsuccessful from "../otherPages/PaymentUnsuccessful";
 
 const route = all_routes;
 
@@ -338,5 +339,11 @@ export const authRoutes = [
     element: <PaymentSuccess />,
     route: Route,
     title: "Payment Success",
+  },
+  {
+    path: route.paymentUnsuccessful,
+    element: <PaymentUnsuccessful />,
+    route: Route,
+    title: "Payment Unsuccessful",
   },
 ];

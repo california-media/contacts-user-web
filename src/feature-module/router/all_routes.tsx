@@ -50,4 +50,5 @@ export const all_routes = {
   manageTickets: "/admin/manage-tickets",
   manageCoupons: "/admin/manage-coupons",
   paymentSuccess: "/payment-success",
+  paymentUnsuccessful: "/payment-unsuccessful",
 };

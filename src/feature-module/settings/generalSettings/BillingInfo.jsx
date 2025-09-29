@@ -773,7 +773,7 @@ const BillingInfo = () => {
                                           className="mb-0"
                                           style={{ color: "#52c41a" }}
                                         >
-                                          {formatCurrency(creditBalance/100)}
+                                          {formatCurrency(creditBalance / 100)}
                                         </Title>
                                       )}
                                     </div>

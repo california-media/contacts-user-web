@@ -55,7 +55,7 @@ const PaymentSuccess = () => {
         setTimeout(() => {
           setRedirecting(true);
           startCountdown();
-        }, 3000);
+        }, 2000);
       } catch (error) {
         console.error(
           "Subscription completion failed:",
@@ -71,7 +71,7 @@ const PaymentSuccess = () => {
         setTimeout(() => {
           setRedirecting(true);
           startCountdown();
-        }, 3000);
+        }, 2000);
       }
     };
 

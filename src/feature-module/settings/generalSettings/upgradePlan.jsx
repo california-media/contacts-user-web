@@ -14,10 +14,7 @@ import {
 import api from "../../../core/axios/axiosInstance";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 import { loadStripe } from "@stripe/stripe-js";
-import {
-  EmbeddedCheckoutProvider,
-  EmbeddedCheckout,
-} from "@stripe/react-stripe-js";
+// Embedded checkout components removed - using hosted checkout for Payment Options Modal
 import "./upgradePlan.css";
 
 const { Option } = Select;
@@ -27,39 +24,7 @@ const stripePromise = loadStripe(
   "pk_test_51JM78KBtOBT8b78eKkjaaXWTEBvsBvmV1VYV3kaRXVgjCYNVLUPK7MNPQEpHgdihSUOtPEfG8WPsVqoHgBBsev2600RynHqIML"
 );
 
-// Checkout Form Component
-const CheckoutForm = ({ clientSecret, onSuccess, onCancel, planDetails }) => {
-  const fetchClientSecret = () => {
-    // Return the clientSecret directly since it's passed as prop
-    return Promise.resolve(clientSecret);
-  };
-
-  return (
-    <div>
-      {/* <div className="mb-3">
-        <h5>Complete your upgrade to {planDetails.name}</h5>
-        <p className="text-muted">
-          Amount: ${(planDetails.price / 100).toFixed(2)}/month
-        </p>
-      </div> */}
-
-      <EmbeddedCheckoutProvider
-        stripe={stripePromise}
-        options={{
-          fetchClientSecret,
-        }}
-      >
-        <EmbeddedCheckout />
-      </EmbeddedCheckoutProvider>
-
-      <div className="d-flex justify-content-end gap-2 mt-4">
-        <Button variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </div>
-  );
-};
+// CheckoutForm component removed - using hosted checkout redirect for Payment Options Modal
 
 const UpgradePlan = () => {
   const route = all_routes;
@@ -74,10 +39,8 @@ const UpgradePlan = () => {
     useState(false);
   const [upgradePreview, setUpgradePreview] = useState(null);
   const [newSubscriptionPreview, setNewSubscriptionPreview] = useState(null);
-  const [clientSecret, setClientSecret] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const [activePaymentTab, setActivePaymentTab] = useState("checkout"); // "checkout" or "credits"
   const [creditBalance, setCreditBalance] = useState(0);
   const [loadingCredits, setLoadingCredits] = useState(false);
   const [subscriptionDetails, setSubscriptionDetails] = useState(null);
@@ -385,7 +348,6 @@ const UpgradePlan = () => {
 
   const handlePaymentSuccess = () => {
     setShowPaymentModal(false);
-    setClientSecret("");
     setSelectedPlan(null);
     // Refresh user profile to get updated plan
     // window.location.reload();
@@ -393,7 +355,6 @@ const UpgradePlan = () => {
 
   const handlePaymentCancel = () => {
     setShowPaymentModal(false);
-    setClientSecret("");
     setSelectedPlan(null);
   };
 
@@ -469,26 +430,35 @@ const UpgradePlan = () => {
             }
           }
 
-          // If user has no payment methods, use checkout session approach
+          // If user has no payment methods, use hosted checkout redirect approach
           if (currentPaymentMethods.length === 0) {
-            console.log("No payment methods found, using checkout session...");
+            console.log(
+              "No payment methods found, redirecting to hosted checkout..."
+            );
 
-            // Create checkout session
+            // Create hosted checkout session with redirect URLs
             const checkoutResponse = await api.post(
-              "/user/payment/create-checkout-session",
+              "/user/payment/create-hosted-checkout-session",
               {
                 planId: plan._id,
                 autoRenewal: true,
+                successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+                cancelUrl: `${window.location.origin}/payment-unsuccessful?error=Payment cancelled`,
               }
             );
 
             if (checkoutResponse.data.success) {
-              setClientSecret(checkoutResponse.data.clientSecret);
-              setShowPaymentModal(true);
+              // Redirect to Stripe's hosted checkout page
+              console.log(
+                "Redirecting to hosted checkout:",
+                checkoutResponse.data.url
+              );
+              window.location.href = checkoutResponse.data.url;
+              return; // Exit the function as we're redirecting
             } else {
               throw new Error(
                 checkoutResponse.data.message ||
-                  "Failed to create checkout session"
+                  "Failed to create hosted checkout session"
               );
             }
           } else {
@@ -1283,17 +1253,19 @@ const UpgradePlan = () => {
 
               {/* Tab Content */}
               <div className="tab-content">
-                {/* Checkout Tab */}
-                {activePaymentTab === "checkout" && clientSecret && (
-                  <div className="tab-pane fade show active">
-                    <CheckoutForm
-                      clientSecret={clientSecret}
-                      onSuccess={handlePaymentSuccess}
-                      onCancel={handlePaymentCancel}
-                      planDetails={selectedPlan}
-                    />
+                {/* This modal should not show for users without payment methods anymore */}
+                {/* Users without payment methods will be redirected to hosted checkout */}
+                <div className="text-center py-4">
+                  <div
+                    className="spinner-border text-primary mb-3"
+                    role="status"
+                  >
+                    <span className="visually-hidden">Loading...</span>
                   </div>
-                )}
+                  <p className="text-muted">
+                    Redirecting to secure checkout...
+                  </p>
+                </div>
               </div>
             </div>
           )}
