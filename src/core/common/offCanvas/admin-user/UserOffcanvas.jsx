@@ -13,7 +13,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [plans, setPlans] = useState([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
-  const [userHasPaymentMethod, setUserHasPaymentMethod] = useState(false);
+  const [userHasPaymentMethod, setUserHasPaymentMethod] = useState(false); ///checks if user has default payment method setup
   const [checkingPaymentMethod, setCheckingPaymentMethod] = useState(false);
   const fileInputRef = useRef(null);
   const offcanvasRef = useRef(null);
@@ -100,7 +100,8 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
         `/admin/users/${selectedUser.id}/payment-methods`
       );
       if (response.data.status === "success") {
-        setUserHasPaymentMethod(response.data.data.hasPaymentMethod);
+
+        setUserHasPaymentMethod(!!response.data.data.defaultPaymentMethod);
       }
     } catch (error) {
       console.error("Error checking payment methods:", error);
@@ -178,7 +179,12 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
 
   const handlePlanChange = (value) => {
     // If user has no payment method and tries to select a non-starter plan, prevent it
-    if (!userHasPaymentMethod && value && !isPlanStarter(value)) {
+    if (
+      !userHasPaymentMethod &&
+      value &&
+      !isPlanStarter(value) &&
+      value !== originalData.planId
+    ) {
       dispatch(
         showToast({
           message:
@@ -601,9 +607,10 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                           .filter((plan) => {
                             // If user has no payment method, only show starter plans
                             if (!userHasPaymentMethod) {
-                              return plan.name
-                                .toLowerCase()
-                                .includes("starter");
+                              return (
+                                plan.name.toLowerCase().includes("starter") ||
+                                plan._id === originalData.planId
+                              );
                             }
                             // If user has payment method, show all plans
                             return true;
@@ -618,7 +625,6 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                       <small className="text-muted d-block mt-1">
                         Plan changes will create/update Stripe subscriptions
                         automatically
-                        
                       </small>
                     </div>
                   </div>
@@ -636,12 +642,10 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                         >
                           <strong>Payment Method Status:</strong>{" "}
                           {userHasPaymentMethod ? (
-                            <span>
-                              User has payment methods set up
-                            </span>
+                            <span>User has a default payment method set up</span>
                           ) : (
                             <span>
-                              User has no payment methods - only starter plans
+                              User has no default payment method setup - only starter plan
                               available
                             </span>
                           )}
@@ -686,7 +690,8 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
                       <small>
                         <i className="fas fa-exclamation-triangle me-1"></i>
                         Immediate billing: User will be charged immediately for
-                        the selected plan via Stripe.
+                        the selected plan via Stripe. Current subscription will
+                        be replaced by the selected plan.
                       </small>
                     </div>
                   )}
