@@ -9,6 +9,7 @@ import LoadingIndicator from "../../../core/common/loadingIndicator/LoadingIndic
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
 
 import api from "../../../core/axios/axiosInstance";
+import { Spin } from "antd";
 
 const AdminDashboard = () => {
   const userProfile = useSelector((state) => state.profile);
@@ -47,7 +48,7 @@ const AdminDashboard = () => {
       {isLoading ? (
         <div className="d-flex justify-content-center align-items-center vh-100 w-100">
           {" "}
-          <LoadingIndicator2 />
+        <Spin size="large" />
         </div>
       ) : (
         <>

@@ -113,6 +113,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
 
   // Fetch plans for dropdown
   useEffect(() => {
+    console.log("Fetching plans...");
     const fetchPlans = async () => {
       try {
         setLoadingPlans(true);
@@ -134,7 +135,7 @@ const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
     };
 
     fetchPlans();
-  }, [dispatch]);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

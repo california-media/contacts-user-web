@@ -7,6 +7,7 @@ import PlanModal from "./PlanModal"; // We'll create this component
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
 import { Modal } from "bootstrap";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
+import { Spin } from "antd";
 
 const ManagePlans = () => {
   const [plans, setPlans] = useState([]);
@@ -136,7 +137,7 @@ const ManagePlans = () => {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 w-100">
         {" "}
-        <LoadingIndicator2 />
+    <Spin size="large" />
       </div>
     );
   }

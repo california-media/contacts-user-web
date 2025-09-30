@@ -3,6 +3,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
 import LoadingIndicator2 from "../../core/common/loadingIndicator/LoadingIndicator2";
+import { Spin } from "antd";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -16,7 +17,7 @@ const PrivateRoute = ({ children }) => {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 w-100">
         {" "}
-        <LoadingIndicator2 />
+        <Spin size="large" />
       </div>
     ); // Or your custom loading component
   }

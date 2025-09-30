@@ -12,6 +12,7 @@ import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarIn
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
 import CopyableInput from "../../../core/common/CopyableInput";
 import Calendar from "../calendar/Calendar";
+import { Spin } from "antd";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -151,7 +152,7 @@ const Dashboard = () => {
       {isLoading ? (
         <div className="d-flex justify-content-center align-items-center vh-100 w-100">
           {" "}
-          <LoadingIndicator2 />
+           <Spin size="large" />
         </div>
       ) : (
         <>

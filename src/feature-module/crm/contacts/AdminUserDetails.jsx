@@ -350,7 +350,7 @@ const AdminUserDetails = () => {
   const chartConfig = {
     data: revenueData,
     xField: "month",
-    yField: "revenue",
+    yField: "Revenue",
     point: {
       size: 5,
       shape: "diamond",
@@ -360,14 +360,7 @@ const AdminUserDetails = () => {
         fill: "#aaa",
       },
     },
-    tooltip: {
-      formatter: (datum) => {
-        return {
-          name: "Revenue",
-          value: formatCurrency(datum.revenue),
-        };
-      },
-    },
+   
     yAxis: {
       label: {
         formatter: (v) => formatCurrency(Number(v)),
@@ -402,7 +395,7 @@ const AdminUserDetails = () => {
       {/* Page Wrapper */}
       <div className="page-wrapper">
         {loading ? (
-          <LoadingIndicator2 />
+     <Spin size="large" />
         ) : (
           <div className="content">
             <div className="row">
@@ -963,7 +956,7 @@ const AdminUserDetails = () => {
                                     value={
                                       revenueData.length > 0
                                         ? revenueData[revenueData.length - 1]
-                                            ?.revenue || 0
+                                            ?.Revenue || 0
                                         : 0
                                     }
                                     prefix={<DollarOutlined />}
@@ -976,7 +969,7 @@ const AdminUserDetails = () => {
                             {/* Revenue Chart */}
                             {revenueData.length > 0 && (
                               <Card style={{ marginBottom: 24 }}>
-                                <Title level={5}>Revenue Over Time</Title>
+                                <Title level={5}>Monthly Revenue Over Time</Title>
                                 <Line {...chartConfig} />
                               </Card>
                             )}

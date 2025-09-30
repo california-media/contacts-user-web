@@ -83,12 +83,18 @@ export const adminRoutes = [
     title: "Profile",
   },
   {
+    path: route.adminProfile,
+    element: <Security />,
+    route: Route,
+    title: "Security",
+  },
+  {
     path: route.adminUserDetails,
     element: <AdminUserDetails />,
     route: Route,
     title: "User Details",
   },
-   {
+  {
     path: route.AdminApi,
     element: <Api />,
     route: Route,
