@@ -1509,7 +1509,7 @@ const UpgradePlan = () => {
                           {couponValidation.discountType === "percentage"
                             ? `${couponValidation.discountValue}% off`
                             : `$${(
-                                couponValidation.discountValue / 100
+                                couponValidation.discountValue
                               ).toFixed(2)} off`}
                           {couponValidation.validUntil && (
                             <span className="text-muted">
@@ -1966,7 +1966,7 @@ const UpgradePlan = () => {
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span>Upgrade charge:</span>
                     <span className="fw-semibold text-dark">
-                      ${upgradePreview.billing.immediateCharge.toFixed(2)}
+                      ${upgradePreview.newPlan.price.toFixed(2)}
                     </span>
                   </div>
 
