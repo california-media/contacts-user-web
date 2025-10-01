@@ -54,6 +54,12 @@ const UpgradePlan = () => {
     useState(false);
   const [selectedDowngradePlan, setSelectedDowngradePlan] = useState(null);
 
+  // Coupon-related state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponValidation, setCouponValidation] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState(null);
+
   // Fetch plans on component mount
   useEffect(() => {
     fetchPlans();
@@ -130,11 +136,12 @@ const UpgradePlan = () => {
     return subscriptionDetails?.scheduledPlan?.name === plan.name;
   };
 
-  const fetchUpgradePreview = async (plan) => {
+  const fetchUpgradePreview = async (plan, couponCode = null) => {
     try {
-      const response = await api.post("/user/payment/preview-upgrade", {
-        planId: plan._id,
-      });
+      const payload = { planId: plan._id };
+      if (couponCode) payload.couponCode = couponCode;
+
+      const response = await api.post("/user/payment/preview-upgrade", payload);
 
       if (response.data.success) {
         return response.data.preview;
@@ -147,13 +154,14 @@ const UpgradePlan = () => {
     }
   };
 
-  const fetchNewSubscriptionPreview = async (plan) => {
+  const fetchNewSubscriptionPreview = async (plan, couponCode = null) => {
     try {
+      const payload = { planId: plan._id };
+      if (couponCode) payload.couponCode = couponCode;
+
       const response = await api.post(
         "/user/payment/preview-new-subscription",
-        {
-          planId: plan._id,
-        }
+        payload
       );
 
       if (response.data.success) {
@@ -166,6 +174,105 @@ const UpgradePlan = () => {
     } catch (error) {
       console.error("Error fetching new subscription preview:", error);
       throw error;
+    }
+  };
+
+  const validateCouponCode = async (code) => {
+    if (!code.trim()) {
+      setCouponValidation(null);
+      setCouponError(null);
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+      setCouponError(null);
+
+      const response = await api.post("/user/payment/validate-coupon", {
+        couponCode: code.trim(),
+      });
+
+      if (response.data.success) {
+        setCouponValidation(response.data.coupon);
+        setCouponError(null);
+        return response.data.coupon;
+      } else {
+        setCouponValidation(null);
+        setCouponError(response.data.message || "Invalid coupon code");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error validating coupon:", error);
+      setCouponValidation(null);
+      setCouponError(
+        error.response?.data?.message || "Failed to validate coupon"
+      );
+      return null;
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleCouponChange = (value) => {
+    setCouponCode(value);
+    // Clear validation when user types (they need to click apply)
+    if (couponValidation || couponError) {
+      setCouponValidation(null);
+      setCouponError(null);
+    }
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError("Please enter a coupon code");
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+
+      // First validate the coupon
+      const couponData = await validateCouponCode(couponCode);
+
+      if (couponData && selectedPlan) {
+        // If valid, refresh the preview with coupon
+        if (showNewSubscriptionModal) {
+          const preview = await fetchNewSubscriptionPreview(
+            selectedPlan,
+            couponCode
+          );
+          setNewSubscriptionPreview(preview);
+        } else if (showUpgradeModal) {
+          const preview = await fetchUpgradePreview(selectedPlan, couponCode);
+          setUpgradePreview(preview);
+        }
+      }
+    } catch (error) {
+      console.error("Error applying coupon:", error);
+      setCouponError("Failed to apply coupon. Please try again.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = async () => {
+    setCouponCode("");
+    setCouponValidation(null);
+    setCouponError(null);
+
+    // Refresh preview without coupon
+    if (selectedPlan) {
+      try {
+        if (showNewSubscriptionModal) {
+          const preview = await fetchNewSubscriptionPreview(selectedPlan, null);
+          setNewSubscriptionPreview(preview);
+        } else if (showUpgradeModal) {
+          const preview = await fetchUpgradePreview(selectedPlan, null);
+          setUpgradePreview(preview);
+        }
+      } catch (error) {
+        console.error("Error refreshing preview:", error);
+      }
     }
   };
 
@@ -344,6 +451,10 @@ const UpgradePlan = () => {
     setUpgradePreview(null);
     setSelectedPlan(null);
     setPaymentLoading(false);
+    // Clear coupon state
+    setCouponCode("");
+    setCouponValidation(null);
+    setCouponError(null);
   };
 
   const handlePaymentSuccess = () => {
@@ -363,6 +474,10 @@ const UpgradePlan = () => {
     setNewSubscriptionPreview(null);
     setSelectedPlan(null);
     setPaymentLoading(false);
+    // Clear coupon state
+    setCouponCode("");
+    setCouponValidation(null);
+    setCouponError(null);
   };
 
   const handleUpgrade = async (plan) => {
@@ -370,6 +485,11 @@ const UpgradePlan = () => {
       setPaymentLoading(true);
       console.log("Selected plan for upgrade:", plan);
       setSelectedPlan(plan);
+
+      // Clear coupon state when selecting a new plan
+      setCouponCode("");
+      setCouponValidation(null);
+      setCouponError(null);
 
       // Check if user has an active subscription via API
       const hasActiveSubscription = await checkSubscriptionStatus();
@@ -639,6 +759,7 @@ const UpgradePlan = () => {
           response = await api.post("/user/payment/purchase-with-credits", {
             planId: selectedPlan._id,
             autoRenewal: true,
+            ...(couponCode && { couponCode: couponCode.trim() }),
           });
         } else {
           // Need to charge payment method - use upgrade endpoint as it handles payment methods
@@ -646,6 +767,7 @@ const UpgradePlan = () => {
             planId: selectedPlan._id,
             autoRenewal: true,
             paymentMethodId: selectedPaymentMethod,
+            ...(couponCode && { couponCode: couponCode.trim() }),
           });
         }
       } else {
@@ -655,6 +777,7 @@ const UpgradePlan = () => {
           planId: selectedPlan._id,
           autoRenewal: true,
           paymentMethodId: selectedPaymentMethod,
+          ...(couponCode && { couponCode: couponCode.trim() }),
         });
       }
 
@@ -718,6 +841,7 @@ const UpgradePlan = () => {
           planId: selectedPlan._id,
           paymentMethodId: selectedPaymentMethod,
           autoRenewal: true, // Default to true for new subscriptions
+          ...(couponCode && { couponCode: couponCode.trim() }),
         }
       );
 
@@ -1303,6 +1427,106 @@ const UpgradePlan = () => {
                 </div>
               </div>
 
+              {/* Coupon Code Section */}
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">
+                  <i className="ti ti-ticket me-2"></i>
+                  Promo Code
+                </h6>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      couponError
+                        ? "is-invalid"
+                        : couponValidation
+                        ? "is-valid"
+                        : ""
+                    }`}
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={(e) => handleCouponChange(e.target.value)}
+                    disabled={couponLoading}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        handleApplyCoupon();
+                      }
+                    }}
+                  />
+                  {couponValidation ? (
+                    <button
+                      className="btn btn-outline-danger"
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      disabled={couponLoading}
+                      title="Remove coupon"
+                    >
+                      <i className="ti ti-x"></i>
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary"
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                    >
+                      {couponLoading ? (
+                        <>
+                          <div
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                          >
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                          Applying...
+                        </>
+                      ) : (
+                        <>
+                          <i className="ti ti-check me-1"></i>
+                          Apply
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {couponError && (
+                  <div className="text-danger mt-2 small">
+                    <i className="ti ti-alert-circle me-1"></i>
+                    {couponError}
+                  </div>
+                )}
+
+                {couponValidation && (
+                  <div className="alert alert-success mt-2 py-2 px-3">
+                    <div className="d-flex align-items-center">
+                      <i className="ti ti-check me-2"></i>
+                      <div>
+                        <strong>
+                          {couponValidation.name || couponValidation.couponCode}
+                        </strong>
+                        <div className="small">
+                          {couponValidation.discountType === "percentage"
+                            ? `${couponValidation.discountValue}% off`
+                            : `$${(
+                                couponValidation.discountValue / 100
+                              ).toFixed(2)} off`}
+                          {couponValidation.validUntil && (
+                            <span className="text-muted">
+                              {" "}
+                              • Valid until{" "}
+                              {new Date(
+                                couponValidation.validUntil
+                              ).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="mb-4">
                 <h6 className="fw-semibold mb-3">Billing Details</h6>
                 <div className="border rounded p-3 bg-light">
@@ -1312,6 +1536,22 @@ const UpgradePlan = () => {
                       ${newSubscriptionPreview.plan.price.toFixed(2)}
                     </span>
                   </div>
+
+                  {newSubscriptionPreview.coupon &&
+                    newSubscriptionPreview.coupon.isApplied && (
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span>
+                          Coupon discount (
+                          {newSubscriptionPreview.coupon.couponCode}):
+                        </span>
+                        <span className="fw-semibold text-success">
+                          -$
+                          {newSubscriptionPreview.coupon.discountAmount?.toFixed(
+                            2
+                          ) || "0.00"}
+                        </span>
+                      </div>
+                    )}
 
                   {newSubscriptionPreview.credits && (
                     <>
@@ -1620,6 +1860,106 @@ const UpgradePlan = () => {
                 </div>
               </div>
 
+              {/* Coupon Code Section */}
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">
+                  <i className="ti ti-ticket me-2"></i>
+                  Promo Code
+                </h6>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      couponError
+                        ? "is-invalid"
+                        : couponValidation
+                        ? "is-valid"
+                        : ""
+                    }`}
+                    placeholder="Enter coupon code"
+                    value={couponCode}
+                    onChange={(e) => handleCouponChange(e.target.value)}
+                    disabled={couponLoading}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        handleApplyCoupon();
+                      }
+                    }}
+                  />
+                  {couponValidation ? (
+                    <button
+                      className="btn btn-outline-danger"
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      disabled={couponLoading}
+                      title="Remove coupon"
+                    >
+                      <i className="ti ti-x"></i>
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary"
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading || !couponCode.trim()}
+                    >
+                      {couponLoading ? (
+                        <>
+                          <div
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                          >
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                          Applying...
+                        </>
+                      ) : (
+                        <>
+                          <i className="ti ti-check me-1"></i>
+                          Apply
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {couponError && (
+                  <div className="text-danger mt-2 small">
+                    <i className="ti ti-alert-circle me-1"></i>
+                    {couponError}
+                  </div>
+                )}
+
+                {couponValidation && (
+                  <div className="alert alert-success mt-2 py-2 px-3">
+                    <div className="d-flex align-items-center">
+                      <i className="ti ti-check me-2"></i>
+                      <div>
+                        <strong>
+                          {couponValidation.name || couponValidation.couponCode}
+                        </strong>
+                        <div className="small">
+                          {couponValidation.discountType === "percentage"
+                            ? `${couponValidation.discountValue}% off`
+                            : `$${(
+                                couponValidation.discountValue / 100
+                              ).toFixed(2)} off`}
+                          {couponValidation.validUntil && (
+                            <span className="text-muted">
+                              {" "}
+                              • Valid until{" "}
+                              {new Date(
+                                couponValidation.validUntil
+                              ).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="mb-4">
                 <h6 className="fw-semibold mb-3">Billing Details</h6>
                 <div className="border rounded p-3 bg-light">
@@ -1629,6 +1969,19 @@ const UpgradePlan = () => {
                       ${upgradePreview.billing.immediateCharge.toFixed(2)}
                     </span>
                   </div>
+
+                  {upgradePreview.coupon && upgradePreview.coupon.isApplied && (
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span>
+                        Coupon discount ({upgradePreview.coupon.couponCode}):
+                      </span>
+                      <span className="fw-semibold text-success">
+                        -$
+                        {upgradePreview.coupon.discountAmount?.toFixed(2) ||
+                          "0.00"}
+                      </span>
+                    </div>
+                  )}
 
                   {upgradePreview.billing.creditApplied > 0 && (
                     <div className="d-flex justify-content-between align-items-center mb-2">
