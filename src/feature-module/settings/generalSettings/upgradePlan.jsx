@@ -20,9 +20,9 @@ import "./upgradePlan.css";
 const { Option } = Select;
 
 // Load Stripe
-const stripePromise = loadStripe(
-  "pk_test_51JM78KBtOBT8b78eKkjaaXWTEBvsBvmV1VYV3kaRXVgjCYNVLUPK7MNPQEpHgdihSUOtPEfG8WPsVqoHgBBsev2600RynHqIML"
-);
+// const stripePromise = loadStripe(
+//   "pk_test_51JM78KBtOBT8b78eKkjaaXWTEBvsBvmV1VYV3kaRXVgjCYNVLUPK7MNPQEpHgdihSUOtPEfG8WPsVqoHgBBsev2600RynHqIML"
+// );
 
 // CheckoutForm component removed - using hosted checkout redirect for Payment Options Modal
 

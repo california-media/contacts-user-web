@@ -239,39 +239,39 @@ const ManageCoupons = () => {
     }
   };
 
-  const handleToggleStatus = async (couponId) => {
-    setToggleLoadingId(couponId);
-    try {
-      const response = await api.patch(`/admin/coupons/${couponId}/status`);
-      if (response.data.success) {
-        dispatch(
-          showToast({
-            heading: "Success",
-            message: response.data.message,
-            variant: "success",
-          })
-        );
-        fetchCoupons(
-          pagination.current,
-          pagination.pageSize,
-          filterStatus,
-          filterType,
-          filterExpiry
-        );
-      }
-    } catch (error) {
-      dispatch(
-        showToast({
-          heading: "Error",
-          message:
-            error?.response?.data?.message || "Failed to toggle coupon status",
-          variant: "danger",
-        })
-      );
-    } finally {
-      setToggleLoadingId(null);
-    }
-  };
+  // const handleToggleStatus = async (couponId) => {
+  //   setToggleLoadingId(couponId);
+  //   try {
+  //     const response = await api.patch(`/admin/coupons/${couponId}/status`);
+  //     if (response.data.success) {
+  //       dispatch(
+  //         showToast({
+  //           heading: "Success",
+  //           message: response.data.message,
+  //           variant: "success",
+  //         })
+  //       );
+  //       fetchCoupons(
+  //         pagination.current,
+  //         pagination.pageSize,
+  //         filterStatus,
+  //         filterType,
+  //         filterExpiry
+  //       );
+  //     }
+  //   } catch (error) {
+  //     dispatch(
+  //       showToast({
+  //         heading: "Error",
+  //         message:
+  //           error?.response?.data?.message || "Failed to toggle coupon status",
+  //         variant: "danger",
+  //       })
+  //     );
+  //   } finally {
+  //     setToggleLoadingId(null);
+  //   }
+  // };
 
   const columns = [
     {
@@ -379,7 +379,7 @@ const ManageCoupons = () => {
               Edit
             </Button>
           </Tooltip>
-          <Tooltip title={record.isActive ? "Deactivate" : "Activate"}>
+          {/* <Tooltip title={record.isActive ? "Deactivate" : "Activate"}>
             <Button
               type={record.isActive ? "default" : "primary"}
               icon={
@@ -396,7 +396,7 @@ const ManageCoupons = () => {
             >
               {record.isActive ? "Deactivate" : "Activate"}
             </Button>
-          </Tooltip>
+          </Tooltip> */}
           <Popconfirm
             title="Are you sure to delete this coupon?"
             onConfirm={() => handleDeleteCoupon(record._id)}
