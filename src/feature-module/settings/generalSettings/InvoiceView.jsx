@@ -320,7 +320,7 @@ const InvoiceView = () => {
                     </div>
 
                     {/* Line Items Table */}
-                    {invoice.lineItems && invoice.lineItems.length > 0 && (
+                    {/* {invoice.lineItems && invoice.lineItems.length > 0 && (
                       <>
                         <Divider />
                         <div className="line-items-section">
@@ -363,7 +363,6 @@ const InvoiceView = () => {
                             ))}
                           </div>
 
-                          {/* Invoice Totals */}
                           <div className="invoice-totals">
                             <Row justify="space-between" className="total-row">
                               <Col>
@@ -417,7 +416,7 @@ const InvoiceView = () => {
                           </div>
                         </div>
                       </>
-                    )}
+                    )} */}
                   </Card>
                 </div>
               </div>
