@@ -38,6 +38,13 @@ export const SidebarData = [
         showSubRoute: false,
         submenuItems: [{ label: "Calendar", link: route.calendar }],
       },
+      {
+        label: "Tickets",
+        iconImg: "assets/img/icons/helpAndSupport.png",
+        submenu: false,
+        showSubRoute: false,
+        submenuItems: [{ label: "Tickets", link: route.myTickets }],
+      },
     ],
   },
   {

@@ -34,6 +34,7 @@ import SyncAndIntegration from "../crm/tools/SyncAndIntegration";
 import Zapier from "../crm/tools/Zapier";
 import ReferAndEarn from "../crm/support/ReferAndEarn";
 import HelpAndSupport from "../crm/support/HelpAndSupport";
+import MyTickets from "../crm/support/MyTickets";
 import Users from "../crm/contacts/Users";
 import AdminContactDetails from "../crm/contacts/AdminUserDetails";
 import AdminUserDetails from "../crm/contacts/AdminUserDetails";
@@ -318,6 +319,12 @@ export const publicRoutes = [
     element: <HelpAndSupport />,
     route: Route,
     title: "Help and Support",
+  },
+  {
+    path: route.myTickets,
+    element: <MyTickets />,
+    route: Route,
+    title: "My Tickets",
   },
   {
     path: route.biilingInfo,

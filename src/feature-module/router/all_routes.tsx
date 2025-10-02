@@ -44,6 +44,7 @@ export const all_routes = {
   SyncAndIntegration: "/sync-and-integration",
   HelpAndSupport: "/help-and-support",
   adminHelpAndSupport: "/admin/help-and-support",
+  myTickets: "/my-tickets",
   users: "/admin/users",
   Zapier: "/zapier",
   contactReports: "/reports/contact-reports",
