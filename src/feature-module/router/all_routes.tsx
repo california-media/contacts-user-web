@@ -29,6 +29,7 @@ export const all_routes = {
   register: "/register",
   upgradePlan: "/general-settings/upgrade-plan",
   biilingInfo: "/general-settings/billing-info",
+  invoiceView: "/general-settings/invoice/:invoiceId",
   managePlans: "/admin/manage-plans",
 
   scans: "/general-settings/scans",

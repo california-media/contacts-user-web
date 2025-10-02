@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import { useSelector, useDispatch } from "react-redux";
 import { loadStripe } from "@stripe/stripe-js";
@@ -55,6 +55,7 @@ const stripePromise = loadStripe(
 
 const BillingInfo = () => {
   const route = all_routes;
+  const navigate = useNavigate();
   const userProfile = useSelector((state) => state.profile);
   const dispatch = useDispatch();
 
@@ -570,7 +571,7 @@ const BillingInfo = () => {
               type="link"
               size="small"
               icon={<EyeOutlined />}
-              onClick={() => window.open(record.hostedUrl, "_blank")}
+              onClick={() => navigate(`/general-settings/invoice/${record.id}`)}
               title="View Invoice"
             />
           )}
@@ -681,7 +682,6 @@ const BillingInfo = () => {
             <div className="col-md-12">
               <div className="row">
                 <div className="col-xl-3 col-lg-12 theiaStickySidebar">
-                  {/* Settings Sidebar */}
                   <div className="card">
                     <div className="card-body">
                       <div className="settings-sidebar">
@@ -715,7 +715,6 @@ const BillingInfo = () => {
                       </div>
                     </div>
                   </div>
-                  {/* /Settings Sidebar */}
                 </div>
 
                 <div className="col-xl-9 col-lg-12">

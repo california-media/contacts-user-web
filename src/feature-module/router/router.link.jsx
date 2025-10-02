@@ -41,6 +41,7 @@ import ManagePlans from "../settings/generalSettings/ManagePlans";
 import ManageTickets from "../settings/generalSettings/ManageTickets";
 import ManageCoupons from "../settings/generalSettings/ManageCoupons";
 import BillingInfo from "../settings/generalSettings/BillingInfo";
+import InvoiceView from "../settings/generalSettings/InvoiceView";
 import PaymentUnsuccessful from "../otherPages/PaymentUnsuccessful";
 
 const route = all_routes;
@@ -323,6 +324,12 @@ export const publicRoutes = [
     element: <BillingInfo />,
     route: Route,
     title: "Billing Info",
+  },
+  {
+    path: route.invoiceView,
+    element: <InvoiceView />,
+    route: Route,
+    title: "Invoice View",
   },
 ];
 
