@@ -483,7 +483,6 @@ const UpgradePlan = () => {
   const handleUpgrade = async (plan) => {
     try {
       setPaymentLoading(true);
-      console.log("Selected plan for upgrade:", plan);
       setSelectedPlan(plan);
 
       // Clear coupon state when selecting a new plan
@@ -496,25 +495,25 @@ const UpgradePlan = () => {
       const currentPlan = getCurrentPlan();
       const isOnTrial = isOnFreeTrial();
 
-      console.log("Detailed subscription check:", {
-        currentPlan,
-        currentPlanName: currentPlan?.name,
-        hasActiveSubscription,
-        isOnTrial,
-        paymentMethodsCount: paymentMethods.length,
-        subscriptionDetails: subscriptionDetails,
-        subscriptionStatus: subscriptionDetails?.status,
-        isSubscriptionActive: isSubscriptionActive(),
-        hasActiveSubscriptionFromAPI: hasActiveSubscription,
-      });
+      // console.log("Detailed subscription check:", {
+      //   currentPlan,
+      //   currentPlanName: currentPlan?.name,
+      //   hasActiveSubscription,
+      //   isOnTrial,
+      //   paymentMethodsCount: paymentMethods.length,
+      //   subscriptionDetails: subscriptionDetails,
+      //   subscriptionStatus: subscriptionDetails?.status,
+      //   isSubscriptionActive: isSubscriptionActive(),
+      //   hasActiveSubscriptionFromAPI: hasActiveSubscription,
+      // });
 
       try {
         let preview;
         // Treat trialing subscriptions as new purchases, not upgrades
         if (hasActiveSubscription && !isOnTrial) {
           // Existing paid subscriber - use upgrade preview
-          console.log("Existing paid subscriber, fetching upgrade preview...");
-          console.log("Calling fetchUpgradePreview for plan:", plan.name);
+          // console.log("Existing paid subscriber, fetching upgrade preview...");
+          // console.log("Calling fetchUpgradePreview for plan:", plan.name);
           preview = await fetchUpgradePreview(plan);
           setUpgradePreview(preview);
           setShowUpgradeModal(true);
