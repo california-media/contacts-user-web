@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../../router/all_routes";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Button, Spinner } from "react-bootstrap";
@@ -30,6 +30,7 @@ const UpgradePlan = () => {
   const route = all_routes;
   const userProfile = useSelector((state) => state.profile);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -549,35 +550,36 @@ const UpgradePlan = () => {
             }
           }
 
-          // If user has no payment methods, use hosted checkout redirect approach
+          // If user has no payment methods, use embedded checkout
           if (currentPaymentMethods.length === 0) {
             console.log(
-              "No payment methods found, redirecting to hosted checkout..."
+              "No payment methods found, creating embedded checkout session..."
             );
 
-            // Create hosted checkout session with redirect URLs
+            // Create embedded checkout session
             const checkoutResponse = await api.post(
-              "/user/payment/create-hosted-checkout-session",
+              "/user/payment/create-checkout-session",
               {
                 planId: plan._id,
                 autoRenewal: true,
-                successUrl: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-                cancelUrl: `${window.location.origin}/payment-unsuccessful?error=Payment cancelled`,
               }
             );
 
             if (checkoutResponse.data.success) {
-              // Redirect to Stripe's hosted checkout page
               console.log(
-                "Redirecting to hosted checkout:",
-                checkoutResponse.data.url
+                "Navigating to embedded checkout page with session:",
+                checkoutResponse.data.sessionId
               );
-              window.location.href = checkoutResponse.data.url;
-              return; // Exit the function as we're redirecting
+
+              // Navigate directly with session ID in URL
+              navigate(
+                `/embedded-checkout?session_id=${checkoutResponse.data.sessionId}`
+              );
+              return; // Exit the function as we're navigating
             } else {
               throw new Error(
                 checkoutResponse.data.message ||
-                  "Failed to create hosted checkout session"
+                  "Failed to create checkout session"
               );
             }
           } else {
@@ -1507,9 +1509,9 @@ const UpgradePlan = () => {
                         <div className="small">
                           {couponValidation.discountType === "percentage"
                             ? `${couponValidation.discountValue}% off`
-                            : `$${(
-                                couponValidation.discountValue
-                              ).toFixed(2)} off`}
+                            : `$${couponValidation.discountValue.toFixed(
+                                2
+                              )} off`}
                           {couponValidation.validUntil && (
                             <span className="text-muted">
                               {" "}

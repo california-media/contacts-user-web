@@ -54,4 +54,5 @@ export const all_routes = {
   manageCoupons: "/admin/manage-coupons",
   paymentSuccess: "/payment-success",
   paymentUnsuccessful: "/payment-unsuccessful",
+  embeddedCheckout: "/embedded-checkout",
 };

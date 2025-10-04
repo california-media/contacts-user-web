@@ -44,6 +44,7 @@ import ManageCoupons from "../settings/generalSettings/ManageCoupons";
 import BillingInfo from "../settings/generalSettings/BillingInfo";
 import InvoiceView from "../settings/generalSettings/InvoiceView";
 import PaymentUnsuccessful from "../otherPages/PaymentUnsuccessful";
+import EmbeddedCheckoutPage from "../otherPages/EmbeddedCheckoutPage";
 
 const route = all_routes;
 
@@ -371,5 +372,11 @@ export const authRoutes = [
     element: <PaymentUnsuccessful />,
     route: Route,
     title: "Payment Unsuccessful",
+  },
+  {
+    path: route.embeddedCheckout,
+    element: <EmbeddedCheckoutPage />,
+    route: Route,
+    title: "Embedded Checkout",
   },
 ];
