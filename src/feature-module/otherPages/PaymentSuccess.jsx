@@ -16,33 +16,14 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const completeSubscription = async () => {
+    const handlePaymentSuccess = async () => {
       try {
+        // The webhook handles all subscription completion logic now
+        // No need to call completeSubscription endpoint
         if (sessionId) {
-          console.log("Processing session:", sessionId);
-          // Complete the subscription
-          const response = await api.post(
-            "/user/payment/complete-subscription",
-            {
-              sessionId: sessionId,
-            }
-          );
-
-          console.log(response.data, "response from the completion api");
-
-          if (response.data.success) {
-            setMessage("Subscription Activated!");
-            setSubMessage(
-              `Successfully upgraded to ${
-                response.data.plan?.name || "your new plan"
-              }!`
-            );
-          } else {
-            setMessage("Payment Successful!");
-            setSubMessage(
-              response.data.message || "Your subscription is being processed."
-            );
-          }
+          console.log("Payment completed for session:", sessionId);
+          setMessage("Subscription Activated!");
+          setSubMessage("Your subscription has been activated!");
         } else {
           // No session ID, just show success
           setMessage("Payment Successful!");
@@ -51,23 +32,18 @@ const PaymentSuccess = () => {
 
         setLoading(false);
 
-        // Start countdown after completion (successful or not)
+        // Start countdown after showing success message
         setTimeout(() => {
           setRedirecting(true);
           startCountdown();
         }, 2000);
       } catch (error) {
-        console.error(
-          "Subscription completion failed:",
-          error.response?.data || error.message
-        );
+        console.error("Error handling payment success:", error);
         setMessage("Payment Successful!");
-        setSubMessage(
-          "Your subscription is being processed. You'll see the changes shortly."
-        );
+        setSubMessage("Your subscription has been activated!");
         setLoading(false);
 
-        // Still redirect even if completion fails
+        // Still redirect even if there's an error
         setTimeout(() => {
           setRedirecting(true);
           startCountdown();
@@ -92,7 +68,7 @@ const PaymentSuccess = () => {
       return () => clearInterval(timer);
     };
 
-    completeSubscription();
+    handlePaymentSuccess();
   }, [sessionId, navigate]);
 
   return (

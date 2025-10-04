@@ -22,15 +22,7 @@ const Sidebar = () => {
   console.log(userProfile, "userProfile in sidebar");
 
   const route = all_routes;
-  function getRemainingDays(trialEndDate) {
-    const now = new Date();
-    const end = new Date(trialEndDate);
-
-    const diff = end - now; // in ms
-    if (diff <= 0) return "Trial expired";
-
-    return Math.ceil(diff / (1000 * 60 * 60 * 24)) + " days remaining";
-  }
+ 
   // ✅ Grab tags once at top level (required for hooks)
   const { tags: allTags = [] } = useSelector((state) => state.tags);
   // const expandMenu = useSelector((state) => state.expandMenu);
