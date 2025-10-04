@@ -162,7 +162,7 @@ const ManageCoupons = () => {
       const payload = {
         ...values,
         expiryDate: values.expiryDate?.toISOString(),
-        couponCode: values.couponCode?.toUpperCase(),
+        couponCode: values.couponCode,
       };
 
       let response;
@@ -568,10 +568,10 @@ const ManageCoupons = () => {
             rules={[{ required: true, message: "Please enter coupon code" }]}
           >
             <Input
-              placeholder="Enter coupon code (will be converted to uppercase)"
+              placeholder="Enter coupon code"
               onChange={(e) => {
                 form.setFieldsValue({
-                  couponCode: e.target.value.toUpperCase(),
+                  couponCode: e.target.value,
                 });
               }}
             />

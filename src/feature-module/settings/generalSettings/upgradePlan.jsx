@@ -214,6 +214,40 @@ const UpgradePlan = () => {
     }
   };
 
+  // Internal validation function that doesn't manage loading state
+  const validateCouponCodeInternal = async (code) => {
+    if (!code.trim()) {
+      setCouponValidation(null);
+      setCouponError(null);
+      return null;
+    }
+
+    try {
+      setCouponError(null);
+
+      const response = await api.post("/user/payment/validate-coupon", {
+        couponCode: code.trim(),
+      });
+
+      if (response.data.success) {
+        setCouponValidation(response.data.coupon);
+        setCouponError(null);
+        return response.data.coupon;
+      } else {
+        setCouponValidation(null);
+        setCouponError(response.data.message || "Invalid coupon code");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error validating coupon:", error);
+      setCouponValidation(null);
+      setCouponError(
+        error.response?.data?.message || "Failed to validate coupon"
+      );
+      return null;
+    }
+  };
+
   const handleCouponChange = (value) => {
     setCouponCode(value);
     // Clear validation when user types (they need to click apply)
@@ -232,8 +266,8 @@ const UpgradePlan = () => {
     try {
       setCouponLoading(true);
 
-      // First validate the coupon
-      const couponData = await validateCouponCode(couponCode);
+      // First validate the coupon (without managing loading state)
+      const couponData = await validateCouponCodeInternal(couponCode);
 
       if (couponData && selectedPlan) {
         // If valid, refresh the preview with coupon
@@ -264,6 +298,7 @@ const UpgradePlan = () => {
     // Refresh preview without coupon
     if (selectedPlan) {
       try {
+        setCouponLoading(true);
         if (showNewSubscriptionModal) {
           const preview = await fetchNewSubscriptionPreview(selectedPlan, null);
           setNewSubscriptionPreview(preview);
@@ -273,6 +308,8 @@ const UpgradePlan = () => {
         }
       } catch (error) {
         console.error("Error refreshing preview:", error);
+      } finally {
+        setCouponLoading(false);
       }
     }
   };
@@ -1503,9 +1540,7 @@ const UpgradePlan = () => {
                     <div className="d-flex align-items-center">
                       <i className="ti ti-check me-2"></i>
                       <div>
-                        <strong>
-                          {couponValidation.name || couponValidation.couponCode}
-                        </strong>
+                        <strong>{couponValidation.name || couponCode}</strong>
                         <div className="small">
                           {couponValidation.discountType === "percentage"
                             ? `${couponValidation.discountValue}% off`
@@ -1530,115 +1565,128 @@ const UpgradePlan = () => {
 
               <div className="mb-4">
                 <h6 className="fw-semibold mb-3">Billing Details</h6>
-                <div className="border rounded p-3 bg-light">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span>Plan cost:</span>
-                    <span className="fw-semibold text-dark">
-                      ${newSubscriptionPreview.plan.price.toFixed(2)}
-                    </span>
+                {couponLoading ? (
+                  <div className="border rounded p-3 bg-light text-center">
+                    <div
+                      className="spinner-border spinner-border-sm text-primary mb-2"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <div className="text-muted small">
+                      Updating pricing with coupon...
+                    </div>
                   </div>
+                ) : (
+                  <div className="border rounded p-3 bg-light">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span>Plan cost:</span>
+                      <span className="fw-semibold text-dark">
+                        ${newSubscriptionPreview.plan.price.toFixed(2)}
+                      </span>
+                    </div>
 
-                  {newSubscriptionPreview.coupon &&
-                    newSubscriptionPreview.coupon.isApplied && (
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <span>
-                          Coupon discount (
-                          {newSubscriptionPreview.coupon.couponCode}):
-                        </span>
-                        <span className="fw-semibold text-success">
-                          -$
-                          {newSubscriptionPreview.coupon.discountAmount?.toFixed(
-                            2
-                          ) || "0.00"}
-                        </span>
-                      </div>
+                    {newSubscriptionPreview.coupon &&
+                      newSubscriptionPreview.coupon.isApplied && (
+                        <div className="d-flex justify-content-between align-items-center mb-2">
+                          <span>Coupon discount ({couponCode}):</span>
+                          <span className="fw-semibold text-success">
+                            -$
+                            {newSubscriptionPreview.coupon.discountAmount?.toFixed(
+                              2
+                            ) || "0.00"}
+                          </span>
+                        </div>
+                      )}
+
+                    {newSubscriptionPreview.credits && (
+                      <>
+                        {newSubscriptionPreview.credits.availableCredits >
+                          0 && (
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span>Available Stripe credits:</span>
+                            <span className="fw-semibold text-info">
+                              $
+                              {newSubscriptionPreview.credits.availableCredits.toFixed(
+                                2
+                              )}
+                            </span>
+                          </div>
+                        )}
+
+                        {newSubscriptionPreview.credits.creditsToUse > 0 && (
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span>Stripe credits used:</span>
+                            <span className="fw-semibold text-warning">
+                              -$
+                              {newSubscriptionPreview.credits.creditsToUse.toFixed(
+                                2
+                              )}
+                            </span>
+                          </div>
+                        )}
+
+                        <hr className="my-2" />
+
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <span className="fw-semibold">Final charge:</span>
+                          <span className="fw-bold text-primary fs-5">
+                            $
+                            {newSubscriptionPreview.credits.finalChargeAfterCredits.toFixed(
+                              2
+                            )}
+                          </span>
+                        </div>
+
+                        {newSubscriptionPreview.credits
+                          .finalChargeAfterCredits === 0 && (
+                          <div className="alert alert-success py-2 px-3 mb-2">
+                            <small>
+                              <i className="ti ti-check me-1"></i>
+                              Your subscription will be fully covered by
+                              available credits!
+                            </small>
+                          </div>
+                        )}
+
+                        {newSubscriptionPreview.credits.creditsToUse > 0 &&
+                          newSubscriptionPreview.credits
+                            .remainingCreditsAfterPurchase >= 0 && (
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                              <span>Credits after purchase:</span>
+                              <span className="fw-semibold text-info">
+                                $
+                                {newSubscriptionPreview.credits.remainingCreditsAfterPurchase.toFixed(
+                                  2
+                                )}
+                              </span>
+                            </div>
+                          )}
+                      </>
                     )}
 
-                  {newSubscriptionPreview.credits && (
-                    <>
-                      {newSubscriptionPreview.credits.availableCredits > 0 && (
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Available Stripe credits:</span>
-                          <span className="fw-semibold text-info">
-                            $
-                            {newSubscriptionPreview.credits.availableCredits.toFixed(
-                              2
-                            )}
-                          </span>
-                        </div>
-                      )}
+                    <hr className="my-2" />
 
-                      {newSubscriptionPreview.credits.creditsToUse > 0 && (
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Stripe credits used:</span>
-                          <span className="fw-semibold text-warning">
-                            -$
-                            {newSubscriptionPreview.credits.creditsToUse.toFixed(
-                              2
-                            )}
-                          </span>
-                        </div>
-                      )}
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span>Next billing date:</span>
+                      <span>
+                        {new Date(
+                          newSubscriptionPreview.billing.nextBillingDate
+                        ).toLocaleDateString()}
+                      </span>
+                    </div>
 
-                      <hr className="my-2" />
-
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <span className="fw-semibold">Final charge:</span>
-                        <span className="fw-bold text-primary fs-5">
-                          $
-                          {newSubscriptionPreview.credits.finalChargeAfterCredits.toFixed(
-                            2
-                          )}
-                        </span>
-                      </div>
-
-                      {newSubscriptionPreview.credits
-                        .finalChargeAfterCredits === 0 && (
-                        <div className="alert alert-success py-2 px-3 mb-2">
-                          <small>
-                            <i className="ti ti-check me-1"></i>
-                            Your subscription will be fully covered by available
-                            credits!
-                          </small>
-                        </div>
-                      )}
-
-                      {newSubscriptionPreview.credits
-                        .remainingCreditsAfterPurchase >= 0 && (
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Credits after purchase:</span>
-                          <span className="fw-semibold text-info">
-                            $
-                            {newSubscriptionPreview.credits.remainingCreditsAfterPurchase.toFixed(
-                              2
-                            )}
-                          </span>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  <hr className="my-2" />
-
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span>Next billing date:</span>
-                    <span>
-                      {new Date(
-                        newSubscriptionPreview.billing.nextBillingDate
-                      ).toLocaleDateString()}
-                    </span>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span>Next billing amount:</span>
+                      <span className="fw-semibold">
+                        $
+                        {newSubscriptionPreview.billing.nextBillingAmount.toFixed(
+                          2
+                        )}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span>Next billing amount:</span>
-                    <span className="fw-semibold">
-                      $
-                      {newSubscriptionPreview.billing.nextBillingAmount.toFixed(
-                        2
-                      )}
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Payment Method Selection for New Subscriptions */}
@@ -1936,9 +1984,7 @@ const UpgradePlan = () => {
                     <div className="d-flex align-items-center">
                       <i className="ti ti-check me-2"></i>
                       <div>
-                        <strong>
-                          {couponValidation.name || couponValidation.couponCode}
-                        </strong>
+                        <strong>{couponValidation.name || couponCode}</strong>
                         <div className="small">
                           {couponValidation.discountType === "percentage"
                             ? `${couponValidation.discountValue}% off`
@@ -1963,112 +2009,129 @@ const UpgradePlan = () => {
 
               <div className="mb-4">
                 <h6 className="fw-semibold mb-3">Billing Details</h6>
-                <div className="border rounded p-3 bg-light">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span>Upgrade charge:</span>
-                    <span className="fw-semibold text-dark">
-                      ${upgradePreview.newPlan.price.toFixed(2)}
-                    </span>
+                {couponLoading ? (
+                  <div className="border rounded p-3 bg-light text-center">
+                    <div
+                      className="spinner-border spinner-border-sm text-primary mb-2"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <div className="text-muted small">
+                      Updating pricing with coupon...
+                    </div>
                   </div>
-
-                  {upgradePreview.coupon && upgradePreview.coupon.isApplied && (
+                ) : (
+                  <div className="border rounded p-3 bg-light">
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span>
-                        Coupon discount ({upgradePreview.coupon.couponCode}):
-                      </span>
-                      <span className="fw-semibold text-success">
-                        -$
-                        {upgradePreview.coupon.discountAmount?.toFixed(2) ||
-                          "0.00"}
+                      <span>Upgrade charge:</span>
+                      <span className="fw-semibold text-dark">
+                        ${upgradePreview.newPlan.price.toFixed(2)}
                       </span>
                     </div>
-                  )}
 
-                  {upgradePreview.billing.creditApplied > 0 && (
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span>Plan credit applied:</span>
-                      <span className="fw-semibold text-success">
-                        -${upgradePreview.billing.creditApplied.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
-
-                  {upgradePreview.credits && (
-                    <>
-                      {upgradePreview.credits.availableCredits > 0 && (
+                    {upgradePreview.coupon &&
+                      upgradePreview.coupon.isApplied && (
                         <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Available Stripe credits:</span>
-                          <span className="fw-semibold text-info">
-                            $
-                            {upgradePreview.credits.availableCredits.toFixed(2)}
+                          <span>Coupon discount ({couponCode}):</span>
+                          <span className="fw-semibold text-success">
+                            -$
+                            {upgradePreview.coupon.discountAmount?.toFixed(2) ||
+                              "0.00"}
                           </span>
                         </div>
                       )}
 
-                      {upgradePreview.credits.creditsToUse > 0 && (
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Stripe credits used:</span>
-                          <span className="fw-semibold text-warning">
-                            -${upgradePreview.credits.creditsToUse.toFixed(2)}
-                          </span>
-                        </div>
-                      )}
-
-                      <hr className="my-2" />
-
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <span className="fw-semibold">Final charge:</span>
-                        <span className="fw-bold text-primary fs-5">
-                          $
-                          {upgradePreview.credits.finalChargeAfterCredits.toFixed(
-                            2
-                          )}
+                    {upgradePreview.billing.creditApplied > 0 && (
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span>Plan credit applied:</span>
+                        <span className="fw-semibold text-success">
+                          -${upgradePreview.billing.creditApplied.toFixed(2)}
                         </span>
                       </div>
+                    )}
 
-                      {upgradePreview.credits.finalChargeAfterCredits === 0 && (
-                        <div className="alert alert-success py-2 px-3 mb-2">
-                          <small>
-                            <i className="ti ti-check me-1"></i>
-                            Your upgrade will be fully covered by available
-                            credits!
-                          </small>
-                        </div>
-                      )}
+                    {upgradePreview.credits && (
+                      <>
+                        {upgradePreview.credits.availableCredits > 0 && (
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span>Available Stripe credits:</span>
+                            <span className="fw-semibold text-info">
+                              $
+                              {upgradePreview.credits.availableCredits.toFixed(
+                                2
+                              )}
+                            </span>
+                          </div>
+                        )}
 
-                      {upgradePreview.credits.remainingCreditsAfterPurchase >=
-                        0 && (
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Credits after purchase:</span>
-                          <span className="fw-semibold text-info">
+                        {upgradePreview.credits.creditsToUse > 0 && (
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span>Stripe credits used:</span>
+                            <span className="fw-semibold text-warning">
+                              -${upgradePreview.credits.creditsToUse.toFixed(2)}
+                            </span>
+                          </div>
+                        )}
+
+                        <hr className="my-2" />
+
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <span className="fw-semibold">Final charge:</span>
+                          <span className="fw-bold text-primary fs-5">
                             $
-                            {upgradePreview.credits.remainingCreditsAfterPurchase.toFixed(
+                            {upgradePreview.credits.finalChargeAfterCredits.toFixed(
                               2
                             )}
                           </span>
                         </div>
-                      )}
-                    </>
-                  )}
 
-                  <hr className="my-2" />
+                        {upgradePreview.credits.finalChargeAfterCredits ===
+                          0 && (
+                          <div className="alert alert-success py-2 px-3 mb-2">
+                            <small>
+                              <i className="ti ti-check me-1"></i>
+                              Your upgrade will be fully covered by available
+                              credits!
+                            </small>
+                          </div>
+                        )}
 
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span>Next billing date:</span>
-                    <span>
-                      {new Date(
-                        upgradePreview.billing.nextBillingDate
-                      ).toLocaleDateString()}
-                    </span>
+                        {upgradePreview.credits.creditsToUse > 0 &&
+                          upgradePreview.credits
+                            .remainingCreditsAfterPurchase >= 0 && (
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                              <span>Credits after purchase:</span>
+                              <span className="fw-semibold text-info">
+                                $
+                                {upgradePreview.credits.remainingCreditsAfterPurchase.toFixed(
+                                  2
+                                )}
+                              </span>
+                            </div>
+                          )}
+                      </>
+                    )}
+
+                    <hr className="my-2" />
+
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span>Next billing date:</span>
+                      <span>
+                        {new Date(
+                          upgradePreview.billing.nextBillingDate
+                        ).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span>Next billing amount:</span>
+                      <span className="fw-semibold">
+                        ${upgradePreview.billing.nextBillingAmount.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span>Next billing amount:</span>
-                    <span className="fw-semibold">
-                      ${upgradePreview.billing.nextBillingAmount.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
 
               {!upgradePreview.isNewSubscription && upgradePreview.period && (
