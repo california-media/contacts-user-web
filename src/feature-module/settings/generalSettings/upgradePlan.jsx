@@ -276,6 +276,7 @@ const UpgradePlan = () => {
             selectedPlan,
             couponCode
           );
+          console.log("New subscription preview with coupon:", preview);  
           setNewSubscriptionPreview(preview);
         } else if (showUpgradeModal) {
           const preview = await fetchUpgradePreview(selectedPlan, couponCode);
@@ -301,6 +302,7 @@ const UpgradePlan = () => {
         setCouponLoading(true);
         if (showNewSubscriptionModal) {
           const preview = await fetchNewSubscriptionPreview(selectedPlan, null);
+          console.log("New subscription preview without coupon:", preview);
           setNewSubscriptionPreview(preview);
         } else if (showUpgradeModal) {
           const preview = await fetchUpgradePreview(selectedPlan, null);
@@ -629,6 +631,7 @@ const UpgradePlan = () => {
               plan.name
             );
             preview = await fetchNewSubscriptionPreview(plan);
+            console.log("New subscription preview fetched outside useEffect:", preview);
             setNewSubscriptionPreview(preview);
             setShowNewSubscriptionModal(true);
           }
@@ -1653,7 +1656,7 @@ const UpgradePlan = () => {
                           newSubscriptionPreview.credits
                             .remainingCreditsAfterPurchase >= 0 && (
                             <div className="d-flex justify-content-between align-items-center mb-2">
-                              <span>Credits after purchase:</span>
+                              <span>Stripe credits after purchase:</span>
                               <span className="fw-semibold text-info">
                                 $
                                 {newSubscriptionPreview.credits.remainingCreditsAfterPurchase.toFixed(
@@ -1690,8 +1693,7 @@ const UpgradePlan = () => {
               </div>
 
               {/* Payment Method Selection for New Subscriptions */}
-              {newSubscriptionPreview.credits &&
-                newSubscriptionPreview.credits.finalChargeAfterCredits > 0 && (
+            
                   <div className="mb-4">
                     <h6 className="fw-semibold mb-3">
                       <CreditCardOutlined className="me-2" />
@@ -1775,7 +1777,7 @@ const UpgradePlan = () => {
                       </div>
                     )}
                   </div>
-                )}
+       
 
               {isOnFreeTrial() && (
                 <div className="alert alert-warning mb-3">
@@ -2105,7 +2107,7 @@ const UpgradePlan = () => {
                           upgradePreview.credits
                             .remainingCreditsAfterPurchase >= 0 && (
                             <div className="d-flex justify-content-between align-items-center mb-2">
-                              <span>Credits after purchase:</span>
+                              <span>Stripe credits after purchase:</span>
                               <span className="fw-semibold text-info">
                                 $
                                 {upgradePreview.credits.remainingCreditsAfterPurchase.toFixed(
