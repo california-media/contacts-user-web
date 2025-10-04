@@ -276,7 +276,7 @@ const UpgradePlan = () => {
             selectedPlan,
             couponCode
           );
-          console.log("New subscription preview with coupon:", preview);  
+          console.log("New subscription preview with coupon:", preview);
           setNewSubscriptionPreview(preview);
         } else if (showUpgradeModal) {
           const preview = await fetchUpgradePreview(selectedPlan, couponCode);
@@ -631,7 +631,10 @@ const UpgradePlan = () => {
               plan.name
             );
             preview = await fetchNewSubscriptionPreview(plan);
-            console.log("New subscription preview fetched outside useEffect:", preview);
+            console.log(
+              "New subscription preview fetched outside useEffect:",
+              preview
+            );
             setNewSubscriptionPreview(preview);
             setShowNewSubscriptionModal(true);
           }
@@ -1693,97 +1696,103 @@ const UpgradePlan = () => {
               </div>
 
               {/* Payment Method Selection for New Subscriptions */}
-            
-                  <div className="mb-4">
-                    <h6 className="fw-semibold mb-3">
-                      <CreditCardOutlined className="me-2" />
-                      Payment Method
-                    </h6>
-                    {loadingPaymentMethods ? (
-                      <div className="text-center py-3">
-                        <Spinner size="sm" className="me-2" />
-                        Loading payment methods...
-                      </div>
-                    ) : paymentMethods.length > 0 ? (
-                      <div>
-                        <Select
-                          value={selectedPaymentMethod}
-                          onChange={setSelectedPaymentMethod}
-                          style={{ width: "100%" }}
-                          size="large"
-                          placeholder="Select a payment method"
-                          suffixIcon={<CreditCardOutlined />}
-                        >
-                          {paymentMethods.map((method) => (
-                            <Option key={method.id} value={method.id}>
-                              <div className="d-flex align-items-center justify-content-between w-100">
-                                <div className="d-flex align-items-center">
-                                  <CreditCardOutlined className="me-2 text-primary" />
-                                  <div className="d-flex gap-3">
-                                    <span
-                                      className="fw-semibold"
-                                      style={{ fontSize: "12px" }}
-                                    >
-                                      {method.card.brand.toUpperCase()} ••••{" "}
-                                      {method.card.last4}
-                                    </span>
-                                    <span
-                                      className="text-muted"
-                                      style={{ fontSize: "11px" }}
-                                    >
-                                      {method.card.exp_month
-                                        .toString()
-                                        .padStart(2, "0")}
-                                      /{method.card.exp_year}
-                                    </span>
-                                    {method.isDefault && (
-                                      <span
-                                        className="text-success fw-semibold"
-                                        style={{ fontSize: "11px" }}
-                                      >
-                                        Default
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </Option>
-                          ))}
-                        </Select>
-                        <div className="mt-2">
-                          <Link
-                            to={route.biilingInfo}
-                            className="btn btn-outline-primary btn-sm"
-                          >
-                            <CreditCardOutlined className="me-1" />
-                            Manage Payment Methods
-                          </Link>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="alert alert-warning">
-                        <i className="ti ti-alert-triangle me-2"></i>
-                        No payment methods found. Please add a payment method to
-                        continue.
-                        <div className="mt-2">
-                          <Link
-                            to={route.biilingInfo}
-                            className="btn btn-primary btn-sm"
-                          >
-                            <i className="ti ti-plus me-1"></i>
-                            Add Payment Method
-                          </Link>
-                        </div>
-                      </div>
-                    )}
+
+              <div className="mb-4">
+                <h6 className="fw-semibold mb-3">
+                  <CreditCardOutlined className="me-2" />
+                  Payment Method
+                </h6>
+                {loadingPaymentMethods ? (
+                  <div className="text-center py-3">
+                    <Spinner size="sm" className="me-2" />
+                    Loading payment methods...
                   </div>
-       
+                ) : paymentMethods.length > 0 ? (
+                  <div>
+                    <Select
+                      value={selectedPaymentMethod}
+                      onChange={setSelectedPaymentMethod}
+                      style={{ width: "100%" }}
+                      size="large"
+                      placeholder="Select a payment method"
+                      suffixIcon={<CreditCardOutlined />}
+                    >
+                      {paymentMethods.map((method) => (
+                        <Option key={method.id} value={method.id}>
+                          <div className="d-flex align-items-center justify-content-between w-100">
+                            <div className="d-flex align-items-center">
+                              <CreditCardOutlined className="me-2 text-primary" />
+                              <div className="d-flex gap-3">
+                                <span
+                                  className="fw-semibold"
+                                  style={{ fontSize: "12px" }}
+                                >
+                                  {method.card.brand.toUpperCase()} ••••{" "}
+                                  {method.card.last4}
+                                </span>
+                                <span
+                                  className="text-muted"
+                                  style={{ fontSize: "11px" }}
+                                >
+                                  {method.card.exp_month
+                                    .toString()
+                                    .padStart(2, "0")}
+                                  /{method.card.exp_year}
+                                </span>
+                                {method.isDefault && (
+                                  <span
+                                    className="text-success fw-semibold"
+                                    style={{ fontSize: "11px" }}
+                                  >
+                                    Default
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Option>
+                      ))}
+                    </Select>
+                    <div className="mt-2">
+                      <Link
+                        to={route.biilingInfo}
+                        className="btn btn-outline-primary btn-sm"
+                      >
+                        <CreditCardOutlined className="me-1" />
+                        Manage Payment Methods
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="alert alert-warning">
+                    <i className="ti ti-alert-triangle me-2"></i>
+                    No payment methods found. Please add a payment method to
+                    continue.
+                    <div className="mt-2">
+                      <Link
+                        to={route.biilingInfo}
+                        className="btn btn-primary btn-sm"
+                      >
+                        <i className="ti ti-plus me-1"></i>
+                        Add Payment Method
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {isOnFreeTrial() && (
                 <div className="alert alert-warning mb-3">
                   <i className="ti ti-alert-triangle me-2"></i>
                   <strong>Important:</strong> Your current free trial will be
                   cancelled and replaced with this paid subscription.
+                </div>
+              )}
+              {newSubscriptionPreview?.billing?.isFirstPurchase && (
+                <div className="alert alert-info mb-3">
+                  <i className="ti ti-alert-triangle me-2"></i>
+                  <strong>First Purchase Notice:</strong> Credits cannot be used on your first purchase. You'll be able
+                  to use credits for future transactions.
                 </div>
               )}
 
@@ -2030,8 +2039,12 @@ const UpgradePlan = () => {
                       <span className="fw-semibold text-dark">
                         $
                         {upgradePreview?.coupon?.discountAmount
-                          ? Number(upgradePreview.newPlan.immediateCharge.toFixed(2)) +
-                            Number(upgradePreview.coupon.discountAmount?.toFixed(2))
+                          ? Number(
+                              upgradePreview.newPlan.immediateCharge.toFixed(2)
+                            ) +
+                            Number(
+                              upgradePreview.coupon.discountAmount?.toFixed(2)
+                            )
                           : upgradePreview.newPlan.immediateCharge.toFixed(2)}
                       </span>
                     </div>
