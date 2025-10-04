@@ -2024,9 +2024,13 @@ const UpgradePlan = () => {
                 ) : (
                   <div className="border rounded p-3 bg-light">
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span>Upgrade charge:</span>
+                      <span>Remaining time on {selectedPlan.name}:</span>
                       <span className="fw-semibold text-dark">
-                        ${upgradePreview.newPlan.price.toFixed(2)}
+                        $
+                        {upgradePreview?.coupon?.discountAmount
+                          ? Number(upgradePreview.newPlan.immediateCharge.toFixed(2)) +
+                            Number(upgradePreview.coupon.discountAmount?.toFixed(2))
+                          : upgradePreview.newPlan.immediateCharge.toFixed(2)}
                       </span>
                     </div>
 
