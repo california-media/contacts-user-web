@@ -797,23 +797,13 @@ const UpgradePlan = () => {
         // New subscription - create subscription with payment method
         console.log("Creating new subscription with payment method...");
 
-        // Check if we can cover the full cost with credits
-        if (upgradePreview.credits.finalChargeAfterCredits === 0) {
-          // Can pay with credits only
-          response = await api.post("/user/payment/purchase-with-credits", {
-            planId: selectedPlan._id,
-            autoRenewal: true,
-            ...(couponCode && { couponCode: couponCode.trim() }),
-          });
-        } else {
-          // Need to charge payment method - use upgrade endpoint as it handles payment methods
-          response = await api.post("/user/payment/upgrade-subscription", {
-            planId: selectedPlan._id,
-            autoRenewal: true,
-            paymentMethodId: selectedPaymentMethod,
-            ...(couponCode && { couponCode: couponCode.trim() }),
-          });
-        }
+        // Need to charge payment method - use upgrade endpoint as it handles payment methods
+        response = await api.post("/user/payment/upgrade-subscription", {
+          planId: selectedPlan._id,
+          autoRenewal: true,
+          paymentMethodId: selectedPaymentMethod,
+          ...(couponCode && { couponCode: couponCode.trim() }),
+        });
       } else {
         // Existing subscription - upgrade
         console.log("Upgrading existing subscription...");
@@ -1791,8 +1781,9 @@ const UpgradePlan = () => {
               {newSubscriptionPreview?.billing?.isFirstPurchase && (
                 <div className="alert alert-info mb-3">
                   <i className="ti ti-alert-triangle me-2"></i>
-                  <strong>First Purchase Notice:</strong> Credits cannot be used on your first purchase. You'll be able
-                  to use credits for future transactions.
+                  <strong>First Purchase Notice:</strong> Credits cannot be used
+                  on your first purchase. You'll be able to use credits for
+                  future transactions.
                 </div>
               )}
 
