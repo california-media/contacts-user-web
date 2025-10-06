@@ -1235,7 +1235,6 @@ const UpgradePlan = () => {
       </div>
     );
   }
-
   return (
     <>
       {/* Page Wrapper */}
@@ -2026,31 +2025,39 @@ const UpgradePlan = () => {
                 ) : (
                   <div className="border rounded p-3 bg-light">
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span>Remaining time on {selectedPlan.name}:</span>
+                      <span>
+                        Remaining time on {selectedPlan.name}
+                        {upgradePreview.coupon &&
+                          upgradePreview.coupon.isApplied && (
+                            <span className="text-success">
+                              {" "}
+                              (with{" "}
+                              {upgradePreview.coupon.discountType ===
+                              "percentage"
+                                ? `${upgradePreview.coupon.discountValue}%`
+                                : `$${(
+                                    upgradePreview.coupon.discountValue / 100
+                                  ).toFixed(2)}`}{" "}
+                              off)
+                            </span>
+                          )}
+                        {upgradePreview.billing?.nextBillingDate && (
+                          <span className="text-muted">
+                            {" "}
+                            after{" "}
+                            {new Date().toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        )}
+                        :
+                      </span>
                       <span className="fw-semibold text-dark">
-                        $
-                        {upgradePreview?.coupon?.discountAmount
-                          ? Number(
-                              upgradePreview.newPlan.immediateCharge.toFixed(2)
-                            ) +
-                            Number(
-                              upgradePreview.coupon.discountAmount?.toFixed(2)
-                            )
-                          : upgradePreview.newPlan.immediateCharge.toFixed(2)}
+                        ${upgradePreview.newPlan.immediateCharge.toFixed(2)}
                       </span>
                     </div>
-
-                    {upgradePreview.coupon &&
-                      upgradePreview.coupon.isApplied && (
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Coupon discount ({couponCode}):</span>
-                          <span className="fw-semibold text-success">
-                            -$
-                            {upgradePreview.coupon.discountAmount?.toFixed(2) ||
-                              "0.00"}
-                          </span>
-                        </div>
-                      )}
 
                     {upgradePreview.billing.creditApplied > 0 && (
                       <div className="d-flex justify-content-between align-items-center mb-2">
@@ -2130,7 +2137,11 @@ const UpgradePlan = () => {
                       <span>
                         {new Date(
                           upgradePreview.billing.nextBillingDate
-                        ).toLocaleDateString()}
+                        ).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </span>
                     </div>
 
