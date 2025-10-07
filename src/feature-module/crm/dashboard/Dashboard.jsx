@@ -13,6 +13,7 @@ import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndi
 import CopyableInput from "../../../core/common/CopyableInput";
 import Calendar from "../calendar/Calendar";
 import { Spin } from "antd";
+import api from "../../../core/axios/axiosInstance";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -77,7 +78,6 @@ const Dashboard = () => {
     },
   });
   const route = all_routes;
-
 
   ///already fethced it in router.jsx
   useEffect(() => {
@@ -151,7 +151,7 @@ const Dashboard = () => {
       {isLoading ? (
         <div className="d-flex justify-content-center align-items-center vh-100 w-100">
           {" "}
-           <Spin size="large" />
+          <Spin size="large" />
         </div>
       ) : (
         <>
@@ -253,7 +253,13 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-
+                  <button
+                    onClick={async () =>
+                      await api.get("/editProfile/testingonesignal")
+                    }
+                  >
+                    click
+                  </button>
                   <div className="col-md-6 mb-md-4 mb-2">
                     <div className="dashboardSmallCards d-flex flex-row justify-content-between h-100">
                       <img
@@ -269,6 +275,7 @@ const Dashboard = () => {
                         <div className="d-flex align-items-center justify-content-end mb-md-0 mb-3">
                           <CopyableInput value={profileLink} width={350} />
                         </div>
+                        testingOneSignal
                         <div className="d-flex align-items-center justify-content-end mt-3">
                           <p
                             style={{

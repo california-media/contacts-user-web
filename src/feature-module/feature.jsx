@@ -7,8 +7,10 @@ import ThemeSettings from "../core/common/theme-settings/themeSettings";
 import Header from "../core/common/header";
 import Sidebar from "../core/common/sidebar";
 import OneSignal from "react-onesignal";
+import useOneSignalAuth from "../hooks/useOneSignalAuth";
 
 // Global flag to track OneSignal initialization
+let isOneSignalInitialized = false;
 
 const Feature = () => {
   const dispatch = useDispatch();
@@ -19,9 +21,16 @@ const Feature = () => {
   const expandMenu = useSelector((state) => state?.common?.expandMenu);
   const [selectedLead, setSelectedLead] = useState(null);
 
+  // Use OneSignal auth hook for user login/logout
+  const { loginOneSignalUser, checkOneSignalStatus } = useOneSignalAuth();
+
   useEffect(() => {
     const initializeOneSignal = async () => {
-      // Check if OneSignal is already initialized
+      // Prevent multiple initializations
+      if (isOneSignalInitialized) {
+        console.log("OneSignal already initialized, skipping...");
+        return;
+      }
 
       try {
         console.log("Initializing OneSignal");
@@ -59,14 +68,20 @@ const Feature = () => {
           },
         });
 
+        isOneSignalInitialized = true;
         console.log("OneSignal initialized successfully");
+
+        // Check current status after initialization
+        setTimeout(() => {
+          checkOneSignalStatus();
+        }, 1000);
       } catch (error) {
         console.error("Error initializing OneSignal:", error);
       }
     };
 
     initializeOneSignal();
-  }, []);
+  }, [checkOneSignalStatus]);
 
   return (
     <div

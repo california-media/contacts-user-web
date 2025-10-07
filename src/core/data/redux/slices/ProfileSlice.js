@@ -16,6 +16,7 @@ const initialState = {
   tagCount: 0,
   isLoading: true,
   role: "user",
+  oneSignalExternalId: "", // Add OneSignal External ID to state
   // error: null,
 };
 
@@ -115,6 +116,13 @@ const profileSlice = createSlice({
         console.log("Fetched profile data:", action.payload);
         // return { ...state, ...action.payload };
         Object.assign(state, action.payload.data);
+
+        // Also store OneSignal External ID from localStorage if not in profile
+        const storedExternalId = localStorage.getItem("oneSignalExternalId");
+        if (storedExternalId && !state.oneSignalExternalId) {
+          state.oneSignalExternalId = storedExternalId;
+        }
+
         state.error = undefined;
       })
       .addCase(fetchProfile.rejected, (state, action) => {

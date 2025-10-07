@@ -16,6 +16,7 @@ import { resetSelectedTemplate } from "../../data/redux/slices/SelectedTemplateS
 import { resetProfile } from "../../data/redux/slices/ProfileSlice";
 import AvatarInitialStyles from "../nameInitialStyles/AvatarInitialStyles";
 import { resetContacts } from "../../data/redux/slices/ContactSlice";
+import useOneSignalAuth from "../../../hooks/useOneSignalAuth";
 import "./header.css";
 
 const AdminHeader = () => {
@@ -29,6 +30,10 @@ const AdminHeader = () => {
   const [clientPhoneNumber, setClientPhoneNumber] = useState("");
   const phoneNumber = useAppSelector((state) => state.appCommon.phone);
   const navigate = useNavigate();
+
+  // Use OneSignal auth hook
+  const { logoutOneSignalUser } = useOneSignalAuth();
+
   useEffect(() => {
     setClientPhoneNumber(phoneNumber);
     phoneNumber && showDropdown();
@@ -49,14 +54,39 @@ const AdminHeader = () => {
   const toggleExpandMenu2 = () => {
     dispatch(setExpandMenu(false));
   };
-  const handleLogout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("token");
-    dispatch(resetProfile());
-    dispatch(resetSelectedContact());
-    dispatch(resetSelectedTemplate());
-    dispatch(resetContacts());
-    navigate(route.login);
+  const handleLogout = async () => {
+    try {
+      // Logout from OneSignal first
+      await logoutOneSignalUser();
+
+      // Clear all localStorage data
+      localStorage.removeItem("userId");
+      localStorage.removeItem("token");
+      localStorage.removeItem("oneSignalExternalId");
+
+      // Reset Redux state
+      dispatch(resetProfile());
+      dispatch(resetSelectedContact());
+      dispatch(resetSelectedTemplate());
+      dispatch(resetContacts());
+
+      // Navigate to login
+      navigate(route.login);
+
+      console.log("✅ Admin logout completed successfully");
+    } catch (error) {
+      console.error("❌ Admin logout error:", error);
+
+      // Still proceed with logout even if OneSignal logout fails
+      localStorage.removeItem("userId");
+      localStorage.removeItem("token");
+      localStorage.removeItem("oneSignalExternalId");
+      dispatch(resetProfile());
+      dispatch(resetSelectedContact());
+      dispatch(resetSelectedTemplate());
+      dispatch(resetContacts());
+      navigate(route.login);
+    }
   };
   const [layoutBs, setLayoutBs] = useState(localStorage.getItem("dataTheme"));
   const isLockScreen = location.pathname === "/lock-screen";
