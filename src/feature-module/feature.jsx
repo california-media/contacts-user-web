@@ -12,15 +12,11 @@ import OneSignal from "react-onesignal";
 
 const Feature = () => {
   const dispatch = useDispatch();
-  const themeOpen = useSelector((state: any) => state?.common?.themeSettings);
-  const headerCollapse = useSelector(
-    (state: any) => state?.common.headerCollapse
-  );
-  const mobileSidebar = useSelector(
-    (state: any) => state?.common?.mobileSidebar
-  );
-  const miniSidebar = useSelector((state: any) => state?.common?.miniSidebar);
-  const expandMenu = useSelector((state: any) => state?.common?.expandMenu);
+  const themeOpen = useSelector((state) => state?.common?.themeSettings);
+  const headerCollapse = useSelector((state) => state?.common.headerCollapse);
+  const mobileSidebar = useSelector((state) => state?.common?.mobileSidebar);
+  const miniSidebar = useSelector((state) => state?.common?.miniSidebar);
+  const expandMenu = useSelector((state) => state?.common?.expandMenu);
   const [selectedLead, setSelectedLead] = useState(null);
 
   useEffect(() => {
@@ -31,7 +27,9 @@ const Feature = () => {
         console.log("Initializing OneSignal");
 
         await OneSignal.init({
-          appId: "446cfd78-6541-4716-83ff-d1e857e75ce6",
+          appId:
+            process.env.REACT_APP_ONESIGNAL_APP_ID ||
+            "446cfd78-6541-4716-83ff-d1e857e75ce6",
           allowLocalhostAsSecureOrigin: true,
           notifyButton: {
             enable: true,
