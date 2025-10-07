@@ -25,7 +25,6 @@ const Dashboard = () => {
   const qrCodeRef = useRef();
   const userProfile = useSelector((state) => state.profile);
   const { tags, error } = useSelector((state) => state.tags);
-  console.log("userProfile in dashboardss", userProfile);
   const [copied, setCopied] = useState(false);
   const profileLink = `https://app.contacts.management/shareProfile/${userProfile.firstname.replace(
     /\s/g,

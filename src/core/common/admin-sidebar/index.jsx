@@ -19,7 +19,6 @@ const AdminSidebar = () => {
   const dispatch = useDispatch();
 
   const userProfile = useSelector((state) => state.profile);
-  console.log(userProfile, "userProfile in sidebar");
 
   const route = all_routes;
   function getRemainingDays(trialEndDate) {

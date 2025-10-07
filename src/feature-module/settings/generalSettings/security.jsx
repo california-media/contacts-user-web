@@ -16,7 +16,6 @@ const Security = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userProfile = useSelector((state) => state.profile);
-  console.log(userProfile, "userProfile in security");
 
   const togglePasswordVisibility = () => {
     setPasswordVisible((prev) => !prev);

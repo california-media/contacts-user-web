@@ -55,7 +55,6 @@ const ShareProfile = () => {
     fetchProfile();
   }, [serialNumber]);
 
-  console.log("userProfile in shareprofile", userProfile);
   const handleSaveContact = () => {
     if (!userProfile.firstname && !userProfile.lastname) return;
 
@@ -122,7 +121,6 @@ console.log();
         console.log(response.data, "response.data from register API");
       }
     }
-    console.log(userProfile, "userprofile in share contact");
 
     const formDataToSend = {
       // "ScannerID" : "6855292146730e89660d6c12",

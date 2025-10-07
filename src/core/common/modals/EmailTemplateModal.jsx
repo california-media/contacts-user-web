@@ -22,7 +22,6 @@ const referralData  = useSelector((state) => state.referral.data);
 console.log(referralData, "referralData in email template modal");
 
   const quillRef = useRef(null);
-  console.log(userProfile, "userProfile in email modal");
 
   useEffect(() => {
     const emailTitles =
