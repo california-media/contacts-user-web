@@ -253,13 +253,13 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <button
+                  {/* <button
                     onClick={async () =>
                       await api.get("/editProfile/testingonesignal")
                     }
                   >
                     click
-                  </button>
+                  </button> */}
                   <div className="col-md-6 mb-md-4 mb-2">
                     <div className="dashboardSmallCards d-flex flex-row justify-content-between h-100">
                       <img
