@@ -62,7 +62,6 @@ const Header = () => {
       // Clear all localStorage data
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
-      localStorage.removeItem("oneSignalExternalId");
 
       // Reset Redux state
       dispatch(resetProfile());
@@ -80,7 +79,6 @@ const Header = () => {
       // Still proceed with logout even if OneSignal logout fails
       localStorage.removeItem("userId");
       localStorage.removeItem("token");
-      localStorage.removeItem("oneSignalExternalId");
       dispatch(resetProfile());
       dispatch(resetSelectedContact());
       dispatch(resetSelectedTemplate());

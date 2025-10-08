@@ -110,18 +110,6 @@ const Login = () => {
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.data.token);
 
-        // Store OneSignal External ID if provided by backend
-        if (response.data.data.oneSignalExternalId) {
-          localStorage.setItem(
-            "oneSignalExternalId",
-            response.data.data.oneSignalExternalId
-          );
-          console.log(
-            "OneSignal External ID stored:",
-            response.data.data.oneSignalExternalId
-          );
-        }
-
         setMessage(response.data.message);
         // fetch data before navigating
         await dispatch(fetchProfile());

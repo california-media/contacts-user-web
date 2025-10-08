@@ -8,43 +8,33 @@ import OneSignal from "react-onesignal";
  */
 const useOneSignalAuth = () => {
   const profile = useSelector((state) => state.profile);
-  const { id, oneSignalExternalId, error } = profile;
+  const { id, error } = profile;
 
   // Login user to OneSignal
   const loginOneSignalUser = useCallback(async () => {
     try {
-      // Get External ID from Redux store or localStorage
-      let externalId = oneSignalExternalId;
-
-      if (!externalId) {
-        externalId = localStorage.getItem("oneSignalExternalId");
-      }
-
-      // If still no external ID, generate one based on user ID
-      if (!externalId && id) {
-        externalId = `user_${id}`;
-        localStorage.setItem("oneSignalExternalId", externalId);
-      }
-
-      if (externalId) {
-        console.log("🔔 Logging into OneSignal with External ID:", externalId);
-        await OneSignal.login(externalId);
-        console.log("✅ OneSignal user login successful");
-
-        // Optional: Store player ID for debugging (use correct API)
-        const playerId = OneSignal.User.PushSubscription.id;
-        console.log("📱 OneSignal Player ID:", playerId);
-
-        return externalId;
-      } else {
-        console.warn("⚠️ No OneSignal External ID available for login");
+      // Generate External ID dynamically from user ID
+      if (!id || error) {
+        console.warn("⚠️ No user ID available for OneSignal login");
         return null;
       }
+
+      const externalId = `user_${id}`;
+
+      console.log("Logging into OneSignal with External ID:", externalId);
+      await OneSignal.login(externalId);
+      console.log("✅ OneSignal user login successful");
+
+      // Optional: Store player ID for debugging (use correct API)
+      // const playerId = OneSignal.User.PushSubscription.id;
+      // console.log("📱 OneSignal Player ID:", playerId);
+
+      return externalId;
     } catch (error) {
       console.error("❌ OneSignal user login failed:", error);
       return null;
     }
-  }, [id, oneSignalExternalId]);
+  }, [id]);
 
   // Logout user from OneSignal
   const logoutOneSignalUser = useCallback(async () => {
@@ -52,39 +42,36 @@ const useOneSignalAuth = () => {
       console.log("🔔 Logging out from OneSignal");
       await OneSignal.logout();
       console.log("✅ OneSignal user logout successful");
-
-      // Clear stored External ID
-      localStorage.removeItem("oneSignalExternalId");
     } catch (error) {
       console.error("❌ OneSignal user logout failed:", error);
     }
   }, []);
 
   // Set up notification event listeners
-  const setupNotificationListeners = useCallback(() => {
-    try {
-      // Helper function to log notification details
-      const logNotificationDetails = (event, eventType) => {
-        if (event.notification) {
-          const notification = event.notification;
-          console.log("Title:", notification.heading || notification.title);
-          console.log("Content:", notification.body || notification.content);
-        }
-      };
+  // const setupNotificationListeners = useCallback(() => {
+  //   try {
+  //     console.log("🎧 Setting up OneSignal notification listeners");
 
-      // Listen for notifications displayed in foreground
-      OneSignal.Notifications.addEventListener(
-        "foregroundWillDisplay",
-        (event) => {
-          logNotificationDetails(event, "received");
-        }
-      );
+  //     // Helper function to log notification details
+  //     const logNotificationDetails = (event, eventType) => {
+  //       if (event.notification) {
+  //         const notification = event.notification;
+  //         console.log("Title:", notification.heading || notification.title);
+  //         console.log("Content:", notification.body || notification.content);
+  //       }
+  //     };
 
-      console.log("✅ OneSignal notification listeners set up successfully");
-    } catch (error) {
-      console.error("❌ Failed to set up notification listeners:", error);
-    }
-  }, [id]);
+  //     // Listen for notifications displayed in foreground
+  //     OneSignal.Notifications.addEventListener(
+  //       "foregroundWillDisplay",
+  //       logNotificationDetails
+  //     );
+
+  //     console.log("✅ OneSignal notification listeners set up successfully");
+  //   } catch (error) {
+  //     console.error("❌ Failed to set up notification listeners:", error);
+  //   }
+  // }, []);
 
   // Check OneSignal authentication status
   const checkOneSignalStatus = useCallback(async () => {
@@ -114,6 +101,8 @@ const useOneSignalAuth = () => {
 
   // Auto-login when user is authenticated and OneSignal is ready
   useEffect(() => {
+    let timeoutId;
+
     const autoLogin = async () => {
       // Only proceed if user is authenticated (has ID)
       if (!id || error) return;
@@ -129,29 +118,31 @@ const useOneSignalAuth = () => {
           console.log("✅ User already logged into OneSignal");
         }
 
-        // Set up notification listeners after login
-        setupNotificationListeners();
+        // Set up notification listeners after login (only once)
+        // setupNotificationListeners();
       } catch (error) {
         console.error("❌ OneSignal auto-login failed:", error);
       }
     };
 
     // Delay to ensure OneSignal is initialized
-    const timer = setTimeout(autoLogin, 2000);
+    timeoutId = setTimeout(autoLogin, 2000);
 
-    return () => clearTimeout(timer);
-  }, [
-    id,
-    loginOneSignalUser,
-    checkOneSignalStatus,
-    setupNotificationListeners,
-  ]);
+    // Cleanup function
+    return () => {
+      // console.log("Cleaning up OneSignal listeners");
+      // OneSignal.Notifications.removeEventListener("foregroundWillDisplay");
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [id, error]); // Removed functions from dependencies to prevent re-runs
 
   return {
     loginOneSignalUser,
     logoutOneSignalUser,
     checkOneSignalStatus,
-    setupNotificationListeners,
+    // setupNotificationListeners,
   };
 };
 

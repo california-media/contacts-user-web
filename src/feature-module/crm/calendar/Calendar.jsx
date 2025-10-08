@@ -131,14 +131,12 @@ const Calendar = () => {
     );
 
     try {
-  await dispatch(saveContact(formDataObj)).unwrap();
-   dispatch(profileEvents());
-  console.log("Contact saved and events updated");
-} catch (error) {
-  console.error("Error while saving contact or updating events:", error);
-
-}
-
+      await dispatch(saveContact(formDataObj)).unwrap();
+      dispatch(profileEvents());
+      console.log("Contact saved and events updated");
+    } catch (error) {
+      console.error("Error while saving contact or updating events:", error);
+    }
 
     setMeetingFormData({
       meeting_id: "",
@@ -192,7 +190,6 @@ const Calendar = () => {
     return acc;
   }, {});
   const days = getCalendarGrid();
-
 
   return (
     <>
