@@ -13,7 +13,9 @@ export const all_routes = {
   registrationForm: "/registration-form",
 
   contactGrid: "/crm/customer-kanban",
-  resetPassword:"/email/reset-password/:token",
+  resetPassword:"/email/reset-password",
+forgotPassword: "/forgotPassword/:method",
+phoneResetPassword: "/phone-reset-password",
 
   contactsDetails: "/contacts-details",
   adminUserDetails: "/admin/user-details",

@@ -3,7 +3,7 @@ import axios from "axios";
 const baseURL =
   process.env.NODE_ENV === "production"
     ? "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/"
-    : "http://localhost:3003/";
+    : "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/";
 
 const api = axios.create({ baseURL });
 

@@ -46,6 +46,8 @@ import InvoiceView from "../settings/generalSettings/InvoiceView";
 import PaymentUnsuccessful from "../otherPages/PaymentUnsuccessful";
 import EmbeddedCheckoutPage from "../otherPages/EmbeddedCheckoutPage";
 import ResetPassword from "../auth/resetPassword";
+import ForgotPassword from "../auth/ForgotPassword";
+import PhoneResetPassword from "../auth/PhoneResetPassword";
 
 const route = all_routes;
 
@@ -356,10 +358,22 @@ export const authRoutes = [
     title: "Register",
   },
   {
-    path:`${route.resetPassword}/:token`,
+    path:`${route.resetPassword}`,
     element: <ResetPassword />,
     route: Route,
     title: "Reset Password",
+  },
+  {
+    path:`${route.forgotPassword}`,
+    element: <ForgotPassword />,
+    route: Route,
+    title: "Forgot Password",
+  },
+  {
+    path:`${route.phoneResetPassword}`,
+    element: <PhoneResetPassword />,
+    route: Route,
+    title: "Password Reset",
   },
   {
     path: `${route.shareProfile}/:serialNumber`,
