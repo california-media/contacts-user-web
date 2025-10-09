@@ -77,7 +77,7 @@ export const adminSidebarData = [
       },
       // {
       //   label: "Calendar",
-      //   iconImg: "assets/img/icons/calendarIcon.png",
+      //   iconImg: "/assets/img/icons/calendarIcon.png",
       //   submenu: false,
       //   showSubRoute: false,
       //   submenuItems: [{ label: "Calendar", link: route.adminCalendar }],
@@ -92,7 +92,7 @@ export const adminSidebarData = [
   //   submenuItems: [
   //     {
   //       label: "Whatsapp",
-  //       iconImg: "assets/img/icons/whatsappIcon.png",
+  //       iconImg: "/assets/img/icons/whatsappIcon.png",
   //       submenu: false,
   //       showSubRoute: false,
   //       submenuItems: [
@@ -101,7 +101,7 @@ export const adminSidebarData = [
   //     },
   //     {
   //       label: "Email",
-  //       iconImg: "assets/img/icons/emailIcon.png",
+  //       iconImg: "/assets/img/icons/emailIcon.png",
   //       submenu: false,
   //       showSubRoute: false,
   //       submenuItems: [
@@ -161,21 +161,21 @@ export const adminSidebarData = [
   //     },
   //     {
   //       label: "Import/export",
-  //       iconImg: "assets/img/icons/importAndExport.png",
+  //       iconImg: "/assets/img/icons/importAndExport.png",
   //       submenu: false,
   //       showSubRoute: false,
   //       submenuItems: [{ label: "Groups", link: route.ImportAndExport }],
   //     },
   //     {
   //       label: "API",
-  //       iconImg: "assets/img/icons/apiIcon.png",
+  //       iconImg: "/assets/img/icons/apiIcon.png",
   //       submenu: false,
   //       showSubRoute: false,
   //       submenuItems: [{ label: "Groups", link: route.Api }],
   //     },
   //     // {
   //     //   label: "Zapier",
-  //     //   iconImg: "assets/img/icons/zapierLogo.png",
+  //     //   iconImg: "/assets/img/icons/zapierLogo.png",
   //     //   submenu: false,
   //     //   showSubRoute: false,
   //     //   submenuItems: [{ label: "Groups", link: route.Zapier }],
@@ -190,14 +190,14 @@ export const adminSidebarData = [
   //   submenuItems: [
   //     {
   //       label: "My Scans",
-  //       iconImg: "assets/img/icons/scanIcon.png",
+  //       iconImg: "/assets/img/icons/scanIcon.png",
   //       submenu: false,
   //       showSubRoute: false,
   //       submenuItems: [{ label: "SCANS", link: `${route.scans}#myScans` }],
   //     },
   //     {
   //       label: "Scanned Me",
-  //       iconImg: "assets/img/icons/scanIcon.png",
+  //       iconImg: "/assets/img/icons/scanIcon.png",
   //       submenu: false,
   //       showSubRoute: false,
   //       submenuItems: [{ label: "SCANS", link: `${route.scans}#scannedMe` }],
@@ -212,7 +212,7 @@ export const adminSidebarData = [
     submenuItems: [
       // {
       //   label: "Refer and Earn",
-      //   iconImg: "assets/img/icons/referAndEarn.png",
+      //   iconImg: "/assets/img/icons/referAndEarn.png",
       //   submenu: false,
       //   showSubRoute: false,
       //   submenuItems: [{ label: "SUPPORT", link: route.ReferAndEarn }],

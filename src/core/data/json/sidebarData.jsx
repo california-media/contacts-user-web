@@ -12,7 +12,7 @@ export const SidebarData = [
     submenuItems: [
       {
         label: "Dashboard",
-        iconImg: "assets/img/icons/dashboardIcon.png",
+        iconImg: "/assets/img/icons/dashboardIcon.png",
         submenu: false,
         showSubRoute: false,
 
@@ -20,7 +20,7 @@ export const SidebarData = [
       },
       {
         label: "Contacts",
-        iconImg: "assets/img/icons/contactsIcon.png",
+        iconImg: "/assets/img/icons/contactsIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [
@@ -33,14 +33,14 @@ export const SidebarData = [
       },
       {
         label: "Calendar",
-        iconImg: "assets/img/icons/calendarIcon.png",
+        iconImg: "/assets/img/icons/calendarIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "Calendar", link: route.calendar }],
       },
       {
         label: "Tickets",
-        iconImg: "assets/img/icons/helpAndSupport.png",
+        iconImg: "/assets/img/icons/helpAndSupport.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "Tickets", link: route.myTickets }],
@@ -55,7 +55,7 @@ export const SidebarData = [
     submenuItems: [
       {
         label: "Whatsapp",
-        iconImg: "assets/img/icons/whatsappIcon.png",
+        iconImg: "/assets/img/icons/whatsappIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [
@@ -64,7 +64,7 @@ export const SidebarData = [
       },
       {
         label: "Email",
-        iconImg: "assets/img/icons/emailIcon.png",
+        iconImg: "/assets/img/icons/emailIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [
@@ -124,21 +124,21 @@ export const SidebarData = [
       },
       {
         label: "Import/export",
-        iconImg: "assets/img/icons/importAndExport.png",
+        iconImg: "/assets/img/icons/importAndExport.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "Groups", link: route.ImportAndExport }],
       },
       {
         label: "API",
-        iconImg: "assets/img/icons/apiIcon.png",
+        iconImg: "/assets/img/icons/apiIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "Groups", link: route.Api }],
       },
       // {
       //   label: "Zapier",
-      //   iconImg: "assets/img/icons/zapierLogo.png",
+      //   iconImg: "/assets/img/icons/zapierLogo.png",
       //   submenu: false,
       //   showSubRoute: false,
       //   submenuItems: [{ label: "Groups", link: route.Zapier }],
@@ -153,14 +153,14 @@ export const SidebarData = [
     submenuItems: [
       {
         label: "My Scans",
-        iconImg: "assets/img/icons/scanIcon.png",
+        iconImg: "/assets/img/icons/scanIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "SCANS", link: `${route.scans}#myScans` }],
       },
       {
         label: "Scanned Me",
-        iconImg: "assets/img/icons/scanIcon.png",
+        iconImg: "/assets/img/icons/scanIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "SCANS", link: `${route.scans}#scannedMe` }],
@@ -175,21 +175,21 @@ export const SidebarData = [
     submenuItems: [
       {
         label: "Refer and Earn",
-        iconImg: "assets/img/icons/referAndEarn.png",
+        iconImg: "/assets/img/icons/referAndEarn.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "SUPPORT", link: route.ReferAndEarn }],
       },
       {
         label: "Help & Support",
-        iconImg: "assets/img/icons/helpAndSupport.png",
+        iconImg: "/assets/img/icons/helpAndSupport.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "SUPPORT", link: route.HelpAndSupport }],
       },
       {
         label: "Settings",
-        iconImg: "assets/img/icons/settingIcon.png",
+        iconImg: "/assets/img/icons/settingIcon.png",
         submenu: false,
         showSubRoute: false,
         submenuItems: [{ label: "SUPPORT", link: route.security }],
