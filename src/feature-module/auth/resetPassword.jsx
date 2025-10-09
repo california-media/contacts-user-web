@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { Link } from "react-router-dom";
 import { all_routes } from "../router/all_routes";
-type PasswordField = 'password' | 'confirmPassword' | 'newpassword';
+
 const ResetPassword = () => {
   const route = all_routes;
   const [passwordVisibility, setPasswordVisibility] = useState({
@@ -11,12 +11,16 @@ const ResetPassword = () => {
     newpassword:false
   });
 
-  const togglePasswordVisibility = (field: PasswordField) => {
+  const togglePasswordVisibility = (field) => {
     setPasswordVisibility((prevState) => ({
       ...prevState,
       [field]: !prevState[field],
     }));
   };
+  useEffect(()=>{
+console.log("reset password page");
+
+  },[])
   return (
     <div className="account-content">
   <div className="d-flex flex-wrap w-100 vh-100 overflow-hidden account-bg-04">

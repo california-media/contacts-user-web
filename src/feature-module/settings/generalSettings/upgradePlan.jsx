@@ -66,6 +66,8 @@ const UpgradePlan = () => {
     fetchPlans();
     fetchPaymentMethods();
   }, []);
+console.log(subscriptionDetails,"sub details");
+console.log(userProfile,"user profile plan");
 
   // Fetch subscription details when user has a paid plan
   useEffect(() => {

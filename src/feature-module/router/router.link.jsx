@@ -45,6 +45,7 @@ import BillingInfo from "../settings/generalSettings/BillingInfo";
 import InvoiceView from "../settings/generalSettings/InvoiceView";
 import PaymentUnsuccessful from "../otherPages/PaymentUnsuccessful";
 import EmbeddedCheckoutPage from "../otherPages/EmbeddedCheckoutPage";
+import ResetPassword from "../auth/resetPassword";
 
 const route = all_routes;
 
@@ -353,6 +354,12 @@ export const authRoutes = [
     element: <Register />,
     route: Route,
     title: "Register",
+  },
+  {
+    path:`${route.resetPassword}/:token`,
+    element: <ResetPassword />,
+    route: Route,
+    title: "Reset Password",
   },
   {
     path: `${route.shareProfile}/:serialNumber`,
