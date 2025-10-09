@@ -134,11 +134,16 @@ const ReferAndEarn = () => {
               0
             ).toFixed(2)}
           </h3>
+          <div className="mb-2 text-sm text-gray-600">
+            {referralData.verifiedReferralCount || 0} verified referrals out of{" "}
+            {referralData.referralCount || 0} total referrals
+          </div>
           <div className="w-100 overflow-x-auto border-b mb-4">
             <table className="w-100">
               <thead style={{ borderBottom: "1px solid #e2e8f0" }}>
                 <tr className="text-gray-500 text-sm border-b">
                   <th className="pb-3">Referred friend</th>
+                  <th className="pb-3">Verification Status</th>
                   <th className="pb-3">Status</th>
                   <th className="pb-3">Date</th>
                 </tr>
@@ -157,7 +162,22 @@ const ReferAndEarn = () => {
                           : "N/A"}
                         )
                       </td>
-                      <td className="py-3">Completed</td>
+                      <td className="py-3">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            referral.isVerified ||
+                            referral.verificationStatus === "Verified"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {referral.verificationStatus ||
+                            (referral.isVerified ? "Verified" : "Not Verified")}
+                        </span>
+                      </td>
+                      <td className="py-3">
+                        {referral.isVerified ? "Completed" : "Pending"}
+                      </td>
                       <td className="py-3">
                         {dayjs(referral.signupDate).format(
                           "MMMM D, YYYY h:mm A"
@@ -167,7 +187,7 @@ const ReferAndEarn = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3" className="py-6 text-center text-gray-600">
+                    <td colSpan="4" className="py-6 text-center text-gray-600">
                       <div className="flex flex-col items-center">
                         <img
                           src="assets/img/icons/noReferral.svg"
@@ -200,10 +220,11 @@ const ReferAndEarn = () => {
 
         <p className="text-gray-500 text-xs mt-4">
           As the referrer, you will receive a $10 credit to your account for
-          each new member you have referred who becomes an annual paying member.
-          The referee must stay a paying member past the 15-day refund period.
-          This credit will be automatically applied in the next billing cycle.
-          You can view the{" "}
+          each new member you have referred who becomes an annual paying member
+          and has verified their account. The referee must stay a paying member
+          past the 15-day refund period and complete email verification. This
+          credit will be automatically applied in the next billing cycle. You
+          can view the{" "}
           <a href="#" className="text-indigo-600 underline">
             Terms & Conditions here
           </a>
