@@ -38,7 +38,7 @@ const Feature = () => {
         await OneSignal.init({
           appId:
             process.env.REACT_APP_ONESIGNAL_APP_ID ||
-            "446cfd78-6541-4716-83ff-d1e857e75ce6",
+            "",
           allowLocalhostAsSecureOrigin: true,
           notifyButton: {
             enable: true,

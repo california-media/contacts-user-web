@@ -38,9 +38,7 @@ const AdminFeature = () => {
         console.log("Initializing OneSignal");
 
         await OneSignal.init({
-          appId:
-            process.env.REACT_APP_ONESIGNAL_APP_ID ||
-            "446cfd78-6541-4716-83ff-d1e857e75ce6",
+          appId: process.env.REACT_APP_ONESIGNAL_APP_ID || "",
           allowLocalhostAsSecureOrigin: true,
           notifyButton: {
             enable: true,
