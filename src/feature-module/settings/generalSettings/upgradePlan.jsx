@@ -60,6 +60,7 @@ const UpgradePlan = () => {
   const [couponValidation, setCouponValidation] = useState(null);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState(null);
+  const [isRemovingCoupon, setIsRemovingCoupon] = useState(false);
 
   // Fetch plans on component mount
   useEffect(() => {
@@ -301,6 +302,7 @@ const UpgradePlan = () => {
     // Refresh preview without coupon
     if (selectedPlan) {
       try {
+        setIsRemovingCoupon(true);
         setCouponLoading(true);
         if (showNewSubscriptionModal) {
           const preview = await fetchNewSubscriptionPreview(selectedPlan, null);
@@ -314,6 +316,7 @@ const UpgradePlan = () => {
         console.error("Error refreshing preview:", error);
       } finally {
         setCouponLoading(false);
+        setIsRemovingCoupon(false);
       }
     }
   };
@@ -1236,7 +1239,6 @@ const UpgradePlan = () => {
       </div>
     );
   }
-  console.log(newSubscriptionPreview, "New subscription preview in render");
   return (
     <>
       {/* Page Wrapper */}
@@ -1481,7 +1483,7 @@ const UpgradePlan = () => {
                     placeholder="Enter coupon code"
                     value={couponCode}
                     onChange={(e) => handleCouponChange(e.target.value)}
-                    disabled={couponLoading}
+                    disabled={couponLoading || couponValidation}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
                         handleApplyCoupon();
@@ -1513,7 +1515,7 @@ const UpgradePlan = () => {
                           >
                             <span className="visually-hidden">Loading...</span>
                           </div>
-                          Applying...
+                          {isRemovingCoupon ? "Removing..." : "Applying..."}
                         </>
                       ) : (
                         <>
@@ -1862,19 +1864,9 @@ const UpgradePlan = () => {
                 Processing...
               </>
             ) : (
-              `Confirm Subscription${
-                newSubscriptionPreview &&
-                newSubscriptionPreview.credits &&
-                newSubscriptionPreview.credits.finalChargeAfterCredits > 0
-                  ? ` - $${newSubscriptionPreview.credits.finalChargeAfterCredits.toFixed(
-                      2
-                    )}`
-                  : newSubscriptionPreview &&
-                    newSubscriptionPreview.credits &&
-                    newSubscriptionPreview.credits.finalChargeAfterCredits === 0
-                  ? " - Free with Credits"
-                  : ""
-              }`
+              `Confirm Subscription${` - $${newSubscriptionPreview?.credits?.finalChargeAfterCredits?.toFixed(
+                2
+              )}`}`
             )}
           </Button>
         </Modal.Footer>
@@ -1946,7 +1938,7 @@ const UpgradePlan = () => {
                     placeholder="Enter coupon code"
                     value={couponCode}
                     onChange={(e) => handleCouponChange(e.target.value)}
-                    disabled={couponLoading}
+                    disabled={couponLoading || couponValidation}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
                         handleApplyCoupon();
@@ -1978,7 +1970,7 @@ const UpgradePlan = () => {
                           >
                             <span className="visually-hidden">Loading...</span>
                           </div>
-                          Applying...
+                          {isRemovingCoupon ? "Removing..." : "Applying..."}
                         </>
                       ) : (
                         <>
@@ -2343,23 +2335,9 @@ const UpgradePlan = () => {
                 Processing...
               </>
             ) : (
-              `Confirm Upgrade${
-                upgradePreview &&
-                upgradePreview.credits &&
-                upgradePreview.credits.finalChargeAfterCredits > 0
-                  ? ` - $${upgradePreview.credits.finalChargeAfterCredits.toFixed(
-                      2
-                    )}`
-                  : upgradePreview &&
-                    upgradePreview.credits &&
-                    upgradePreview.credits.finalChargeAfterCredits === 0
-                  ? " - Free with Credits"
-                  : upgradePreview &&
-                    upgradePreview.billing &&
-                    upgradePreview.billing.immediateCharge > 0
-                  ? ` - $${upgradePreview.billing.immediateCharge.toFixed(2)}`
-                  : ""
-              }`
+              `Confirm Upgrade${` - $${upgradePreview?.credits?.finalChargeAfterCredits?.toFixed(
+                2
+              )}`}`
             )}
           </Button>
         </Modal.Footer>
