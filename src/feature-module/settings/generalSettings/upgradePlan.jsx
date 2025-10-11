@@ -66,8 +66,8 @@ const UpgradePlan = () => {
     fetchPlans();
     fetchPaymentMethods();
   }, []);
-console.log(subscriptionDetails,"sub details");
-console.log(userProfile,"user profile plan");
+  console.log(subscriptionDetails, "sub details");
+  console.log(userProfile, "user profile plan");
 
   // Fetch subscription details when user has a paid plan
   useEffect(() => {
@@ -923,7 +923,6 @@ console.log(userProfile,"user profile plan");
       setPaymentLoading(false);
     }
   };
-
   const renderPlanCard = (plan) => (
     <div key={plan._id} className="col-lg-6 mb-4 overflow-visible">
       <div
@@ -1237,6 +1236,7 @@ console.log(userProfile,"user profile plan");
       </div>
     );
   }
+  console.log(newSubscriptionPreview, "New subscription preview in render");
   return (
     <>
       {/* Page Wrapper */}
@@ -1577,24 +1577,39 @@ console.log(userProfile,"user profile plan");
                 ) : (
                   <div className="border rounded p-3 bg-light">
                     <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span>Plan cost:</span>
+                      <span>
+                        Remaining time on {selectedPlan.name}
+                        {newSubscriptionPreview?.coupon &&
+                          newSubscriptionPreview?.coupon?.isApplied && (
+                            <span className="text-success">
+                              {" "}
+                              (with{" "}
+                              {newSubscriptionPreview?.coupon?.discountType ===
+                              "percentage"
+                                ? `${newSubscriptionPreview?.coupon?.discountValue}%`
+                                : `$${newSubscriptionPreview?.coupon?.discountValue.toFixed(
+                                    2
+                                  )}`}{" "}
+                              off)
+                            </span>
+                          )}
+                        {newSubscriptionPreview?.billing?.nextBillingDate && (
+                          <span className="text-muted">
+                            {" "}
+                            after{" "}
+                            {new Date().toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        )}
+                        :
+                      </span>
                       <span className="fw-semibold text-dark">
-                        ${newSubscriptionPreview.plan.price.toFixed(2)}
+                        ${newSubscriptionPreview?.plan?.finalPrice.toFixed(2)}
                       </span>
                     </div>
-
-                    {newSubscriptionPreview.coupon &&
-                      newSubscriptionPreview.coupon.isApplied && (
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                          <span>Coupon discount ({couponCode}):</span>
-                          <span className="fw-semibold text-success">
-                            -$
-                            {newSubscriptionPreview.coupon.discountAmount?.toFixed(
-                              2
-                            ) || "0.00"}
-                          </span>
-                        </div>
-                      )}
 
                     {newSubscriptionPreview.credits && (
                       <>
@@ -1991,9 +2006,9 @@ console.log(userProfile,"user profile plan");
                         <div className="small">
                           {couponValidation.discountType === "percentage"
                             ? `${couponValidation.discountValue}% off`
-                            : `$${(
-                                couponValidation.discountValue / 100
-                              ).toFixed(2)} off`}
+                            : `$${couponValidation.discountValue.toFixed(
+                                2
+                              )} off`}
                           {couponValidation.validUntil && (
                             <span className="text-muted">
                               {" "}
@@ -2037,9 +2052,9 @@ console.log(userProfile,"user profile plan");
                               {upgradePreview.coupon.discountType ===
                               "percentage"
                                 ? `${upgradePreview.coupon.discountValue}%`
-                                : `$${(
-                                    upgradePreview.coupon.discountValue / 100
-                                  ).toFixed(2)}`}{" "}
+                                : `$${upgradePreview.coupon.discountValue.toFixed(
+                                    2
+                                  )}`}{" "}
                               off)
                             </span>
                           )}
