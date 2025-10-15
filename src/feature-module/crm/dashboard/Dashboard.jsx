@@ -272,10 +272,10 @@ const Dashboard = () => {
                         // }}
                       />
                       <div>
-                        <div className="d-flex align-items-center justify-content-end mb-md-0 mb-3">
-                          <CopyableInput value={profileLink} width={350} />
+                        <div className="d-flex align-items-center justify-content-end mb-md-0 mb-3 overflow-hidden">
+                          <CopyableInput value={profileLink}  />
                         </div>
-                        testingOneSignal
+                     
                         <div className="d-flex align-items-center justify-content-end mt-3">
                           <p
                             style={{

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../../core/axios/axiosInstance";
 
 import { Player } from "@lottiefiles/react-lottie-player";
@@ -68,10 +68,10 @@ const handleForgotPassword = async (e) => {
   }
 
   return (
-    <div className="container-fluid min-vh-100 p-0">
+    <div className="container-fluid min-vh-100 p-0 bg-white d-flex align-items-center justify-content-center">
       <div className="row h-100 m-0">
         {/* Left Side - Form */}
-        <div className="col-md-6 d-flex align-items-center justify-content-center px-5">
+        <div className="col-md-6 d-flex bg-white align-items-center justify-content-center px-5">
           <div style={{ maxWidth: "400px", width: "100%" }}>
             <h2 className="mb-4 fw-bold text-center">Forgot Password</h2>
             <form onSubmit={handleForgotPassword}>
@@ -120,6 +120,13 @@ const handleForgotPassword = async (e) => {
             {message && (
               <p className="mt-3 text-info text-center">{message}</p>
             )}
+
+           <div className="mt-3 text-center">
+  <span>Back to </span>
+  <Link to="/login" className="text-primary text-decoration-underline">
+    Login
+  </Link>
+</div>
           </div>
         </div>
 

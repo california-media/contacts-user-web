@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import ImageWithBasePath from "../../core/common/imageWithBasePath";
 import { all_routes } from "../router/all_routes";
 import api from "../../core/axios/axiosInstance";
+import axios from "axios";
 
 const useQuery = () => new URLSearchParams(useLocation().search);
 
@@ -52,10 +53,33 @@ const ResetPassword = () => {
 
     try {
       setLoading(true);
-     const res = await api.post(`/auth/reset-password?token=${token}`, {
-  password: formData.password,
-  confirmPassword: formData.confirmPassword,
-});
+      console.log(formData,"formdata for reset password");
+      console.log(token,"token for reset password");
+      
+//      const res = await axios.post(`/email/reset-password?token=${token}`, {
+//   password: formData.password,
+//   confirmPassword: formData.confirmPassword,
+// });
+
+
+
+
+
+
+
+const res = await api.post(
+  `/email/reset-password`,
+  {
+    password: formData.password,
+    confirmPassword: formData.confirmPassword,
+  },
+  {
+    params: {
+      token: token
+    }
+  }
+);
+
 
       console.log("Password reset successful:", res.data);
       navigate(route.login); // redirect to login page
@@ -87,7 +111,7 @@ const ResetPassword = () => {
                 />
               </div>
               <div className="mb-4">
-                <h4 className="mb-2 fs-20">Reset Password</h4>
+                <h4 className="mb-2 fs-20">Reset Password page</h4>
                 <p>Enter your new password and confirm it below.</p>
               </div>
 

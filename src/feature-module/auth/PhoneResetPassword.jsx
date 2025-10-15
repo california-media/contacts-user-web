@@ -67,7 +67,7 @@ const PhoneResetPassword = () => {
   };
 
   return (
-    <div className="container py-5">
+    <div className="container bg-white py-5">
       <div className="row justify-content-center">
         <div className="col-md-6">
           <h2 className="mb-4 text-center">Reset Password</h2>
