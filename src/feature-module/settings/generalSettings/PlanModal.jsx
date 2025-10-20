@@ -1,6 +1,6 @@
 // components/admin/PlanModal.js
 import React, { useState, useEffect } from "react";
-import { Modal } from "bootstrap";
+// Removed: import { Modal } from "bootstrap"; - This was causing conflicts with Bootstrap dropdowns
 import ReactDOM from "react-dom";
 import api from "../../../core/axios/axiosInstance";
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
@@ -121,7 +121,9 @@ const PlanModal = ({ onSuccess, plan, type }) => {
 
       // ✅ Properly close modal (removes backdrop too)
       const modalEl = document.getElementById("plan_modal");
-      const modal = Modal.getInstance(modalEl) || new Modal(modalEl);
+      const modal =
+        window.bootstrap.Modal.getInstance(modalEl) ||
+        new window.bootstrap.Modal(modalEl);
       modal.hide();
 
       onSuccess();
