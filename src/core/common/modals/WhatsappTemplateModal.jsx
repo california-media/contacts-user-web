@@ -56,7 +56,7 @@ const WhatsappTemplateModal = () => {
       };
       console.log(payload, "payload for whatsapp activity");
 
-      const response = await api.post("/whatsapp-email-activity", payload);
+      const response = await api.post("/whatsapp-email-call-activity", payload);
       dispatch(fetchContactActivities(selectedContact.contact_id));
       console.log(
         response.data,
