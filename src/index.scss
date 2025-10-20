@@ -777,6 +777,16 @@ div.sidebar-themesettings
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
 }
 
 
@@ -1226,23 +1236,113 @@ input:-webkit-autofill:active {
     padding: 15px;
   }
 
-.line-break{
-  display: inline;
-}
-
-
+  .line-break{
+    display: inline;
+  }
+  
+  .page-wrapper {
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+  }
 }
 
 @media (max-width: 768px) {
+  .container-fluid {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  
+  .dashboardSmallCards {
+    padding: 12px !important;
+  }
+  
+  .profileCardImg {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .qrCodeImg {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .page-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 0 !important;
+  }
+  
+  .content {
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+    padding: 0 !important;
+    overflow-y: visible !important;
+  }
+  
   .custom-table table {
     // min-width: 900px;
     width: 100%;
   }
+}
+
+@media (max-width: 576px) {
+  .col-md-6 .dashboardSmallCards {
+    text-align: center;
+  }
+  
+  .qrCodeImg {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 12px;
+  }
+  
+  .profileCardImg {
+    width: 56px;
+    height: 56px;
+  }
+  
+  // Reduce font sizes on mobile
+  .dashboardSmallCards p[style*="font-size: 24px"] {
+    font-size: 18px !important;
+    line-height: 24px !important;
+  }
+  
+  .dashboardSmallCards p[style*="font-size: 30px"] {
+    font-size: 24px !important;
+    line-height: 32px !important;
+  }
+  
+  // Prevent calendar overflow
+  .col-md-12.fitContentHeight {
+    overflow-x: hidden;
+  }
+  
+  .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  .page-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  .content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  .container-fluid {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
   .importMenu{
     margin-top: 10px;
     width: auto !important;
   }
-
 }
 
  .custom-table table {

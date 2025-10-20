@@ -266,7 +266,7 @@ const Calendar = () => {
               )}
             </div>
             <div className="col-12 col-md-6 order-1 order-md-2">
-              <div className="custom-calendar-wrapper overflow-scroll mb-4">
+              <div className="custom-calendar-wrapper mb-4">
                 <div className="calendar-header">
                   <div
                     onClick={() =>

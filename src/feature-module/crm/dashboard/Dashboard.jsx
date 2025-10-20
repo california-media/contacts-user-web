@@ -155,11 +155,8 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
-          <div
-            className="page-wrapper overflow-auto"
-            style={{ height: "calc(100vh - 50px)" }}
-          >
-            <div className="content overflow-auto">
+          <div className="page-wrapper " style={{ height: "100%" }}>
+            <div className="content " style={{ height: "100%" }}>
               <div className="container-fluid">
                 <div className="row">
                   <div className="col-md-6 mb-md-4 mb-2">
@@ -190,6 +187,7 @@ const Dashboard = () => {
                         <div>
                           <div>
                             <p
+                              className="line-clamp-1"
                               style={{
                                 color: "#030303",
                                 fontSize: "24px",
@@ -211,8 +209,10 @@ const Dashboard = () => {
                                 alt="Designation"
                                 width={18}
                                 height={18}
+                                style={{ flexShrink: 0 }}
                               />
                               <p
+                                className="line-clamp-1"
                                 style={{
                                   color: "#777B8B",
                                   fontSize: "14px",
@@ -236,6 +236,7 @@ const Dashboard = () => {
                               alt="share"
                               width={18}
                               height={18}
+                              style={{ flexShrink: 0 }}
                             />
                             <p
                               style={{
@@ -261,22 +262,18 @@ const Dashboard = () => {
                     click
                   </button> */}
                   <div className="col-md-6 mb-md-4 mb-2">
-                    <div className="dashboardSmallCards d-flex flex-row justify-content-between h-100">
+                    <div className="dashboardSmallCards d-flex flex-column flex-sm-row justify-content-between align-items-center h-100">
                       <img
                         src={userProfile.qrCode}
                         alt="QR Code"
-                        className="qrCodeImg"
-                        // style={{
-                        //   border: "1px solid white",
-                        //   marginRight: "20px",
-                        // }}
+                        className="qrCodeImg mb-3 mb-sm-0"
                       />
-                      <div>
+                      <div className="w-100">
                         <div className="d-flex align-items-center justify-content-end mb-md-0 mb-3 overflow-hidden">
-                          <CopyableInput value={profileLink}  />
+                          <CopyableInput value={profileLink} />
                         </div>
-                     
-                        <div className="d-flex align-items-center justify-content-end mt-3">
+
+                        <div className="d-flex align-items-center justify-content-center justify-content-sm-end mt-3">
                           <p
                             style={{
                               color: "#5D606D",
