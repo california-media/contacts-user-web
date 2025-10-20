@@ -358,19 +358,19 @@ export const authRoutes = [
     title: "Register",
   },
   {
-    path:`${route.resetPassword}`,
+    path: `${route.resetPassword}`,
     element: <ResetPassword />,
     route: Route,
     title: "Reset Password",
   },
   {
-    path:`${route.forgotPassword}`,
+    path: `${route.forgotPassword}`,
     element: <ForgotPassword />,
     route: Route,
     title: "Forgot Password",
   },
   {
-    path:`${route.phoneResetPassword}`,
+    path: `${route.phoneResetPassword}`,
     element: <PhoneResetPassword />,
     route: Route,
     title: "Password Reset",

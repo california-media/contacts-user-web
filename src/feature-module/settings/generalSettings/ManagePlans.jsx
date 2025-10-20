@@ -5,7 +5,7 @@ import api from "../../../core/axios/axiosInstance";
 import { all_routes } from "../../router/all_routes";
 import PlanModal from "./PlanModal"; // We'll create this component
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
-import { Modal } from "bootstrap";
+// Removed: import { Modal } from "bootstrap"; - This was causing conflicts with Bootstrap dropdowns
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
 import { Spin } from "antd";
 
@@ -59,7 +59,7 @@ const ManagePlans = () => {
   const handleDeletePlan = (plan) => {
     setPlanToDelete(plan);
     const modalEl = document.getElementById("delete_confirmation_modal");
-    const modal = new Modal(modalEl);
+    const modal = new window.bootstrap.Modal(modalEl);
     modal.show();
   };
 
@@ -81,7 +81,7 @@ const ManagePlans = () => {
 
         // Close modal
         const modalEl = document.getElementById("delete_confirmation_modal");
-        const modal = Modal.getInstance(modalEl);
+        const modal = window.bootstrap.Modal.getInstance(modalEl);
         modal.hide();
         setPlanToDelete(null);
       }
@@ -137,7 +137,7 @@ const ManagePlans = () => {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100 w-100">
         {" "}
-    <Spin size="large" />
+        <Spin size="large" />
       </div>
     );
   }
@@ -165,7 +165,7 @@ const ManagePlans = () => {
                       onClick={() => {
                         handleAddPlan();
                         const modalEl = document.getElementById("plan_modal");
-                        const modal = new Modal(modalEl);
+                        const modal = new window.bootstrap.Modal(modalEl);
                         modal.show();
                       }}
                     >
@@ -247,16 +247,16 @@ const ManagePlans = () => {
                                     handleEditPlan(plan);
                                     const modalEl =
                                       document.getElementById("plan_modal");
-                                    const modal = new Modal(modalEl);
+                                    const modal = new window.bootstrap.Modal(
+                                      modalEl
+                                    );
                                     modal.show();
                                   }}
                                 >
                                   <i className="fa fa-edit me-1"></i> Edit
                                 </button>
                                 {plan.name === "Starter" ||
-                                plan.name === "Pro" ? (
-                                  null
-                                ) : (
+                                plan.name === "Pro" ? null : (
                                   <button
                                     className="btn btn-secondary me-2"
                                     onClick={() => handleToggleStatus(plan._id)}
