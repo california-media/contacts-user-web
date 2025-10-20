@@ -134,6 +134,8 @@
     "@types/react-input-mask": "^3.0.5",
     "@types/react-redux": "^7.1.33",
     "@types/react-resizable": "^3.0.8",
-    "@types/react-slick": "^0.23.13"
+    "@types/react-slick": "^0.23.13",
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0"
   }
 }
