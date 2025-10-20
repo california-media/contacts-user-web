@@ -17,7 +17,7 @@ import "../src/style/icon/ionic/ionicons.css";
 import "../src/style/icon/tabler-icons/webfont/tabler-icons.css";
 import ALLRoutes from "./feature-module/router/router";
 import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
-import { HelmetProvider } from 'react-helmet-async'
+import { HelmetProvider } from "react-helmet-async";
 import { PersistGate } from "redux-persist/integration/react";
 import { EmailAuthProvider } from "./core/common/context/EmailAuthContext";
 
@@ -30,10 +30,10 @@ root.render(
     <PersistGate loading={null} persistor={persistor}>
       <HelmetProvider>
         <EmailAuthProvider>
-        <BrowserRouter basename={base_path}>
-          <Loader />
-          <ALLRoutes />
-        </BrowserRouter>
+          <BrowserRouter basename={base_path}>
+            <Loader />
+            <ALLRoutes />
+          </BrowserRouter>
         </EmailAuthProvider>
       </HelmetProvider>
     </PersistGate>

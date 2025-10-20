@@ -127,6 +127,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@types/bootstrap": "^5.2.10",
     "@types/dragula": "^3.7.5",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-bootstrap": "^0.32.36",

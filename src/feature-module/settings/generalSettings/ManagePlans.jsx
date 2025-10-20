@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import api from "../../../core/axios/axiosInstance";
 import { all_routes } from "../../router/all_routes";
-import PlanModal from "./PlanModal"; // We'll create this component
+import PlanModal from "./PlanModal";
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
-// Removed: import { Modal } from "bootstrap"; - This was causing conflicts with Bootstrap dropdowns
 import { showToast } from "../../../core/data/redux/slices/ToastSlice";
-import { Spin } from "antd";
+import { Spin, Modal } from "antd";
 
 const ManagePlans = () => {
   const [plans, setPlans] = useState([]);
@@ -16,6 +15,8 @@ const ManagePlans = () => {
   const [modalType, setModalType] = useState("add"); // 'add' or 'edit'
   const [planToDelete, setPlanToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -49,18 +50,18 @@ const ManagePlans = () => {
   const handleAddPlan = () => {
     setEditingPlan(null);
     setModalType("add");
+    setIsPlanModalOpen(true);
   };
 
   const handleEditPlan = (plan) => {
     setEditingPlan(plan);
     setModalType("edit");
+    setIsPlanModalOpen(true);
   };
 
   const handleDeletePlan = (plan) => {
     setPlanToDelete(plan);
-    const modalEl = document.getElementById("delete_confirmation_modal");
-    const modal = new window.bootstrap.Modal(modalEl);
-    modal.show();
+    setIsDeleteModalOpen(true);
   };
 
   const confirmDeletePlan = async () => {
@@ -78,11 +79,7 @@ const ManagePlans = () => {
             variant: "success",
           })
         );
-
-        // Close modal
-        const modalEl = document.getElementById("delete_confirmation_modal");
-        const modal = window.bootstrap.Modal.getInstance(modalEl);
-        modal.hide();
+        setIsDeleteModalOpen(false);
         setPlanToDelete(null);
       }
     } catch (error) {
@@ -130,6 +127,7 @@ const ManagePlans = () => {
 
   const handleModalSuccess = () => {
     setEditingPlan(null);
+    setIsPlanModalOpen(false);
     fetchPlans(); // Refresh the list
   };
 
@@ -160,15 +158,7 @@ const ManagePlans = () => {
                     </ul>
                   </div>
                   <div className="col-sm-6 text-end">
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => {
-                        handleAddPlan();
-                        const modalEl = document.getElementById("plan_modal");
-                        const modal = new window.bootstrap.Modal(modalEl);
-                        modal.show();
-                      }}
-                    >
+                    <button className="btn btn-primary" onClick={handleAddPlan}>
                       <i className="fa fa-plus me-2"></i> Add New Plan
                     </button>
                   </div>
@@ -243,15 +233,7 @@ const ManagePlans = () => {
                               <div className="text-center mb-3">
                                 <button
                                   className="btn btn-primary me-2"
-                                  onClick={() => {
-                                    handleEditPlan(plan);
-                                    const modalEl =
-                                      document.getElementById("plan_modal");
-                                    const modal = new window.bootstrap.Modal(
-                                      modalEl
-                                    );
-                                    modal.show();
-                                  }}
+                                  onClick={() => handleEditPlan(plan)}
                                 >
                                   <i className="fa fa-edit me-1"></i> Edit
                                 </button>
@@ -302,69 +284,63 @@ const ManagePlans = () => {
 
       {/* Plan Modal */}
       <PlanModal
+        open={isPlanModalOpen}
+        onCancel={() => setIsPlanModalOpen(false)}
         onSuccess={handleModalSuccess}
         plan={editingPlan}
         type={modalType}
       />
 
       {/* Delete Confirmation Modal */}
-      <div className="modal fade" id="delete_confirmation_modal">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Confirm Delete</h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                disabled={isDeleting}
-              ></button>
-            </div>
-            <div className="modal-body">
-              <div className="text-center mb-3">
-                <i className="fa fa-exclamation-triangle text-warning fs-1 mb-3"></i>
-                <h6>Are you sure you want to delete this plan?</h6>
-                {planToDelete && (
-                  <p className="text-muted mb-0">
-                    Plan: <strong>{planToDelete.name}</strong>
-                  </p>
-                )}
-                <p className="text-danger small mt-2">
-                  This action cannot be undone.
-                </p>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-                disabled={isDeleting}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={confirmDeletePlan}
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2"></span>
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <i className="fa fa-trash me-1"></i>
-                    Delete Plan
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
+      <Modal
+        title="Confirm Delete"
+        open={isDeleteModalOpen}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        footer={[
+          <button
+            key="cancel"
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setIsDeleteModalOpen(false)}
+            disabled={isDeleting}
+          >
+            Cancel
+          </button>,
+          <button
+            key="delete"
+            type="button"
+            className="btn btn-danger"
+            onClick={confirmDeletePlan}
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2"></span>
+                Deleting...
+              </>
+            ) : (
+              <>
+                <i className="fa fa-trash me-1"></i>
+                Delete Plan
+              </>
+            )}
+          </button>,
+        ]}
+        centered
+      >
+        <div className="text-center mb-3">
+          <i className="fa fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+          <h6>Are you sure you want to delete this plan?</h6>
+          {planToDelete && (
+            <p className="text-muted mb-0">
+              Plan: <strong>{planToDelete.name}</strong>
+            </p>
+          )}
+          <p className="text-danger small mt-2">
+            This action cannot be undone.
+          </p>
         </div>
-      </div>
+      </Modal>
     </>
   );
 };
