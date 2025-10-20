@@ -149,9 +149,13 @@ const AdminHeader = () => {
           </ul>
         </div>
         {/* /Mobile Menu */}
-        <div className="mobile-user-menu d-flex justify-content-center align-items-center">
+        <div
+          className={`mobile-user-menu d-flex justify-content-center   align-items-center ${
+            userProfile.profileImageURL ? "mt-2" : ""
+          }`}
+        >
           <Link
-            to={route.profile}
+            to={route.adminProfile}
             style={{ marginTop: "2px" }}
             className={`nav-link userset  ${
               !userProfile.profileImageURL ? "border-0 shadow-none" : ""

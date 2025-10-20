@@ -105,7 +105,7 @@ const Header = () => {
 
   return (
     <>
-      <div className="header">
+      <div className="header  ">
         <Link
           id="mobile_btn"
           className="mobile_btn"
@@ -149,7 +149,11 @@ const Header = () => {
           </ul>
         </div>
         {/* /Mobile Menu */}
-        <div className="mobile-user-menu d-flex justify-content-center align-items-center">
+        <div
+          className={`mobile-user-menu d-flex justify-content-center   align-items-center ${
+            userProfile.profileImageURL ? "mt-2" : ""
+          }`}
+        >
           <Link
             to={route.profile}
             style={{ marginTop: "2px" }}
@@ -158,8 +162,8 @@ const Header = () => {
             }`}
           >
             {userProfile.profileImageURL ? (
-              <span className="user-info">
-                <span className="user-letter">
+              <span className="user-info ">
+                <span className="user-letter ">
                   <img
                     src={userProfile.profileImageURL}
                     alt="Profile"

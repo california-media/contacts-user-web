@@ -48,15 +48,12 @@ const AdminDashboard = () => {
       {isLoading ? (
         <div className="d-flex justify-content-center align-items-center vh-100 w-100">
           {" "}
-        <Spin size="large" />
+          <Spin size="large" />
         </div>
       ) : (
         <>
-          <div
-            className="page-wrapper overflow-auto"
-            style={{ height: "calc(100vh - 50px)" }}
-          >
-            <div className="content overflow-auto">
+          <div className="page-wrapper" style={{ height: "100%" }}>
+            <div className="content" style={{ height: "100%" }}>
               <div className="container-fluid">
                 <div className="row">
                   <div className="col-md-12 fitContentHeight">
@@ -103,8 +100,10 @@ const AdminDashboard = () => {
                               <img
                                 src="/assets/img/icons/trendingIcon.svg"
                                 className="me-2"
+                                style={{ flexShrink: 0 }}
                               />
                               <p
+                                className="line-clamp-1"
                                 style={{
                                   color: "#484A54",
                                   marginBottom: 0,
@@ -223,8 +222,10 @@ const AdminDashboard = () => {
                               <img
                                 src="/assets/img/icons/trendingIcon.svg"
                                 className="me-2"
+                                style={{ flexShrink: 0 }}
                               />
                               <p
+                                className="line-clamp-1"
                                 style={{
                                   color: "#484A54",
                                   marginBottom: 0,
