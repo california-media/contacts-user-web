@@ -160,12 +160,14 @@ console.log(formData.email,"emaillsdfsd");
     formDataObj.append("company", formData.company);
     formDataObj.append("designation", formData.designation);
     formDataObj.append("emailaddresses", formData.email);
-    formDataObj.append(
-      "tags",
-      JSON.stringify(
-        selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
-      )
-    );
+ if (selectedContact.contact_id == null) {
+  formDataObj.append(
+    "tags",
+    JSON.stringify(
+      selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
+    )
+  );
+}
     formDataObj.append("phonenumber", formData.phone);
     formDataObj.append("instagram", formData.instagram);
     formDataObj.append("twitter", formData.twitter);

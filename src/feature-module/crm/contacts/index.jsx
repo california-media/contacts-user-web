@@ -1666,7 +1666,7 @@ const ContactsDetails = () => {
                         }
                       >
                         <span>
-                          <a
+                          {/* <a
                             href={
                               leadInfo?.phonenumbers?.[0]
                                 ? `tel:${leadInfo.phonenumbers[0]}`
@@ -1677,16 +1677,90 @@ const ContactsDetails = () => {
                                 ? "disabled-icon"
                                 : ""
                             }`}
-                            onClick={(e) => {
-                              if (!leadInfo?.phonenumbers?.length)
-                                e.preventDefault();
-                            }}
+                            // onClick={(e) => {
+                            //   if (!leadInfo?.phonenumbers?.length)
+                            //     e.preventDefault();
+                            // }}
+                             onClick={async (e) => {
+    if (!leadInfo?.phonenumbers?.length) {
+      console.log("!leadInfo?.phonenumbers?.length");
+      
+      e.preventDefault();
+      return;
+    }
+console.log("log1");
+
+e.preventDefault(); // Prevent default <a> behavior until API call is done
+console.log("log2");
+
+    const phoneNumber = leadInfo.phonenumbers[0];
+
+    // Build the payload
+    const payload = {
+      contact_id: selectedContact.contact_id,
+      call: phoneNumber, // <-- instead of whatsappMessage
+    };
+
+    console.log(payload, "payload for call activity");
+
+    try {
+      // Call the API
+      await api.post("/whatsapp-email-call-activity", payload);
+
+      // Optionally refetch activities
+      dispatch(fetchContactActivities(selectedContact.contact_id));
+
+      // Then trigger the phone call
+      window.location.href = `tel:${phoneNumber}`;
+    } catch (error) {
+      console.error("Failed to log call activity:", error);
+      // Optionally show error message to user
+    }
+  }}
                           >
                             <img
                               src="/assets/img/icons/phoneCallIcon.png"
                               alt="Phone"
                             />
-                          </a>
+                          </a> */}
+                          <button
+  className={`icon-wrapper-sm phone ${
+    !leadInfo?.phonenumbers?.length ? "disabled-icon" : ""
+  }`}
+  onClick={async (e) => {
+    e.preventDefault(); // always prevent button default
+
+    if (!leadInfo?.phonenumbers?.length) {
+      console.log("No phone number found");
+      return;
+    }
+
+    console.log("Clicked phone button");
+
+    const phoneNumber = leadInfo.phonenumbers[0];
+
+    const payload = {
+      contact_id: selectedContact.contact_id,
+      call: phoneNumber,
+    };
+
+    console.log(payload, "payload for call activity");
+
+    try {
+      await api.post("/whatsapp-email-call-activity", payload);
+      dispatch(fetchContactActivities(selectedContact.contact_id));
+      window.location.href = `tel:${phoneNumber}`;
+    } catch (error) {
+      console.error("Failed to log call activity:", error);
+    }
+  }}
+>
+  <img
+    src="/assets/img/icons/phoneCallIcon.png"
+    alt="Phone"
+  />
+</button>
+
                         </span>
                       </OverlayTrigger>
 
