@@ -194,12 +194,11 @@ const Profile = () => {
                       <div className="settings-sidebar">
                         <h4 className="fw-semibold mb-3">Settings</h4>
                         <div className="list-group list-group-flush settings-sidebar">
-                          <Link to={route.profile} className="fw-medium">
+                          <Link to={route.profile} className="fw-medium active">
                             Profile
                           </Link>
                           <Link
                             to={route.security}
-                            className="fw-medium active"
                           >
                             Security
                           </Link>

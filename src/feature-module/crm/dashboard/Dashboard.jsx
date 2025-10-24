@@ -194,9 +194,12 @@ const Dashboard = () => {
                                 fontWeight: 500,
                                 lineHeight: "32px",
                                 marginBottom: "8px",
+                                textAlign: "left",
                               }}
                             >
-                              {userProfile.firstname} {userProfile.lastname}
+                              {userProfile.firstname.charAt(0).toUpperCase() +
+                                userProfile.firstname.slice(1)}
+                              {userProfile.lastname}
                             </p>
                           </div>
                           {userProfile?.designation && (
@@ -266,10 +269,14 @@ const Dashboard = () => {
                       <img
                         src={userProfile.qrCode}
                         alt="QR Code"
-                        className="qrCodeImg mb-3 mb-sm-0"
+                        style={{ width: "120px", height: "120px" }}
+                        className="qrCodeImg mb-3 mb-sm-0 "
                       />
                       <div className="w-100">
-                        <div className="d-flex align-items-center justify-content-end mb-md-0 mb-3 overflow-hidden">
+                        <div
+                          className="d-flex align-items-center justify-content-end mb-md-0 m-auto m-md-0  mb-3 overflow-hidden"
+                          style={{ maxWidth: "300px" }}
+                        >
                           <CopyableInput value={profileLink} />
                         </div>
 
