@@ -41,6 +41,7 @@ import AdminUserDetails from "../crm/contacts/AdminUserDetails";
 import ManagePlans from "../settings/generalSettings/ManagePlans";
 import ManageTickets from "../settings/generalSettings/ManageTickets";
 import ManageCoupons from "../settings/generalSettings/ManageCoupons";
+import ManageQuotes from "../settings/generalSettings/ManageQuotes";
 import BillingInfo from "../settings/generalSettings/BillingInfo";
 import InvoiceView from "../settings/generalSettings/InvoiceView";
 import PaymentUnsuccessful from "../otherPages/PaymentUnsuccessful";
@@ -123,6 +124,12 @@ export const adminRoutes = [
     element: <ManageCoupons />,
     route: Route,
     title: "Manage Coupons",
+  },
+  {
+    path: route.manageQuotes,
+    element: <ManageQuotes />,
+    route: Route,
+    title: "Manage Quotes",
   },
 ];
 

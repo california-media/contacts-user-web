@@ -75,6 +75,19 @@ export const adminSidebarData = [
           },
         ],
       },
+      {
+        label: "Quotes",
+        iconImg: "/assets/img/icons/plusIconCircleBlack.png",
+        submenu: false,
+        showSubRoute: false,
+        submenuItems: [
+          {
+            label: "Quotes",
+            link: route.manageQuotes,
+            icon: <IoMdCube />,
+          },
+        ],
+      },
       // {
       //   label: "Calendar",
       //   iconImg: "/assets/img/icons/calendarIcon.png",
