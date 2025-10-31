@@ -82,21 +82,16 @@ const GroupsOffcanvas = () => {
 
     dispatch(action)
       .unwrap()
-       .then(() => {
-      setTagValue("");
-      setCurrentEmoji("🏷️");
-      setIsEditMode(false);
-      setEditTagId(null);
-    })
+      .then(() => {
+        setTagValue("");
+        setCurrentEmoji("🏷️");
+        setIsEditMode(false);
+        setEditTagId(null);
+      })
       .catch((error) => {
-       
         console.error("Tag operation failed:", error);
       });
   };
-
-
-
-
 
   const handleDeleteTag = () => {
     if (!tagToBeDeleted?.tag_id) return;
@@ -109,7 +104,7 @@ const GroupsOffcanvas = () => {
         }
       })
       .catch((error) => {
-        console.error("Failed to delete tag:", error);  
+        console.error("Failed to delete tag:", error);
       });
   };
 
@@ -206,10 +201,10 @@ const GroupsOffcanvas = () => {
                 style={{ cursor: "pointer" }}
                 onClick={() => handleEditTag(tag)}
               >
-                <div>
+                <span>
                   <span className="me-2">{tag.emoji}</span>
                   <span>{tag.tag}</span>
-                </div>
+                </span>
                 <MdCancel
                   className="groupDeleteIconStyle"
                   onClick={(e) => {

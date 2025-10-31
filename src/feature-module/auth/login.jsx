@@ -2,21 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { all_routes } from "../router/all_routes";
 import api from "../../core/axios/axiosInstance";
-import {
-  GoogleLogin,
-  GoogleOAuthProvider,
-  useGoogleLogin,
-} from "@react-oauth/google";
+
 import PhoneInput from "react-phone-input-2";
 import Slider from "react-slick";
 import { Player } from "@lottiefiles/react-lottie-player";
 
 import loginAnimation1 from "../../style/animations/loginAnimation1.json";
-import loginAnimation2 from "../../style/animations/loginAnimation2.json";
-import loginAnimation3 from "../../style/animations/loginAnimation3.json";
-import ImageWithBasePath from "../../core/common/imageWithBasePath";
-import 'react-phone-input-2/lib/style.css'; // already done ✅
 
+import "react-phone-input-2/lib/style.css"; // already done ✅
+import { fetchProfile } from "../../core/data/redux/slices/ProfileSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const Login = () => {
   const sliderSettings = {
@@ -49,15 +44,22 @@ const Login = () => {
   const clientId =
     "308171825690-ukpu99fsh0jsojolv0j4vrhidait4s5b.apps.googleusercontent.com";
 
+  const {
+    id,
+    role,
+    error: fetchUserError,
+  } = useSelector((state) => state.profile); ////if id  = "" then it is default user
+
   useEffect(() => {
-    localStorage.setItem("menuOpened", "Dashboard");
     const token = localStorage.getItem("token");
-    if (token) navigate(route.dashboard);
+    console.log("Checking user authentication status", fetchUserError);
+    if (token && !fetchUserError) navigate(route.dashboard);
   }, []);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible((prev) => !prev);
   };
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (timer <= 0) {
@@ -101,8 +103,13 @@ const Login = () => {
 
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.data.token);
+
         setMessage(response.data.message);
-        navigate(route.dashboard);
+        // fetch data before navigating
+        await dispatch(fetchProfile());
+        response.data.data.role === "superadmin"
+          ? navigate(route.adminDashboard)
+          : navigate(route.dashboard);
       }
     } catch (error) {
       setMessage(error?.response?.data?.message || "Login failed");
@@ -113,249 +120,6 @@ const Login = () => {
       }
     } finally {
       setIsLoading(false);
-    }
-  };
-  const GoogleLoginButton = () => {
-    const login = useGoogleLogin({
-      onSuccess: (tokenResponse) => handleGoogleLogin(tokenResponse),
-      onError: () => console.log("Google Login Failed"),
-    });
-
-    return (
-      <button
-        onClick={() => login()}
-        className="btn"
-        style={{
-          border: "1px solid #dadce0",
-          borderRadius: "50%",
-          padding: "15px",
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-        }}
-      >
-        <ImageWithBasePath
-          src="assets/img/icons/googleLogo.png"
-          width={20}
-          height={20}
-        />
-      </button>
-    );
-  };
-  // const GoogleLoginButton = ({ onSuccess }) => {
-  //   const login = useGoogleLogin({
-  //     onSuccess,
-  //     onError: (err) => console.log("Google Login Failed", err),
-  //   });
-
-  //   return (
-  //     <button
-  //       onClick={() => login()}
-  //       className="d-flex align-items-center justify-content-center"
-  //       style={{
-  //         width: 40,
-  //         height: 40,
-  //         borderRadius: "50%",
-  //         border: "1px solid #dadce0",
-  //         background: "#fff",
-  //         cursor: "pointer",
-  //       }}
-  //     >
-  //       <img
-  //         src="https://developers.google.com/identity/images/g-logo.png"
-  //         alt="Google"
-  //         width={18}
-  //         height={18}
-  //       />
-  //     </button>
-  //   );
-  // };
-  const handleLinkedinLogin = async () => {
-    let popup = null;
-
-    const finish = (data) => {
-      console.log(`LinkedIn finish`, data);
-
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-      }
-      if (data?.isFirstTime) {
-        navigate("/registration-form", { replace: true, state: data });
-      } else {
-        navigate(route.dashboard);
-      }
-    };
-
-    try {
-      const url = referralCode
-        ? `/user/linkedin/login?ref=${referralCode}`
-        : `/user/linkedin/login`;
-        console.log("url for linkedin login", url);
-        
-      const response = await api.get(url);
-      console.log(response.data, "response from linkedin login");
-      if (
-        response.data?.status === "success" &&
-        response.data?.data?.token &&
-        typeof response.data?.data?.isFirstTime !== "undefined"
-      ) {
-        finish(response.data.data, "direct");
-        return;
-      }
-      if (response.data?.status === "success" && response.data?.url) {
-        const width = 500;
-        const height = 600;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
-
-        const messageHandler = (event) => {
-          console.log(event.data, "event from LinkedIn popup");
-          const data = event.data;
-          if (data?.status === "success") {
-            console.log(data, "data inside the if condition");
-
-            if (data?.data?.token) {
-              localStorage.setItem("token", data.data.token);
-              console.log("token saved");
-            }
-            console.log("inside if condition");
-
-            if (data?.data?.isFirstTime) {
-              navigate("/registration-form", { replace: true, state: data });
-            } else {
-              navigate(route.dashboard);
-            }
-            popup?.close();
-            window.removeEventListener("message", messageHandler);
-          }
-        };
-
-        window.addEventListener("message", messageHandler);
-
-        popup = window.open(
-          response.data.url,
-          "_blank",
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
-        if (!popup) {
-          console.error("Popup blocked");
-          window.removeEventListener("message", messageHandler);
-        }
-        return;
-      }
-
-      console.error("Unexpected LinkedIn login response shape:", response.data);
-    } catch (err) {
-      console.error("LinkedIn Sign-In initiation failed", err);
-    }
-  };
-
-  // const handleGoogleLogin = async (credentialResponse) => {
-  //   console.log("Google Token : ", credentialResponse.credential);
-
-  //   try {
-  //     setIsGoogleLoading(true);
-  //     const response = await api.post("user/login", {
-  //       googleToken: credentialResponse.credential,
-  //     });
-  //     console.log(response.data, "response from google");
-
-  //     if (response.data.status === "success") {
-  //       localStorage.setItem("token", response.data.data.token);
-  //       setMessage(response.data.message);
-  //       setIsGoogleLoading(false);
-  //       if (response.data.data.isFirstTime) {
-  //         navigate("/registration-form", {
-  //           replace: true,
-  //           state: response.data.data,
-  //         });
-  //       } else {
-  //         navigate(route.dashboard);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     setMessage(error?.response?.data?.message || "Google login failed");
-  //   } finally {
-  //     setIsGoogleLoading(false);
-  //   }
-  // };
-
-  const handleGoogleLogin = async () => {
-    let popup = null;
-
-    const finish = (data) => {
-      console.log(`Google finish`, data);
-
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-      }
-      if (data?.isFirstTime) {
-        navigate("/registration-form", { replace: true, state: data });
-      } else {
-        navigate(route.dashboard);
-      }
-    };
-
-    try {
-      const url = referralCode
-        ? `/user/google/login?ref=${referralCode}`
-        : `/user/google/login`;
-         console.log("url for google login", url);
-      const response = await api.get(url);
-      console.log(response.data, "response from google login");
-      if (
-        response.data?.status === "success" &&
-        response.data?.data?.token &&
-        typeof response.data?.data?.isFirstTime !== "undefined"
-      ) {
-        finish(response.data.data, "direct");
-        return;
-      }
-      if (response.data?.status === "success" && response.data?.url) {
-        const width = 500;
-        const height = 600;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
-
-        const messageHandler = (event) => {
-          console.log(event.data, "event from Google popup");
-          const data = event.data;
-          if (data?.status === "success") {
-            console.log(data, "data inside the if condition");
-
-            if (data?.data?.token) {
-              localStorage.setItem("token", data.data.token);
-              console.log("token saved");
-            }
-            console.log("inside if condition");
-
-            if (data?.data?.isFirstTime) {
-              navigate("/registration-form", { replace: true, state: data });
-            } else {
-              navigate(route.dashboard);
-            }
-            popup?.close();
-            window.removeEventListener("message", messageHandler);
-          }
-        };
-
-        window.addEventListener("message", messageHandler);
-
-        popup = window.open(
-          response.data.url,
-          "_blank",
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
-        if (!popup) {
-          console.error("Popup blocked");
-          window.removeEventListener("message", messageHandler);
-        }
-        return;
-      }
-
-      console.error("Unexpected Google login response shape:", response.data);
-    } catch (err) {
-      console.error("Google Sign-In initiation failed", err);
     }
   };
 
@@ -552,100 +316,24 @@ const Login = () => {
                       "Sign In"
                     )}
                   </button>
-
-                  {/* <div className="text-center my-3 position-relative divider-line">
-                    <span className="bg-white px-2">or</span>
-                  </div>
-                  <div className=" mt-4 d-flex justify-content-center flex-row align-items-center">
- 
-                    <div
-                      onClick={handleGoogleLogin}
-                      style={{
-                        marginRight: 10,
-                        borderRadius: "50%",
-                        width: 50,
-                        height: 50,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        border: "1px solid #dadce0",
-                        padding: "8px",
-                        marginBottom: "10px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <ImageWithBasePath
-                        src="assets/img/icons/googleLogo.png"
-                        width={30}
-                        alt=""
-                      />
-                    </div>
-                    <div
-                      onClick={handleLinkedinLogin}
-                      style={{
-                        borderRadius: "50%",
-                        width: 50,
-                        height: 50,
-                        border: "1px solid #dadce0",
-                        padding: "12px",
-                        marginBottom: "10px",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <ImageWithBasePath
-                        src="assets/img/icons/linkedinIcon.png"
-                        width={30}
-                        alt=""
-                      />
-                    </div>
-                    
-
-               
-                  </div> */}
-                  {/* <div className="d-flex justify-content-center mb-3 mt-4">
-                    <GoogleOAuthProvider clientId={clientId}>
-                      {isgoogleLoading ? (
-                        <button
-                          className="btn"
-                          style={{ background: "#4f7df5", color: "#fff" }}
-                          disabled
-                        >
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                            aria-hidden="true"
-                          ></span>
-                          Logging in...
-                        </button>
-                      ) : (
-                        <GoogleLogin
-                          onSuccess={handleGoogleLogin}
-                          onError={() => console.log("Google Login Failed")}
-                        />
-                      )}
-                    </GoogleOAuthProvider>
-                  </div>
-                  <div className="d-flex justify-content-center">
-                    <Link
-                      onClick={handleLinkedinLogin}
-                      className="d-inline-flex align-items-center p-2"
-                      style={{ border: "1px solid #dadce0", borderRadius: 5 }}
-                    >
-                      <div className="me-2">
-                        <ImageWithBasePath
-                          src="assets/img/icons/linkedinIcon.png"
-                          alt="link"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                      <p className="mb-0">Sign in with Linkedin</p>
-                    </Link>
-                  </div> */}
                 </form>
+                <div className="text-end mb-3">
+                  {tab === "email" ? (
+                    <Link
+                      to="/forgotPassword/email"
+                      className="text-primary fw-medium"
+                    >
+                      Forgot Email Login?
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/forgotPassword/phone"
+                      className="text-primary fw-medium"
+                    >
+                      Forgot Phone Login?
+                    </Link>
+                  )}
+                </div>
                 <div className="text-center mt-4">
                   <small>
                     New to Contacts Managment?{" "}

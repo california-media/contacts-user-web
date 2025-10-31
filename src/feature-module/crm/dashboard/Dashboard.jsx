@@ -12,6 +12,8 @@ import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarIn
 import LoadingIndicator2 from "../../../core/common/loadingIndicator/LoadingIndicator2";
 import CopyableInput from "../../../core/common/CopyableInput";
 import Calendar from "../calendar/Calendar";
+import { Spin } from "antd";
+import api from "../../../core/axios/axiosInstance";
 
 const Dashboard = () => {
   const [file, setFile] = useState();
@@ -19,14 +21,19 @@ const Dashboard = () => {
   const [qrCodeValue, setQrCodeValue] = useState("");
   const [language, setLanguage] = useState("eng");
   const [result, setResult] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [quotes, setQuotes] = useState([]);
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [quotesLoading, setQuotesLoading] = useState(false);
   const dispatch = useDispatch();
   const qrCodeRef = useRef();
   const userProfile = useSelector((state) => state.profile);
   const { tags, error } = useSelector((state) => state.tags);
-  console.log("userProfile in dashboardss", userProfile);
   const [copied, setCopied] = useState(false);
-  const profileLink = `https://app.contacts.management/shareProfile/${userProfile.firstname.replace(/\s/g, "")}${userProfile.serialNumber}`;
+  const profileLink = `https://app.contacts.management/shareProfile/${userProfile.firstname.replace(
+    /\s/g,
+    ""
+  )}${userProfile.serialNumber}`;
 
   const [sline] = useState({
     chart: {
@@ -74,9 +81,42 @@ const Dashboard = () => {
     },
   });
   const route = all_routes;
-  const onFileChange = (e) => {
-    setFile(e.target.files[0]);
+
+  // Helper function to get display name with capitalization
+  const getDisplayName = () => {
+    const capitalize = (str) => {
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    };
+
+    if (userProfile.firstname && userProfile.lastname) {
+      return `${capitalize(userProfile.firstname)} ${capitalize(
+        userProfile.lastname
+      )}`;
+    } else if (userProfile.firstname) {
+      return capitalize(userProfile.firstname);
+    } else if (userProfile.lastname) {
+      return capitalize(userProfile.lastname);
+    } else if (userProfile.email) {
+      return userProfile.email.split("@")[0];
+    } else if (userProfile.phonenumbers?.length > 0) {
+      return userProfile.phonenumbers[0];
+    }
+    return "User";
   };
+
+  // Get formatted today's date
+  const getFormattedDate = () => {
+    const today = new Date();
+    return today.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  ///already fethced it in router.jsx
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -115,6 +155,39 @@ const Dashboard = () => {
   useEffect(() => {
     dispatch(fetchTags());
   }, [dispatch]);
+
+  // Fetch quotes
+  useEffect(() => {
+    const fetchQuotes = async () => {
+      setQuotesLoading(true);
+      try {
+        const response = await api.get("/quote/get");
+        if (response.data.quotes) {
+          const quotesArray = Array.isArray(response.data.quotes)
+            ? response.data.quotes
+            : [];
+          setQuotes(quotesArray);
+        }
+      } catch (error) {
+        console.error("Error fetching quotes:", error);
+        setQuotes([]);
+      } finally {
+        setQuotesLoading(false);
+      }
+    };
+    fetchQuotes();
+  }, []);
+
+  // Rotate quotes every 4 seconds (2 more seconds than original)
+  useEffect(() => {
+    if (quotes.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentQuoteIndex((prevIndex) => (prevIndex + 1) % quotes.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [quotes.length]);
   const processImage = () => {
     setResult("");
     setProgress(0);
@@ -148,16 +221,169 @@ const Dashboard = () => {
       {isLoading ? (
         <div className="d-flex justify-content-center align-items-center vh-100 w-100">
           {" "}
-          <LoadingIndicator2 />
+          <Spin size="large" />
         </div>
       ) : (
         <>
-          <div
-            className="page-wrapper overflow-auto"
-            style={{ height: "calc(100vh - 50px)" }}
-          >
-            <div className="content overflow-auto">
+          <div className="page-wrapper " style={{ height: "100%" }}>
+            <div className="content " style={{ height: "100%" }}>
               <div className="container-fluid">
+                {/* Quotes Section */}
+                <div className="row mb-2">
+                  <div className="col-md-12">
+                    <div
+                      style={{
+                        background: "transparent",
+                        borderRadius: "0",
+                        padding: "8px 0",
+                        minHeight: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
+                        alignItems: "flex-start",
+                        color: "#333",
+                        boxShadow: "none",
+                        position: "relative",
+                        overflow: "visible",
+                      }}
+                    >
+                      {/* Quote Ribbon */}
+                      <div
+                      className="mt-1"
+                        style={{
+                          position: "relative",
+                          height: "40px",
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "flex-start",
+                          marginBottom: "4px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {quotes.length > 0 && !quotesLoading && (
+                          <>
+                            {/* Previous quote sliding out */}
+                            <div
+                              key={`quote-prev-${currentQuoteIndex}`}
+                              className="text-primary"
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                animation:
+                                  "slideOutUp 0.6s ease-in-out forwards",
+                                fontSize: "16px",
+                                fontWeight: "500",
+                                fontStyle: "italic",
+                                textAlign: "left",
+                                lineHeight: "1.4",
+                                
+                              }}
+                            >
+                              "
+                              {
+                                quotes[
+                                  (currentQuoteIndex - 1 + quotes.length) %
+                                    quotes.length
+                                ]?.quoteText
+                              }
+                              "
+                            </div>
+                            {/* Current quote sliding in */}
+                            <div
+                              key={`quote-current-${currentQuoteIndex}`}
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                animation:
+                                  "slideInUpQuote 0.6s ease-in-out forwards",
+                                fontSize: "16px",
+                                fontWeight: "500",
+                                fontStyle: "italic",
+                                textAlign: "left",
+                                lineHeight: "1.4",
+                               
+                              }}
+                              className="text-primary"
+                            >
+                              "
+                              {quotes[currentQuoteIndex]?.quoteText ||
+                                "No quotes available"}
+                              "
+                            </div>
+                          </>
+                        )}
+                        {quotesLoading && (
+                          <p
+                            style={{
+                              fontSize: "14px",
+                              margin: 0,
+                              color: "#999",
+                            }}
+                          >
+                            Loading quotes...
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Greeting */}
+                      <div style={{ textAlign: "left" }}>
+                        <p
+                          style={{
+                            fontSize: "18px",
+                            fontWeight: "600",
+                            margin: 0,
+                            letterSpacing: "0.3px",
+                            color: "#333",
+                          }}
+                        >
+                          Hello, {getDisplayName()}!
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "400",
+                            margin: "2px 0 0 0",
+                            opacity: "0.7",
+                     
+                          }}
+                          className="text-primary"
+                        >
+                          {getFormattedDate()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add CSS animation */}
+                <style>{`
+                  @keyframes slideInUpQuote {
+                    from {
+                      opacity: 0;
+                      transform: translateY(30px);
+                    }
+                    to {
+                      opacity: 1;
+                      transform: translateY(0);
+                    }
+                  }
+                  @keyframes slideOutUp {
+                    from {
+                      opacity: 1;
+                      transform: translateY(0);
+                    }
+                    to {
+                      opacity: 0;
+                      transform: translateY(-30px);
+                    }
+                  }
+                `}</style>
+
                 <div className="row">
                   <div className="col-md-6 mb-md-4 mb-2">
                     <div className="dashboardSmallCards h-100">
@@ -187,15 +413,19 @@ const Dashboard = () => {
                         <div>
                           <div>
                             <p
+                              className="line-clamp-1"
                               style={{
                                 color: "#030303",
                                 fontSize: "24px",
                                 fontWeight: 500,
                                 lineHeight: "32px",
                                 marginBottom: "8px",
+                                textAlign: "left",
                               }}
                             >
-                              {userProfile.firstname} {userProfile.lastname}
+                              {userProfile.firstname.charAt(0).toUpperCase() +
+                                userProfile.firstname.slice(1)}
+                              {userProfile.lastname}
                             </p>
                           </div>
                           {userProfile?.designation && (
@@ -208,8 +438,10 @@ const Dashboard = () => {
                                 alt="Designation"
                                 width={18}
                                 height={18}
+                                style={{ flexShrink: 0 }}
                               />
                               <p
+                                className="line-clamp-1"
                                 style={{
                                   color: "#777B8B",
                                   fontSize: "14px",
@@ -233,6 +465,7 @@ const Dashboard = () => {
                               alt="share"
                               width={18}
                               height={18}
+                              style={{ flexShrink: 0 }}
                             />
                             <p
                               style={{
@@ -250,23 +483,30 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-
+                  {/* <button
+                    onClick={async () =>
+                      await api.get("/editProfile/testingonesignal")
+                    }
+                  >
+                    click
+                  </button> */}
                   <div className="col-md-6 mb-md-4 mb-2">
-                    <div className="dashboardSmallCards d-flex flex-row justify-content-between h-100">
+                    <div className="dashboardSmallCards d-flex flex-column flex-sm-row justify-content-between align-items-center h-100">
                       <img
                         src={userProfile.qrCode}
                         alt="QR Code"
-                        className="qrCodeImg"
-                        // style={{
-                        //   border: "1px solid white",
-                        //   marginRight: "20px",
-                        // }}
+                        style={{ width: "120px", height: "120px" }}
+                        className="qrCodeImg mb-3 mb-sm-0 "
                       />
-                      <div>
-                        <div className="d-flex align-items-center justify-content-end mb-md-0 mb-3">
-                          <CopyableInput value={profileLink} width={350} />
+                      <div className="w-100">
+                        <div
+                          className="d-flex align-items-center justify-content-end mb-md-0 m-auto m-md-0  mb-3 overflow-hidden"
+                          style={{ maxWidth: "300px" }}
+                        >
+                          <CopyableInput value={profileLink} />
                         </div>
-                        <div className="d-flex align-items-center justify-content-end mt-3">
+
+                        <div className="d-flex align-items-center justify-content-center justify-content-sm-end mt-3">
                           <p
                             style={{
                               color: "#5D606D",
@@ -555,7 +795,7 @@ const Dashboard = () => {
                 </div>
                 <div className="row">
                   <div className="col-md-12 fitContentHeight">
-                   <Calendar/>
+                    <Calendar />
                   </div>
                 </div>
               </div>

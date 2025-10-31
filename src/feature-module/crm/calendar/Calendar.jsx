@@ -131,14 +131,12 @@ const Calendar = () => {
     );
 
     try {
-  await dispatch(saveContact(formDataObj)).unwrap();
-   dispatch(profileEvents());
-  console.log("Contact saved and events updated");
-} catch (error) {
-  console.error("Error while saving contact or updating events:", error);
-
-}
-
+      await dispatch(saveContact(formDataObj)).unwrap();
+      dispatch(profileEvents());
+      console.log("Contact saved and events updated");
+    } catch (error) {
+      console.error("Error while saving contact or updating events:", error);
+    }
 
     setMeetingFormData({
       meeting_id: "",
@@ -193,7 +191,6 @@ const Calendar = () => {
   }, {});
   const days = getCalendarGrid();
 
-
   return (
     <>
       <div className={isCalendar ? "page-wrapper" : ""}>
@@ -216,7 +213,7 @@ const Calendar = () => {
             </div>
           </div>
           <div className="row">
-            <div className="col-6">
+            <div className="col-12 col-md-6 order-2 order-md-1">
               {selectedDate && (
                 <div className="selected-events mt-6">
                   <h5 className="text-lg font-semibold mb-3 text-gray-700">
@@ -268,7 +265,7 @@ const Calendar = () => {
                 </div>
               )}
             </div>
-            <div className="col-6">
+            <div className="col-12 col-md-6 order-1 order-md-2">
               <div className="custom-calendar-wrapper mb-4">
                 <div className="calendar-header">
                   <div

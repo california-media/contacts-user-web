@@ -1,6 +1,6 @@
-import React, { useContext, useEffect } from "react";
-import { Route, Routes, useLocation } from "react-router";
-import { authRoutes, publicRoutes } from "./router.link";
+import React, { useContext, useEffect, useRef } from "react";
+import { Route, Routes, useLocation, useNavigate } from "react-router";
+import { adminRoutes, authRoutes, publicRoutes } from "./router.link";
 import Feature from "../feature";
 import AuthFeature from "../authFeature";
 import Login from "../auth/login";
@@ -12,14 +12,17 @@ import { useDispatch, useSelector } from "react-redux";
 import PrivateRoute from "./PrivateRoute";
 import { Toast } from "react-bootstrap";
 import { hideToast } from "../../core/data/redux/slices/ToastSlice";
-import { EmailAuthContext } from "../../core/common/context/EmailAuthContext";
 import { fetchGoogleCalendarEvents } from "../../core/common/googleEvents/GoogleEvents";
+import AdminRoute from "./AdminRoute";
+import AdminFeature from "../AdminFeature";
+import UserVerification from "../otherPages/UserVerification";
+
 const ALLRoutes = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const { toasts } = useSelector((state) => state.toast);
 
-const userProfile = useSelector((state) =>state.profile)
+  const userProfile = useSelector((state) => state.profile);
   const routesWithoutFeature = ["/registration-form"];
   const route = all_routes;
   // Find the current route in either public or auth routes
@@ -35,11 +38,12 @@ const userProfile = useSelector((state) =>state.profile)
   useEffect(() => {
     document.title = fullTitle;
   }, [fullTitle]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       // navigate(route.dashboard);
-
+      console.log("token found");
       dispatch(fetchProfile());
       dispatch(fetchTags());
     }
@@ -58,11 +62,64 @@ const userProfile = useSelector((state) =>state.profile)
       <Routes>
         {/* Public Route - Login */}
         <Route path="/" element={<Login />} />
+        <Route path="/user-verification" element={<UserVerification />} />
+
         <Route element={<AuthFeature />}>
           {authRoutes.map((route, index) => (
             <Route path={route.path} element={route.element} key={index} />
           ))}
         </Route>
+
+        {/* Admin Routes */}
+        <Route
+          element={
+            <AdminRoute>
+              <Routes>
+                {adminRoutes.map((route, index) => {
+                  // Skip routes with undefined paths
+                  if (!route.path) return null;
+
+                  const shouldUseFeature = !routesWithoutFeature.includes(
+                    route.path.split("/")[1]
+                      ? `/${route.path.split("/")[1]}`
+                      : route.path
+                  );
+
+                  return shouldUseFeature ? (
+                    <Route element={<AdminFeature />} key={index}>
+                      <Route path={route.path} element={route.element} />
+                    </Route>
+                  ) : (
+                    <Route
+                      path={route.path}
+                      element={route.element}
+                      key={index}
+                    />
+                  );
+                })}
+              </Routes>
+            </AdminRoute>
+          }
+        >
+          {adminRoutes.map((route, index) => {
+            if (!route.path) return null;
+
+            const shouldUseFeature = !routesWithoutFeature.includes(
+              route.path.split("/")[1]
+                ? `/${route.path.split("/")[1]}`
+                : route.path
+            );
+
+            return shouldUseFeature ? (
+              <Route element={<Feature />} key={index}>
+                <Route path={route.path} element={route.element} />
+              </Route>
+            ) : (
+              <Route path={route.path} element={route.element} key={index} />
+            );
+          })}
+        </Route>
+
         {/* Private Routes */}
         <Route
           path="/*"
@@ -79,27 +136,27 @@ const userProfile = useSelector((state) =>state.profile)
                   ))}
                 </Route> */}
                 {publicRoutes.map((route, index) => {
-  // Skip routes with undefined paths
-  if (!route.path) return null;
+                  // Skip routes with undefined paths
+                  if (!route.path) return null;
 
-  const shouldUseFeature = !routesWithoutFeature.includes(
-    route.path.split("/")[1]
-      ? `/${route.path.split("/")[1]}`
-      : route.path
-  );
+                  const shouldUseFeature = !routesWithoutFeature.includes(
+                    route.path.split("/")[1]
+                      ? `/${route.path.split("/")[1]}`
+                      : route.path
+                  );
 
-  return shouldUseFeature ? (
-    <Route element={<Feature />} key={index}>
-      <Route path={route.path} element={route.element} />
-    </Route>
-  ) : (
-    <Route
-      path={route.path}
-      element={route.element}
-      key={index}
-    />
-  );
-})}
+                  return shouldUseFeature ? (
+                    <Route element={<Feature />} key={index}>
+                      <Route path={route.path} element={route.element} />
+                    </Route>
+                  ) : (
+                    <Route
+                      path={route.path}
+                      element={route.element}
+                      key={index}
+                    />
+                  );
+                })}
                 {/* {publicRoutes.map((route, index) => {
                   const shouldUseFeature = !routesWithoutFeature.includes(
                     route.path.split("/")[1]

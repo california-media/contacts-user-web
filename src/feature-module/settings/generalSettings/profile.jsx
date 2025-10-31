@@ -5,7 +5,10 @@ import { all_routes } from "../../router/all_routes";
 import { useDispatch, useSelector } from "react-redux";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/bootstrap.css";
-import { editProfile } from "../../../core/data/redux/slices/ProfileSlice";
+import {
+  editProfile,
+  changePassword,
+} from "../../../core/data/redux/slices/ProfileSlice";
 import AvatarInitialStyles from "../../../core/common/nameInitialStyles/AvatarInitialStyles";
 import { SlPhone } from "react-icons/sl";
 
@@ -18,10 +21,12 @@ const Profile = () => {
 
   const dispatch = useDispatch();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
   const [message, setMessage] = useState({ text: "", type: "" });
   const [passwordVisibility, setPasswordVisibility] = useState({
-    password: false,
+    newPassword: false,
     confirmPassword: false,
   });
   const [formData, setFormData] = useState({
@@ -36,6 +41,10 @@ const Profile = () => {
     facebook: "",
     telegram: "",
     designation: "",
+  });
+  const [passwordData, setPasswordData] = useState({
+    newPassword: "",
+    confirmPassword: "",
   });
   const [changeSignin, setChangeSignin] = useState({
     email: "",
@@ -78,7 +87,7 @@ const Profile = () => {
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsProfileLoading(true);
 
     const data = new FormData();
     data.append("firstname", formData.firstname);
@@ -102,8 +111,11 @@ const Profile = () => {
     data.append("designation", formData.designation);
     console.log(Object.fromEntries(data.entries()), "formData before dispatch");
 
-    dispatch(editProfile(data));
-    setIsLoading(false);
+    try {
+      await dispatch(editProfile(data));
+    } finally {
+      setIsProfileLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -118,6 +130,56 @@ const Profile = () => {
     document.getElementById("open-change-signin-method-modal").click();
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      setMessage({
+        text: "New password and confirm password are required",
+        type: "error",
+      });
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setMessage({ text: "New passwords do not match", type: "error" });
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setMessage({
+        text: "New password must be at least 6 characters long",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsPasswordLoading(true);
+    try {
+      await dispatch(
+        changePassword({
+          newPassword: passwordData.newPassword,
+        })
+      );
+
+      // Reset form on success
+      setPasswordData({
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setMessage({ text: "", type: "" });
+    } catch (error) {
+      // Error handling is done in the Redux slice
+    } finally {
+      setIsPasswordLoading(false);
+    }
+  };
+
   return (
     <div className="page-wrapper">
       <div className="content">
@@ -125,33 +187,58 @@ const Profile = () => {
           <div className="col-md-12">
             <div className="row">
               <div className="col-xl-3 col-lg-12 theiaStickySidebar">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="settings-sidebar">
-                      <h4 className="fw-semibold mb-3">Settings</h4>
-                      <div className="list-group list-group-flush settings-sidebar">
-                        <Link to={route.profile} className="fw-medium active">
-                          Profile
-                        </Link>
-                        <Link to={route.security} className="fw-medium">
-                          Security
-                        </Link>
-                        <Link to={route.emailSetup} className="fw-medium">
-                          Sync and Integration
-                        </Link>
-                        <Link
-                          to={`${route.scans}#myScans`}
-                          className="fw-medium"
-                        >
-                          My Scans
-                        </Link>
-                        <Link to={route.upgradePlan} className="fw-medium">
-                          Upgrade Plan
-                        </Link>
+                {/* Settings Sidebar */}
+                {userProfile.role === "user" ? (
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="settings-sidebar">
+                        <h4 className="fw-semibold mb-3">Settings</h4>
+                        <div className="list-group list-group-flush settings-sidebar">
+                          <Link to={route.profile} className="fw-medium active">
+                            Profile
+                          </Link>
+                          <Link
+                            to={route.security}
+                          >
+                            Security
+                          </Link>
+                          <Link to={route.emailSetup} className="fw-medium">
+                            Sync and Integration
+                          </Link>
+                          <Link
+                            to={`${route.scans}#myScans`}
+                            className="fw-medium"
+                          >
+                            My Scans
+                          </Link>
+                          <Link to={route.upgradePlan} className="fw-medium">
+                            Upgrade Plan
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="card">
+                    <div className="card-body">
+                      <div className="settings-sidebar">
+                        <h4 className="fw-semibold mb-3">Settings</h4>
+                        <div className="list-group list-group-flush settings-sidebar">
+                          <Link to={route.adminProfile} className="fw-medium active">
+                            Profile
+                          </Link>
+                          <Link
+                            to={route.adminSecurity}
+                            className="fw-medium "
+                          >
+                            Security
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {/* /Settings Sidebar */}
               </div>
 
               <div className="col-xl-9 col-lg-12">
@@ -330,7 +417,7 @@ const Profile = () => {
                                   autoFocus: true,
                                 }}
                               />
-                              
+
                               {/* <PhoneInput
   country={"ae"}
   value={formData.phoneNumbers}
@@ -359,8 +446,6 @@ const Profile = () => {
     width: "100%",
   }}
 /> */}
-
-
                             </div>
                           </div>
 
@@ -388,6 +473,25 @@ const Profile = () => {
                                 onChange={handleChange}
                                 className="form-control"
                               />
+                            </div>
+                          </div>
+
+                          <div className="col-md-4">
+                            <div className="mb-3">
+                              <label className="form-label">User Role</label>
+                              <input
+                                type="text"
+                                value={userProfile.role || "user"}
+                                disabled
+                                className="form-control"
+                                style={{
+                                  backgroundColor: "#f8f9fa",
+                                  cursor: "not-allowed",
+                                }}
+                              />
+                              <small className="text-muted">
+                                This field cannot be modified
+                              </small>
                             </div>
                           </div>
                         </div>
@@ -546,9 +650,9 @@ const Profile = () => {
                           type="submit"
                           className="btn btn-primary"
                           style={{ width: 150 }}
-                          disabled={isLoading}
+                          disabled={isProfileLoading}
                         >
-                          {isLoading ? "Saving..." : "Save Changes"}
+                          {isProfileLoading ? "Saving..." : "Save Changes"}
                         </button>
                       </div>
                     </form>
@@ -630,6 +734,7 @@ const Profile = () => {
                                       : "password"
                                   }
                                   className="pass-input form-control"
+                                  name="emailPassword"
                                   value={changeSignin.emailPassword}
                                   onChange={handleChangeSignin}
                                 />
@@ -667,7 +772,7 @@ const Profile = () => {
                               <label className="form-label">Password </label>
                               <input
                                 type="text"
-                                name="password"
+                                name="phonePassword"
                                 value={changeSignin.phonePassword}
                                 onChange={handleChangeSignin}
                                 className="form-control"

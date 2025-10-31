@@ -1,0 +1,1008 @@
+import React, { useRef, useState, useEffect } from "react";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import PhoneInput from "react-phone-input-2";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../data/redux/slices/ToastSlice";
+import { Select, Switch } from "antd";
+import dayjs from "dayjs";
+
+import api from "../../../../core/axios/axiosInstance";
+
+const UserOffcanvas = ({ selectedUser, setUserInfo }) => {
+  const [originalData, setOriginalData] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [loadingPlans, setLoadingPlans] = useState(false);
+  const [userHasPaymentMethod, setUserHasPaymentMethod] = useState(false); ///checks if user has default payment method setup
+  const [checkingPaymentMethod, setCheckingPaymentMethod] = useState(false);
+  const fileInputRef = useRef(null);
+  const offcanvasRef = useRef(null);
+  const dispatch = useDispatch();
+
+  // Helper function to check if selected plan is starter
+  const isStarterPlan = () => {
+    if (!formData.planId || !plans.length) return false;
+    const selectedPlan = plans.find((plan) => plan._id === formData.planId);
+    return selectedPlan?.name?.toLowerCase().includes("starter");
+  };
+
+  // Helper function to check if a plan is starter by ID
+  const isPlanStarter = (planId) => {
+    if (!planId || !plans.length) return false;
+    const plan = plans.find((p) => p._id === planId);
+    return plan?.name?.toLowerCase().includes("starter");
+  };
+
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    email: "",
+    phonenumber: "",
+    designation: "",
+    linkedin: "",
+    instagram: "",
+    telegram: "",
+    twitter: "",
+    facebook: "",
+    companyName: "",
+    goals: "",
+    categories: "",
+    employeeCount: "",
+    helps: [],
+    profileImage: null,
+    planId: "", // Add planId field
+  });
+
+  // Initialize form data when selectedUser changes
+  useEffect(() => {
+    if (selectedUser) {
+      const phoneNumber = selectedUser.phonenumbers?.[0]
+        ? `+${selectedUser.phonenumbers[0].countryCode}${selectedUser.phonenumbers[0].number}`
+        : "";
+
+      const initialData = {
+        firstname: selectedUser.firstname || "",
+        lastname: selectedUser.lastname || "",
+        email: selectedUser.email || "",
+        phonenumber: phoneNumber,
+        designation: selectedUser.designation || "",
+        linkedin: selectedUser.linkedin || "",
+        instagram: selectedUser.instagram || "",
+        telegram: selectedUser.telegram || "",
+        twitter: selectedUser.twitter || "",
+        facebook: selectedUser.facebook || "",
+        gender: selectedUser.gender || "", // NEW: Add gender
+        companyName: selectedUser.userInfo?.companyName || "",
+        goals: selectedUser.userInfo?.goals || "", // This will now be radio, but keep as string
+        categories: selectedUser.userInfo?.categories || "", // This will now be radio, but keep as string
+        employeeCount: selectedUser.userInfo?.employeeCount || "",
+        helps: selectedUser.userInfo?.helps || [],
+        profileImage: null,
+        planId: selectedUser.plan?._id || "", // Add planId from user's current plan
+      };
+
+      setFormData(initialData);
+      // Store original data for comparison
+      setOriginalData({ ...initialData });
+
+      // Check if user has payment methods
+      checkUserPaymentMethods();
+    }
+  }, [selectedUser]);
+
+  // Function to check if user has payment methods
+  const checkUserPaymentMethods = async () => {
+    if (!selectedUser?.id) return;
+
+    try {
+      setCheckingPaymentMethod(true);
+      const response = await api.get(
+        `/admin/users/${selectedUser.id}/payment-methods`
+      );
+      if (response.data.status === "success") {
+
+        setUserHasPaymentMethod(!!response.data.data.defaultPaymentMethod);
+      }
+    } catch (error) {
+      console.error("Error checking payment methods:", error);
+      // Default to false if error occurs
+      setUserHasPaymentMethod(false);
+    } finally {
+      setCheckingPaymentMethod(false);
+    }
+  };
+
+  // Fetch plans for dropdown
+  useEffect(() => {
+    console.log("Fetching plans...");
+    const fetchPlans = async () => {
+      try {
+        setLoadingPlans(true);
+        const response = await api.get("/admin/users/plans");
+        if (response.data.status === "success") {
+          setPlans(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching plans:", error);
+        dispatch(
+          showToast({
+            type: "error",
+            message: "Failed to load plans",
+          })
+        );
+      } finally {
+        setLoadingPlans(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleOnPhoneChange = (value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      phonenumber: value,
+    }));
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setFormData((prevData) => ({
+        ...prevData,
+        profileImage: file,
+      }));
+    }
+  };
+
+  const handleHelpsChange = (e) => {
+    const { value, checked } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      helps: checked
+        ? [...prevData.helps, value]
+        : prevData.helps.filter((help) => help !== value),
+    }));
+  };
+
+  const handlePlanChange = (value) => {
+    // If user has no payment method and tries to select a non-starter plan, prevent it
+    if (
+      !userHasPaymentMethod &&
+      value &&
+      !isPlanStarter(value) &&
+      value !== originalData.planId
+    ) {
+      dispatch(
+        showToast({
+          message:
+            "User must have a payment method to be assigned a premium plan",
+          variant: "error",
+        })
+      );
+      return;
+    }
+
+    setFormData((prevData) => ({
+      ...prevData,
+      planId: value,
+    }));
+  };
+
+  // Helper function to get validation message for form
+  const getValidationMessage = () => {
+    // With Stripe integration, most validations are handled by the backend
+    // Only basic frontend validations remain
+
+    if (!formData.planId) {
+      return null; // No plan selected, no validation needed
+    }
+
+    if (isStarterPlan()) {
+      return null; // Starter plan doesn't need validation
+    }
+
+    // Basic validation: if a premium plan is selected, ensure it has proper configuration
+    const selectedPlan = plans.find((plan) => plan._id === formData.planId);
+    if (selectedPlan && selectedPlan.name.toLowerCase() !== "starter") {
+      // This is a premium plan - backend will handle Stripe subscription creation
+      return null;
+    }
+
+    return null;
+  };
+
+  const getChangedData = () => {
+    const changedData = {};
+
+    // Compare each field with original data
+    Object.keys(formData).forEach((key) => {
+      if (key === "profileImage") {
+        // Always include profile image if it's been changed (not null)
+        if (formData[key]) {
+          changedData[key] = formData[key];
+        }
+      } else if (key === "helps") {
+        // Compare arrays - only include if they're different
+        const originalHelps = originalData[key] || [];
+        const currentHelps = formData[key] || [];
+
+        // Check if arrays are different (order doesn't matter)
+        const areArraysEqual =
+          originalHelps.length === currentHelps.length &&
+          originalHelps.every((item) => currentHelps.includes(item)) &&
+          currentHelps.every((item) => originalHelps.includes(item));
+
+        if (!areArraysEqual) {
+          changedData[key] = currentHelps;
+        }
+      } else {
+        // Compare strings and other values
+        if (formData[key] !== originalData[key]) {
+          changedData[key] = formData[key];
+        }
+      }
+    });
+
+    return changedData;
+  };
+
+  const handleUpdateUser = async () => {
+    if (!selectedUser?.id) {
+      return;
+    }
+
+    const changedData = getChangedData();
+
+    // If no changes, show message and return
+    if (Object.keys(changedData).length === 0) {
+      dispatch(
+        showToast({
+          message: "No changes detected",
+          variant: "info",
+        })
+      );
+      return;
+    }
+
+    // Validate dates before submission
+    const validationMessage = getValidationMessage();
+    if (validationMessage) {
+      dispatch(
+        showToast({
+          message: validationMessage,
+          variant: "error",
+        })
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    const formDataObj = new FormData();
+
+    // Only append changed fields
+    Object.keys(changedData).forEach((key) => {
+      if (key === "helps") {
+        formDataObj.append("helps", JSON.stringify(changedData.helps));
+      } else if (key === "profileImage" && changedData.profileImage) {
+        formDataObj.append("profileImage", changedData.profileImage);
+      } else if (changedData[key] !== null && changedData[key] !== undefined) {
+        formDataObj.append(key, changedData[key]);
+      }
+    });
+    console.log("Changed Data:", formDataObj);
+    try {
+      const response = await api.put(
+        `/admin/users/${selectedUser.id}`,
+        formDataObj,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.data.status === "success") {
+        // Update the user info in parent component
+        setUserInfo(response.data.data);
+
+        // Show success toast
+        dispatch(
+          showToast({
+            message: "User updated successfully!",
+            variant: "success",
+          })
+        );
+
+        // Reset original data to new values
+        const phoneNumber = response.data.data.phonenumbers?.[0]
+          ? `+${response.data.data.phonenumbers[0].countryCode}${response.data.data.phonenumbers[0].number}`
+          : "";
+
+        const newOriginalData = {
+          firstname: response.data.data.firstname || "",
+          lastname: response.data.data.lastname || "",
+          email: response.data.data.email || "",
+          phonenumber: phoneNumber,
+          designation: response.data.data.designation || "",
+          linkedin: response.data.data.linkedin || "",
+          instagram: response.data.data.instagram || "",
+          telegram: response.data.data.telegram || "",
+          twitter: response.data.data.twitter || "",
+          facebook: response.data.data.facebook || "",
+          gender: response.data.data.gender || "", // NEW: Add gender
+          companyName: response.data.data.userInfo?.companyName || "",
+          goals: response.data.data.userInfo?.goals || "",
+          categories: response.data.data.userInfo?.categories || "",
+          employeeCount: response.data.data.userInfo?.employeeCount || "",
+          helps: response.data.data.userInfo?.helps || [],
+          profileImage: null,
+          planId: response.data.data.plan?._id || "", // Add planId
+        };
+        setOriginalData(newOriginalData);
+        setFormData(newOriginalData);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+
+      // Show error toast
+      const errorMessage =
+        error.response?.data?.message ||
+        "Error updating user. Please try again.";
+      dispatch(
+        showToast({
+          message: errorMessage,
+          variant: "danger",
+        })
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Check if email can be edited
+  const canEditEmail = !["email", "google", "linkedin"].includes(
+    selectedUser?.signupMethod
+  );
+
+  // Check if phone can be edited
+  const canEditPhone = selectedUser?.signupMethod !== "phoneNumber";
+
+  const helpOptions = [
+    "Managing Sales pipelines",
+    "Organizing key relationships",
+    "Process automation",
+    "Something else",
+  ];
+
+  return (
+    <div
+      className="offcanvas offcanvas-end offcanvas-large"
+      tabIndex={-1}
+      id="user_offcanvas"
+      ref={offcanvasRef}
+    >
+      <div className="offcanvas-header border-bottom">
+        <h5 className="fw-semibold">Edit User Profile</h5>
+        <button
+          type="button"
+          className="btn-close custom-btn-close border p-1 me-0 d-flex align-items-center justify-content-center rounded-circle"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+          id="closeUserOffcanvas"
+        >
+          <i className="ti ti-x" />
+        </button>
+      </div>
+
+      <div className="offcanvas-body">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleUpdateUser();
+          }}
+        >
+          <div className="row">
+            {/* Profile Image */}
+            <div className="col-md-12 d-flex justify-content-center mb-4">
+              <div className="profilePic">
+                <img
+                  src={
+                    formData.profileImage
+                      ? URL.createObjectURL(formData.profileImage)
+                      : selectedUser?.profileImageURL ||
+                        "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="
+                  }
+                  className="profilePic cursor-pointer"
+                  onClick={handleImageClick}
+                  alt="Profile"
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </div>
+            </div>
+
+            {/* First Name */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">
+                  First Name <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="firstname"
+                  value={formData.firstname}
+                  onChange={handleChange}
+                  className="form-control"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Last Name */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">Last Name</label>
+                <input
+                  type="text"
+                  name="lastname"
+                  value={formData.lastname}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">
+                  Email{" "}
+                  {!canEditEmail && (
+                    <span className="text-muted">(Read Only)</span>
+                  )}
+                </label>
+                {canEditEmail ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="form-control"
+                  />
+                ) : (
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip>
+                        Email cannot be changed for accounts signed up with
+                        Email, Google, or LinkedIn
+                      </Tooltip>
+                    }
+                  >
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      className="form-control"
+                      disabled
+                    />
+                  </OverlayTrigger>
+                )}
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">
+                  Phone{" "}
+                  {!canEditPhone && (
+                    <span className="text-muted">(Read Only)</span>
+                  )}
+                </label>
+                {canEditPhone ? (
+                  <PhoneInput
+                    country={"ae"}
+                    value={formData.phonenumber}
+                    onChange={handleOnPhoneChange}
+                    enableSearch
+                    inputProps={{
+                      name: "phone",
+                      autoFocus: false,
+                    }}
+                  />
+                ) : (
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip>
+                        Phone number cannot be changed for accounts signed up
+                        with phone number
+                      </Tooltip>
+                    }
+                  >
+                    <div>
+                      <PhoneInput
+                        country={"ae"}
+                        value={formData.phonenumber}
+                        disabled
+                        inputProps={{
+                          name: "phone",
+                          autoFocus: false,
+                        }}
+                      />
+                    </div>
+                  </OverlayTrigger>
+                )}
+              </div>
+            </div>
+
+            {/* Designation */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">Designation</label>
+                <input
+                  type="text"
+                  name="designation"
+                  value={formData.designation}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+
+            {/* Company Name */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">Company Name</label>
+                <input
+                  type="text"
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  className="form-control"
+                />
+              </div>
+            </div>
+
+            {/* Plan Management Section */}
+            <div className="col-md-12">
+              <div className="mb-3">
+                <div
+                  className="card p-3"
+                  style={{ backgroundColor: "#f8f9fa" }}
+                >
+                  <h6 className="mb-3">Plan Management</h6>
+
+                  {/* Plan Selection */}
+                  <div className="row mb-3">
+                    <div className="col-md-12">
+                      <label className="col-form-label">User Plan</label>
+                      <Select
+                        style={{ width: "100%", height: "38px" }}
+                        placeholder="Select a plan"
+                        allowClear
+                        loading={loadingPlans || checkingPaymentMethod}
+                        value={formData.planId || undefined}
+                        onChange={handlePlanChange}
+                        options={plans
+                          .filter((plan) => {
+                            // If user has no payment method, only show starter plans
+                            if (!userHasPaymentMethod) {
+                              return (
+                                plan.name.toLowerCase().includes("starter") ||
+                                plan._id === originalData.planId
+                              );
+                            }
+                            // If user has payment method, show all plans
+                            return true;
+                          })
+                          .map((plan) => ({
+                            value: plan._id,
+                            label: `${plan.name} - $${(
+                              plan.price / 100
+                            ).toFixed(2)}/${plan.pricePeriod}`,
+                          }))}
+                      />
+                      <small className="text-muted d-block mt-1">
+                        Plan changes will create/update Stripe subscriptions
+                        automatically
+                      </small>
+                    </div>
+                  </div>
+
+                  {/* Payment Method Status */}
+                  {!checkingPaymentMethod && (
+                    <div className="row mb-3">
+                      <div className="col-md-12">
+                        <div
+                          className={`alert ${
+                            userHasPaymentMethod
+                              ? "alert-success"
+                              : "alert-warning"
+                          }`}
+                        >
+                          <strong>Payment Method Status:</strong>{" "}
+                          {userHasPaymentMethod ? (
+                            <span>User has a default payment method set up</span>
+                          ) : (
+                            <span>
+                              User has no default payment method setup - only starter plan
+                              available
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Current Plan Status Display */}
+                  {selectedUser?.plan?.subscriptionStatus && (
+                    <div className="row mb-3">
+                      <div className="col-md-12">
+                        <div className="alert alert-info">
+                          <strong>Current Subscription Status:</strong>{" "}
+                          {selectedUser.plan.subscriptionStatus}
+                          {selectedUser.plan?.expiresAt && (
+                            <div className="mt-1">
+                              <strong>Current Period Ends:</strong>{" "}
+                              {dayjs(selectedUser.plan.expiresAt).format(
+                                "YYYY-MM-DD"
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Information Text */}
+                  {isStarterPlan() && (
+                    <div className="alert alert-info mt-2 mb-0">
+                      <small>
+                        <i className="fas fa-info-circle me-1"></i>
+                        Starter plan: This is a free plan with basic features.
+                        No subscription required.
+                      </small>
+                    </div>
+                  )}
+
+                  {formData.planId && !isStarterPlan() && (
+                    <div className="alert alert-warning mt-2 mb-0">
+                      <small>
+                        <i className="fas fa-exclamation-triangle me-1"></i>
+                        Immediate billing: User will be charged immediately for
+                        the selected plan via Stripe. Current subscription will
+                        be replaced by the selected plan.
+                      </small>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Gender */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">Gender</label>
+                <div className="d-flex gap-4">
+                  {["Male", "Female", "Other"].map((genderOption) => (
+                    <div key={genderOption} className="form-check">
+                      <input
+                        type="radio"
+                        className="form-check-input"
+                        id={`gender-${genderOption}`}
+                        name="gender"
+                        value={genderOption}
+                        checked={formData.gender === genderOption}
+                        onChange={handleChange}
+                      />
+                      <label
+                        className="form-check-label"
+                        htmlFor={`gender-${genderOption}`}
+                      >
+                        {genderOption}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Goals Radio */}
+            <div className="col-md-12">
+              <div className="mb-3">
+                <label className="col-form-label">Goals</label>
+                <div className="row">
+                  {["For personal use", "Testing for my company", "Other"].map(
+                    (goalOption) => (
+                      <div key={goalOption} className="col-md-4 mb-2">
+                        <div className="form-check">
+                          <input
+                            type="radio"
+                            className="form-check-input"
+                            id={`goal-${goalOption}`}
+                            name="goals"
+                            value={goalOption}
+                            checked={formData.goals === goalOption}
+                            onChange={handleChange}
+                          />
+                          <label
+                            className="form-check-label"
+                            htmlFor={`goal-${goalOption}`}
+                          >
+                            {goalOption}
+                          </label>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Categories Radio */}
+            <div className="col-md-12">
+              <div className="mb-3">
+                <label className="col-form-label">Categories</label>
+                <div className="row">
+                  {[
+                    "Sales",
+                    "Marketing",
+                    "IT",
+                    "Procurement",
+                    "Consultant",
+                    "C-Level",
+                    "HR",
+                    "Field Representative",
+                    "Freelancer",
+                    "Other",
+                  ].map((categoryOption) => (
+                    <div key={categoryOption} className="col-md-4 mb-2">
+                      <div className="form-check">
+                        <input
+                          type="radio"
+                          className="form-check-input"
+                          id={`category-${categoryOption}`}
+                          name="categories"
+                          value={categoryOption}
+                          checked={formData.categories === categoryOption}
+                          onChange={handleChange}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor={`category-${categoryOption}`}
+                        >
+                          {categoryOption}
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Employee Count */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <label className="col-form-label">Employee Count</label>
+                <Select
+                  style={{ width: "100%", height: 38 }}
+                  placeholder="Select Employee Count"
+                  allowClear
+                  value={formData.employeeCount || undefined}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, employeeCount: value }))
+                  }
+                  options={[
+                    { value: "1-4", label: "1-4" },
+                    { value: "5-19", label: "5-19" },
+                    { value: "20-49", label: "20-49" },
+                    { value: "50-99", label: "50-99" },
+                    { value: "100-249", label: "100-249" },
+                    { value: "250-499", label: "250-499" },
+                    { value: "500-999", label: "500-999" },
+                    { value: "1000+", label: "1000+" },
+                  ]}
+                />
+              </div>
+            </div>
+            <div className="col-md-12">
+              <div className="mb-3">
+                <label className="col-form-label">Areas of Help</label>
+                <div className="row">
+                  {helpOptions.map((help) => (
+                    <div key={help} className="col-md-4 mb-2">
+                      <div className="form-check">
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          id={`help-${help}`}
+                          value={help}
+                          checked={formData.helps.includes(help)}
+                          onChange={handleHelpsChange}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor={`help-${help}`}
+                        >
+                          {help}
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="col-md-12">
+              <h6 className="mb-3">Social Links</h6>
+            </div>
+
+            {/* LinkedIn */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <img
+                      src="/assets/img/icons/linkedinIcon.png"
+                      alt="LinkedIn"
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="LinkedIn"
+                    name="linkedin"
+                    value={formData.linkedin}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Instagram */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <img
+                      src="/assets/img/icons/instagramIcon.png"
+                      alt="Instagram"
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Instagram"
+                    name="instagram"
+                    value={formData.instagram}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Twitter */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <img
+                      src="/assets/img/icons/twitterIcon.png"
+                      alt="Twitter"
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Twitter"
+                    name="twitter"
+                    value={formData.twitter}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Facebook */}
+            <div className="col-md-6">
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <img
+                      src="/assets/img/icons/facebookIcon.png"
+                      alt="Facebook"
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Facebook"
+                    name="facebook"
+                    value={formData.facebook}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Telegram */}
+            <div className="col-md-12">
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text">
+                    <img
+                      src="/assets/img/icons/telegramIcon.png"
+                      alt="Telegram"
+                      style={{ width: 20, height: 20 }}
+                    />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Telegram"
+                    name="telegram"
+                    value={formData.telegram}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="d-flex align-items-center justify-content-end mt-4">
+            <button
+              type="button"
+              data-bs-target="#user_offcanvas"
+              data-bs-dismiss="offcanvas"
+              className="btn btn-light me-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                >
+                  <span className="sr-only">Loading...</span>
+                </div>
+              ) : null}
+              {isSubmitting ? "Updating..." : "Update User"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default UserOffcanvas;

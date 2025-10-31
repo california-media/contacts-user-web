@@ -22,7 +22,6 @@ const referralData  = useSelector((state) => state.referral.data);
 console.log(referralData, "referralData in email template modal");
 
   const quillRef = useRef(null);
-  console.log(userProfile, "userProfile in email modal");
 
   useEffect(() => {
     const emailTitles =
@@ -98,7 +97,7 @@ console.log(referralData, "referralData in email template modal");
         contact_id: selectedContact.contact_id,
         emailMessage: editEmailTemplateSubject,
       };
-      const response = await api.post("/whatsapp-email-activity", payload);
+      const response = await api.post("/whatsapp-email-call-activity", payload);
       dispatch(fetchContactActivities(selectedContact.contact_id));
     }
     document.getElementById("closeEmailTemplateModal")?.click();

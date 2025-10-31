@@ -14,7 +14,8 @@ const initialState = {
   // emailTemplates: [],
   favouriteCount: 0,
   tagCount: 0,
-  isLoading: false,
+  isLoading: true,
+  role: "user",
   // error: null,
 };
 
@@ -78,6 +79,24 @@ export const deleteTemplate = createAsyncThunk(
   }
 );
 
+export const changePassword = createAsyncThunk(
+  "profile/changePassword",
+  async (passwordData, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.post("/changePassword", passwordData);
+      dispatch(
+        showToast({ message: response.data.message, variant: "success" })
+      );
+      return response.data;
+    } catch (error) {
+      dispatch(
+        showToast({ message: error.response.data.message, variant: "danger" })
+      );
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const profileSlice = createSlice({
   name: "profile",
   initialState,
@@ -93,9 +112,11 @@ const profileSlice = createSlice({
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-
+        console.log("Fetched profile data:", action.payload);
         // return { ...state, ...action.payload };
         Object.assign(state, action.payload.data);
+
+        state.error = undefined;
       })
       .addCase(fetchProfile.rejected, (state, action) => {
         state.isLoading = false;
@@ -147,6 +168,16 @@ const profileSlice = createSlice({
       })
       .addCase(editProfile.rejected, (state, action) => {
         console.error("Edit profile failed", action.payload);
+      })
+      .addCase(changePassword.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.isLoading = false;
+        console.error("Change password failed", action.payload);
       })
       .addCase(deleteTemplate.fulfilled, (state, action) => {
         const { templateType, template_id } = action.payload;

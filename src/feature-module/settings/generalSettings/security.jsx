@@ -16,7 +16,6 @@ const Security = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userProfile = useSelector((state) => state.profile);
-  console.log(userProfile, "userProfile in security");
 
   const togglePasswordVisibility = () => {
     setPasswordVisible((prev) => !prev);
@@ -65,36 +64,57 @@ const Security = () => {
               <div className="row">
                 <div className="col-xl-3 col-lg-12 theiaStickySidebar">
                   {/* Settings Sidebar */}
-                  <div className="card">
-                    <div className="card-body">
-                      <div className="settings-sidebar">
-                        <h4 className="fw-semibold mb-3">Settings</h4>
-                        <div className="list-group list-group-flush settings-sidebar">
-                          <Link to={route.profile} className="fw-medium">
-                            Profile
-                          </Link>
-                          <Link
-                            to={route.security}
-                            className="fw-medium active"
-                          >
-                            Security
-                          </Link>
-                          <Link to={route.emailSetup} className="fw-medium">
-                            Sync and Integration
-                          </Link>
-                          <Link
-                            to={`${route.scans}#myScans`}
-                            className="fw-medium"
-                          >
-                            My Scans
-                          </Link>
-                          <Link to={route.upgradePlan} className="fw-medium">
-                            Upgrade Plan
-                          </Link>
+                  {userProfile.role === "user" ? (
+                    <div className="card">
+                      <div className="card-body">
+                        <div className="settings-sidebar">
+                          <h4 className="fw-semibold mb-3">Settings</h4>
+                          <div className="list-group list-group-flush settings-sidebar">
+                            <Link to={route.profile} className="fw-medium">
+                              Profile
+                            </Link>
+                            <Link
+                              to={route.security}
+                              className="fw-medium active"
+                            >
+                              Security
+                            </Link>
+                            <Link to={route.emailSetup} className="fw-medium">
+                              Sync and Integration
+                            </Link>
+                            <Link
+                              to={`${route.scans}#myScans`}
+                              className="fw-medium"
+                            >
+                              My Scans
+                            </Link>
+                            <Link to={route.upgradePlan} className="fw-medium">
+                              Upgrade Plan
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="card">
+                      <div className="card-body">
+                        <div className="settings-sidebar">
+                          <h4 className="fw-semibold mb-3">Settings</h4>
+                          <div className="list-group list-group-flush settings-sidebar">
+                            <Link to={route.adminProfile} className="fw-medium">
+                              Profile
+                            </Link>
+                            <Link
+                              to={route.adminSecurity}
+                              className="fw-medium active"
+                            >
+                              Security
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {/* /Settings Sidebar */}
                 </div>
                 <div className="col-xl-9 col-lg-12">

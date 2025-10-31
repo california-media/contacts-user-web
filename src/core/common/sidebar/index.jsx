@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setExpandMenu, setMobileSidebar } from "../../data/redux/commonSlice";
 // import Calling from "../../../feature-module/crm/calling";
 import { all_routes } from "../../../feature-module/router/all_routes";
+import api from "../../axios/axiosInstance";
 // import { resetProfile } from "../../data/redux/slices/ProfileSlice";
 // import { resetSelectedContact } from "../../data/redux/slices/SelectedContactSlice";
 // import { resetSelectedTemplate } from "../../data/redux/slices/SelectedTemplateSlice";
@@ -18,18 +19,9 @@ const Sidebar = () => {
   const dispatch = useDispatch();
 
   const userProfile = useSelector((state) => state.profile);
-  console.log(userProfile, "userProfile in sidebar");
 
   const route = all_routes;
-  function getRemainingDays(trialEndDate) {
-    const now = new Date();
-    const end = new Date(trialEndDate);
-
-    const diff = end - now; // in ms
-    if (diff <= 0) return "Trial expired";
-
-    return Math.ceil(diff / (1000 * 60 * 60 * 24)) + " days remaining";
-  }
+ 
   // ✅ Grab tags once at top level (required for hooks)
   const { tags: allTags = [] } = useSelector((state) => state.tags);
   // const expandMenu = useSelector((state) => state.expandMenu);
@@ -39,6 +31,8 @@ const Sidebar = () => {
   // const [showDialer, setShowDialer] = useState(false);
   // const [openDropdown, setOpenDropdown] = useState(true);
   const [isHovered, setIsHovered] = useState(null);
+  const [availablePlans, setAvailablePlans] = useState([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
 
   // const toggleDropdown = () => setOpenDropdown((p) => !p);
 
@@ -75,19 +69,29 @@ const Sidebar = () => {
   // const toggle2 = () => dispatch(setExpandMenu(false));
 
   useEffect(() => {
-    setSubopen(localStorage.getItem("menuOpened"));
-    // maintain legacy DOM-based active behavior
-    const submenus = document.querySelectorAll(".submenu");
-    submenus.forEach((submenu) => {
-      const listItems = submenu.querySelectorAll("li");
-      submenu.classList.remove("active");
-      listItems.forEach((item) => {
-        if (item.classList.contains("active")) {
-          submenu.classList.add("active");
-        }
-      });
-    });
+    /* Lines 78-90 omitted */
   }, [Location.pathname]);
+
+  // Fetch available plans to determine highest tier
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setIsLoadingPlans(true);
+        const response = await api.get("/plans/get");
+        if (response.data.success) {
+          setAvailablePlans(response.data.plans || []);
+        }
+      } catch (error) {
+        console.error("Error fetching plans:", error);
+        // Set empty array on error to avoid issues
+        setAvailablePlans([]);
+      } finally {
+        setIsLoadingPlans(false);
+      }
+    };
+
+    fetchPlans();
+  }, []);
 
   const handleMouseEnter = (menuLabel) => setIsHovered(menuLabel);
   const handleMouseLeave = () => setIsHovered(null);
@@ -154,6 +158,39 @@ const Sidebar = () => {
         : section
     );
   }, [allTags]);
+
+  // Helper functions for plan logic
+  const getCurrentPlan = () => {
+    return userProfile?.plan;
+  };
+
+  const getMostExpensivePlan = () => {
+    if (!availablePlans.length) return null;
+    return availablePlans.reduce((highest, current) =>
+      current.price > highest.price ? current : highest
+    );
+  };
+
+  const isOnHighestTierPlan = () => {
+    const currentPlan = getCurrentPlan();
+    const highestPlan = getMostExpensivePlan();
+
+    if (!currentPlan || !highestPlan) return false;
+
+    // Compare by price since that's how tiers are determined
+    return currentPlan.price >= highestPlan.price;
+  };
+
+  const isOnFreeTrial = () => {
+    const currentPlan = getCurrentPlan();
+
+    // Check if user is on Stripe subscription trial
+    if (currentPlan?.isTrialing) {
+      return true;
+    }
+
+    return false;
+  };
 
   const now = new Date();
   const trialEnd = new Date(userProfile?.trialEndDate);
@@ -403,7 +440,10 @@ const Sidebar = () => {
 
           {/* lower box content */}
           <div>
-            <div className="sidebarTrialBox">
+            <div
+              className="sidebarTrialBox cursor-pointer"
+              onClick={() => navigate(route.upgradePlan)}
+            >
               <div
                 className="d-flex justify-content-between"
                 style={{ marginBottom: 12 }}
@@ -420,20 +460,99 @@ const Sidebar = () => {
                 /> */}
               </div>
               <div>
-                <p className="trialHeading">
-                  {diff > 0
-                    ? `Your trial ends in ${daysLeft} days`
-                    : "Your trial has expired"}
-                </p>
-                <p className="trialDescription">
-                  Select new plan and unlock all features
-                </p>
-                <p
-                  className="upgradePlan"
-                  onClick={() => navigate(route.upgradePlan)}
-                >
-                  Upgrade Plan
-                </p>
+                {(() => {
+                  const currentPlan = getCurrentPlan();
+                  const showUpgradeButton =
+                    !isLoadingPlans && !isOnHighestTierPlan();
+                  const isTrialing = isOnFreeTrial();
+
+                  // Show current plan with trial indication if user is on a trial
+                  if (currentPlan && currentPlan.name) {
+                    if (isTrialing) {
+                      // User has a plan but it's in trial mode
+                      return (
+                        <>
+                          <p className="trialHeading">
+                            14 days Free Trial: {currentPlan.name}
+                          </p>
+                          <p className="trialDescription">
+                            {diff > 0
+                              ? `Trial ends in ${daysLeft} days`
+                              : "Trial has expired"}
+                          </p>
+                          <p
+                            className="upgradePlan"
+                            style={{ cursor: "pointer" }}
+                          >
+                            Upgrade Plan
+                          </p>
+                        </>
+                      );
+                    } else {
+                      // User has a regular paid plan
+                      return (
+                        <>
+                          <p className="trialHeading">
+                            Current Plan: {currentPlan.name}
+                          </p>
+                          <p className="trialDescription">
+                            {showUpgradeButton
+                              ? "Upgrade to unlock more features"
+                              : "You're on the highest tier plan"}
+                          </p>
+                          {showUpgradeButton && (
+                            <p
+                              className="upgradePlan"
+                              style={{ cursor: "pointer" }}
+                            >
+                              Upgrade Plan
+                            </p>
+                          )}
+                        </>
+                      );
+                    }
+                  } else {
+                    // No current plan - check if on legacy trial or starter
+                    if (isTrialing) {
+                      return (
+                        <>
+                          <p className="trialHeading">
+                            {diff > 0
+                              ? `Free Trial - ${daysLeft} days left`
+                              : "Free Trial Expired"}
+                          </p>
+                          <p className="trialDescription">
+                            Upgrade to continue using premium features
+                          </p>
+                          <p
+                            className="upgradePlan"
+                            style={{ cursor: "pointer" }}
+                          >
+                            Upgrade Plan
+                          </p>
+                        </>
+                      );
+                    } else {
+                      // Regular starter/free user
+                      return (
+                        <>
+                          <p className="trialHeading">Free Plan</p>
+                          <p className="trialDescription">
+                            Upgrade to unlock premium features
+                          </p>
+                          {showUpgradeButton && (
+                            <p
+                              className="upgradePlan"
+                              style={{ cursor: "pointer" }}
+                            >
+                              Upgrade Plan
+                            </p>
+                          )}
+                        </>
+                      );
+                    }
+                  }
+                })()}
               </div>
             </div>
 
