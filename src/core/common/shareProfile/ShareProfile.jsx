@@ -44,7 +44,7 @@ const ShareProfile = () => {
     const fetchProfile = async () => {
       try {
         const response = await axios.get(
-          `https://100rjobf76.execute-api.eu-north-1.amazonaws.com/shareProfile/${serialNumber}`
+          `https://16za49tm71.execute-api.eu-north-1.amazonaws.com/shareProfile/${serialNumber}`
         );
         setUserProfile(response.data.data);
       } catch (error) {
@@ -109,14 +109,14 @@ console.log();
 
       if(formData.email!=""| null){
         const response = await axios.post(
-        "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup/email",
+        "https://16za49tm71.execute-api.eu-north-1.amazonaws.com/user/signup/email",
         payload
       )
       console.log(response.data, "response.data from register API");
       }
       else{
           const response = await axios.post(
-        "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/user/signup/phoneNumber",
+        "https://16za49tm71.execute-api.eu-north-1.amazonaws.com/user/signup/phoneNumber",
         payload)
         console.log(response.data, "response.data from register API");
       }
@@ -133,7 +133,7 @@ console.log();
     console.log(formDataToSend, "formDataToSend");
 
     const response = await axios.post(
-      "https://100rjobf76.execute-api.eu-north-1.amazonaws.com/scan",
+      "https://16za49tm71.execute-api.eu-north-1.amazonaws.com/scan",
       formDataToSend
     );
     console.log(response.data, "response.data from scan API");

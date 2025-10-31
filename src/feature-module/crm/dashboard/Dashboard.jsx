@@ -30,7 +30,7 @@ const Dashboard = () => {
   const userProfile = useSelector((state) => state.profile);
   const { tags, error } = useSelector((state) => state.tags);
   const [copied, setCopied] = useState(false);
-  const profileLink = `https://app.contacts.management/shareProfile/${userProfile.firstname.replace(
+  const profileLink = `https://demo.contacts.management/shareProfile/${userProfile.firstname.replace(
     /\s/g,
     ""
   )}${userProfile.serialNumber}`;
@@ -201,7 +201,7 @@ const Dashboard = () => {
       setResult(text);
     });
   };
-  const whatsappShareLink = `Here is my contact: https://app.contacts.management/shareProfile/${userProfile.firstname}${userProfile.serialNumber}`;
+  const whatsappShareLink = `Here is my contact: https://demo.contacts.management/shareProfile/${userProfile.firstname}${userProfile.serialNumber}`;
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(profileLink);
