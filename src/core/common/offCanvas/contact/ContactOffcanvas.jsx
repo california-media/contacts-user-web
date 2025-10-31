@@ -39,6 +39,9 @@ const LeadOffcanvas = ({ selectedContact }) => {
   const [checkSendMailToContact, setCheckSendMailToContact] = useState(false);
 
   console.log(selectedContact, "gfhgfhh");
+  // console.log(removedTags, "removedTags");
+  // console.log(selectedTags, "selectedTags");
+
 
   const [formData, setFormData] = useState({
     contact_id: "",
@@ -160,20 +163,27 @@ console.log(formData.email,"emaillsdfsd");
     formDataObj.append("company", formData.company);
     formDataObj.append("designation", formData.designation);
     formDataObj.append("emailaddresses", formData.email);
- if (selectedContact.contact_id == null) {
-  formDataObj.append(
-    "tags",
-    JSON.stringify(
-      selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
-    )
-  );
-}
+//  if (selectedContact.contact_id == null) {
+//   formDataObj.append(
+//     "tags",
+//     JSON.stringify(
+//       selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
+//     )
+//   );
+// }
     formDataObj.append("phonenumber", formData.phone);
     formDataObj.append("instagram", formData.instagram);
     formDataObj.append("twitter", formData.twitter);
     formDataObj.append("linkedin", formData.linkedin);
     formDataObj.append("facebook", formData.facebook);
     formDataObj.append("telegram", formData.telegram);
+    // formDataObj.append("removedTags", JSON.stringify(removedTags));
+    formDataObj.append("tags",
+      JSON.stringify(
+        selectedTags.map((tag) => ({ tag: tag.value, emoji: tag.emoji }))
+      )
+    );    
+
     try {
       if (newTags.length > 0) {
         await dispatch(addTag(newTags)).unwrap();
