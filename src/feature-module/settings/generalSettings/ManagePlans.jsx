@@ -17,10 +17,14 @@ const ManagePlans = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [daysBeforeExpiry, setDaysBeforeExpiry] = useState(7);
+  const [loadingConfig, setLoadingConfig] = useState(false);
+  const [savingConfig, setSavingConfig] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
     fetchPlans();
+    fetchExpiryConfiguration();
   }, []);
 
   const fetchPlans = async () => {
@@ -44,6 +48,71 @@ const ManagePlans = () => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchExpiryConfiguration = async () => {
+    try {
+      setLoadingConfig(true);
+      const response = await api.get(
+        "/admin/configuration/subscription-expiry"
+      );
+      console.log("Expiry config response:", response.data);
+      if (response.data.status === "success") {
+        setDaysBeforeExpiry(response.data.data.days_before_expiry || 7);
+      }
+    } catch (error) {
+      console.error("Error fetching expiry configuration:", error);
+      // Don't show error toast on initial load, just use default value
+    } finally {
+      setLoadingConfig(false);
+    }
+  };
+
+  const handleSaveExpiryConfiguration = async () => {
+    if (daysBeforeExpiry < 1 || daysBeforeExpiry > 90) {
+      dispatch(
+        showToast({
+          heading: "Validation Error",
+          message: "Days before expiry must be between 1 and 90",
+          variant: "warning",
+        })
+      );
+      return;
+    }
+
+    try {
+      setSavingConfig(true);
+      const response = await api.put(
+        "/admin/configuration/subscription-expiry",
+        {
+          days_before_expiry: parseInt(daysBeforeExpiry),
+        }
+      );
+
+      console.log("Save config response:", response.data);
+      if (response.data.status === "success") {
+        dispatch(
+          showToast({
+            heading: "Success",
+            message:
+              "Subscription expiry alert configuration updated successfully",
+            variant: "success",
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error saving expiry configuration:", error);
+      dispatch(
+        showToast({
+          heading: "Error",
+          message:
+            error.response?.data?.message || "Failed to update configuration",
+          variant: "danger",
+        })
+      );
+    } finally {
+      setSavingConfig(false);
     }
   };
 
@@ -161,6 +230,86 @@ const ManagePlans = () => {
                     <button className="btn btn-primary" onClick={handleAddPlan}>
                       <i className="fa fa-plus me-2"></i> Add New Plan
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Subscription Expiry Alert Configuration */}
+              <div className="row mb-4">
+                <div className="col-xl-12 col-lg-12">
+                  <div className="card">
+                    <div className="card-body " style={{ padding: "2rem" }}>
+                      <h5 className="fw-semibold mb-3">
+                        <i className="fa fa-bell me-2"></i>
+                        Subscription Expiry Alert Configuration
+                      </h5>
+                      <p className="text-muted small mb-3">
+                        Configure how many days before subscription expiry users
+                        should receive an email alert.
+                      </p>
+
+                      <div className="row align-items-end">
+                        <div className="col-md-4">
+                          <label className="form-label fw-medium">
+                            Days Before Expiry
+                            <span className="text-danger">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            className="form-control"
+                            value={daysBeforeExpiry}
+                            onChange={(e) =>
+                              setDaysBeforeExpiry(e.target.value)
+                            }
+                            min="1"
+                            max="90"
+                            placeholder="Enter days (1-90)"
+                            disabled={loadingConfig || savingConfig}
+                          />
+                          <small className="text-muted">
+                            Users will be notified {daysBeforeExpiry} day
+                            {daysBeforeExpiry != 1 ? "s" : ""} before their
+                            subscription expires
+                          </small>
+                        </div>
+                        <div
+                          className="col-12 text-end mt-2"
+                        
+                        >
+                          <div
+                            className="alert alert-info mb-0 py-2 px-3 text-center d-flex align-items-center justify-content-center"
+                            role="alert"
+                              style={{ width: "fit-content" }}
+                          >
+                            <i className="fa fa-info-circle me-2"></i>
+                            <small>
+                              Current setting:{" "}
+                              <strong>{daysBeforeExpiry} days</strong> before
+                              expiry
+                            </small>
+                          </div>
+                        </div>
+                        <div className="col-md-12 mt-3">
+                          <button
+                            className="btn btn-primary"
+                            onClick={handleSaveExpiryConfiguration}
+                            disabled={loadingConfig || savingConfig}
+                          >
+                            {savingConfig ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <i className="fa fa-save me-2"></i>
+                                Save Configuration
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
