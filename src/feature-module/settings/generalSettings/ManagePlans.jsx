@@ -394,8 +394,6 @@ const ManagePlans = () => {
                 </div>
               </div>
 
-             
-
               <div className="row">
                 <div className="col-xl-12 col-lg-12">
                   <div className="card">
@@ -508,7 +506,7 @@ const ManagePlans = () => {
                   </div>
                 </div>
               </div>
-               {/* Subscription Expiry Alert Configuration */}
+              {/* Subscription Expiry Alert Configuration */}
               <div className="row mb-4">
                 <div className="col-xl-12 col-lg-12">
                   <div className="card">
@@ -524,97 +522,106 @@ const ManagePlans = () => {
                         expiry).
                       </p>
 
-                      <div className="row">
-                        <div className="col-md-12">
-                          <label className="form-label fw-medium mb-3">
-                            Alert Days (1-90)
-                            <span className="text-danger">*</span>
-                          </label>
+                      {loadingConfig ? (
+                        <div
+                          className="d-flex justify-content-center align-items-center"
+                          style={{ minHeight: "200px" }}
+                        >
+                          <Spin size="large" />
+                        </div>
+                      ) : (
+                        <div className="row">
+                          <div className="col-md-12">
+                            <label className="form-label fw-medium mb-3">
+                              Alert Days (1-90)
+                              <span className="text-danger">*</span>
+                            </label>
 
-                          {daysBeforeExpiry.map((day, index) => (
-                            <div
-                              key={index}
-                              className="d-flex align-items-center mb-3"
-                            >
+                            {daysBeforeExpiry.map((day, index) => (
                               <div
-                                className="flex-grow-1"
-                                style={{ maxWidth: "300px" }}
+                                key={index}
+                                className="d-flex align-items-center mb-3"
                               >
-                                <input
-                                  type="number"
-                                  className="form-control"
-                                  value={day}
-                                  onChange={(e) =>
-                                    handleDayChange(index, e.target.value)
+                                <div
+                                  className="flex-grow-1"
+                                  style={{ maxWidth: "300px" }}
+                                >
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    value={day}
+                                    onChange={(e) =>
+                                      handleDayChange(index, e.target.value)
+                                    }
+                                    min="1"
+                                    max="90"
+                                    placeholder="Enter days (1-90)"
+                                    disabled={loadingConfig || savingConfig}
+                                  />
+                                </div>
+                                <button
+                                  className="btn btn-outline-danger btn-sm ms-2"
+                                  onClick={() => handleRemoveDay(index)}
+                                  disabled={
+                                    loadingConfig ||
+                                    savingConfig ||
+                                    daysBeforeExpiry.length === 1
                                   }
-                                  min="1"
-                                  max="90"
-                                  placeholder="Enter days (1-90)"
-                                  disabled={loadingConfig || savingConfig}
-                                />
+                                  title="Remove this day"
+                                >
+                                  <i className="fa fa-trash"></i>
+                                </button>
                               </div>
-                              <button
-                                className="btn btn-outline-danger btn-sm ms-2"
-                                onClick={() => handleRemoveDay(index)}
-                                disabled={
-                                  loadingConfig ||
-                                  savingConfig ||
-                                  daysBeforeExpiry.length === 1
-                                }
-                                title="Remove this day"
-                              >
-                                <i className="fa fa-trash"></i>
-                              </button>
+                            ))}
+
+                            <button
+                              className="btn btn-outline-primary btn-sm mb-3"
+                              onClick={handleAddDay}
+                              disabled={loadingConfig || savingConfig}
+                            >
+                              <i className="fa fa-plus me-2"></i>
+                              Add Another Day
+                            </button>
+
+                            <div
+                              className="alert alert-info py-2 px-3 mb-3 d-flex align-items-start"
+                              role="alert"
+                            >
+                              <i className="fa fa-info-circle me-2"></i>
+                              <p>
+                                Users will receive alerts on:{" "}
+                                <strong>
+                                  {daysBeforeExpiry
+                                    .filter((d) => d !== "" && d !== null)
+                                    .map((d) => `${d} day${d != 1 ? "s" : ""}`)
+                                    .join(", ") || "Not set"}
+                                </strong>{" "}
+                                before expiry
+                              </p>
                             </div>
-                          ))}
+                          </div>
 
-                          <button
-                            className="btn btn-outline-primary btn-sm mb-3"
-                            onClick={handleAddDay}
-                            disabled={loadingConfig || savingConfig}
-                          >
-                            <i className="fa fa-plus me-2"></i>
-                            Add Another Day
-                          </button>
-
-                          <div
-                            className="alert alert-info py-2 px-3 mb-3 d-flex align-items-start"
-                            role="alert"
-                          >
-                            <i className="fa fa-info-circle me-2"></i>
-                            <p>
-                              Users will receive alerts on:{" "}
-                              <strong>
-                                {daysBeforeExpiry
-                                  .filter((d) => d !== "" && d !== null)
-                                  .map((d) => `${d} day${d != 1 ? "s" : ""}`)
-                                  .join(", ") || "Not set"}
-                              </strong>{" "}
-                              before expiry
-                            </p>
+                          <div className="col-md-12">
+                            <button
+                              className="btn btn-primary"
+                              onClick={handleSaveExpiryConfiguration}
+                              disabled={loadingConfig || savingConfig}
+                            >
+                              {savingConfig ? (
+                                <>
+                                  <span className="spinner-border spinner-border-sm me-2"></span>
+                                  Saving...
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fa fa-save me-2"></i>
+                                  Save Alert Days
+                                </>
+                              )}
+                            </button>
                           </div>
                         </div>
-
-                        <div className="col-md-12">
-                          <button
-                            className="btn btn-primary"
-                            onClick={handleSaveExpiryConfiguration}
-                            disabled={loadingConfig || savingConfig}
-                          >
-                            {savingConfig ? (
-                              <>
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <i className="fa fa-save me-2"></i>
-                                Save Alert Days
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -630,10 +637,10 @@ const ManagePlans = () => {
                         Subscription Expiry Email Template
                       </h5>
                       <p className="text-muted  mb-3">
-                        Customize the main message of the email sent to users
+                        Customize the message content of the email sent to users
                         when their subscription is about to expire. The email
-                        will automatically include the logo, benefits section,
-                        upgrade button, and footer.
+                        will automatically include the logo, upgrade button, and
+                        footer.
                       </p>
                       <div
                         className="alert alert-info py-2 px-3 mb-3 d-flex align-items-start"
@@ -650,81 +657,102 @@ const ManagePlans = () => {
                           <strong>Note:</strong> The email body supports HTML.
                           You can use tags like <code>&lt;p&gt;</code>,{" "}
                           <code>&lt;strong&gt;</code>,{" "}
-                          <code>&lt;div class="highlight"&gt;</code>, etc.
+                          <code>&lt;div class="highlight"&gt;</code>,{" "}
+                          <code>&lt;div class="benefits"&gt;</code>, etc.
                         </span>
                       </div>
 
-                      <div className="row">
-                        <div className="col-md-12 mb-3">
-                          <label className="form-label fw-medium">
-                            Email Subject
-                            <span className="text-danger">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={emailSubject}
-                            onChange={(e) => setEmailSubject(e.target.value)}
-                            placeholder="e.g., Your Subscription is Expiring Soon"
-                            disabled={
-                              loadingEmailTemplate || savingEmailTemplate
-                            }
-                          />
+                      {loadingEmailTemplate ? (
+                        <div
+                          className="d-flex justify-content-center align-items-center"
+                          style={{ minHeight: "300px" }}
+                        >
+                          <Spin size="large" />
                         </div>
+                      ) : (
+                        <div className="row">
+                          <div className="col-md-12 mb-3">
+                            <label className="form-label fw-medium">
+                              Email Subject
+                              <span className="text-danger">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              value={emailSubject}
+                              onChange={(e) => setEmailSubject(e.target.value)}
+                              placeholder="e.g., Your Subscription is Expiring Soon"
+                              disabled={
+                                loadingEmailTemplate || savingEmailTemplate
+                              }
+                            />
+                          </div>
 
-                        <div className="col-md-12 mb-3">
-                          <label className="form-label fw-medium">
-                            Email Message Content (HTML)
-                            <span className="text-danger">*</span>
-                          </label>
-                          <textarea
-                            className="form-control"
-                            rows="12"
-                            value={emailBody}
-                            onChange={(e) => setEmailBody(e.target.value)}
-                            placeholder={`<p>Hi {{userName}},</p>
+                          <div className="col-md-12 mb-3">
+                            <label className="form-label fw-medium">
+                              Email Message Content (HTML)
+                              <span className="text-danger">*</span>
+                            </label>
+                            <textarea
+                              className="form-control"
+                              rows="15"
+                              value={emailBody}
+                              onChange={(e) => setEmailBody(e.target.value)}
+                              placeholder={`<p>Hi {{userName}},</p>
 <p>Your <strong>{{planName}}</strong> subscription is ending soon—just <strong>{{daysLeft}}</strong> day(s) left!</p>
 <div class="highlight">
   <strong>Your subscription will expire on {{expiryDate}}</strong>
 </div>
-<p>Don't lose access to your premium features!</p>`}
-                            disabled={
-                              loadingEmailTemplate || savingEmailTemplate
-                            }
-                            style={{
-                              fontFamily: "monospace",
-                              fontSize: "13px",
-                            }}
-                          />
-                          <span className="text-muted mt-1">
-                            This content will be inserted into the styled email
-                            template (with logo, benefits, and footer
-                            automatically included)
-                          </span>
-                        </div>
+<p>Don't lose access to your premium features!</p>
 
-                        <div className="col-md-12">
-                          <button
-                            className="btn btn-primary"
-                            onClick={handleSaveEmailTemplate}
-                            disabled={
-                              loadingEmailTemplate || savingEmailTemplate
-                            }
-                          >
-                            {savingEmailTemplate ? (
-                              <>
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <i className="fa fa-save me-2"></i>
-                                Save Email Template
-                              </>
-                            )}
-                          </button>
+<div class="benefits">
+  <p><strong>Why Continue?</strong></p>
+  <ul>
+    <li>Unlimited contacts and advanced management</li>
+    <li>Seamless integrations with Gmail, Outlook, iCloud & more</li>
+    <li>Digital business cards and QR code sharing</li>
+    <li>Advanced analytics and insights</li>
+  </ul>
+</div>
+<p><strong>Ready to continue?</strong></p>`}
+                              disabled={
+                                loadingEmailTemplate || savingEmailTemplate
+                              }
+                              style={{
+                                fontFamily: "monospace",
+                                fontSize: "13px",
+                              }}
+                            />
+                            <span className="text-muted mt-1">
+                              This content will be inserted into the styled
+                              email template (with logo, upgrade button, and
+                              footer automatically included).
+                            </span>
+                          </div>
+
+                          <div className="col-md-12">
+                            <button
+                              className="btn btn-primary"
+                              onClick={handleSaveEmailTemplate}
+                              disabled={
+                                loadingEmailTemplate || savingEmailTemplate
+                              }
+                            >
+                              {savingEmailTemplate ? (
+                                <>
+                                  <span className="spinner-border spinner-border-sm me-2"></span>
+                                  Saving...
+                                </>
+                              ) : (
+                                <>
+                                  <i className="fa fa-save me-2"></i>
+                                  Save Email Template
+                                </>
+                              )}
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
