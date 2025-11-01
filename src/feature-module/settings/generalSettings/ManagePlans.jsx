@@ -17,14 +17,24 @@ const ManagePlans = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [daysBeforeExpiry, setDaysBeforeExpiry] = useState(7);
+
+  // Expiry days configuration (now an array)
+  const [daysBeforeExpiry, setDaysBeforeExpiry] = useState([7]);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
+
+  // Email template configuration
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [loadingEmailTemplate, setLoadingEmailTemplate] = useState(false);
+  const [savingEmailTemplate, setSavingEmailTemplate] = useState(false);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
     fetchPlans();
     fetchExpiryConfiguration();
+    fetchEmailTemplate();
   }, []);
 
   const fetchPlans = async () => {
@@ -57,46 +67,137 @@ const ManagePlans = () => {
       const response = await api.get(
         "/admin/configuration/subscription-expiry"
       );
-      console.log("Expiry config response:", response.data);
+      console.log("=== FETCH EXPIRY CONFIG ===");
+      console.log("Response:", response.data);
       if (response.data.status === "success") {
-        setDaysBeforeExpiry(response.data.data.days_before_expiry || 7);
+        const days = response.data.data.days_before_expiry || [7];
+        const daysArray = Array.isArray(days) ? days : [days];
+        console.log("Setting days to:", daysArray);
+        setDaysBeforeExpiry(daysArray);
       }
     } catch (error) {
       console.error("Error fetching expiry configuration:", error);
-      // Don't show error toast on initial load, just use default value
+      setDaysBeforeExpiry([7]);
     } finally {
       setLoadingConfig(false);
     }
   };
 
-  const handleSaveExpiryConfiguration = async () => {
-    if (daysBeforeExpiry < 1 || daysBeforeExpiry > 90) {
+  const fetchEmailTemplate = async () => {
+    try {
+      setLoadingEmailTemplate(true);
+      const response = await api.get("/admin/configuration/subscription-email");
+      console.log("=== FETCH EMAIL TEMPLATE ===");
+      console.log("Response:", response.data);
+      if (response.data.status === "success") {
+        setEmailSubject(response.data.data.subject || "");
+        setEmailBody(response.data.data.body || "");
+      }
+    } catch (error) {
+      console.error("Error fetching email template:", error);
+    } finally {
+      setLoadingEmailTemplate(false);
+    }
+  };
+
+  const handleAddDay = () => {
+    setDaysBeforeExpiry([...daysBeforeExpiry, ""]);
+  };
+
+  const handleRemoveDay = (index) => {
+    if (daysBeforeExpiry.length === 1) {
       dispatch(
         showToast({
           heading: "Validation Error",
-          message: "Days before expiry must be between 1 and 90",
+          message: "At least one day value is required",
           variant: "warning",
         })
       );
       return;
     }
+    const newDays = daysBeforeExpiry.filter((_, i) => i !== index);
+    setDaysBeforeExpiry(newDays);
+  };
+
+  const handleDayChange = (index, value) => {
+    const newDays = [...daysBeforeExpiry];
+    newDays[index] = value;
+    setDaysBeforeExpiry(newDays);
+  };
+
+  const validateDaysArray = () => {
+    // Check for empty values
+    if (
+      daysBeforeExpiry.some(
+        (day) => day === "" || day === null || day === undefined
+      )
+    ) {
+      dispatch(
+        showToast({
+          heading: "Validation Error",
+          message: "Please fill in all day values or remove empty cells",
+          variant: "warning",
+        })
+      );
+      return false;
+    }
+
+    // Validate each value
+    const validatedDays = [];
+    for (const day of daysBeforeExpiry) {
+      const dayValue = parseInt(day);
+      if (isNaN(dayValue) || dayValue < 1 || dayValue > 90) {
+        dispatch(
+          showToast({
+            heading: "Validation Error",
+            message: "Each day value must be between 1 and 90",
+            variant: "warning",
+          })
+        );
+        return false;
+      }
+      validatedDays.push(dayValue);
+    }
+
+    // Check for duplicates
+    const uniqueDays = [...new Set(validatedDays)];
+    if (uniqueDays.length !== validatedDays.length) {
+      dispatch(
+        showToast({
+          heading: "Validation Error",
+          message: "Duplicate day values are not allowed",
+          variant: "warning",
+        })
+      );
+      return false;
+    }
+
+    return validatedDays;
+  };
+
+  const handleSaveExpiryConfiguration = async () => {
+    const validatedDays = validateDaysArray();
+    if (!validatedDays) return;
 
     try {
       setSavingConfig(true);
       const response = await api.put(
         "/admin/configuration/subscription-expiry",
         {
-          days_before_expiry: parseInt(daysBeforeExpiry),
+          days_before_expiry: validatedDays,
         }
       );
 
-      console.log("Save config response:", response.data);
+      console.log("=== SAVE EXPIRY CONFIG ===");
+      console.log("Response:", response.data);
       if (response.data.status === "success") {
+        // Update local state with sorted values
+        setDaysBeforeExpiry(response.data.data.days_before_expiry);
         dispatch(
           showToast({
             heading: "Success",
             message:
-              "Subscription expiry alert configuration updated successfully",
+              "Subscription expiry days configuration updated successfully",
             variant: "success",
           })
         );
@@ -113,6 +214,65 @@ const ManagePlans = () => {
       );
     } finally {
       setSavingConfig(false);
+    }
+  };
+
+  const handleSaveEmailTemplate = async () => {
+    if (!emailSubject || !emailSubject.trim()) {
+      dispatch(
+        showToast({
+          heading: "Validation Error",
+          message: "Email subject is required",
+          variant: "warning",
+        })
+      );
+      return;
+    }
+
+    if (!emailBody || !emailBody.trim()) {
+      dispatch(
+        showToast({
+          heading: "Validation Error",
+          message: "Email body is required",
+          variant: "warning",
+        })
+      );
+      return;
+    }
+
+    try {
+      setSavingEmailTemplate(true);
+      const response = await api.put(
+        "/admin/configuration/subscription-email",
+        {
+          subject: emailSubject.trim(),
+          body: emailBody.trim(),
+        }
+      );
+
+      console.log("=== SAVE EMAIL TEMPLATE ===");
+      console.log("Response:", response.data);
+      if (response.data.status === "success") {
+        dispatch(
+          showToast({
+            heading: "Success",
+            message: "Email template updated successfully",
+            variant: "success",
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error saving email template:", error);
+      dispatch(
+        showToast({
+          heading: "Error",
+          message:
+            error.response?.data?.message || "Failed to update email template",
+          variant: "danger",
+        })
+      );
+    } finally {
+      setSavingEmailTemplate(false);
     }
   };
 
@@ -234,85 +394,7 @@ const ManagePlans = () => {
                 </div>
               </div>
 
-              {/* Subscription Expiry Alert Configuration */}
-              <div className="row mb-4">
-                <div className="col-xl-12 col-lg-12">
-                  <div className="card">
-                    <div className="card-body " style={{ padding: "2rem" }}>
-                      <h5 className="fw-semibold mb-3">
-                        <i className="fa fa-bell me-2"></i>
-                        Subscription Expiry Alert Configuration
-                      </h5>
-                      <p className="text-muted small mb-3">
-                        Configure how many days before subscription expiry users
-                        should receive an email alert.
-                      </p>
-
-                      <div className="row align-items-end">
-                        <div className="col-md-4">
-                          <label className="form-label fw-medium">
-                            Days Before Expiry
-                            <span className="text-danger">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            value={daysBeforeExpiry}
-                            onChange={(e) =>
-                              setDaysBeforeExpiry(e.target.value)
-                            }
-                            min="1"
-                            max="90"
-                            placeholder="Enter days (1-90)"
-                            disabled={loadingConfig || savingConfig}
-                          />
-                          <small className="text-muted">
-                            Users will be notified {daysBeforeExpiry} day
-                            {daysBeforeExpiry != 1 ? "s" : ""} before their
-                            subscription expires
-                          </small>
-                        </div>
-                        <div
-                          className="col-12 text-end mt-2"
-                        
-                        >
-                          <div
-                            className="alert alert-info mb-0 py-2 px-3 text-center d-flex align-items-center justify-content-center"
-                            role="alert"
-                              style={{ width: "fit-content" }}
-                          >
-                            <i className="fa fa-info-circle me-2"></i>
-                            <small>
-                              Current setting:{" "}
-                              <strong>{daysBeforeExpiry} days</strong> before
-                              expiry
-                            </small>
-                          </div>
-                        </div>
-                        <div className="col-md-12 mt-3">
-                          <button
-                            className="btn btn-primary"
-                            onClick={handleSaveExpiryConfiguration}
-                            disabled={loadingConfig || savingConfig}
-                          >
-                            {savingConfig ? (
-                              <>
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                Saving...
-                              </>
-                            ) : (
-                              <>
-                                <i className="fa fa-save me-2"></i>
-                                Save Configuration
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+             
 
               <div className="row">
                 <div className="col-xl-12 col-lg-12">
@@ -421,6 +503,227 @@ const ManagePlans = () => {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+               {/* Subscription Expiry Alert Configuration */}
+              <div className="row mb-4">
+                <div className="col-xl-12 col-lg-12">
+                  <div className="card">
+                    <div className="card-body" style={{ padding: "2rem" }}>
+                      <h5 className="fw-semibold mb-3">
+                        <i className="fa fa-bell me-2"></i>
+                        Subscription Expiry Alert Days Configuration
+                      </h5>
+                      <p className="text-muted  mb-3">
+                        Configure multiple days before subscription expiry when
+                        users should receive email alerts. You can add multiple
+                        reminder days (e.g., 7 days, 3 days, 1 day before
+                        expiry).
+                      </p>
+
+                      <div className="row">
+                        <div className="col-md-12">
+                          <label className="form-label fw-medium mb-3">
+                            Alert Days (1-90)
+                            <span className="text-danger">*</span>
+                          </label>
+
+                          {daysBeforeExpiry.map((day, index) => (
+                            <div
+                              key={index}
+                              className="d-flex align-items-center mb-3"
+                            >
+                              <div
+                                className="flex-grow-1"
+                                style={{ maxWidth: "300px" }}
+                              >
+                                <input
+                                  type="number"
+                                  className="form-control"
+                                  value={day}
+                                  onChange={(e) =>
+                                    handleDayChange(index, e.target.value)
+                                  }
+                                  min="1"
+                                  max="90"
+                                  placeholder="Enter days (1-90)"
+                                  disabled={loadingConfig || savingConfig}
+                                />
+                              </div>
+                              <button
+                                className="btn btn-outline-danger btn-sm ms-2"
+                                onClick={() => handleRemoveDay(index)}
+                                disabled={
+                                  loadingConfig ||
+                                  savingConfig ||
+                                  daysBeforeExpiry.length === 1
+                                }
+                                title="Remove this day"
+                              >
+                                <i className="fa fa-trash"></i>
+                              </button>
+                            </div>
+                          ))}
+
+                          <button
+                            className="btn btn-outline-primary btn-sm mb-3"
+                            onClick={handleAddDay}
+                            disabled={loadingConfig || savingConfig}
+                          >
+                            <i className="fa fa-plus me-2"></i>
+                            Add Another Day
+                          </button>
+
+                          <div
+                            className="alert alert-info py-2 px-3 mb-3 d-flex align-items-start"
+                            role="alert"
+                          >
+                            <i className="fa fa-info-circle me-2"></i>
+                            <p>
+                              Users will receive alerts on:{" "}
+                              <strong>
+                                {daysBeforeExpiry
+                                  .filter((d) => d !== "" && d !== null)
+                                  .map((d) => `${d} day${d != 1 ? "s" : ""}`)
+                                  .join(", ") || "Not set"}
+                              </strong>{" "}
+                              before expiry
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="col-md-12">
+                          <button
+                            className="btn btn-primary"
+                            onClick={handleSaveExpiryConfiguration}
+                            disabled={loadingConfig || savingConfig}
+                          >
+                            {savingConfig ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <i className="fa fa-save me-2"></i>
+                                Save Alert Days
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Template Configuration */}
+              <div className="row mb-4">
+                <div className="col-xl-12 col-lg-12">
+                  <div className="card">
+                    <div className="card-body" style={{ padding: "2rem" }}>
+                      <h5 className="fw-semibold mb-3">
+                        <i className="fa fa-envelope me-2"></i>
+                        Subscription Expiry Email Template
+                      </h5>
+                      <p className="text-muted  mb-3">
+                        Customize the main message of the email sent to users
+                        when their subscription is about to expire. The email
+                        will automatically include the logo, benefits section,
+                        upgrade button, and footer.
+                      </p>
+                      <div
+                        className="alert alert-info py-2 px-3 mb-3 d-flex align-items-start"
+                        role="alert"
+                      >
+                        <i className="fa fa-info-circle me-2"></i>
+                        <span>
+                          <strong>Available placeholders:</strong>{" "}
+                          <code>{"{{userName}}"}</code>,{" "}
+                          <code>{"{{planName}}"}</code>,{" "}
+                          <code>{"{{expiryDate}}"}</code>,{" "}
+                          <code>{"{{daysLeft}}"}</code>
+                          <br />
+                          <strong>Note:</strong> The email body supports HTML.
+                          You can use tags like <code>&lt;p&gt;</code>,{" "}
+                          <code>&lt;strong&gt;</code>,{" "}
+                          <code>&lt;div class="highlight"&gt;</code>, etc.
+                        </span>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-md-12 mb-3">
+                          <label className="form-label fw-medium">
+                            Email Subject
+                            <span className="text-danger">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={emailSubject}
+                            onChange={(e) => setEmailSubject(e.target.value)}
+                            placeholder="e.g., Your Subscription is Expiring Soon"
+                            disabled={
+                              loadingEmailTemplate || savingEmailTemplate
+                            }
+                          />
+                        </div>
+
+                        <div className="col-md-12 mb-3">
+                          <label className="form-label fw-medium">
+                            Email Message Content (HTML)
+                            <span className="text-danger">*</span>
+                          </label>
+                          <textarea
+                            className="form-control"
+                            rows="12"
+                            value={emailBody}
+                            onChange={(e) => setEmailBody(e.target.value)}
+                            placeholder={`<p>Hi {{userName}},</p>
+<p>Your <strong>{{planName}}</strong> subscription is ending soon—just <strong>{{daysLeft}}</strong> day(s) left!</p>
+<div class="highlight">
+  <strong>Your subscription will expire on {{expiryDate}}</strong>
+</div>
+<p>Don't lose access to your premium features!</p>`}
+                            disabled={
+                              loadingEmailTemplate || savingEmailTemplate
+                            }
+                            style={{
+                              fontFamily: "monospace",
+                              fontSize: "13px",
+                            }}
+                          />
+                          <span className="text-muted mt-1">
+                            This content will be inserted into the styled email
+                            template (with logo, benefits, and footer
+                            automatically included)
+                          </span>
+                        </div>
+
+                        <div className="col-md-12">
+                          <button
+                            className="btn btn-primary"
+                            onClick={handleSaveEmailTemplate}
+                            disabled={
+                              loadingEmailTemplate || savingEmailTemplate
+                            }
+                          >
+                            {savingEmailTemplate ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <i className="fa fa-save me-2"></i>
+                                Save Email Template
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
